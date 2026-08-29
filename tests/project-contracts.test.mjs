@@ -102,3 +102,21 @@ test("a publicação preserva o caminho do GitHub Pages e depende dos testes", (
     assert.match(workflow, /pages:\s*write/);
     assert.match(workflow, /id-token:\s*write/);
 });
+
+test("a exclusão de usuários exige prévia recente e protege espaços compartilhados", () => {
+    const migration = readProjectFile("supabase/migrations/202608290006_safe_user_deletion.sql");
+
+    assert.match(migration, /before delete on auth\.users/i);
+    assert.match(migration, /USER_DELETION_REQUIRES_FRESH_PREVIEW/);
+    assert.match(migration, /USER_DATA_CHANGED_REVIEW_DELETION_AGAIN/);
+    assert.match(migration, /TRANSFER_SHARED_WORKSPACE_OWNERSHIP_FIRST/);
+    assert.match(migration, /interval '15 minutes'/);
+    assert.match(migration, /where item\.user_id = target_user_id/g);
+    assert.match(migration, /where workspace\.owner_id = old\.id\s+for update/i);
+    assert.match(migration, /references auth\.users\(id\) on delete cascade/i);
+    assert.match(migration, /revoke all on function public\.preview_user_deletion\(uuid\) from public, anon, authenticated/i);
+    assert.match(migration, /revoke all on function public\.prepare_user_deletion\(uuid, text\) from public, anon, authenticated/i);
+    assert.match(migration, /grant execute on function public\.preview_user_deletion\(uuid\) to service_role/i);
+    assert.match(migration, /grant execute on function public\.prepare_user_deletion\(uuid, text\) to service_role/i);
+    assert.doesNotMatch(migration, /target_email|email_address/i);
+});
