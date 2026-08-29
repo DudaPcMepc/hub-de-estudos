@@ -885,8 +885,10 @@ let notaSelecionadaId = null;
 let filtroStatusTopico = "todos";
 let buscaNotasTexto = "";
 let timerAutoSave = null;
+let salvamentoNotaPendente = null;
 
 function abrirMateria(id) {
+    if (!salvarNotaPendente()) return;
     const m = materiaPorId(id);
     if (!m) return;
     materiaAbertaId = m.id;
@@ -1025,6 +1027,7 @@ function renderizarListaNotas(m) {
             ${(n.tags || []).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${n.tags.map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
         </button>`).join("");
     container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", () => {
+        if (String(notaSelecionadaId) === b.dataset.id || !salvarNotaPendente()) return;
         notaSelecionadaId = b.dataset.id;
         const mm = materiaPorId(materiaAbertaId);
         renderizarListaNotas(mm);
@@ -1049,6 +1052,7 @@ function renderizarEditorNota(m) {
 }
 
 function criarNota(titulo, conteudo) {
+    if (!salvarNotaPendente()) return;
     const id = novoId();
     atualizarMateria(materiaAbertaId, m => m.notas.unshift({
         id, titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [], fixada: false,
@@ -1060,33 +1064,63 @@ function criarNota(titulo, conteudo) {
     document.getElementById("notaTitulo").focus();
 }
 
-function salvarNotaAtual() {
-    if (!notaSelecionadaId) return;
-    atualizarMateria(materiaAbertaId, m => {
-        const n = m.notas.find(x => String(x.id) === String(notaSelecionadaId));
-        if (!n) return;
-        n.titulo = document.getElementById("notaTitulo").value;
-        n.conteudo = document.getElementById("notaConteudo").value;
-        n.tags = document.getElementById("notaTags").value.split(",").map(s => s.trim()).filter(Boolean);
-        n.atualizadaEm = hojeISO();
-    });
-    const status = document.getElementById("statusSalvamento");
-    status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Salvo</span>';
-    setTimeout(() => { status.textContent = "Salva sozinho enquanto você digita."; }, 1500);
-    renderizarListaNotas(materiaPorId(materiaAbertaId));
-    renderizarMaterias();
+function capturarNotaParaSalvar() {
+    if (!materiaAbertaId || !notaSelecionadaId) return null;
+    return {
+        materiaId: materiaAbertaId,
+        notaId: notaSelecionadaId,
+        titulo: document.getElementById("notaTitulo").value,
+        conteudo: document.getElementById("notaConteudo").value,
+        tags: document.getElementById("notaTags").value.split(",").map(s => s.trim()).filter(Boolean)
+    };
+}
+
+function salvarNotaPendente() {
+    if (!salvamentoNotaPendente) return true;
+    clearTimeout(timerAutoSave);
+    timerAutoSave = null;
+    const pendente = salvamentoNotaPendente;
+    try {
+        atualizarMateria(pendente.materiaId, m => {
+            const n = m.notas.find(x => String(x.id) === String(pendente.notaId));
+            if (!n) return;
+            n.titulo = pendente.titulo;
+            n.conteudo = pendente.conteudo;
+            n.tags = pendente.tags;
+            n.atualizadaEm = hojeISO();
+        });
+        salvamentoNotaPendente = null;
+        if (String(materiaAbertaId) === String(pendente.materiaId) && String(notaSelecionadaId) === String(pendente.notaId)) {
+            const status = document.getElementById("statusSalvamento");
+            status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Salvo</span>';
+            setTimeout(() => {
+                if (!salvamentoNotaPendente) status.textContent = "Salva sozinho enquanto você digita.";
+            }, 1500);
+            const materiaAtual = materiaPorId(materiaAbertaId);
+            if (materiaAtual) renderizarListaNotas(materiaAtual);
+        }
+        renderizarMaterias();
+        return true;
+    } catch (erro) {
+        const status = document.getElementById("statusSalvamento");
+        status.innerHTML = '<span class="text-danger"><i class="bi-exclamation-triangle-fill"></i> Não foi possível salvar.</span>';
+        return false;
+    }
 }
 
 function agendarSalvamento() {
+    salvamentoNotaPendente = capturarNotaParaSalvar();
+    if (!salvamentoNotaPendente) return;
     document.getElementById("statusSalvamento").innerHTML = '<span class="text-muted"><i class="bi-pencil"></i> Digitando...</span>';
     clearTimeout(timerAutoSave);
-    timerAutoSave = setTimeout(salvarNotaAtual, 600);
+    timerAutoSave = setTimeout(salvarNotaPendente, 600);
 }
 ["notaTitulo", "notaConteudo", "notaTags"].forEach(id => document.getElementById(id).addEventListener("input", agendarSalvamento));
 
 document.getElementById("btnNovaNota").addEventListener("click", () => criarNota("Nova nota", ""));
 document.getElementById("buscaNotas").addEventListener("input", e => { buscaNotasTexto = e.target.value; renderizarListaNotas(materiaPorId(materiaAbertaId)); });
 document.getElementById("btnFixarNota").addEventListener("click", () => {
+    if (!salvarNotaPendente()) return;
     atualizarMateria(materiaAbertaId, m => {
         const n = m.notas.find(x => String(x.id) === String(notaSelecionadaId));
         if (n) n.fixada = !n.fixada;
@@ -1094,6 +1128,7 @@ document.getElementById("btnFixarNota").addEventListener("click", () => {
     renderizarWorkspace();
 });
 document.getElementById("btnExcluirNota").addEventListener("click", () => {
+    if (!salvarNotaPendente()) return;
     if (!confirm("Excluir esta nota?")) return;
     atualizarMateria(materiaAbertaId, m => { m.notas = m.notas.filter(x => String(x.id) !== String(notaSelecionadaId)); });
     const m = materiaPorId(materiaAbertaId);
@@ -1130,6 +1165,7 @@ document.querySelectorAll("[data-fmt]").forEach(b => b.addEventListener("click",
 document.querySelectorAll("[data-linha]").forEach(b => b.addEventListener("click", () => aplicarFormatoLinha(b.dataset.linha)));
 
 document.getElementById("btnNotaViraCard").addEventListener("click", () => {
+    if (!salvarNotaPendente()) return;
     const area = document.getElementById("notaConteudo");
     const selecionado = area.value.slice(area.selectionStart, area.selectionEnd).trim();
     if (!selecionado) { alert("Selecione no texto o trecho que vira a resposta do flashcard."); return; }
@@ -1427,7 +1463,12 @@ function obterDiasDaSemana() {
     }
     return dias;
 }
-function paraISO(data) { return data.toISOString().slice(0, 10); }
+function paraISO(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(data.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+}
 function ehHoje(data) { return paraISO(data) === paraISO(new Date()); }
 
 function renderizarCalendario() {
@@ -2057,6 +2098,15 @@ function limparBackdropsOrfaos() {
     document.body.style.removeProperty("padding-right");
 }
 document.querySelectorAll(".modal").forEach(modalEl => modalEl.addEventListener("hidden.bs.modal", limparBackdropsOrfaos));
+document.getElementById("modalMateria").addEventListener("hide.bs.modal", evento => {
+    if (!salvarNotaPendente()) evento.preventDefault();
+});
+window.addEventListener("beforeunload", evento => {
+    if (!salvarNotaPendente()) {
+        evento.preventDefault();
+        evento.returnValue = "";
+    }
+});
 
 // ============================================================
 // INICIALIZAÇÃO
