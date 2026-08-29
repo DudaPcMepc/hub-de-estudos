@@ -64,6 +64,10 @@ O workflow `.github/workflows/deploy-pages.yml` prepara a versão hospedada em `
 
 Antes da primeira publicação, cadastre `VITE_SUPABASE_URL` como variável do repositório e `VITE_SUPABASE_PUBLISHABLE_KEY` como segredo do GitHub Actions. Depois, selecione **GitHub Actions** como origem em **Settings → Pages** e registre o endereço HTTPS de produção na configuração de URLs do Supabase Auth.
 
+## Administração de usuários
+
+A remoção de contas usa um fluxo administrativo em duas fases: prévia e preparação com validade de 15 minutos. A exclusão é bloqueada se os dados mudarem ou se a conta possuir um espaço compartilhado. O procedimento completo e suas proteções estão em `docs/administracao-de-usuarios.md`.
+
 A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes e redirecionamento em `http://localhost:5173`.
 
 ## Ativação dos simulados seguros
