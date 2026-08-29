@@ -41,3 +41,8 @@ jobs:
 
       - name: Compilar o frontend
         run: npm run build
+
+      - name: Compilar o caminho do GitHub Pages
+        env:
+          DEPLOY_BASE_PATH: /hub-de-estudos/
+        run: npm run build

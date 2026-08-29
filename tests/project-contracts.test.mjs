@@ -85,4 +85,20 @@ test("o workflow possui permissões mínimas e valida antes de compilar", () => 
     assert.match(workflow, /persist-credentials: false/);
     assert.match(workflow, /npm ci --ignore-scripts/);
     assert.ok(workflow.indexOf("run: npm test") < workflow.indexOf("run: npm run build"));
+    assert.match(workflow, /DEPLOY_BASE_PATH:\s*\/hub-de-estudos\//);
+});
+
+test("a publicação preserva o caminho do GitHub Pages e depende dos testes", () => {
+    const config = readProjectFile("vite.config.mjs");
+    const auth = readProjectFile("src/auth.js");
+    const workflow = readProjectFile(".github/workflows/deploy-pages.yml");
+
+    assert.match(config, /process\.env\.DEPLOY_BASE_PATH\s*\|\|\s*["']\/["']/);
+    assert.match(auth, /import\.meta\.env\.BASE_URL/);
+    assert.doesNotMatch(auth, /new URL\(["']\/\?auth=recovery/);
+    assert.match(workflow, /DEPLOY_BASE_PATH:\s*\/hub-de-estudos\//);
+    assert.ok(workflow.indexOf("run: npm test") < workflow.indexOf("run: npm run build"));
+    assert.match(workflow, /needs:\s*validate-and-build/);
+    assert.match(workflow, /pages:\s*write/);
+    assert.match(workflow, /id-token:\s*write/);
 });

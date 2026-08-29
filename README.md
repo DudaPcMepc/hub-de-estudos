@@ -58,6 +58,12 @@ O workflow `.github/workflows/ci.yml` roda em cada Pull Request para `main` e em
 
 Os testes iniciais em `tests/project-contracts.test.mjs` verificam contratos importantes: ausência de formatos conhecidos de segredos nos arquivos versionados, chave Gemini fora do navegador, autenticação da Edge Function, permissões da cota diária, proteção da restauração e ordem das migrations.
 
+## Publicação no GitHub Pages
+
+O workflow `.github/workflows/deploy-pages.yml` prepara a versão hospedada em `/hub-de-estudos/`, executa os testes e somente publica quando todas as validações passam. O endereço de recuperação de senha utiliza automaticamente o caminho correto do ambiente atual, mantendo compatibilidade com `localhost` e com o GitHub Pages.
+
+Antes da primeira publicação, cadastre `VITE_SUPABASE_URL` como variável do repositório e `VITE_SUPABASE_PUBLISHABLE_KEY` como segredo do GitHub Actions. Depois, selecione **GitHub Actions** como origem em **Settings → Pages** e registre o endereço HTTPS de produção na configuração de URLs do Supabase Auth.
+
 A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes e redirecionamento em `http://localhost:5173`.
 
 ## Ativação dos simulados seguros
