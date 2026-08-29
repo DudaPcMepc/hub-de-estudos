@@ -1,0 +1,12 @@
+{
+  "name": "hub-de-estudos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hub de estudos multiusuário",
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "2.116.0"
+  }
+}
