@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub de Estudos - Concurso GCM</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    body { background-color: #f8f9fa; }
+    .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
+    .card-materia:active { cursor: grabbing; }
+    .card-materia:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
+    .card-materia.sortable-ghost { opacity: .35; }
+    .badge-cor { width: 34px; height: 34px; border-radius: .5rem; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+    .tarefa-item.concluida { opacity: .55; text-decoration: line-through; }
+    .nav-tabs .nav-link.active { font-weight: 600; }
+    .celula-calendario { min-height: 110px; vertical-align: top; }
+    .chip-tarefa { cursor: pointer; font-size: .72rem; display: block; white-space: normal; text-align: left; }
+    .opcao-resposta { cursor: pointer; text-align: left; }
+    .opcao-resposta.correta { background-color: #d1e7dd !important; border-color: #badbcc !important; font-weight: 600; }
+    .opcao-resposta.incorreta { background-color: #f8d7da !important; border-color: #f5c2c7 !important; }
+    .opcao-resposta.desabilitada { pointer-events: none; }
+    /* ---------- Matérias: workspace de estudo ---------- */
+    .materia-progress { height: 6px; }
+    .badge-mini { font-size: .68rem; font-weight: 500; }
+    .card-materia .dropdown-toggle::after { display: none; }
+    .lista-notas { max-height: 58vh; overflow-y: auto; }
+    .nota-item { cursor: pointer; }
+    .nota-item.ativa { background-color: #e7f1ff; border-color: #9ec5fe; }
+    .editor-nota { min-height: 320px; max-height: 58vh; resize: vertical; line-height: 1.6; }
+    .preview-nota { min-height: 320px; max-height: 58vh; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: .375rem; padding: 1rem; line-height: 1.7; }
+    .preview-nota p { margin-bottom: .5rem; }
+    .preview-nota ul { margin-bottom: .5rem; padding-left: 1.2rem; }
+    .preview-nota mark { background-color: #fff3cd; padding: 0 .15rem; }
+    .preview-nota code { background: #f1f3f5; padding: .05rem .3rem; border-radius: .25rem; color: #d63384; }
+    .topico-item { border-left: 4px solid transparent; }
+    .topico-item.st-estudando { border-left-color: var(--bs-primary); }
+    .topico-item.st-revisar { border-left-color: var(--bs-warning); }
+    .topico-item.st-dominado { border-left-color: var(--bs-success); background-color: #f6fff9; }
+    .flashcard-face { min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.25rem; font-size: 1.05rem; }
+    .ws-nav .nav-link { border-radius: 2rem; font-size: .9rem; }
+    .tag-nota { font-size: .68rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand fw-bold"><i class="bi-journal-bookmark-fill me-2"></i>Hub de Estudos - GCM</span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-light" id="btnExportar" title="Baixar backup"><i class="bi-download me-1"></i>Backup</button>
+            <label class="btn btn-sm btn-outline-light mb-0" title="Restaurar backup">
+                <i class="bi-upload me-1"></i>Restaurar
+                <input type="file" id="inputImportar" accept=".json" class="d-none">
+            </label>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 mb-5">
+
+    <ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto" id="abas" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-cronograma" type="button"><i class="bi-calendar-week-fill me-1"></i>Cronograma</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-edital" type="button"><i class="bi-file-earmark-spreadsheet-fill me-1"></i>Edital &amp; Estratégia</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-lightning-charge-fill me-1"></i>Simulados (IA)</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-erros" type="button"><i class="bi-journal-x me-1"></i>Caderno de Erros</button></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- ============================================================ -->
+        <!-- MATÉRIAS -->
+        <!-- ============================================================ -->
+                <div class="tab-pane fade show active" id="p-materias">
+            <div class="row g-2 align-items-center mb-3">
+                <div class="col-lg-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi-search"></i></span>
+                        <input type="text" class="form-control" id="buscaMaterias" placeholder="Buscar por matéria, tópico, nota ou tag...">
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <select class="form-select" id="ordemMaterias">
+                        <option value="manual">Ordem manual (arrastar)</option>
+                        <option value="nome">Nome (A–Z)</option>
+                        <option value="progresso">Maior progresso</option>
+                        <option value="pendencias">Mais pendências</option>
+                    </select>
+                </div>
+                <div class="col-lg-4 d-flex gap-2 justify-content-lg-end">
+                    <button class="btn btn-outline-primary rounded-pill" id="btnRevisarTudo"><i class="bi-lightning-charge me-1"></i>Revisar hoje (<span id="contadorRevisao">0</span>)</button>
+                    <button class="btn btn-success rounded-pill" id="btnNovaMateria"><i class="bi-plus-circle me-1"></i>Nova Matéria</button>
+                </div>
+            </div>
+            <p class="text-muted small mb-3" id="resumoMaterias"></p>
+            <div class="row g-3" id="gridMaterias"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CRONOGRAMA + CALENDÁRIO -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-cronograma">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi-plus-circle me-1"></i>Nova sessão de estudo</h6>
+                    <form id="formTarefa" class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small">Matéria</label>
+                            <select class="form-select" id="tarefaMateria" required></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">O que vai estudar</label>
+                            <input type="text" class="form-control" id="tarefaTopico" placeholder="Ex: Art. 5º, incisos I a X" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Data</label>
+                            <input type="date" class="form-control" id="tarefaData" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg"></i> Adicionar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi-calendar3 me-1"></i>Calendário semanal</h6>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="btnSemanaAnterior"><i class="bi-chevron-left"></i></button>
+                            <button class="btn btn-outline-secondary" id="btnSemanaHoje">Hoje</button>
+                            <button class="btn btn-outline-secondary" id="btnSemanaProxima"><i class="bi-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0" id="tabelaCalendario">
+                            <thead class="table-light text-center"><tr id="cabecalhoCalendario"></tr></thead>
+                            <tbody><tr id="corpoCalendario"></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-primary"><i class="bi-hourglass-split me-1"></i>Pendentes</h6>
+                    <div id="listaPendentes" class="d-flex flex-column gap-2"></div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-success"><i class="bi-check-circle-fill me-1"></i>Concluídas</h6>
+                    <div id="listaConcluidas" class="d-flex flex-column gap-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- EDITAL & ESTRATÉGIA -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-edital">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h6 class="fw-bold m-0"><i class="bi-file-earmark-spreadsheet-fill text-success me-2"></i>Edital &amp; Estratégia da Prova</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#modalConfigEdital"><i class="bi-gear-fill me-1"></i>Configurar Concurso</button>
+                        <button class="btn btn-sm btn-success rounded-pill" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Adicionar Matéria</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4 text-center">
+                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Concurso</span><strong id="editalNome">Aguardando</strong></div></div>
+                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Banca</span><strong id="editalBanca">—</strong></div></div>
+                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Vagas</span><strong id="editalVagas">—</strong></div></div>
+                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Data da prova</span><strong id="editalData">—</strong></div></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0"><i class="bi-calculator me-1"></i>Matriz de Pesos e Relevância</h6>
+                        <span class="text-muted small">Total da prova: <strong id="editalTotalPontos" class="text-primary">0 pts</strong></span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border">
+                            <thead class="table-light">
+                                <tr><th>Matéria</th><th class="text-center">Questões</th><th class="text-center">Peso</th><th class="text-center">Pontos</th><th class="text-center">% da prova</th><th class="text-center">Ações</th></tr>
+                            </thead>
+                            <tbody id="tabelaEdital"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SIMULADOS COM IA -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-simulados">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2"><i class="bi-key-fill me-1"></i>Configuração da IA (Google Gemini)</h6>
+                    <p class="text-muted small mb-2">Cole sua chave gratuita. Consiga em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Fica salva só neste navegador.</p>
+                    <div class="input-group">
+                        <input type="password" id="inputApiKey" class="form-control" placeholder="Cole aqui sua chave (AIza...)">
+                        <button class="btn btn-outline-secondary" type="button" id="btnMostrarChave"><i class="bi-eye"></i></button>
+                        <button class="btn btn-success" type="button" id="btnSalvarChave">Salvar</button>
+                    </div>
+                    <div id="statusChave" class="form-text"></div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi-pie-chart-fill me-1"></i>Desempenho por matéria</h6>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div id="badgesDesempenho" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="col-md-7">
+                            <div style="max-width:340px; margin:0 auto; height:260px;">
+                                <canvas id="graficoPizza"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi-magic me-1"></i>Gerar Simulado</h6>
+                    <form id="formGerarSimulado" class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small">Matéria</label>
+                            <select class="form-select" id="simMateria" required></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Tema (opcional)</label>
+                            <input type="text" class="form-control" id="simTema" placeholder="Ex: Prisão em flagrante">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Dificuldade</label>
+                            <select class="form-select" id="simDificuldade">
+                                <option>Fácil</option><option selected>Médio</option><option>Difícil</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Quantidade</label>
+                            <select class="form-select" id="simQtd">
+                                <option value="3">3</option><option value="5" selected>5</option><option value="10">10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi-stars me-1"></i>Gerar</button>
+                        </div>
+                    </form>
+                    <div id="loadingIA" class="mt-3 text-muted small d-none">
+                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>A IA está gerando as questões...
+                    </div>
+                    <div id="erroIA" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+            </div>
+
+            <div id="areaQuestoes" class="row g-3"></div>
+            <div id="areaResultado" class="alert alert-info mt-3 d-none"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CADERNO DE ERROS -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-erros">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi-plus-circle me-1"></i>Registrar erro manualmente</h6>
+                    <form id="formErro" class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small">Matéria</label>
+                            <select class="form-select" id="erroMateria" required></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Tema / questão</label>
+                            <input type="text" class="form-control" id="erroTema" placeholder="Ex: Prisão em flagrante" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">O que errei / por quê</label>
+                            <input type="text" class="form-control" id="erroObs" placeholder="Ex: Confundi flagrante com ordem judicial">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-danger w-100"><i class="bi-plus-lg"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small" id="resumoErros"></span>
+                <select class="form-select form-select-sm" id="filtroErroMateria" style="width:auto;"><option value="">Todas as matérias</option></select>
+            </div>
+            <div id="listaErros"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= MODAIS ================= -->
+
+<div class="modal fade" id="modalNovaMateria" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title fw-bold" id="tituloModalMateria">Nova Matéria</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form id="formMateria">
+                <input type="hidden" id="materiaEditandoId">
+                <div class="mb-3"><label class="form-label">Nome</label><input type="text" class="form-control" id="materiaNome" required></div>
+                <div class="mb-3"><label class="form-label">Descrição breve</label><input type="text" class="form-control" id="materiaDesc"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Cor</label>
+                        <select class="form-select" id="materiaCor">
+                            <option value="primary">Azul</option><option value="danger">Vermelho</option><option value="success">Verde</option>
+                            <option value="warning">Amarelo</option><option value="info">Azul claro</option><option value="secondary">Cinza</option><option value="dark">Preto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Prioridade</label>
+                        <select class="form-select" id="materiaPrioridade">
+                            <option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-pill">Salvar</button>
+            </form>
+        </div>
+    </div></div>
+</div>
+
+<!-- ============ WORKSPACE DA MATÉRIA ============ -->
+<div class="modal fade" id="modalMateria" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-lg-down"><div class="modal-content">
+        <div class="modal-header align-items-center">
+            <span class="badge-cor bg-secondary me-2" id="wsCorMateria"><i class="bi-journal-bookmark-fill"></i></span>
+            <div class="flex-grow-1">
+                <h5 class="modal-title fw-bold mb-0" id="wsNomeMateria">Matéria</h5>
+                <span class="small text-muted" id="wsSubtitulo"></span>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary me-2" id="btnExportarMateria" title="Baixar tudo desta matéria em .md"><i class="bi-download me-1"></i>Exportar</button>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="px-3 pt-3">
+            <div class="progress materia-progress mb-3"><div class="progress-bar" id="wsBarraProgresso" style="width:0%"></div></div>
+            <ul class="nav nav-pills ws-nav gap-2 mb-3 flex-nowrap overflow-auto" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#ws-topicos" type="button"><i class="bi-list-check me-1"></i>Tópicos</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-notas" type="button"><i class="bi-journal-text me-1"></i>Notas</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-cards" type="button"><i class="bi-card-heading me-1"></i>Flashcards</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-links" type="button"><i class="bi-link-45deg me-1"></i>Materiais</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-resumo" type="button"><i class="bi-graph-up me-1"></i>Resumo</button></li>
+            </ul>
+        </div>
+        <div class="modal-body pt-0">
+            <div class="tab-content">
+
+                <div class="tab-pane fade show active" id="ws-topicos">
+                    <form id="formTopico" class="row g-2 mb-3">
+                        <div class="col-md-9"><input type="text" class="form-control" id="topicoTitulo" placeholder="Novo tópico (ex: Art. 5º — direitos e deveres individuais)" required></div>
+                        <div class="col-md-3"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Adicionar</button></div>
+                    </form>
+                    <div class="accordion mb-3" id="accColarEdital">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header"><button class="accordion-button collapsed py-2 small" type="button" data-bs-toggle="collapse" data-bs-target="#colapsoColar"><i class="bi-clipboard-plus me-2"></i>Colar vários tópicos de uma vez (um por linha)</button></h2>
+                            <div id="colapsoColar" class="accordion-collapse collapse" data-bs-parent="#accColarEdital">
+                                <div class="accordion-body">
+                                    <textarea class="form-control mb-2" id="topicosEmLote" rows="5" placeholder="Cole aqui o conteúdo do edital, um tópico por linha..."></textarea>
+                                    <button class="btn btn-sm btn-outline-primary" id="btnAddTopicosLote">Adicionar todos</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-2" id="wsFiltrosTopico"></div>
+                    <div id="listaTopicos" class="d-flex flex-column gap-2"></div>
+                </div>
+
+                <div class="tab-pane fade" id="ws-notas">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="d-flex gap-2 mb-2">
+                                <input type="text" class="form-control form-control-sm" id="buscaNotas" placeholder="Buscar nota...">
+                                <button class="btn btn-sm btn-success flex-shrink-0" id="btnNovaNota"><i class="bi-plus-lg"></i></button>
+                            </div>
+                            <div id="listaNotas" class="list-group lista-notas"></div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div id="editorNotaVazio" class="text-center text-muted fst-italic py-5">Selecione uma nota à esquerda ou crie uma nova.</div>
+                            <div id="editorNota" class="d-none">
+                                <div class="d-flex gap-2 mb-2">
+                                    <input type="text" class="form-control fw-semibold" id="notaTitulo" placeholder="Título da nota">
+                                    <button class="btn btn-outline-warning flex-shrink-0" id="btnFixarNota" title="Fixar no topo"><i class="bi-pin-angle"></i></button>
+                                    <button class="btn btn-outline-danger flex-shrink-0" id="btnExcluirNota" title="Excluir nota"><i class="bi-trash"></i></button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2" id="notaTags" placeholder="Tags separadas por vírgula (ex: art. 5º, jurisprudência)">
+                                <div class="btn-group btn-group-sm mb-2 flex-wrap">
+                                    <button class="btn btn-outline-secondary" data-fmt="**" title="Negrito"><i class="bi-type-bold"></i></button>
+                                    <button class="btn btn-outline-secondary" data-fmt="*" title="Itálico"><i class="bi-type-italic"></i></button>
+                                    <button class="btn btn-outline-secondary" data-fmt="==" title="Destacar"><i class="bi-highlighter"></i></button>
+                                    <button class="btn btn-outline-secondary" data-fmt="`" title="Código"><i class="bi-code"></i></button>
+                                    <button class="btn btn-outline-secondary" data-linha="## " title="Título"><i class="bi-type-h2"></i></button>
+                                    <button class="btn btn-outline-secondary" data-linha="- " title="Lista"><i class="bi-list-ul"></i></button>
+                                    <button class="btn btn-outline-secondary" data-linha="> " title="Citação"><i class="bi-quote"></i></button>
+                                    <button class="btn btn-outline-primary" id="btnPreviewNota" title="Alternar visualização"><i class="bi-eye"></i></button>
+                                    <button class="btn btn-outline-success" id="btnNotaViraCard" title="Transformar seleção em flashcard"><i class="bi-card-heading"></i></button>
+                                </div>
+                                <textarea class="form-control editor-nota" id="notaConteudo" placeholder="Escreva livremente. Aceita **negrito**, *itálico*, ==destaque==, `código`, # títulos, - listas e > citações."></textarea>
+                                <div id="previewNota" class="preview-nota d-none"></div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <span class="form-text" id="statusSalvamento">Salva sozinho enquanto você digita.</span>
+                                    <span class="form-text" id="infoNota"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="ws-cards">
+                    <form id="formCard" class="row g-2 mb-3">
+                        <div class="col-md-5"><input type="text" class="form-control" id="cardFrente" placeholder="Pergunta / frente" required></div>
+                        <div class="col-md-5"><input type="text" class="form-control" id="cardVerso" placeholder="Resposta / verso" required></div>
+                        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Criar</button></div>
+                    </form>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small" id="resumoCards"></span>
+                        <button class="btn btn-sm btn-warning rounded-pill" id="btnRevisarMateria"><i class="bi-lightning-charge me-1"></i>Revisar esta matéria</button>
+                    </div>
+                    <div id="listaCards" class="d-flex flex-column gap-2"></div>
+                </div>
+
+                <div class="tab-pane fade" id="ws-links">
+                    <form id="formLink" class="row g-2 mb-3">
+                        <div class="col-md-4"><input type="text" class="form-control" id="linkTitulo" placeholder="Título (ex: Lei 13.022/2014)" required></div>
+                        <div class="col-md-6"><input type="url" class="form-control" id="linkUrl" placeholder="https://..." required></div>
+                        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Salvar</button></div>
+                    </form>
+                    <div id="listaLinks" class="list-group"></div>
+                </div>
+
+                <div class="tab-pane fade" id="ws-resumo">
+                    <div id="painelResumo"></div>
+                </div>
+
+            </div>
+        </div>
+    </div></div>
+</div>
+
+<!-- ============ REVISÃO DE FLASHCARDS ============ -->
+<div class="modal fade" id="modalRevisao" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title fw-bold"><i class="bi-lightning-charge-fill text-warning me-2"></i>Revisão</h5>
+            <span class="ms-3 text-muted small" id="revisaoContador"></span>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div id="revisaoVazia" class="text-center text-muted py-5 d-none">
+                <i class="bi-emoji-sunglasses fs-1 d-block mb-2"></i>Nada para revisar agora. Volte amanhã.
+            </div>
+            <div id="revisaoConteudo">
+                <div class="small text-muted mb-1" id="revisaoMateria"></div>
+                <div class="card border-0 shadow-sm mb-2"><div class="card-body flashcard-face fw-semibold" id="revisaoFrente"></div></div>
+                <div class="card border-success border-2 mb-3 d-none" id="revisaoVersoBox"><div class="card-body flashcard-face" id="revisaoVerso"></div></div>
+                <button class="btn btn-outline-primary w-100 mb-3" id="btnMostrarVerso"><i class="bi-eye me-1"></i>Mostrar resposta</button>
+                <div class="row g-2 d-none" id="revisaoBotoes">
+                    <div class="col-4"><button class="btn btn-danger w-100" data-nivel="errei"><i class="bi-x-lg me-1"></i>Errei</button></div>
+                    <div class="col-4"><button class="btn btn-warning w-100" data-nivel="dificil"><i class="bi-hourglass-split me-1"></i>Difícil</button></div>
+                    <div class="col-4"><button class="btn btn-success w-100" data-nivel="acertei"><i class="bi-check-lg me-1"></i>Acertei</button></div>
+                </div>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="chkRegistrarErro" checked>
+                    <label class="form-check-label small text-muted" for="chkRegistrarErro">Registrar no Caderno de Erros quando eu errar</label>
+                </div>
+            </div>
+        </div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalConfigEdital" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title fw-bold">Configurar Concurso</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form id="formConfigEdital">
+                <div class="mb-3"><label class="form-label">Concurso / Órgão</label><input type="text" class="form-control" id="inputEditalNome" required></div>
+                <div class="mb-3"><label class="form-label">Banca</label><input type="text" class="form-control" id="inputEditalBanca"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Vagas</label><input type="text" class="form-control" id="inputEditalVagas"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Data da prova</label><input type="date" class="form-control" id="inputEditalData"></div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 rounded-pill">Salvar</button>
+            </form>
+        </div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalAddMateriaEdital" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title fw-bold">Adicionar Matéria à Matriz</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form id="formAddMateriaEdital">
+                <div class="mb-3"><label class="form-label">Matéria</label><select class="form-select" id="editalMateriaSelect" required></select></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Qtd. questões</label><input type="number" min="0" class="form-control" id="editalQuestoes" value="10" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Peso</label><input type="number" min="0" step="0.1" class="form-control" id="editalPeso" value="1" required></div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 rounded-pill">Adicionar</button>
+            </form>
+        </div>
+    </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+"use strict";
+
+// ============================================================
+// ARMAZENAMENTO
+// ============================================================
+const LS = {
+    materias: "hub_materias",
+    tarefas: "hub_tarefas",
+    edital: "hub_edital",
+    erros: "hub_erros",
+    desempenho: "hub_desempenho",
+    apiKey: "hub_gemini_api_key"
+};
+
+function carregar(chave, padrao) {
+    try { const raw = localStorage.getItem(chave); return raw ? JSON.parse(raw) : padrao; }
+    catch (e) { return padrao; }
+}
+function salvar(chave, valor) { localStorage.setItem(chave, JSON.stringify(valor)); }
+
+const MATERIAS_PADRAO = [
+    { id: 1, nome: "Direito Constitucional", desc: "Princípios, direitos fundamentais, organização do Estado.", cor: "primary", notas: "" },
+    { id: 2, nome: "Direito Penal", desc: "Teoria do crime, penas, crimes em espécie.", cor: "danger", notas: "" },
+    { id: 3, nome: "Direito Administrativo", desc: "Atos administrativos, princípios da administração pública.", cor: "info", notas: "" },
+    { id: 4, nome: "Ética no Serviço Público", desc: "Código de conduta, moralidade administrativa.", cor: "success", notas: "" },
+    { id: 5, nome: "Processo Penal", desc: "Inquérito, prisões, flagrante.", cor: "dark", notas: "" },
+    { id: 6, nome: "Estatuto das GCMs", desc: "Lei 13.022/2014.", cor: "warning", notas: "" },
+    { id: 7, nome: "Legislação Extravagante", desc: "Maria da Penha, ECA, drogas, etc.", cor: "secondary", notas: "" },
+    { id: 8, nome: "Trânsito", desc: "CTB, infrações, sinalização.", cor: "warning", notas: "" },
+    { id: 9, nome: "Português", desc: "Gramática, interpretação de texto.", cor: "primary", notas: "" }
+];
+
+function obterMaterias() { return carregar(LS.materias, MATERIAS_PADRAO); }
+function obterTarefas() { return carregar(LS.tarefas, []); }
+function obterEdital() { return carregar(LS.edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] }); }
+function obterErros() { return carregar(LS.erros, []); }
+function obterDesempenho() { return carregar(LS.desempenho, {}); }
+function nomeDaMateria(id) { return (obterMaterias().find(m => String(m.id) === String(id)) || {}).nome || "(matéria removida)"; }
+
+// ============================================================
+// MATÉRIAS — WORKSPACE DE ESTUDO
+// ============================================================
+const STATUS_TOPICO = {
+    nao:       { rotulo: "Não estudado", cor: "secondary", peso: 0,    icone: "circle" },
+    estudando: { rotulo: "Estudando",    cor: "primary",   peso: 0.34, icone: "play-circle-fill" },
+    revisar:   { rotulo: "Revisar",      cor: "warning",   peso: 0.67, icone: "arrow-repeat" },
+    dominado:  { rotulo: "Dominado",     cor: "success",   peso: 1,    icone: "check-circle-fill" }
+};
+const CICLO_STATUS = ["nao", "estudando", "revisar", "dominado"];
+const INTERVALO_CAIXA = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 };
+const PRIORIDADES = { alta: "Alta", media: "Média", baixa: "Baixa" };
+
+function esc(t) {
+    return String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function novoId() { return Date.now() + Math.floor(Math.random() * 10000); }
+function hojeISO() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function somarDias(iso, n) { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function dataBR(iso) { return iso ? iso.split("-").reverse().join("/") : "—"; }
+
+// ---------- Modelo / migração ----------
+function normalizarMateria(m) {
+    if (typeof m.notas === "string") {
+        const texto = m.notas.trim();
+        m.notas = texto ? [{ id: novoId(), titulo: "Anotações antigas", conteudo: m.notas, tags: [], fixada: false, criadaEm: hojeISO(), atualizadaEm: hojeISO() }] : [];
+    }
+    if (!Array.isArray(m.notas)) m.notas = [];
+    if (!Array.isArray(m.topicos)) m.topicos = [];
+    if (!Array.isArray(m.cards)) m.cards = [];
+    if (!Array.isArray(m.links)) m.links = [];
+    if (!m.prioridade) m.prioridade = "media";
+    m.topicos.forEach(t => { if (!STATUS_TOPICO[t.status]) t.status = "nao"; });
+    m.cards.forEach(c => { c.caixa = Number(c.caixa) || 1; c.proxima = c.proxima || hojeISO(); c.acertos = c.acertos || 0; c.erros = c.erros || 0; });
+    return m;
+}
+function materiasNormalizadas() { return obterMaterias().map(normalizarMateria); }
+function salvarMaterias(lista) { salvar(LS.materias, lista); }
+(function migracaoInicial() { salvarMaterias(materiasNormalizadas()); })();
+
+function materiaPorId(id) { return materiasNormalizadas().find(m => String(m.id) === String(id)); }
+function atualizarMateria(id, fn) {
+    const lista = materiasNormalizadas();
+    const m = lista.find(x => String(x.id) === String(id));
+    if (!m) return;
+    fn(m);
+    salvarMaterias(lista);
+}
+function progressoMateria(m) {
+    if (!m.topicos.length) return 0;
+    const soma = m.topicos.reduce((a, t) => a + (STATUS_TOPICO[t.status] || STATUS_TOPICO.nao).peso, 0);
+    return Math.round((soma / m.topicos.length) * 100);
+}
+function cardsVencidos(m) { const h = hojeISO(); return m.cards.filter(c => (c.proxima || h) <= h); }
+function errosDaMateria(id) { return obterErros().filter(e => String(e.materiaId) === String(id)).length; }
+function pendenciasMateria(m) { return cardsVencidos(m).length + m.topicos.filter(t => t.status !== "dominado").length; }
+
+// ---------- Mini-markdown ----------
+function renderizarMarkdown(txt) {
+    const linhas = esc(txt || "").split(/\r?\n/);
+    const inline = s => s
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/(^|[^*])\*([^*]+?)\*/g, "$1<em>$2</em>")
+        .replace(/==(.+?)==/g, "<mark>$1</mark>")
+        .replace(/`(.+?)`/g, "<code>$1</code>");
+    let html = "", emLista = false, m;
+    linhas.forEach(linha => {
+        const t = linha.trim();
+        const item = t.match(/^[-*]\s+(.*)$/);
+        if (item) { if (!emLista) { html += "<ul>"; emLista = true; } html += "<li>" + inline(item[1]) + "</li>"; return; }
+        if (emLista) { html += "</ul>"; emLista = false; }
+        if (!t) return;
+        if ((m = t.match(/^###\s+(.*)/))) html += '<h6 class="fw-bold mt-3">' + inline(m[1]) + "</h6>";
+        else if ((m = t.match(/^##\s+(.*)/))) html += '<h5 class="fw-bold mt-3">' + inline(m[1]) + "</h5>";
+        else if ((m = t.match(/^#\s+(.*)/))) html += '<h4 class="fw-bold mt-2">' + inline(m[1]) + "</h4>";
+        else if ((m = t.match(/^&gt;\s+(.*)/))) html += '<blockquote class="border-start border-3 border-warning ps-2 text-muted mb-2">' + inline(m[1]) + "</blockquote>";
+        else if (/^-{3,}$/.test(t)) html += "<hr>";
+        else html += "<p>" + inline(t) + "</p>";
+    });
+    if (emLista) html += "</ul>";
+    return html || '<p class="text-muted fst-italic">Nada escrito ainda.</p>';
+}
+
+// ---------- Grade de matérias ----------
+let sortableInstancia = null;
+let filtroMaterias = "";
+let ordemMaterias = "manual";
+
+function materiaCombina(m, q) {
+    const alvo = [m.nome, m.desc,
+        m.topicos.map(t => t.titulo).join(" "),
+        m.notas.map(n => n.titulo + " " + n.conteudo + " " + (n.tags || []).join(" ")).join(" "),
+        m.cards.map(c => c.frente + " " + c.verso).join(" ")
+    ].join(" ").toLowerCase();
+    return alvo.includes(q);
+}
+
+function renderizarMaterias() {
+    const todas = materiasNormalizadas();
+    const grid = document.getElementById("gridMaterias");
+    const q = filtroMaterias.trim().toLowerCase();
+    let lista = q ? todas.filter(m => materiaCombina(m, q)) : todas.slice();
+
+    if (ordemMaterias === "nome") lista.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    else if (ordemMaterias === "progresso") lista.sort((a, b) => progressoMateria(b) - progressoMateria(a));
+    else if (ordemMaterias === "pendencias") lista.sort((a, b) => pendenciasMateria(b) - pendenciasMateria(a));
+
+    const totalTopicos = todas.reduce((a, m) => a + m.topicos.length, 0);
+    const dominados = todas.reduce((a, m) => a + m.topicos.filter(t => t.status === "dominado").length, 0);
+    const totalNotas = todas.reduce((a, m) => a + m.notas.length, 0);
+    const totalCards = todas.reduce((a, m) => a + m.cards.length, 0);
+    const vencidos = todas.reduce((a, m) => a + cardsVencidos(m).length, 0);
+    document.getElementById("resumoMaterias").innerHTML =
+        `<strong>${todas.length}</strong> matérias · <strong>${dominados}/${totalTopicos}</strong> tópicos dominados · <strong>${totalNotas}</strong> notas · <strong>${totalCards}</strong> flashcards · <strong class="text-warning-emphasis">${vencidos}</strong> para revisar hoje`;
+    const contador = document.getElementById("contadorRevisao");
+    if (contador) contador.textContent = vencidos;
+
+    if (lista.length === 0) {
+        grid.innerHTML = `<div class="col-12 text-center text-muted py-5">${q ? "Nenhuma matéria encontrada para essa busca." : 'Nenhuma matéria ainda. Clique em "Nova Matéria".'}</div>`;
+        popularSelects();
+        return;
+    }
+
+    grid.innerHTML = lista.map(m => {
+        const p = progressoMateria(m);
+        const dom = m.topicos.filter(t => t.status === "dominado").length;
+        const venc = cardsVencidos(m).length;
+        const err = errosDaMateria(m.id);
+        return `
+            <div class="col-md-6 col-lg-4 col-xxl-3" data-id="${m.id}">
+                <div class="card card-materia h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge-cor bg-${m.cor} me-2"><i class="bi-grip-vertical"></i></span>
+                            <div class="flex-grow-1 min-w-0">
+                                <h6 class="fw-bold mb-0 text-truncate">${esc(m.nome)}</h6>
+                                <span class="small text-muted">${dom}/${m.topicos.length} tópicos · ${p}%</span>
+                            </div>
+                            ${m.prioridade === "alta" ? '<i class="bi-fire text-danger" title="Prioridade alta"></i>' : ""}
+                        </div>
+                        <p class="text-secondary small mb-2">${esc(m.desc || "")}</p>
+                        <div class="progress materia-progress mb-2"><div class="progress-bar bg-${m.cor}" style="width:${p}%"></div></div>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            <span class="badge bg-light text-dark border badge-mini"><i class="bi-journal-text me-1"></i>${m.notas.length}</span>
+                            <span class="badge bg-light text-dark border badge-mini"><i class="bi-card-heading me-1"></i>${m.cards.length}</span>
+                            ${venc ? `<span class="badge bg-warning text-dark badge-mini"><i class="bi-alarm me-1"></i>${venc} p/ revisar</span>` : ""}
+                            ${err ? `<span class="badge bg-danger-subtle text-danger border badge-mini"><i class="bi-x-circle me-1"></i>${err} erros</span>` : ""}
+                        </div>
+                        <div class="mt-auto d-flex gap-2">
+                            <button class="btn btn-sm btn-${m.cor} flex-grow-1 btn-abrir-materia" data-id="${m.id}"><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
+                            <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar"><i class="bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir"><i class="bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }).join("");
+
+    grid.querySelectorAll(".btn-abrir-materia").forEach(b => b.addEventListener("click", () => abrirMateria(b.dataset.id)));
+    grid.querySelectorAll(".btn-editar-materia").forEach(b => b.addEventListener("click", () => abrirFormularioMateria(b.dataset.id)));
+    grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => {
+        const m = materiaPorId(b.dataset.id);
+        if (!confirm(`Remover "${m ? m.nome : ""}"? Notas, tópicos e flashcards dela serão apagados.`)) return;
+        salvarMaterias(materiasNormalizadas().filter(x => String(x.id) !== String(b.dataset.id)));
+        renderizarMaterias();
+    }));
+
+    if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
+    if (ordemMaterias === "manual" && !q) {
+        sortableInstancia = Sortable.create(grid, {
+            animation: 150,
+            ghostClass: "sortable-ghost",
+            onEnd: () => {
+                const ids = Array.from(grid.children).map(el => el.dataset.id);
+                const atuais = materiasNormalizadas();
+                salvarMaterias(ids.map(id => atuais.find(m => String(m.id) === id)).filter(Boolean));
+            }
+        });
+    }
+    popularSelects();
+}
+
+function popularSelects() {
+    const materias = obterMaterias();
+    const opcoes = materias.map(m => `<option value="${m.id}">${esc(m.nome)}</option>`).join("");
+    ["tarefaMateria", "erroMateria", "simMateria", "editalMateriaSelect"].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const valorAtual = select.value;
+        select.innerHTML = opcoes || `<option value="">Cadastre uma matéria primeiro</option>`;
+        if (valorAtual) select.value = valorAtual;
+    });
+    const filtro = document.getElementById("filtroErroMateria");
+    if (filtro) {
+        const valorAtual = filtro.value;
+        filtro.innerHTML = `<option value="">Todas as matérias</option>` + opcoes;
+        filtro.value = valorAtual;
+    }
+}
+
+document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; renderizarMaterias(); });
+document.getElementById("ordemMaterias").addEventListener("change", e => { ordemMaterias = e.target.value; renderizarMaterias(); });
+document.getElementById("btnNovaMateria").addEventListener("click", () => abrirFormularioMateria(null));
+
+// ---------- Criar / editar matéria ----------
+function abrirFormularioMateria(id) {
+    const m = id ? materiaPorId(id) : null;
+    document.getElementById("tituloModalMateria").textContent = m ? "Editar Matéria" : "Nova Matéria";
+    document.getElementById("materiaEditandoId").value = m ? m.id : "";
+    document.getElementById("materiaNome").value = m ? m.nome : "";
+    document.getElementById("materiaDesc").value = m ? (m.desc || "") : "";
+    document.getElementById("materiaCor").value = m ? m.cor : "primary";
+    document.getElementById("materiaPrioridade").value = m ? m.prioridade : "media";
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaMateria")).show();
+}
+
+document.getElementById("formMateria").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = document.getElementById("materiaEditandoId").value;
+    const dados = {
+        nome: document.getElementById("materiaNome").value.trim(),
+        desc: document.getElementById("materiaDesc").value.trim(),
+        cor: document.getElementById("materiaCor").value,
+        prioridade: document.getElementById("materiaPrioridade").value
+    };
+    if (id) {
+        atualizarMateria(id, m => Object.assign(m, dados));
+    } else {
+        const lista = materiasNormalizadas();
+        lista.push(Object.assign({ id: novoId(), notas: [], topicos: [], cards: [], links: [] }, dados));
+        salvarMaterias(lista);
+    }
+    e.target.reset();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaMateria")).hide();
+    renderizarMaterias();
+});
+
+// ============================================================
+// WORKSPACE DA MATÉRIA
+// ============================================================
+let materiaAbertaId = null;
+let notaSelecionadaId = null;
+let filtroStatusTopico = "todos";
+let buscaNotasTexto = "";
+let timerAutoSave = null;
+
+function abrirMateria(id) {
+    const m = materiaPorId(id);
+    if (!m) return;
+    materiaAbertaId = m.id;
+    notaSelecionadaId = m.notas.length ? (m.notas.find(n => n.fixada) || m.notas[0]).id : null;
+    buscaNotasTexto = "";
+    document.getElementById("buscaNotas").value = "";
+    renderizarWorkspace();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalMateria")).show();
+}
+
+function renderizarWorkspace() {
+    const m = materiaPorId(materiaAbertaId);
+    if (!m) return;
+    const p = progressoMateria(m);
+    document.getElementById("wsNomeMateria").textContent = m.nome;
+    document.getElementById("wsCorMateria").className = "badge-cor bg-" + m.cor + " me-2";
+    document.getElementById("wsSubtitulo").textContent =
+        `${p}% dominado · ${m.topicos.length} tópicos · ${m.notas.length} notas · ${m.cards.length} flashcards · prioridade ${PRIORIDADES[m.prioridade] || "Média"}`;
+    const barra = document.getElementById("wsBarraProgresso");
+    barra.style.width = p + "%";
+    barra.className = "progress-bar bg-" + m.cor;
+    renderizarTopicos(m);
+    renderizarListaNotas(m);
+    renderizarEditorNota(m);
+    renderizarCards(m);
+    renderizarLinks(m);
+    renderizarResumoMateria(m);
+}
+
+// ---------- Tópicos ----------
+function renderizarTopicos(m) {
+    const filtros = document.getElementById("wsFiltrosTopico");
+    const contagem = { todos: m.topicos.length };
+    CICLO_STATUS.forEach(s => contagem[s] = m.topicos.filter(t => t.status === s).length);
+    filtros.innerHTML = ["todos"].concat(CICLO_STATUS).map(s => {
+        const info = s === "todos" ? { rotulo: "Todos", cor: "dark" } : STATUS_TOPICO[s];
+        const ativo = filtroStatusTopico === s;
+        return `<button class="btn btn-sm ${ativo ? "btn-" + info.cor : "btn-outline-" + info.cor} rounded-pill btn-filtro-topico" data-status="${s}">${info.rotulo} (${contagem[s]})</button>`;
+    }).join("");
+    filtros.querySelectorAll(".btn-filtro-topico").forEach(b => b.addEventListener("click", () => {
+        filtroStatusTopico = b.dataset.status;
+        renderizarTopicos(materiaPorId(materiaAbertaId));
+    }));
+
+    const lista = filtroStatusTopico === "todos" ? m.topicos : m.topicos.filter(t => t.status === filtroStatusTopico);
+    const container = document.getElementById("listaTopicos");
+    if (!lista.length) {
+        container.innerHTML = `<p class="text-muted fst-italic small mb-0">Nenhum tópico ${filtroStatusTopico === "todos" ? "cadastrado" : "com esse status"}.</p>`;
+        return;
+    }
+    container.innerHTML = lista.map(t => {
+        const s = STATUS_TOPICO[t.status];
+        return `
+        <div class="card border-0 shadow-sm topico-item st-${t.status}">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-${s.cor} btn-ciclo-topico" data-id="${t.id}" title="Mudar status"><i class="bi-${s.icone}"></i></button>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold small">${esc(t.titulo)}</div>
+                        <span class="badge bg-${s.cor}-subtle text-${s.cor}-emphasis border chip-status">${s.rotulo}</span>
+                        ${t.revisoes ? `<span class="text-muted small ms-1">${t.revisoes} revisões</span>` : ""}
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary btn-nota-topico" data-id="${t.id}" title="Criar nota deste tópico"><i class="bi-journal-plus"></i></button>
+                    <button class="btn btn-sm btn-outline-danger btn-excluir-topico" data-id="${t.id}"><i class="bi-trash"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join("");
+
+    container.querySelectorAll(".btn-ciclo-topico").forEach(b => b.addEventListener("click", () => {
+        atualizarMateria(materiaAbertaId, mm => {
+            const t = mm.topicos.find(x => String(x.id) === b.dataset.id);
+            if (!t) return;
+            t.status = CICLO_STATUS[(CICLO_STATUS.indexOf(t.status) + 1) % CICLO_STATUS.length];
+            t.revisoes = (t.revisoes || 0) + (t.status === "revisar" ? 1 : 0);
+        });
+        renderizarWorkspace();
+        renderizarMaterias();
+    }));
+    container.querySelectorAll(".btn-excluir-topico").forEach(b => b.addEventListener("click", () => {
+        atualizarMateria(materiaAbertaId, mm => { mm.topicos = mm.topicos.filter(x => String(x.id) !== b.dataset.id); });
+        renderizarWorkspace();
+        renderizarMaterias();
+    }));
+    container.querySelectorAll(".btn-nota-topico").forEach(b => b.addEventListener("click", () => {
+        const t = materiaPorId(materiaAbertaId).topicos.find(x => String(x.id) === b.dataset.id);
+        if (!t) return;
+        criarNota(t.titulo, "## " + t.titulo + "\n\n");
+        document.querySelector('[data-bs-target="#ws-notas"]').click();
+    }));
+}
+
+document.getElementById("formTopico").addEventListener("submit", e => {
+    e.preventDefault();
+    const titulo = document.getElementById("topicoTitulo").value.trim();
+    if (!titulo) return;
+    atualizarMateria(materiaAbertaId, m => m.topicos.push({ id: novoId(), titulo, status: "nao", revisoes: 0 }));
+    e.target.reset();
+    renderizarWorkspace();
+    renderizarMaterias();
+});
+
+document.getElementById("btnAddTopicosLote").addEventListener("click", () => {
+    const area = document.getElementById("topicosEmLote");
+    const linhas = area.value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!linhas.length) return;
+    atualizarMateria(materiaAbertaId, m => linhas.forEach(l => m.topicos.push({ id: novoId(), titulo: l, status: "nao", revisoes: 0 })));
+    area.value = "";
+    renderizarWorkspace();
+    renderizarMaterias();
+});
+
+// ---------- Notas ----------
+function notasFiltradas(m) {
+    const q = buscaNotasTexto.trim().toLowerCase();
+    const lista = q
+        ? m.notas.filter(n => (n.titulo + " " + n.conteudo + " " + (n.tags || []).join(" ")).toLowerCase().includes(q))
+        : m.notas.slice();
+    return lista.sort((a, b) => (b.fixada ? 1 : 0) - (a.fixada ? 1 : 0) || String(b.atualizadaEm || "").localeCompare(String(a.atualizadaEm || "")));
+}
+
+function renderizarListaNotas(m) {
+    const lista = notasFiltradas(m);
+    const container = document.getElementById("listaNotas");
+    if (!lista.length) {
+        container.innerHTML = `<div class="list-group-item text-muted small fst-italic">Nenhuma nota${buscaNotasTexto ? " encontrada" : " ainda"}.</div>`;
+        return;
+    }
+    container.innerHTML = lista.map(n => `
+        <button type="button" class="list-group-item list-group-item-action nota-item ${String(n.id) === String(notaSelecionadaId) ? "ativa" : ""}" data-id="${n.id}">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="fw-semibold small text-truncate">${n.fixada ? '<i class="bi-pin-angle-fill text-warning me-1"></i>' : ""}${esc(n.titulo || "Sem título")}</span>
+                <span class="text-muted" style="font-size:.68rem;">${dataBR(n.atualizadaEm)}</span>
+            </div>
+            <div class="text-muted text-truncate" style="font-size:.72rem;">${esc((n.conteudo || "").replace(/\s+/g, " ").slice(0, 70))}</div>
+            ${(n.tags || []).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${n.tags.map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
+        </button>`).join("");
+    container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", () => {
+        notaSelecionadaId = b.dataset.id;
+        const mm = materiaPorId(materiaAbertaId);
+        renderizarListaNotas(mm);
+        renderizarEditorNota(mm);
+    }));
+}
+
+function renderizarEditorNota(m) {
+    const nota = m.notas.find(n => String(n.id) === String(notaSelecionadaId));
+    const editor = document.getElementById("editorNota");
+    const vazio = document.getElementById("editorNotaVazio");
+    if (!nota) { editor.classList.add("d-none"); vazio.classList.remove("d-none"); return; }
+    editor.classList.remove("d-none");
+    vazio.classList.add("d-none");
+    document.getElementById("notaTitulo").value = nota.titulo || "";
+    document.getElementById("notaTags").value = (nota.tags || []).join(", ");
+    document.getElementById("notaConteudo").value = nota.conteudo || "";
+    document.getElementById("btnFixarNota").className = "btn flex-shrink-0 " + (nota.fixada ? "btn-warning" : "btn-outline-warning");
+    document.getElementById("infoNota").textContent = `Criada em ${dataBR(nota.criadaEm)} · ${(nota.conteudo || "").length} caracteres`;
+    const preview = document.getElementById("previewNota");
+    if (!preview.classList.contains("d-none")) preview.innerHTML = renderizarMarkdown(nota.conteudo);
+}
+
+function criarNota(titulo, conteudo) {
+    const id = novoId();
+    atualizarMateria(materiaAbertaId, m => m.notas.unshift({
+        id, titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [], fixada: false,
+        criadaEm: hojeISO(), atualizadaEm: hojeISO()
+    }));
+    notaSelecionadaId = id;
+    renderizarWorkspace();
+    renderizarMaterias();
+    document.getElementById("notaTitulo").focus();
+}
+
+function salvarNotaAtual() {
+    if (!notaSelecionadaId) return;
+    atualizarMateria(materiaAbertaId, m => {
+        const n = m.notas.find(x => String(x.id) === String(notaSelecionadaId));
+        if (!n) return;
+        n.titulo = document.getElementById("notaTitulo").value;
+        n.conteudo = document.getElementById("notaConteudo").value;
+        n.tags = document.getElementById("notaTags").value.split(",").map(s => s.trim()).filter(Boolean);
+        n.atualizadaEm = hojeISO();
+    });
+    const status = document.getElementById("statusSalvamento");
+    status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Salvo</span>';
+    setTimeout(() => { status.textContent = "Salva sozinho enquanto você digita."; }, 1500);
+    renderizarListaNotas(materiaPorId(materiaAbertaId));
+    renderizarMaterias();
+}
+
+function agendarSalvamento() {
+    document.getElementById("statusSalvamento").innerHTML = '<span class="text-muted"><i class="bi-pencil"></i> Digitando...</span>';
+    clearTimeout(timerAutoSave);
+    timerAutoSave = setTimeout(salvarNotaAtual, 600);
+}
+["notaTitulo", "notaConteudo", "notaTags"].forEach(id => document.getElementById(id).addEventListener("input", agendarSalvamento));
+
+document.getElementById("btnNovaNota").addEventListener("click", () => criarNota("Nova nota", ""));
+document.getElementById("buscaNotas").addEventListener("input", e => { buscaNotasTexto = e.target.value; renderizarListaNotas(materiaPorId(materiaAbertaId)); });
+document.getElementById("btnFixarNota").addEventListener("click", () => {
+    atualizarMateria(materiaAbertaId, m => {
+        const n = m.notas.find(x => String(x.id) === String(notaSelecionadaId));
+        if (n) n.fixada = !n.fixada;
+    });
+    renderizarWorkspace();
+});
+document.getElementById("btnExcluirNota").addEventListener("click", () => {
+    if (!confirm("Excluir esta nota?")) return;
+    atualizarMateria(materiaAbertaId, m => { m.notas = m.notas.filter(x => String(x.id) !== String(notaSelecionadaId)); });
+    const m = materiaPorId(materiaAbertaId);
+    notaSelecionadaId = m.notas.length ? m.notas[0].id : null;
+    renderizarWorkspace();
+    renderizarMaterias();
+});
+document.getElementById("btnPreviewNota").addEventListener("click", () => {
+    const area = document.getElementById("notaConteudo");
+    const preview = document.getElementById("previewNota");
+    const mostrandoPreview = preview.classList.contains("d-none");
+    preview.classList.toggle("d-none", !mostrandoPreview);
+    area.classList.toggle("d-none", mostrandoPreview);
+    if (mostrandoPreview) preview.innerHTML = renderizarMarkdown(area.value);
+});
+
+function aplicarFormato(prefixo, sufixo) {
+    const area = document.getElementById("notaConteudo");
+    const ini = area.selectionStart, fim = area.selectionEnd;
+    const selecionado = area.value.slice(ini, fim) || "texto";
+    area.value = area.value.slice(0, ini) + prefixo + selecionado + sufixo + area.value.slice(fim);
+    area.focus();
+    area.setSelectionRange(ini + prefixo.length, ini + prefixo.length + selecionado.length);
+    agendarSalvamento();
+}
+function aplicarFormatoLinha(marca) {
+    const area = document.getElementById("notaConteudo");
+    const ini = area.value.lastIndexOf("\n", Math.max(0, area.selectionStart - 1)) + 1;
+    area.value = area.value.slice(0, ini) + marca + area.value.slice(ini);
+    area.focus();
+    agendarSalvamento();
+}
+document.querySelectorAll("[data-fmt]").forEach(b => b.addEventListener("click", () => aplicarFormato(b.dataset.fmt, b.dataset.fmt)));
+document.querySelectorAll("[data-linha]").forEach(b => b.addEventListener("click", () => aplicarFormatoLinha(b.dataset.linha)));
+
+document.getElementById("btnNotaViraCard").addEventListener("click", () => {
+    const area = document.getElementById("notaConteudo");
+    const selecionado = area.value.slice(area.selectionStart, area.selectionEnd).trim();
+    if (!selecionado) { alert("Selecione no texto o trecho que vira a resposta do flashcard."); return; }
+    const frente = prompt("Pergunta do flashcard:", document.getElementById("notaTitulo").value);
+    if (!frente) return;
+    atualizarMateria(materiaAbertaId, m => m.cards.push({ id: novoId(), frente, verso: selecionado, caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 }));
+    renderizarWorkspace();
+    renderizarMaterias();
+});
+
+// ---------- Flashcards ----------
+function renderizarCards(m) {
+    const venc = cardsVencidos(m).length;
+    document.getElementById("resumoCards").innerHTML =
+        `${m.cards.length} flashcards · <strong class="text-warning-emphasis">${venc}</strong> para revisar hoje`;
+    const container = document.getElementById("listaCards");
+    if (!m.cards.length) {
+        container.innerHTML = `<p class="text-muted fst-italic small mb-0">Nenhum flashcard ainda. Crie acima ou selecione um trecho de uma nota e clique no ícone de card.</p>`;
+        return;
+    }
+    const ordenados = m.cards.slice().sort((a, b) => String(a.proxima).localeCompare(String(b.proxima)));
+    container.innerHTML = ordenados.map(c => `
+        <div class="card border-0 shadow-sm">
+            <div class="card-body py-2 px-3 d-flex align-items-center gap-2">
+                <span class="badge bg-secondary-subtle text-secondary-emphasis border">Caixa ${c.caixa}</span>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold small">${esc(c.frente)}</div>
+                    <div class="text-muted small">${esc(c.verso)}</div>
+                    <div class="text-muted" style="font-size:.7rem;">Próxima revisão: ${dataBR(c.proxima)} · ${c.acertos} acertos / ${c.erros} erros</div>
+                </div>
+                <button class="btn btn-sm btn-outline-danger btn-excluir-card" data-id="${c.id}"><i class="bi-trash"></i></button>
+            </div>
+        </div>`).join("");
+    container.querySelectorAll(".btn-excluir-card").forEach(b => b.addEventListener("click", () => {
+        atualizarMateria(materiaAbertaId, mm => { mm.cards = mm.cards.filter(x => String(x.id) !== b.dataset.id); });
+        renderizarWorkspace();
+        renderizarMaterias();
+    }));
+}
+
+document.getElementById("formCard").addEventListener("submit", e => {
+    e.preventDefault();
+    atualizarMateria(materiaAbertaId, m => m.cards.push({
+        id: novoId(),
+        frente: document.getElementById("cardFrente").value.trim(),
+        verso: document.getElementById("cardVerso").value.trim(),
+        caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0
+    }));
+    e.target.reset();
+    renderizarWorkspace();
+    renderizarMaterias();
+});
+
+// ---------- Materiais / links ----------
+function renderizarLinks(m) {
+    const container = document.getElementById("listaLinks");
+    if (!m.links.length) {
+        container.innerHTML = `<div class="list-group-item text-muted small fst-italic">Nenhum material salvo. Guarde aqui leis, vídeos, PDFs e resumos que você usa nessa matéria.</div>`;
+        return;
+    }
+    container.innerHTML = m.links.map(l => `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="min-w-0">
+                <div class="fw-semibold small">${esc(l.titulo)}</div>
+                <a href="${esc(l.url)}" target="_blank" rel="noopener" class="small text-truncate d-block">${esc(l.url)}</a>
+            </div>
+            <button class="btn btn-sm btn-outline-danger btn-excluir-link" data-id="${l.id}"><i class="bi-trash"></i></button>
+        </div>`).join("");
+    container.querySelectorAll(".btn-excluir-link").forEach(b => b.addEventListener("click", () => {
+        atualizarMateria(materiaAbertaId, mm => { mm.links = mm.links.filter(x => String(x.id) !== b.dataset.id); });
+        renderizarWorkspace();
+    }));
+}
+
+document.getElementById("formLink").addEventListener("submit", e => {
+    e.preventDefault();
+    atualizarMateria(materiaAbertaId, m => m.links.push({
+        id: novoId(),
+        titulo: document.getElementById("linkTitulo").value.trim(),
+        url: document.getElementById("linkUrl").value.trim()
+    }));
+    e.target.reset();
+    renderizarWorkspace();
+});
+
+// ---------- Resumo da matéria ----------
+function renderizarResumoMateria(m) {
+    const tarefas = obterTarefas().filter(t => String(t.materiaId) === String(m.id));
+    const pendentes = tarefas.filter(t => t.status === "pendente").length;
+    const concluidas = tarefas.length - pendentes;
+    const erros = obterErros().filter(e => String(e.materiaId) === String(m.id));
+    const porCaixa = [1, 2, 3, 4, 5].map(c => m.cards.filter(x => x.caixa === c).length);
+    const bloco = (rotulo, valor, cor) => `
+        <div class="col-6 col-md-3">
+            <div class="p-3 border rounded bg-light h-100 text-center">
+                <div class="fs-4 fw-bold text-${cor}">${valor}</div>
+                <div class="small text-muted">${rotulo}</div>
+            </div>
+        </div>`;
+    document.getElementById("painelResumo").innerHTML = `
+        <div class="row g-3 mb-4">
+            ${bloco("Progresso", progressoMateria(m) + "%", "primary")}
+            ${bloco("Tópicos dominados", m.topicos.filter(t => t.status === "dominado").length + "/" + m.topicos.length, "success")}
+            ${bloco("Sessões concluídas", concluidas + "/" + tarefas.length, "info")}
+            ${bloco("Erros registrados", erros.length, "danger")}
+        </div>
+        <h6 class="fw-bold"><i class="bi-stack me-1"></i>Flashcards por caixa</h6>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+            ${porCaixa.map((q, i) => `<span class="badge bg-light text-dark border py-2 px-3">Caixa ${i + 1}: <strong>${q}</strong> <span class="text-muted">(revisa a cada ${INTERVALO_CAIXA[i + 1]}d)</span></span>`).join("")}
+        </div>
+        <h6 class="fw-bold"><i class="bi-hourglass-split me-1"></i>Sessões pendentes (${pendentes})</h6>
+        ${pendentes ? `<ul class="small">${tarefas.filter(t => t.status === "pendente").map(t => `<li>${esc(t.topico)} <span class="text-muted">— ${dataBR(t.data)}</span></li>`).join("")}</ul>` : '<p class="text-muted small fst-italic">Nenhuma sessão pendente no cronograma.</p>'}
+        <h6 class="fw-bold mt-3"><i class="bi-journal-x me-1"></i>Últimos erros</h6>
+        ${erros.length ? `<ul class="small">${erros.slice(-5).reverse().map(e => `<li><strong>${esc(e.tema)}</strong>${e.obs ? " — " + esc(e.obs) : ""} <span class="text-muted">(${esc(e.data || "")})</span></li>`).join("")}</ul>` : '<p class="text-muted small fst-italic">Nenhum erro registrado nesta matéria.</p>'}
+    `;
+}
+
+// ---------- Exportar matéria em Markdown ----------
+document.getElementById("btnExportarMateria").addEventListener("click", () => {
+    const m = materiaPorId(materiaAbertaId);
+    if (!m) return;
+    const linhas = [];
+    linhas.push("# " + m.nome, "", m.desc || "", "", `Progresso: ${progressoMateria(m)}%`, "");
+    linhas.push("## Tópicos", "");
+    m.topicos.forEach(t => linhas.push(`- [${STATUS_TOPICO[t.status].rotulo}] ${t.titulo}`));
+    linhas.push("", "## Notas", "");
+    m.notas.forEach(n => linhas.push("### " + (n.titulo || "Sem título"), (n.tags || []).length ? "_Tags: " + n.tags.join(", ") + "_" : "", "", n.conteudo || "", ""));
+    linhas.push("## Flashcards", "");
+    m.cards.forEach(c => linhas.push(`- **${c.frente}** → ${c.verso} _(caixa ${c.caixa})_`));
+    linhas.push("", "## Materiais", "");
+    m.links.forEach(l => linhas.push(`- [${l.titulo}](${l.url})`));
+    const blob = new Blob([linhas.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = m.nome.replace(/[^\wÀ-ÿ -]/g, "").trim() + ".md";
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
+
+// ============================================================
+// REVISÃO ESPAÇADA (Leitner)
+// ============================================================
+let filaRevisao = [];
+let indiceRevisao = 0;
+
+function iniciarRevisao(materiaId) {
+    const materias = materiasNormalizadas();
+    filaRevisao = [];
+    materias.forEach(m => {
+        if (materiaId && String(m.id) !== String(materiaId)) return;
+        cardsVencidos(m).forEach(c => filaRevisao.push({ materiaId: m.id, materiaNome: m.nome, cardId: c.id }));
+    });
+    filaRevisao.sort(() => Math.random() - 0.5);
+    indiceRevisao = 0;
+    mostrarCardRevisao();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalRevisao")).show();
+}
+
+function mostrarCardRevisao() {
+    const vazio = document.getElementById("revisaoVazia");
+    const conteudo = document.getElementById("revisaoConteudo");
+    if (indiceRevisao >= filaRevisao.length) {
+        vazio.classList.remove("d-none");
+        conteudo.classList.add("d-none");
+        vazio.innerHTML = filaRevisao.length
+            ? '<i class="bi-trophy-fill fs-1 d-block mb-2 text-warning"></i>Revisão concluída! ' + filaRevisao.length + " cards revisados."
+            : '<i class="bi-emoji-sunglasses fs-1 d-block mb-2"></i>Nada para revisar agora. Volte amanhã.';
+        return;
+    }
+    vazio.classList.add("d-none");
+    conteudo.classList.remove("d-none");
+    const item = filaRevisao[indiceRevisao];
+    const m = materiaPorId(item.materiaId);
+    const card = m.cards.find(c => String(c.id) === String(item.cardId));
+    if (!card) { indiceRevisao++; mostrarCardRevisao(); return; }
+    document.getElementById("revisaoContador").textContent = `${indiceRevisao + 1} de ${filaRevisao.length}`;
+    document.getElementById("revisaoMateria").textContent = item.materiaNome + " · caixa " + card.caixa;
+    document.getElementById("revisaoFrente").textContent = card.frente;
+    document.getElementById("revisaoVerso").textContent = card.verso;
+    document.getElementById("revisaoVersoBox").classList.add("d-none");
+    document.getElementById("revisaoBotoes").classList.add("d-none");
+    document.getElementById("btnMostrarVerso").classList.remove("d-none");
+}
+
+document.getElementById("btnMostrarVerso").addEventListener("click", () => {
+    document.getElementById("revisaoVersoBox").classList.remove("d-none");
+    document.getElementById("revisaoBotoes").classList.remove("d-none");
+    document.getElementById("btnMostrarVerso").classList.add("d-none");
+});
+
+document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEventListener("click", () => {
+    const item = filaRevisao[indiceRevisao];
+    if (!item) return;
+    const nivel = b.dataset.nivel;
+    let cardFrente = "";
+    atualizarMateria(item.materiaId, m => {
+        const c = m.cards.find(x => String(x.id) === String(item.cardId));
+        if (!c) return;
+        cardFrente = c.frente;
+        if (nivel === "acertei") { c.caixa = Math.min(5, c.caixa + 1); c.acertos++; }
+        else if (nivel === "dificil") { c.acertos++; }
+        else { c.caixa = 1; c.erros++; }
+        c.proxima = somarDias(hojeISO(), nivel === "errei" ? 1 : INTERVALO_CAIXA[c.caixa]);
+    });
+    if (nivel === "errei" && document.getElementById("chkRegistrarErro").checked && cardFrente) {
+        registrarErro(item.materiaId, cardFrente, "Errei na revisão de flashcards");
+        if (document.getElementById("listaErros")) renderizarErros();
+    }
+    indiceRevisao++;
+    mostrarCardRevisao();
+    renderizarMaterias();
+    if (materiaAbertaId) { const mm = materiaPorId(materiaAbertaId); if (mm) renderizarCards(mm); }
+}));
+
+document.getElementById("btnRevisarTudo").addEventListener("click", () => iniciarRevisao(null));
+document.getElementById("btnRevisarMateria").addEventListener("click", () => iniciarRevisao(materiaAbertaId));
+
+
+// ============================================================
+// CRONOGRAMA
+// ============================================================
+function renderizarTarefas() {
+    const tarefas = obterTarefas();
+    const pendentes = tarefas.filter(t => t.status === "pendente").sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+    const concluidas = tarefas.filter(t => t.status === "concluido").sort((a, b) => b.id - a.id);
+
+    const linha = (t, concluida) => `
+        <div class="card border-0 shadow-sm tarefa-item ${concluida ? "concluida" : ""}">
+            <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">${nomeDaMateria(t.materiaId)}${t.data ? " · " + t.data : ""}</div>
+                    <div class="fw-semibold">${t.topico}</div>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-${concluida ? "secondary" : "success"} btn-toggle-tarefa" data-id="${t.id}"><i class="bi-${concluida ? "arrow-counterclockwise" : "check-lg"}"></i></button>
+                    <button class="btn btn-sm btn-outline-danger btn-excluir-tarefa" data-id="${t.id}"><i class="bi-trash"></i></button>
+                </div>
+            </div>
+        </div>`;
+
+    document.getElementById("listaPendentes").innerHTML = pendentes.length ? pendentes.map(t => linha(t, false)).join("") : `<p class="text-muted small fst-italic">Nada pendente.</p>`;
+    document.getElementById("listaConcluidas").innerHTML = concluidas.length ? concluidas.map(t => linha(t, true)).join("") : `<p class="text-muted small fst-italic">Nenhuma concluída ainda.</p>`;
+
+    document.querySelectorAll(".btn-toggle-tarefa").forEach(btn => btn.addEventListener("click", () => {
+        const tarefas2 = obterTarefas();
+        const t = tarefas2.find(x => String(x.id) === btn.dataset.id);
+        if (!t) return;
+        t.status = t.status === "pendente" ? "concluido" : "pendente";
+        salvar(LS.tarefas, tarefas2);
+        renderizarTudoCronograma();
+    }));
+    document.querySelectorAll(".btn-excluir-tarefa").forEach(btn => btn.addEventListener("click", () => {
+        salvar(LS.tarefas, obterTarefas().filter(x => String(x.id) !== btn.dataset.id));
+        renderizarTudoCronograma();
+    }));
+}
+
+document.getElementById("formTarefa").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const materiaId = document.getElementById("tarefaMateria").value;
+    if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
+    const tarefas = obterTarefas();
+    tarefas.push({
+        id: Date.now(), materiaId,
+        topico: document.getElementById("tarefaTopico").value.trim(),
+        data: document.getElementById("tarefaData").value,
+        status: "pendente"
+    });
+    salvar(LS.tarefas, tarefas);
+    e.target.reset();
+    renderizarTudoCronograma();
+});
+
+// ---------- Calendário semanal ----------
+let offsetSemana = 0;
+
+function obterDiasDaSemana() {
+    const hoje = new Date();
+    hoje.setDate(hoje.getDate() + offsetSemana * 7);
+    const diaSemana = hoje.getDay();
+    const segunda = new Date(hoje);
+    segunda.setDate(hoje.getDate() - ((diaSemana + 6) % 7));
+    const dias = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(segunda);
+        d.setDate(segunda.getDate() + i);
+        dias.push(d);
+    }
+    return dias;
+}
+function paraISO(data) { return data.toISOString().slice(0, 10); }
+function ehHoje(data) { return paraISO(data) === paraISO(new Date()); }
+
+function renderizarCalendario() {
+    const dias = obterDiasDaSemana();
+    const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+    const tarefas = obterTarefas();
+
+    document.getElementById("cabecalhoCalendario").innerHTML = dias.map((d, i) =>
+        `<th class="text-center ${ehHoje(d) ? "table-primary" : ""}">${nomesDias[i]}<br><span class="small text-muted">${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span></th>`
+    ).join("");
+
+    document.getElementById("corpoCalendario").innerHTML = dias.map(d => {
+        const iso = paraISO(d);
+        const doDia = tarefas.filter(t => t.data === iso);
+        const conteudo = doDia.length === 0
+            ? `<span class="text-muted small fst-italic">—</span>`
+            : doDia.map(t => `<span class="badge ${t.status === "concluido" ? "bg-success" : "bg-primary"} chip-tarefa mb-1 btn-tarefa-cal" data-id="${t.id}">${nomeDaMateria(t.materiaId)}: ${t.topico}</span>`).join("");
+        return `<td class="celula-calendario">${conteudo}</td>`;
+    }).join("");
+
+    document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", () => {
+        const tarefas2 = obterTarefas();
+        const t = tarefas2.find(x => String(x.id) === el.dataset.id);
+        if (!t) return;
+        t.status = t.status === "pendente" ? "concluido" : "pendente";
+        salvar(LS.tarefas, tarefas2);
+        renderizarTudoCronograma();
+    }));
+}
+
+document.getElementById("btnSemanaAnterior").addEventListener("click", () => { offsetSemana--; renderizarCalendario(); });
+document.getElementById("btnSemanaProxima").addEventListener("click", () => { offsetSemana++; renderizarCalendario(); });
+document.getElementById("btnSemanaHoje").addEventListener("click", () => { offsetSemana = 0; renderizarCalendario(); });
+
+function renderizarTudoCronograma() {
+    renderizarTarefas();
+    renderizarCalendario();
+}
+
+// ============================================================
+// EDITAL & ESTRATÉGIA
+// ============================================================
+function calcularPontosTotais(edital) {
+    return edital.materias.reduce((acc, m) => acc + (Number(m.questoes) * Number(m.peso)), 0);
+}
+
+function renderizarEdital() {
+    const edital = obterEdital();
+    document.getElementById("editalNome").textContent = edital.nomeConcurso || "Aguardando";
+    document.getElementById("editalBanca").textContent = edital.banca || "—";
+    document.getElementById("editalVagas").textContent = edital.vagas || "—";
+    document.getElementById("editalData").textContent = edital.dataProva || "—";
+
+    const total = calcularPontosTotais(edital);
+    document.getElementById("editalTotalPontos").textContent = total.toFixed(1) + " pts";
+
+    const tabela = document.getElementById("tabelaEdital");
+    if (edital.materias.length === 0) {
+        tabela.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhuma matéria na matriz ainda.</td></tr>`;
+        return;
+    }
+
+    const ordenadas = [...edital.materias].sort((a, b) => (b.questoes * b.peso) - (a.questoes * a.peso));
+
+    tabela.innerHTML = ordenadas.map(m => {
+        const pontos = Number(m.questoes) * Number(m.peso);
+        const pct = total > 0 ? (pontos / total) * 100 : 0;
+        const cor = pct > 20 ? "bg-danger" : pct > 10 ? "bg-warning" : "bg-info";
+        return `
+        <tr>
+            <td class="fw-semibold">${nomeDaMateria(m.materiaId)}</td>
+            <td class="text-center"><input type="number" min="0" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
+            <td class="text-center"><input type="number" min="0" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
+            <td class="text-center fw-bold">${pontos.toFixed(1)}</td>
+            <td class="text-center" style="min-width:170px;">
+                <div class="d-flex align-items-center gap-2">
+                    <small class="fw-bold" style="min-width:40px;">${pct.toFixed(1)}%</small>
+                    <div class="progress flex-grow-1" style="height:8px;"><div class="progress-bar ${cor}" style="width:${pct}%"></div></div>
+                </div>
+            </td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger btn-remover-edital" data-id="${m.id}"><i class="bi-trash"></i></button></td>
+        </tr>`;
+    }).join("");
+
+    tabela.querySelectorAll(".campo-questoes").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(Number(input.dataset.id), "questoes", Number(input.value) || 0)));
+    tabela.querySelectorAll(".campo-peso").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(Number(input.dataset.id), "peso", Number(input.value) || 0)));
+    tabela.querySelectorAll(".btn-remover-edital").forEach(btn => btn.addEventListener("click", () => {
+        const edital2 = obterEdital();
+        edital2.materias = edital2.materias.filter(m => m.id !== Number(btn.dataset.id));
+        salvar(LS.edital, edital2);
+        renderizarEdital();
+    }));
+}
+
+function atualizarCampoEdital(id, campo, valor) {
+    const edital = obterEdital();
+    const m = edital.materias.find(x => x.id === id);
+    if (!m) return;
+    m[campo] = valor;
+    salvar(LS.edital, edital);
+    renderizarEdital();
+}
+
+document.getElementById("formConfigEdital").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const edital = obterEdital();
+    edital.nomeConcurso = document.getElementById("inputEditalNome").value.trim();
+    edital.banca = document.getElementById("inputEditalBanca").value.trim();
+    edital.vagas = document.getElementById("inputEditalVagas").value.trim();
+    edital.dataProva = document.getElementById("inputEditalData").value;
+    salvar(LS.edital, edital);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConfigEdital")).hide();
+    renderizarEdital();
+});
+document.getElementById("modalConfigEdital").addEventListener("show.bs.modal", () => {
+    const edital = obterEdital();
+    document.getElementById("inputEditalNome").value = edital.nomeConcurso || "";
+    document.getElementById("inputEditalBanca").value = edital.banca || "";
+    document.getElementById("inputEditalVagas").value = edital.vagas || "";
+    document.getElementById("inputEditalData").value = edital.dataProva || "";
+});
+
+document.getElementById("formAddMateriaEdital").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const materiaId = document.getElementById("editalMateriaSelect").value;
+    if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
+    const edital = obterEdital();
+    if (edital.materias.some(m => String(m.materiaId) === String(materiaId))) { alert("Essa matéria já está na matriz."); return; }
+    edital.materias.push({
+        id: Date.now(), materiaId,
+        questoes: Number(document.getElementById("editalQuestoes").value) || 0,
+        peso: Number(document.getElementById("editalPeso").value) || 1
+    });
+    salvar(LS.edital, edital);
+    e.target.reset();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalAddMateriaEdital")).hide();
+    renderizarEdital();
+});
+
+// ============================================================
+// CADERNO DE ERROS
+// ============================================================
+function registrarErro(materiaId, tema, obs) {
+    const erros = obterErros();
+    erros.push({ id: Date.now() + Math.random(), materiaId, tema, obs, data: new Date().toLocaleDateString("pt-BR") });
+    salvar(LS.erros, erros);
+}
+
+function renderizarErros() {
+    const erros = obterErros();
+    const filtro = document.getElementById("filtroErroMateria").value;
+    const lista = filtro ? erros.filter(e => String(e.materiaId) === String(filtro)) : erros;
+    const container = document.getElementById("listaErros");
+
+    document.getElementById("resumoErros").textContent = `${erros.length} erro(s) registrado(s)` + (filtro ? ` · mostrando ${lista.length}` : "");
+
+    if (lista.length === 0) {
+        container.innerHTML = `<p class="text-muted">Nenhum erro ${filtro ? "nesta matéria" : "registrado"} ainda.</p>`;
+        return;
+    }
+
+    const porMateria = {};
+    [...lista].reverse().forEach(er => {
+        const nome = nomeDaMateria(er.materiaId);
+        if (!porMateria[nome]) porMateria[nome] = [];
+        porMateria[nome].push(er);
+    });
+
+    container.innerHTML = Object.keys(porMateria).sort().map(nome => `
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white fw-bold">${nome} <span class="badge bg-secondary">${porMateria[nome].length}</span></div>
+            <ul class="list-group list-group-flush">
+                ${porMateria[nome].map(er => `
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold">${er.tema}</div>
+                            ${er.obs ? `<div class="small text-muted">${er.obs}</div>` : ""}
+                            <div class="small text-muted">${er.data || ""}</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}"><i class="bi-trash"></i></button>
+                    </li>`).join("")}
+            </ul>
+        </div>`).join("");
+
+    container.querySelectorAll(".btn-excluir-erro").forEach(btn => btn.addEventListener("click", () => {
+        salvar(LS.erros, obterErros().filter(x => String(x.id) !== btn.dataset.id));
+        renderizarErros();
+    }));
+}
+
+document.getElementById("formErro").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const materiaId = document.getElementById("erroMateria").value;
+    if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
+    registrarErro(materiaId, document.getElementById("erroTema").value.trim(), document.getElementById("erroObs").value.trim());
+    e.target.reset();
+    renderizarErros();
+});
+document.getElementById("filtroErroMateria").addEventListener("change", renderizarErros);
+
+// ============================================================
+// SIMULADOS COM IA (Google Gemini)
+// ============================================================
+const MODELO_GEMINI = "gemini-3.6-flash";
+
+function obterApiKey() { return localStorage.getItem(LS.apiKey) || ""; }
+function salvarApiKeyLS(key) { localStorage.setItem(LS.apiKey, key.trim()); }
+
+function atualizarStatusChave() {
+    const status = document.getElementById("statusChave");
+    const key = obterApiKey();
+    if (key) {
+        status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Chave salva. Pronto para gerar questões.</span>';
+        document.getElementById("inputApiKey").value = key;
+    } else {
+        status.innerHTML = '<span class="text-danger"><i class="bi-exclamation-circle-fill"></i> Nenhuma chave configurada.</span>';
+    }
+}
+document.getElementById("btnSalvarChave").addEventListener("click", () => {
+    const valor = document.getElementById("inputApiKey").value.trim();
+    if (!valor) return;
+    salvarApiKeyLS(valor);
+    atualizarStatusChave();
+});
+document.getElementById("btnMostrarChave").addEventListener("click", () => {
+    const input = document.getElementById("inputApiKey");
+    input.type = input.type === "password" ? "text" : "password";
+});
+
+async function chamarGemini(systemPrompt, userPrompt) {
+    const apiKey = obterApiKey();
+    if (!apiKey) throw new Error("Configure sua chave da API do Gemini primeiro.");
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        })
+    });
+    if (!resp.ok) {
+        const textoErro = await resp.text();
+        throw new Error(`Falha na API (status ${resp.status}): ${textoErro.slice(0, 200)}`);
+    }
+    const data = await resp.json();
+    const candidato = data.candidates && data.candidates[0];
+    if (!candidato || !candidato.content) throw new Error("A IA não retornou conteúdo válido.");
+    const texto = candidato.content.parts.map(p => p.text || "").join("");
+    const limpo = texto.replace(/```json|```/g, "").trim();
+    return JSON.parse(limpo);
+}
+
+const SYSTEM_PROMPT = `Você é um elaborador de questões de concurso público (estilo VUNESP/FGV/CESPE) para Guarda Civil Municipal (GCM) no Brasil.
+Responda SOMENTE com um JSON válido (array de objetos), sem markdown, sem texto antes ou depois.
+Cada objeto: "pergunta" (string), "opcoes" (array de 4 strings sem prefixo de letra), "resposta_correta_index" (0 a 3), "explicacao" (string curta), "dificuldade" ("Fácil"|"Médio"|"Difícil").`;
+
+let quizAtual = [];
+
+document.getElementById("formGerarSimulado").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const materiaId = document.getElementById("simMateria").value;
+    if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
+    const materiaNome = nomeDaMateria(materiaId);
+    const tema = document.getElementById("simTema").value.trim();
+    const dificuldade = document.getElementById("simDificuldade").value;
+    const qtd = document.getElementById("simQtd").value;
+
+    const loading = document.getElementById("loadingIA");
+    const erroDiv = document.getElementById("erroIA");
+    erroDiv.classList.add("d-none");
+    loading.classList.remove("d-none");
+    document.getElementById("areaQuestoes").innerHTML = "";
+    document.getElementById("areaResultado").classList.add("d-none");
+
+    try {
+        let prompt = `Gere ${qtd} questões de múltipla escolha, nível ${dificuldade}, sobre a matéria "${materiaNome}"`;
+        if (tema) prompt += `, focando no tema: "${tema}"`;
+        prompt += `. Relevantes para concurso de Guarda Civil Municipal (GCM) no Brasil.`;
+        const questoes = await chamarGemini(SYSTEM_PROMPT, prompt);
+        renderizarQuestoes(questoes, materiaId, materiaNome);
+    } catch (err) {
+        erroDiv.textContent = "Não foi possível gerar as questões: " + err.message;
+        erroDiv.classList.remove("d-none");
+    } finally {
+        loading.classList.add("d-none");
+    }
+});
+
+function renderizarQuestoes(questoes, materiaId, materiaNome) {
+    quizAtual = questoes.map(q => ({ ...q, materiaId, materiaNome, respondida: false }));
+    const area = document.getElementById("areaQuestoes");
+    area.innerHTML = "";
+
+    quizAtual.forEach((q, qIndex) => {
+        const corDif = q.dificuldade === "Fácil" ? "success" : q.dificuldade === "Difícil" ? "danger" : "warning";
+        const card = document.createElement("div");
+        card.className = "col-12";
+        card.innerHTML = `
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge bg-secondary">${materiaNome}</span>
+                        <span class="badge bg-${corDif}">${q.dificuldade || ""}</span>
+                    </div>
+                    <p class="fw-semibold">${qIndex + 1}. ${q.pergunta}</p>
+                    <div class="list-group" id="opcoes-${qIndex}">
+                        ${q.opcoes.map((op, oIndex) => `
+                            <button type="button" class="list-group-item list-group-item-action opcao-resposta" data-qindex="${qIndex}" data-oindex="${oIndex}">
+                                ${String.fromCharCode(65 + oIndex)}) ${op}
+                            </button>`).join("")}
+                    </div>
+                    <div class="collapse mt-2" id="explicacao-${qIndex}">
+                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${q.explicacao}</div>
+                    </div>
+                </div>
+            </div>`;
+        area.appendChild(card);
+    });
+
+    area.querySelectorAll(".opcao-resposta").forEach(btn => btn.addEventListener("click", onResponder));
+}
+
+function onResponder(e) {
+    const btn = e.currentTarget;
+    const qIndex = parseInt(btn.dataset.qindex);
+    const oIndex = parseInt(btn.dataset.oindex);
+    const q = quizAtual[qIndex];
+    if (q.respondida) return;
+    q.respondida = true;
+
+    const grupo = document.getElementById(`opcoes-${qIndex}`);
+    grupo.querySelectorAll(".opcao-resposta").forEach(b => b.classList.add("desabilitada"));
+    const correta = q.resposta_correta_index;
+    grupo.children[correta].classList.add("correta");
+
+    const acertou = oIndex === correta;
+    if (!acertou) {
+        grupo.children[oIndex].classList.add("incorreta");
+        registrarErro(q.materiaId, q.pergunta.slice(0, 120), "Errei no simulado gerado por IA. Resposta correta: " + q.opcoes[correta]);
+    }
+
+    document.getElementById(`explicacao-${qIndex}`).classList.add("show");
+    registrarDesempenho(q.materiaId, acertou);
+    verificarFimDoSimulado();
+}
+
+function verificarFimDoSimulado() {
+    if (!quizAtual.every(q => q.respondida)) return;
+    const acertos = quizAtual.filter((q, i) => {
+        const grupo = document.getElementById(`opcoes-${i}`);
+        return grupo && !grupo.querySelector(".incorreta");
+    }).length;
+    const total = quizAtual.length;
+    const areaResultado = document.getElementById("areaResultado");
+    areaResultado.innerHTML = `Simulado concluído! Você acertou <strong>${acertos} de ${total}</strong> questões. ${acertos < total ? "As erradas já foram salvas no Caderno de Erros." : "Mandou muito bem! 🎉"}`;
+    areaResultado.classList.remove("d-none");
+    renderizarErros();
+}
+
+// ---------- Desempenho + gráfico de pizza ----------
+let graficoPizzaInstancia = null;
+
+function registrarDesempenho(materiaId, acertou) {
+    const desempenho = obterDesempenho();
+    if (!desempenho[materiaId]) desempenho[materiaId] = { acertos: 0, total: 0 };
+    desempenho[materiaId].total += 1;
+    if (acertou) desempenho[materiaId].acertos += 1;
+    salvar(LS.desempenho, desempenho);
+    renderizarDesempenho();
+}
+
+function renderizarDesempenho() {
+    const desempenho = obterDesempenho();
+    const ids = Object.keys(desempenho);
+    const badgesDiv = document.getElementById("badgesDesempenho");
+
+    if (ids.length === 0) {
+        badgesDiv.innerHTML = '<span class="text-muted small">Sem dados ainda. Responda um simulado.</span>';
+        if (graficoPizzaInstancia) { graficoPizzaInstancia.destroy(); graficoPizzaInstancia = null; }
+        return;
+    }
+
+    badgesDiv.innerHTML = ids.map(id => {
+        const d = desempenho[id];
+        const pct = d.total > 0 ? Math.round((d.acertos / d.total) * 100) : 0;
+        const cor = pct >= 70 ? "success" : pct >= 40 ? "warning" : "danger";
+        return `<span class="badge bg-${cor}-subtle text-${cor}-emphasis border d-block py-2 mb-1">${nomeDaMateria(id)}: ${pct}% (${d.acertos}/${d.total})</span>`;
+    }).join("");
+
+    const paleta = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#0dcaf0", "#6f42c1", "#fd7e14", "#20c997", "#d63384", "#6c757d"];
+    const labels = ids.map(id => nomeDaMateria(id));
+    const valores = ids.map(id => desempenho[id].total);
+    const cores = ids.map((_, i) => paleta[i % paleta.length]);
+
+    const ctx = document.getElementById("graficoPizza");
+    if (graficoPizzaInstancia) graficoPizzaInstancia.destroy();
+    graficoPizzaInstancia = new Chart(ctx, {
+        type: "pie",
+        data: { labels, datasets: [{ data: valores, backgroundColor: cores, borderWidth: 2 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } }
+        }
+    });
+}
+
+// ============================================================
+// BACKUP
+// ============================================================
+document.getElementById("btnExportar").addEventListener("click", () => {
+    const payload = {
+        app: "hub-estudos-gcm",
+        dataExportacao: new Date().toISOString(),
+        dados: {
+            materias: obterMaterias(), tarefas: obterTarefas(), edital: obterEdital(),
+            erros: obterErros(), desempenho: obterDesempenho(), apiKey: obterApiKey()
+        }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backup-hub-gcm-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById("inputImportar").addEventListener("change", (e) => {
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+    if (!confirm("Isso vai substituir os dados atuais pelos do backup. Continuar?")) { e.target.value = ""; return; }
+    const leitor = new FileReader();
+    leitor.onload = (evt) => {
+        try {
+            const payload = JSON.parse(evt.target.result);
+            if (!payload.dados) throw new Error("Arquivo inválido");
+            salvar(LS.materias, payload.dados.materias || []);
+            salvar(LS.tarefas, payload.dados.tarefas || []);
+            salvar(LS.edital, payload.dados.edital || { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] });
+            salvar(LS.erros, payload.dados.erros || []);
+            salvar(LS.desempenho, payload.dados.desempenho || {});
+            if (payload.dados.apiKey) salvarApiKeyLS(payload.dados.apiKey);
+            alert("Backup restaurado com sucesso!");
+            iniciar();
+        } catch (err) {
+            alert("Não foi possível ler esse arquivo de backup.");
+        }
+    };
+    leitor.readAsText(arquivo, "UTF-8");
+    e.target.value = "";
+});
+
+// ============================================================
+// REDE DE SEGURANÇA CONTRA TELA ESCURA PRESA (backdrop órfão)
+// ============================================================
+function limparBackdropsOrfaos() {
+    if (document.querySelector(".modal.show")) return;
+    document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+    document.body.classList.remove("modal-open");
+    document.body.style.removeProperty("overflow");
+    document.body.style.removeProperty("padding-right");
+}
+document.querySelectorAll(".modal").forEach(modalEl => modalEl.addEventListener("hidden.bs.modal", limparBackdropsOrfaos));
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+function iniciar() {
+    renderizarMaterias();
+    renderizarTudoCronograma();
+    renderizarEdital();
+    renderizarErros();
+    renderizarDesempenho();
+    atualizarStatusChave();
+    limparBackdropsOrfaos();
+}
+iniciar();
+</script>
+</body>
+</html>
