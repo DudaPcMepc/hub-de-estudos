@@ -148,15 +148,21 @@ const authShell = document.getElementById("authShell");
 const appShell = document.getElementById("appShell");
 const formLogin = document.getElementById("formLogin");
 const formRecuperacao = document.getElementById("formRecuperacao");
+const formCodigoRecuperacao = document.getElementById("formCodigoRecuperacao");
 const formNovaSenha = document.getElementById("formNovaSenha");
 const inputEmail = document.getElementById("loginEmail");
 const inputSenha = document.getElementById("loginSenha");
 const recuperacaoEmail = document.getElementById("recuperacaoEmail");
+const codigoRecuperacaoEmail = document.getElementById("codigoRecuperacaoEmail");
+const recuperacaoCodigo = document.getElementById("recuperacaoCodigo");
 const novaSenha = document.getElementById("novaSenha");
 const confirmarNovaSenha = document.getElementById("confirmarNovaSenha");
 const btnEntrar = document.getElementById("btnEntrar");
 const btnAbrirRecuperacao = document.getElementById("btnAbrirRecuperacao");
 const btnEnviarRecuperacao = document.getElementById("btnEnviarRecuperacao");
+const btnJaTenhoCodigo = document.getElementById("btnJaTenhoCodigo");
+const btnValidarCodigo = document.getElementById("btnValidarCodigo");
+const btnVoltarRecuperacao = document.getElementById("btnVoltarRecuperacao");
 const btnVoltarLogin = document.getElementById("btnVoltarLogin");
 const btnSalvarNovaSenha = document.getElementById("btnSalvarNovaSenha");
 const btnSair = document.getElementById("btnSair");
@@ -164,6 +170,8 @@ const loginSpinner = document.getElementById("loginSpinner");
 const loginButtonText = document.getElementById("loginButtonText");
 const recuperacaoSpinner = document.getElementById("recuperacaoSpinner");
 const recuperacaoButtonText = document.getElementById("recuperacaoButtonText");
+const codigoRecuperacaoSpinner = document.getElementById("codigoRecuperacaoSpinner");
+const codigoRecuperacaoButtonText = document.getElementById("codigoRecuperacaoButtonText");
 const novaSenhaSpinner = document.getElementById("novaSenhaSpinner");
 const novaSenhaButtonText = document.getElementById("novaSenhaButtonText");
 const authMessage = document.getElementById("authMessage");
@@ -186,6 +194,7 @@ function limparMensagem() {
 function mostrarSomenteFormulario(formulario) {
     formLogin.classList.toggle("d-none", formulario !== formLogin);
     formRecuperacao.classList.toggle("d-none", formulario !== formRecuperacao);
+    formCodigoRecuperacao.classList.toggle("d-none", formulario !== formCodigoRecuperacao);
     formNovaSenha.classList.toggle("d-none", formulario !== formNovaSenha);
 }
 
@@ -201,9 +210,19 @@ function definirCarregandoLogin(ativo) {
 function definirCarregandoRecuperacao(ativo) {
     recuperacaoEmail.disabled = ativo;
     btnEnviarRecuperacao.disabled = ativo;
+    btnJaTenhoCodigo.disabled = ativo;
     btnVoltarLogin.disabled = ativo;
     recuperacaoSpinner.classList.toggle("d-none", !ativo);
-    recuperacaoButtonText.textContent = ativo ? "Enviando..." : "Enviar link seguro";
+    recuperacaoButtonText.textContent = ativo ? "Enviando..." : "Enviar código seguro";
+}
+
+function definirCarregandoCodigoRecuperacao(ativo) {
+    codigoRecuperacaoEmail.disabled = ativo;
+    recuperacaoCodigo.disabled = ativo;
+    btnValidarCodigo.disabled = ativo;
+    btnVoltarRecuperacao.disabled = ativo;
+    codigoRecuperacaoSpinner.classList.toggle("d-none", !ativo);
+    codigoRecuperacaoButtonText.textContent = ativo ? "Confirmando..." : "Confirmar código";
 }
 
 function definirCarregandoNovaSenha(ativo) {
@@ -235,6 +254,7 @@ function mostrarLogin(mensagem = "", tipo = "danger") {
     inputSenha.value = "";
     definirCarregandoLogin(false);
     definirCarregandoRecuperacao(false);
+    definirCarregandoCodigoRecuperacao(false);
     definirCarregandoNovaSenha(false);
     if (mensagem) mostrarMensagem(mensagem, tipo);
     else limparMensagem();
@@ -249,6 +269,19 @@ function mostrarRecuperacao() {
     limparMensagem();
     definirCarregandoRecuperacao(false);
     recuperacaoEmail.focus();
+}
+
+function mostrarCodigoRecuperacao(email = "", mensagem = "") {
+    window.encerrarHub?.();
+    appShell.classList.add("d-none");
+    authShell.classList.remove("d-none");
+    mostrarSomenteFormulario(formCodigoRecuperacao);
+    codigoRecuperacaoEmail.value = email.trim();
+    recuperacaoCodigo.value = "";
+    definirCarregandoCodigoRecuperacao(false);
+    if (mensagem) mostrarMensagem(mensagem, "success");
+    else limparMensagem();
+    (codigoRecuperacaoEmail.value ? recuperacaoCodigo : codigoRecuperacaoEmail).focus();
 }
 
 function mostrarDefinicaoDeSenha(session) {
@@ -370,11 +403,11 @@ formRecuperacao.addEventListener("submit", async evento => {
     limparMensagem();
     definirCarregandoRecuperacao(true);
     try {
-        const redirectTo = new URL(`${import.meta.env.BASE_URL}?auth=recovery`, window.location.origin).toString();
-        const { error } = await supabase.auth.resetPasswordForEmail(recuperacaoEmail.value.trim(), { redirectTo });
+        const email = recuperacaoEmail.value.trim();
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) throw error;
-        inputEmail.value = recuperacaoEmail.value.trim();
-        mostrarLogin("Se esse e-mail estiver autorizado, o link seguro chegará em instantes. Verifique também o spam.", "success");
+        inputEmail.value = email;
+        mostrarCodigoRecuperacao(email, "Se esse e-mail estiver autorizado, o código chegará em instantes. Verifique também o spam.");
     } catch (erro) {
         console.error("Falha ao solicitar recuperação de senha", erro);
         const mensagem = String(erro?.message || "").toLowerCase();
@@ -384,6 +417,43 @@ formRecuperacao.addEventListener("submit", async evento => {
             mostrarMensagem("Não foi possível enviar o link agora. Aguarde um momento e tente novamente.");
         }
         definirCarregandoRecuperacao(false);
+    }
+});
+
+btnJaTenhoCodigo.addEventListener("click", () => mostrarCodigoRecuperacao(recuperacaoEmail.value));
+btnVoltarRecuperacao.addEventListener("click", () => {
+    recuperacaoEmail.value = codigoRecuperacaoEmail.value.trim();
+    mostrarRecuperacao();
+});
+
+formCodigoRecuperacao.addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!supabase) return;
+    const codigo = recuperacaoCodigo.value.replace(/\s/g, "");
+    recuperacaoCodigo.value = codigo;
+    if (!formCodigoRecuperacao.checkValidity()) {
+        formCodigoRecuperacao.reportValidity();
+        return;
+    }
+
+    limparMensagem();
+    definirCarregandoCodigoRecuperacao(true);
+    modoNovaSenhaAtivo = true;
+    try {
+        const { data, error } = await supabase.auth.verifyOtp({
+            email: codigoRecuperacaoEmail.value.trim(),
+            token: codigo,
+            type: "recovery"
+        });
+        if (error || !data.session) throw error || new Error("RECOVERY_SESSION_MISSING");
+        inputEmail.value = codigoRecuperacaoEmail.value.trim();
+        mostrarDefinicaoDeSenha(data.session);
+        mostrarMensagem("Código confirmado. Agora crie sua nova senha.", "success");
+    } catch (erro) {
+        console.error("Falha ao confirmar código de recuperação", erro);
+        modoNovaSenhaAtivo = false;
+        mostrarMensagem("Código inválido ou expirado. Confira o código mais recente ou solicite outro.");
+        definirCarregandoCodigoRecuperacao(false);
     }
 });
 

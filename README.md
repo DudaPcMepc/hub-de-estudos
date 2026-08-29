@@ -60,7 +60,7 @@ Os testes iniciais em `tests/project-contracts.test.mjs` verificam contratos imp
 
 ## Publicação no GitHub Pages
 
-O workflow `.github/workflows/deploy-pages.yml` prepara a versão hospedada em `/hub-de-estudos/`, executa os testes e somente publica quando todas as validações passam. O endereço de recuperação de senha utiliza automaticamente o caminho correto do ambiente atual, mantendo compatibilidade com `localhost` e com o GitHub Pages.
+O workflow `.github/workflows/deploy-pages.yml` prepara a versão hospedada em `/hub-de-estudos/`, executa os testes e somente publica quando todas as validações passam. A recuperação de senha usa um código de uso único digitado no Hub, por isso funciona mesmo quando o e-mail é aberto em outro navegador ou dispositivo.
 
 Antes da primeira publicação, cadastre `VITE_SUPABASE_URL` como variável do repositório e `VITE_SUPABASE_PUBLISHABLE_KEY` como segredo do GitHub Actions. Depois, selecione **GitHub Actions** como origem em **Settings → Pages** e registre o endereço HTTPS de produção na configuração de URLs do Supabase Auth.
 
@@ -68,7 +68,7 @@ Antes da primeira publicação, cadastre `VITE_SUPABASE_URL` como variável do r
 
 A remoção de contas usa um fluxo administrativo em duas fases: prévia e preparação com validade de 15 minutos. A exclusão é bloqueada se os dados mudarem ou se a conta possuir um espaço compartilhado. O procedimento completo e suas proteções estão em `docs/administracao-de-usuarios.md`.
 
-A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes e redirecionamento em `http://localhost:5173`.
+A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes, produção no GitHub Pages, desenvolvimento em `localhost` e modelo de recuperação por código.
 
 ## Ativação dos simulados seguros
 
@@ -99,7 +99,7 @@ A migration inicial:
 - O cadastro público e o acesso anônimo estão desativados.
 - Contas por e-mail exigem confirmação e senhas fortes.
 - A recuperação usa resposta neutra para não revelar se um e-mail está cadastrado.
-- Links de convite e recuperação abrem uma etapa própria para definição da senha.
+- Convites antigos continuam compatíveis com links; a recuperação de senha usa código de uso único para funcionar em qualquer navegador.
 - O token pessoal usado pela CLI fica fora do repositório e possui validade limitada.
 - O conteúdo principal permanece oculto até a sessão e o espaço pessoal serem validados.
 - As chaves do armazenamento local são separadas por usuário, evitando mistura de dados no mesmo navegador.
