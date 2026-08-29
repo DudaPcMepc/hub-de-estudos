@@ -370,7 +370,7 @@ formRecuperacao.addEventListener("submit", async evento => {
     limparMensagem();
     definirCarregandoRecuperacao(true);
     try {
-        const redirectTo = new URL("/?auth=recovery", window.location.origin).toString();
+        const redirectTo = new URL(`${import.meta.env.BASE_URL}?auth=recovery`, window.location.origin).toString();
         const { error } = await supabase.auth.resetPasswordForEmail(recuperacaoEmail.value.trim(), { redirectTo });
         if (error) throw error;
         inputEmail.value = recuperacaoEmail.value.trim();
