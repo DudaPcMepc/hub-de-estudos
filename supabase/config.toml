@@ -382,6 +382,10 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
+[functions.generate-quiz]
+# A função exige o JWT da conta conectada e também valida o usuário no próprio handler.
+verify_jwt = true
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

@@ -1,0 +1,502 @@
+import { erroConfiguracaoSupabase, supabase, tipoDoLinkDeAutenticacao } from "./supabase-client.js";
+import { encerrarPreviaMigracao, iniciarPreviaMigracao } from "./migration-preview.js";
+import { restaurarBackupRemoto } from "./migration-import.js";
+import {
+    atualizarMateria,
+    atualizarNota,
+    atualizarFlashcard,
+    atualizarProgressoFlashcard,
+    atualizarLink,
+    atualizarTarefa,
+    atualizarMateriaEdital,
+    atualizarTopicoEdital,
+    atualizarPosicoesMaterias,
+    atualizarPosicoesTopicos,
+    atualizarTopico,
+    carregarMateriasRemotas,
+    carregarNotasRemotas,
+    carregarFlashcardsRemotos,
+    carregarLinksRemotos,
+    carregarTarefasRemotas,
+    carregarEditalRemoto,
+    carregarErrosRemotos,
+    carregarDesempenhoRemoto,
+    carregarTopicosRemotos,
+    criarMateria,
+    criarNota,
+    criarFlashcard,
+    criarLink,
+    criarTarefa,
+    criarMateriaEdital,
+    criarTopicosEdital,
+    criarErro,
+    criarTopico,
+    criarTopicos,
+    encerrarRepositorioRemoto,
+    excluirMateria,
+    excluirNota,
+    excluirFlashcard,
+    excluirLink,
+    excluirTarefa,
+    excluirMateriaEdital,
+    excluirConfiguracaoEdital,
+    excluirErro,
+    excluirTopico,
+    prepararRepositorioRemoto,
+    registrarRespostaDesempenho,
+    salvarConfiguracaoEdital
+} from "./cloud-core-repository.js";
+
+window.HUB_CLOUD_SUBJECTS = Object.freeze({
+    atualizar: atualizarMateria,
+    criar: criarMateria,
+    excluir: excluirMateria,
+    listar: carregarMateriasRemotas,
+    reordenar: atualizarPosicoesMaterias
+});
+
+window.HUB_CLOUD_TOPICS = Object.freeze({
+    atualizar: atualizarTopico,
+    criar: criarTopico,
+    criarLote: criarTopicos,
+    excluir: excluirTopico,
+    reordenar: atualizarPosicoesTopicos
+});
+
+window.HUB_CLOUD_NOTES = Object.freeze({
+    atualizar: atualizarNota,
+    criar: criarNota,
+    excluir: excluirNota,
+    listar: carregarNotasRemotas
+});
+
+window.HUB_CLOUD_FLASHCARDS = Object.freeze({
+    atualizar: atualizarFlashcard,
+    atualizarProgresso: atualizarProgressoFlashcard,
+    criar: criarFlashcard,
+    excluir: excluirFlashcard,
+    listar: carregarFlashcardsRemotos
+});
+
+window.HUB_CLOUD_LINKS = Object.freeze({
+    atualizar: atualizarLink,
+    criar: criarLink,
+    excluir: excluirLink,
+    listar: carregarLinksRemotos
+});
+
+window.HUB_CLOUD_TASKS = Object.freeze({
+    atualizar: atualizarTarefa,
+    criar: criarTarefa,
+    excluir: excluirTarefa,
+    listar: carregarTarefasRemotas
+});
+
+window.HUB_CLOUD_EXAM = Object.freeze({
+    adicionarMateria: criarMateriaEdital,
+    adicionarTopicos: criarTopicosEdital,
+    atualizarMateria: atualizarMateriaEdital,
+    atualizarTopico: atualizarTopicoEdital,
+    excluirMateria: excluirMateriaEdital,
+    limparConfiguracao: excluirConfiguracaoEdital,
+    listar: carregarEditalRemoto,
+    salvarConfiguracao: salvarConfiguracaoEdital
+});
+
+window.HUB_CLOUD_ERRORS = Object.freeze({
+    criar: criarErro,
+    excluir: excluirErro,
+    listar: carregarErrosRemotos
+});
+
+window.HUB_CLOUD_PERFORMANCE = Object.freeze({
+    listar: carregarDesempenhoRemoto,
+    registrarResposta: registrarRespostaDesempenho
+});
+
+window.HUB_CLOUD_AI = Object.freeze({
+    async gerarSimulado(parametros) {
+        if (!supabase) throw new Error("A conexão segura com o Supabase não está configurada.");
+        const { data, error } = await supabase.functions.invoke("generate-quiz", {
+            body: parametros
+        });
+        if (error) {
+            let mensagem = "A geração segura de simulados ainda não está disponível.";
+            try {
+                const detalhe = await error.context?.clone?.().json();
+                if (typeof detalhe?.error === "string" && detalhe.error.trim()) mensagem = detalhe.error.trim();
+            } catch (_) {
+                // A resposta pode não conter JSON; mantemos uma mensagem segura e compreensível.
+            }
+            throw new Error(mensagem);
+        }
+        if (!data || !Array.isArray(data.questions)) throw new Error("A IA não retornou questões válidas.");
+        return {
+            questions: data.questions,
+            quota: data.quota && Number.isInteger(data.quota.remaining) && Number.isInteger(data.quota.limit)
+                ? { remaining: data.quota.remaining, limit: data.quota.limit }
+                : null
+        };
+    }
+});
+
+window.HUB_CLOUD_BACKUP = Object.freeze({
+    restaurar: restaurarBackupRemoto
+});
+
+const authShell = document.getElementById("authShell");
+const appShell = document.getElementById("appShell");
+const formLogin = document.getElementById("formLogin");
+const formRecuperacao = document.getElementById("formRecuperacao");
+const formNovaSenha = document.getElementById("formNovaSenha");
+const inputEmail = document.getElementById("loginEmail");
+const inputSenha = document.getElementById("loginSenha");
+const recuperacaoEmail = document.getElementById("recuperacaoEmail");
+const novaSenha = document.getElementById("novaSenha");
+const confirmarNovaSenha = document.getElementById("confirmarNovaSenha");
+const btnEntrar = document.getElementById("btnEntrar");
+const btnAbrirRecuperacao = document.getElementById("btnAbrirRecuperacao");
+const btnEnviarRecuperacao = document.getElementById("btnEnviarRecuperacao");
+const btnVoltarLogin = document.getElementById("btnVoltarLogin");
+const btnSalvarNovaSenha = document.getElementById("btnSalvarNovaSenha");
+const btnSair = document.getElementById("btnSair");
+const loginSpinner = document.getElementById("loginSpinner");
+const loginButtonText = document.getElementById("loginButtonText");
+const recuperacaoSpinner = document.getElementById("recuperacaoSpinner");
+const recuperacaoButtonText = document.getElementById("recuperacaoButtonText");
+const novaSenhaSpinner = document.getElementById("novaSenhaSpinner");
+const novaSenhaButtonText = document.getElementById("novaSenhaButtonText");
+const authMessage = document.getElementById("authMessage");
+
+let usuarioAtivoId = null;
+let ativacaoEmAndamento = null;
+let modoNovaSenhaAtivo = false;
+let sessaoParaNovaSenha = null;
+
+function mostrarMensagem(texto, tipo = "danger") {
+    authMessage.textContent = texto;
+    authMessage.className = `alert alert-${tipo}`;
+}
+
+function limparMensagem() {
+    authMessage.textContent = "";
+    authMessage.className = "alert d-none";
+}
+
+function mostrarSomenteFormulario(formulario) {
+    formLogin.classList.toggle("d-none", formulario !== formLogin);
+    formRecuperacao.classList.toggle("d-none", formulario !== formRecuperacao);
+    formNovaSenha.classList.toggle("d-none", formulario !== formNovaSenha);
+}
+
+function definirCarregandoLogin(ativo) {
+    btnEntrar.disabled = ativo;
+    inputEmail.disabled = ativo;
+    inputSenha.disabled = ativo;
+    btnAbrirRecuperacao.disabled = ativo;
+    loginSpinner.classList.toggle("d-none", !ativo);
+    loginButtonText.textContent = ativo ? "Entrando..." : "Entrar";
+}
+
+function definirCarregandoRecuperacao(ativo) {
+    recuperacaoEmail.disabled = ativo;
+    btnEnviarRecuperacao.disabled = ativo;
+    btnVoltarLogin.disabled = ativo;
+    recuperacaoSpinner.classList.toggle("d-none", !ativo);
+    recuperacaoButtonText.textContent = ativo ? "Enviando..." : "Enviar link seguro";
+}
+
+function definirCarregandoNovaSenha(ativo) {
+    novaSenha.disabled = ativo;
+    confirmarNovaSenha.disabled = ativo;
+    btnSalvarNovaSenha.disabled = ativo;
+    novaSenhaSpinner.classList.toggle("d-none", !ativo);
+    novaSenhaButtonText.textContent = ativo ? "Salvando..." : "Salvar senha e entrar";
+}
+
+function mensagemDeErro(erro) {
+    const mensagem = String(erro?.message || "").toLowerCase();
+    if (mensagem.includes("invalid login credentials")) return "E-mail ou senha inválidos.";
+    if (mensagem.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+    if (mensagem.includes("failed to fetch") || mensagem.includes("network")) return "Não foi possível conectar ao serviço. Verifique sua internet e tente novamente.";
+    return "Não foi possível entrar com segurança. Tente novamente.";
+}
+
+function mostrarLogin(mensagem = "", tipo = "danger") {
+    usuarioAtivoId = null;
+    modoNovaSenhaAtivo = false;
+    sessaoParaNovaSenha = null;
+    window.encerrarHub?.();
+    encerrarRepositorioRemoto();
+    encerrarPreviaMigracao();
+    appShell.classList.add("d-none");
+    authShell.classList.remove("d-none");
+    mostrarSomenteFormulario(formLogin);
+    inputSenha.value = "";
+    definirCarregandoLogin(false);
+    definirCarregandoRecuperacao(false);
+    definirCarregandoNovaSenha(false);
+    if (mensagem) mostrarMensagem(mensagem, tipo);
+    else limparMensagem();
+}
+
+function mostrarRecuperacao() {
+    window.encerrarHub?.();
+    appShell.classList.add("d-none");
+    authShell.classList.remove("d-none");
+    mostrarSomenteFormulario(formRecuperacao);
+    recuperacaoEmail.value = inputEmail.value.trim();
+    limparMensagem();
+    definirCarregandoRecuperacao(false);
+    recuperacaoEmail.focus();
+}
+
+function mostrarDefinicaoDeSenha(session) {
+    modoNovaSenhaAtivo = true;
+    sessaoParaNovaSenha = session;
+    window.encerrarHub?.();
+    appShell.classList.add("d-none");
+    authShell.classList.remove("d-none");
+    mostrarSomenteFormulario(formNovaSenha);
+    novaSenha.value = "";
+    confirmarNovaSenha.value = "";
+    limparMensagem();
+    definirCarregandoNovaSenha(false);
+    novaSenha.focus();
+}
+
+async function carregarContexto(user) {
+    const [perfilResposta, workspaceResposta] = await Promise.all([
+        supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+        supabase.from("workspaces").select("id, name, kind").eq("owner_id", user.id).eq("kind", "personal").single()
+    ]);
+
+    if (perfilResposta.error) throw perfilResposta.error;
+    if (workspaceResposta.error) throw workspaceResposta.error;
+
+    return {
+        userId: user.id,
+        email: user.email || "",
+        displayName: perfilResposta.data.display_name || user.email || "Usuário",
+        workspaceId: workspaceResposta.data.id,
+        workspaceName: workspaceResposta.data.name,
+        workspaceKind: workspaceResposta.data.kind,
+        role: "owner"
+    };
+}
+
+async function ativarSessao(session) {
+    if (!session?.user) {
+        mostrarLogin();
+        return;
+    }
+    if (usuarioAtivoId === session.user.id) return;
+    if (ativacaoEmAndamento) return ativacaoEmAndamento;
+
+    ativacaoEmAndamento = (async () => {
+        authShell.classList.remove("d-none");
+        appShell.classList.add("d-none");
+        definirCarregandoLogin(true);
+        mostrarMensagem("Validando sua sessão e seu espaço de estudos...", "info");
+        try {
+            const contexto = await carregarContexto(session.user);
+            await prepararRepositorioRemoto(contexto);
+            const materiasRemotas = await carregarMateriasRemotas();
+            if (materiasRemotas.some((materia, indice) => materia.position !== indice)) {
+                await atualizarPosicoesMaterias(materiasRemotas.map(materia => materia.id));
+                materiasRemotas.forEach((materia, indice) => { materia.position = indice; });
+            }
+            const topicosRemotos = await carregarTopicosRemotos();
+            const notasRemotas = await carregarNotasRemotas();
+            const flashcardsRemotos = await carregarFlashcardsRemotos();
+            const linksRemotos = await carregarLinksRemotos();
+            const tarefasRemotas = await carregarTarefasRemotas();
+            const editalRemoto = await carregarEditalRemoto();
+            const errosRemotos = await carregarErrosRemotos();
+            const desempenhoRemoto = await carregarDesempenhoRemoto();
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto);
+            iniciarPreviaMigracao(contexto);
+            usuarioAtivoId = session.user.id;
+            limparMensagem();
+            authShell.classList.add("d-none");
+            appShell.classList.remove("d-none");
+        } catch (erro) {
+            console.error("Falha ao preparar a sessão autenticada", erro);
+            mostrarLogin("Sua conta entrou, mas o espaço de estudos não pôde ser carregado. Tente novamente em instantes.");
+        } finally {
+            definirCarregandoLogin(false);
+            ativacaoEmAndamento = null;
+        }
+    })();
+
+    return ativacaoEmAndamento;
+}
+
+formLogin.addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!supabase) return;
+    if (!formLogin.checkValidity()) {
+        formLogin.reportValidity();
+        return;
+    }
+
+    limparMensagem();
+    definirCarregandoLogin(true);
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: inputEmail.value.trim(),
+            password: inputSenha.value
+        });
+        if (error) throw error;
+        await ativarSessao(data.session);
+    } catch (erro) {
+        console.error("Falha de autenticação", erro);
+        mostrarMensagem(mensagemDeErro(erro));
+        definirCarregandoLogin(false);
+    }
+});
+
+btnAbrirRecuperacao.addEventListener("click", mostrarRecuperacao);
+btnVoltarLogin.addEventListener("click", () => mostrarLogin());
+
+formRecuperacao.addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!supabase) return;
+    if (!formRecuperacao.checkValidity()) {
+        formRecuperacao.reportValidity();
+        return;
+    }
+
+    limparMensagem();
+    definirCarregandoRecuperacao(true);
+    try {
+        const redirectTo = new URL("/?auth=recovery", window.location.origin).toString();
+        const { error } = await supabase.auth.resetPasswordForEmail(recuperacaoEmail.value.trim(), { redirectTo });
+        if (error) throw error;
+        inputEmail.value = recuperacaoEmail.value.trim();
+        mostrarLogin("Se esse e-mail estiver autorizado, o link seguro chegará em instantes. Verifique também o spam.", "success");
+    } catch (erro) {
+        console.error("Falha ao solicitar recuperação de senha", erro);
+        const mensagem = String(erro?.message || "").toLowerCase();
+        if (mensagem.includes("failed to fetch") || mensagem.includes("network")) {
+            mostrarMensagem("Não foi possível conectar ao serviço. Verifique sua internet e tente novamente.");
+        } else {
+            mostrarMensagem("Não foi possível enviar o link agora. Aguarde um momento e tente novamente.");
+        }
+        definirCarregandoRecuperacao(false);
+    }
+});
+
+formNovaSenha.addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!supabase || !sessaoParaNovaSenha) return;
+
+    confirmarNovaSenha.setCustomValidity("");
+    const senha = novaSenha.value;
+    const senhaForte = senha.length >= 8
+        && /[a-z]/.test(senha)
+        && /[A-Z]/.test(senha)
+        && /\d/.test(senha)
+        && /[^A-Za-z0-9]/.test(senha);
+
+    if (!senhaForte) {
+        mostrarMensagem("A senha precisa ter 8 ou mais caracteres, com maiúscula, minúscula, número e símbolo.");
+        novaSenha.focus();
+        return;
+    }
+    if (senha !== confirmarNovaSenha.value) {
+        confirmarNovaSenha.setCustomValidity("As senhas não coincidem.");
+        confirmarNovaSenha.reportValidity();
+        return;
+    }
+    if (!formNovaSenha.checkValidity()) {
+        formNovaSenha.reportValidity();
+        return;
+    }
+
+    limparMensagem();
+    definirCarregandoNovaSenha(true);
+    try {
+        const { error } = await supabase.auth.updateUser({ password: senha });
+        if (error) throw error;
+        novaSenha.value = "";
+        confirmarNovaSenha.value = "";
+        window.history.replaceState({}, document.title, window.location.pathname);
+        modoNovaSenhaAtivo = false;
+        sessaoParaNovaSenha = null;
+        const { data } = await supabase.auth.getSession();
+        await ativarSessao(data.session);
+    } catch (erro) {
+        console.error("Falha ao definir nova senha", erro);
+        const mensagem = String(erro?.message || "").toLowerCase();
+        if (mensagem.includes("different from the old password")) {
+            mostrarMensagem("Escolha uma senha diferente da anterior.");
+        } else if (mensagem.includes("session") || mensagem.includes("expired")) {
+            mostrarLogin("Este link expirou ou já foi usado. Solicite um novo link.");
+        } else {
+            mostrarMensagem("Não foi possível salvar a senha. Confira os requisitos e tente novamente.");
+            definirCarregandoNovaSenha(false);
+        }
+    }
+});
+
+confirmarNovaSenha.addEventListener("input", () => confirmarNovaSenha.setCustomValidity(""));
+
+btnSair.addEventListener("click", async () => {
+    if (!supabase) return;
+    if (await window.prepararSaidaHub?.() === false) {
+        alert("Há uma nota que não pôde ser salva. Corrija o problema ou faça um backup antes de sair.");
+        return;
+    }
+    btnSair.disabled = true;
+    try {
+        const { error } = await supabase.auth.signOut({ scope: "local" });
+        if (error) throw error;
+        mostrarLogin();
+    } catch (erro) {
+        console.error("Falha ao encerrar sessão", erro);
+        alert("Não foi possível sair com segurança. Verifique sua conexão e tente novamente.");
+    } finally {
+        btnSair.disabled = false;
+    }
+});
+
+async function iniciarAutenticacao() {
+    if (erroConfiguracaoSupabase || !supabase) {
+        mostrarMensagem(erroConfiguracaoSupabase || "Supabase indisponível.");
+        btnEntrar.disabled = true;
+        inputEmail.disabled = true;
+        inputSenha.disabled = true;
+        btnAbrirRecuperacao.disabled = true;
+        return;
+    }
+
+    supabase.auth.onAuthStateChange((evento, session) => {
+        setTimeout(() => {
+            if (evento === "INITIAL_SESSION") {
+                return;
+            } else if (evento === "PASSWORD_RECOVERY") {
+                mostrarDefinicaoDeSenha(session);
+            } else if (evento === "SIGNED_OUT" || !session) {
+                mostrarLogin();
+            } else if (!modoNovaSenhaAtivo) {
+                ativarSessao(session);
+            }
+        }, 0);
+    });
+
+    definirCarregandoLogin(true);
+    mostrarMensagem("Verificando sua sessão...", "info");
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+        console.error("Falha ao restaurar sessão", error);
+        mostrarLogin("Não foi possível restaurar sua sessão. Entre novamente.");
+        return;
+    }
+    if (data.session && tipoDoLinkDeAutenticacao) mostrarDefinicaoDeSenha(data.session);
+    else if (data.session) await ativarSessao(data.session);
+    else if (tipoDoLinkDeAutenticacao) mostrarLogin("Este link expirou ou já foi usado. Solicite um novo link.");
+    else mostrarLogin();
+}
+
+iniciarAutenticacao();
