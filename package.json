@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test tests/project-contracts.test.mjs",
+    "check": "npm run test && npm run build",
     "preview": "vite preview",
     "supabase": "supabase"
   },
