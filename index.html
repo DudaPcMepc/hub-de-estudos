@@ -155,16 +155,33 @@
                 <button class="btn btn-link link-secondary w-100 mt-2" id="btnAbrirRecuperacao" type="button">Primeiro acesso ou esqueci minha senha</button>
             </form>
             <form id="formRecuperacao" class="d-none" novalidate>
-                <p class="small text-muted">Informe o e-mail que recebeu o convite. Se a conta existir, enviaremos um link seguro para criar uma nova senha.</p>
+                <p class="small text-muted">Informe o e-mail que recebeu o convite. Se a conta existir, enviaremos um código para criar uma nova senha em qualquer navegador.</p>
                 <div class="mb-3">
                     <label class="form-label" for="recuperacaoEmail">E-mail</label>
                     <input class="form-control" id="recuperacaoEmail" type="email" autocomplete="email" maxlength="254" required>
                 </div>
                 <button class="btn btn-primary w-100" id="btnEnviarRecuperacao" type="submit">
                     <span class="spinner-border spinner-border-sm d-none me-2" id="recuperacaoSpinner" aria-hidden="true"></span>
-                    <span id="recuperacaoButtonText">Enviar link seguro</span>
+                    <span id="recuperacaoButtonText">Enviar código seguro</span>
                 </button>
+                <button class="btn btn-outline-secondary w-100 mt-2" id="btnJaTenhoCodigo" type="button">Já tenho um código</button>
                 <button class="btn btn-link link-secondary w-100 mt-2" id="btnVoltarLogin" type="button">Voltar para entrar</button>
+            </form>
+            <form id="formCodigoRecuperacao" class="d-none" novalidate>
+                <p class="small text-muted">Digite o e-mail da conta e o código recebido. O código é de uso único e expira por segurança.</p>
+                <div class="mb-3">
+                    <label class="form-label" for="codigoRecuperacaoEmail">E-mail</label>
+                    <input class="form-control" id="codigoRecuperacaoEmail" type="email" autocomplete="email" maxlength="254" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="recuperacaoCodigo">Código de recuperação</label>
+                    <input class="form-control text-center fs-5" id="recuperacaoCodigo" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6,8}" minlength="6" maxlength="8" required>
+                </div>
+                <button class="btn btn-primary w-100" id="btnValidarCodigo" type="submit">
+                    <span class="spinner-border spinner-border-sm d-none me-2" id="codigoRecuperacaoSpinner" aria-hidden="true"></span>
+                    <span id="codigoRecuperacaoButtonText">Confirmar código</span>
+                </button>
+                <button class="btn btn-link link-secondary w-100 mt-2" id="btnVoltarRecuperacao" type="button">Solicitar outro código</button>
             </form>
             <form id="formNovaSenha" class="d-none" novalidate>
                 <p class="small text-muted">Crie a senha que será usada nos próximos acessos.</p>

@@ -90,17 +90,32 @@ test("o workflow possui permissões mínimas e valida antes de compilar", () => 
 
 test("a publicação preserva o caminho do GitHub Pages e depende dos testes", () => {
     const config = readProjectFile("vite.config.mjs");
-    const auth = readProjectFile("src/auth.js");
     const workflow = readProjectFile(".github/workflows/deploy-pages.yml");
 
     assert.match(config, /process\.env\.DEPLOY_BASE_PATH\s*\|\|\s*["']\/["']/);
-    assert.match(auth, /import\.meta\.env\.BASE_URL/);
-    assert.doesNotMatch(auth, /new URL\(["']\/\?auth=recovery/);
     assert.match(workflow, /DEPLOY_BASE_PATH:\s*\/hub-de-estudos\//);
     assert.ok(workflow.indexOf("run: npm test") < workflow.indexOf("run: npm run build"));
     assert.match(workflow, /needs:\s*validate-and-build/);
     assert.match(workflow, /pages:\s*write/);
     assert.match(workflow, /id-token:\s*write/);
+});
+
+test("a recuperação por código funciona sem depender do navegador de origem", () => {
+    const html = readProjectFile("index.html");
+    const auth = readProjectFile("src/auth.js");
+    const client = readProjectFile("src/supabase-client.js");
+    const config = readProjectFile("supabase/config.toml");
+    const template = readProjectFile("supabase/templates/recovery.html");
+
+    assert.match(html, /id=["']formCodigoRecuperacao["']/);
+    assert.match(html, /autocomplete=["']one-time-code["']/);
+    assert.match(auth, /supabase\.auth\.verifyOtp\(\{/);
+    assert.match(auth, /type:\s*["']recovery["']/);
+    assert.match(auth, /supabase\.auth\.resetPasswordForEmail\(email\)/);
+    assert.doesNotMatch(client, /flowType:\s*["']implicit["']/);
+    assert.match(config, /\[auth\.email\.template\.recovery\][\s\S]*?content_path\s*=\s*["']\.\/supabase\/templates\/recovery\.html["']/);
+    assert.match(template, /\{\{ \.Token \}\}/);
+    assert.doesNotMatch(template, /ConfirmationURL|TokenHash/);
 });
 
 test("a exclusão de usuários exige prévia recente e protege espaços compartilhados", () => {
