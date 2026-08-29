@@ -1,5 +1,7 @@
 # Hub de Estudos
 
+[![CI](https://github.com/DudaPcMepc/hub-de-estudos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DudaPcMepc/hub-de-estudos/actions/workflows/ci.yml)
+
 Aplicação de organização de estudos com matérias, notas, flashcards, cronograma, edital, caderno de erros e simulados.
 
 ## Estado atual
@@ -49,6 +51,12 @@ Ao entrar, matérias, tópicos, notas, flashcards, materiais, links, sessões do
 5. Nunca adicione senhas, chaves administrativas ou a chave Gemini ao repositório. A chave Gemini deve ser cadastrada como o segredo `GEMINI_API_KEY` da Edge Function no Supabase.
 
 O arquivo `.env.local` é lido pelo Vite e ignorado pelo Git. A chave publicável pode aparecer no código entregue ao navegador; a segurança dos dados depende das políticas RLS do banco.
+
+## Validação automática
+
+O workflow `.github/workflows/ci.yml` roda em cada Pull Request para `main` e em cada atualização da própria `main`. Ele instala exatamente as versões do `package-lock.json`, executa `npm test` e só então compila com `npm run build`. As ações externas ficam fixadas por identificadores imutáveis e o token do workflow possui somente permissão de leitura.
+
+Os testes iniciais em `tests/project-contracts.test.mjs` verificam contratos importantes: ausência de formatos conhecidos de segredos nos arquivos versionados, chave Gemini fora do navegador, autenticação da Edge Function, permissões da cota diária, proteção da restauração e ordem das migrations.
 
 A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes e redirecionamento em `http://localhost:5173`.
 
