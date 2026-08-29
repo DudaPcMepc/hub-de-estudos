@@ -1,0 +1,20 @@
+# Dependências e artefatos de build
+node_modules/
+dist/
+coverage/
+
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários do Supabase
+supabase/.temp/
+supabase/functions/.env
+supabase/functions/.env.*
+
+# Arquivos do sistema e editor
+.DS_Store
+Thumbs.db
+*.log
+
