@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hub de Estudos - Concurso GCM</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
 <style>
     body { background-color: #f8f9fa; }
     .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
@@ -200,7 +200,7 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h6 class="fw-bold mb-2"><i class="bi-key-fill me-1"></i>Configuração da IA (Google Gemini)</h6>
-                    <p class="text-muted small mb-2">Cole sua chave gratuita. Consiga em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Fica salva só neste navegador.</p>
+                    <p class="text-muted small mb-2">Cole sua chave gratuita. Consiga em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a>. Fica salva só neste navegador e não entra no backup.</p>
                     <div class="input-group">
                         <input type="password" id="inputApiKey" class="form-control" placeholder="Cole aqui sua chave (AIza...)">
                         <button class="btn btn-outline-secondary" type="button" id="btnMostrarChave"><i class="bi-eye"></i></button>
@@ -512,9 +512,9 @@
     </div></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha384-BSxuMLxX+FCbTdYec3TbXlnMGEEM2QXTFdtDaveen71o+jswm2J36+xFqp8k4VHM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
 <script>
 "use strict";
 
@@ -567,9 +567,16 @@ const STATUS_TOPICO = {
 const CICLO_STATUS = ["nao", "estudando", "revisar", "dominado"];
 const INTERVALO_CAIXA = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 };
 const PRIORIDADES = { alta: "Alta", media: "Média", baixa: "Baixa" };
+const CORES_PERMITIDAS = ["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"];
 
 function esc(t) {
     return String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function urlHttpSegura(valor) {
+    try {
+        const url = new URL(String(valor || "").trim());
+        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+    } catch (e) { return ""; }
 }
 function novoId() { return Date.now() + Math.floor(Math.random() * 10000); }
 function hojeISO() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
@@ -578,6 +585,8 @@ function dataBR(iso) { return iso ? iso.split("-").reverse().join("/") : "—"; 
 
 // ---------- Modelo / migração ----------
 function normalizarMateria(m) {
+    if (!CORES_PERMITIDAS.includes(m.cor)) m.cor = "primary";
+    if (!Object.prototype.hasOwnProperty.call(PRIORIDADES, m.prioridade)) m.prioridade = "media";
     if (typeof m.notas === "string") {
         const texto = m.notas.trim();
         m.notas = texto ? [{ id: novoId(), titulo: "Anotações antigas", conteudo: m.notas, tags: [], fixada: false, criadaEm: hojeISO(), atualizadaEm: hojeISO() }] : [];
@@ -586,7 +595,6 @@ function normalizarMateria(m) {
     if (!Array.isArray(m.topicos)) m.topicos = [];
     if (!Array.isArray(m.cards)) m.cards = [];
     if (!Array.isArray(m.links)) m.links = [];
-    if (!m.prioridade) m.prioridade = "media";
     m.topicos.forEach(t => { if (!STATUS_TOPICO[t.status]) t.status = "nao"; });
     m.cards.forEach(c => { c.caixa = Number(c.caixa) || 1; c.proxima = c.proxima || hojeISO(); c.acertos = c.acertos || 0; c.erros = c.erros || 0; });
     return m;
@@ -1105,14 +1113,19 @@ function renderizarLinks(m) {
         container.innerHTML = `<div class="list-group-item text-muted small fst-italic">Nenhum material salvo. Guarde aqui leis, vídeos, PDFs e resumos que você usa nessa matéria.</div>`;
         return;
     }
-    container.innerHTML = m.links.map(l => `
+    container.innerHTML = m.links.map(l => {
+        const href = urlHttpSegura(l.url);
+        return `
         <div class="list-group-item d-flex justify-content-between align-items-center">
             <div class="min-w-0">
                 <div class="fw-semibold small">${esc(l.titulo)}</div>
-                <a href="${esc(l.url)}" target="_blank" rel="noopener" class="small text-truncate d-block">${esc(l.url)}</a>
+                ${href
+                    ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="small text-truncate d-block">${esc(l.url)}</a>`
+                    : `<span class="small text-danger">URL inválida</span>`}
             </div>
             <button class="btn btn-sm btn-outline-danger btn-excluir-link" data-id="${l.id}"><i class="bi-trash"></i></button>
-        </div>`).join("");
+        </div>`;
+    }).join("");
     container.querySelectorAll(".btn-excluir-link").forEach(b => b.addEventListener("click", () => {
         atualizarMateria(materiaAbertaId, mm => { mm.links = mm.links.filter(x => String(x.id) !== b.dataset.id); });
         renderizarWorkspace();
@@ -1121,10 +1134,12 @@ function renderizarLinks(m) {
 
 document.getElementById("formLink").addEventListener("submit", e => {
     e.preventDefault();
+    const url = urlHttpSegura(document.getElementById("linkUrl").value);
+    if (!url) { alert("Informe uma URL válida iniciada por http:// ou https://."); return; }
     atualizarMateria(materiaAbertaId, m => m.links.push({
         id: novoId(),
         titulo: document.getElementById("linkTitulo").value.trim(),
-        url: document.getElementById("linkUrl").value.trim()
+        url
     }));
     e.target.reset();
     renderizarWorkspace();
@@ -1275,8 +1290,8 @@ function renderizarTarefas() {
         <div class="card border-0 shadow-sm tarefa-item ${concluida ? "concluida" : ""}">
             <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="small text-muted">${nomeDaMateria(t.materiaId)}${t.data ? " · " + t.data : ""}</div>
-                    <div class="fw-semibold">${t.topico}</div>
+                    <div class="small text-muted">${esc(nomeDaMateria(t.materiaId))}${t.data ? " · " + esc(t.data) : ""}</div>
+                    <div class="fw-semibold">${esc(t.topico)}</div>
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-${concluida ? "secondary" : "success"} btn-toggle-tarefa" data-id="${t.id}"><i class="bi-${concluida ? "arrow-counterclockwise" : "check-lg"}"></i></button>
@@ -1352,7 +1367,7 @@ function renderizarCalendario() {
         const doDia = tarefas.filter(t => t.data === iso);
         const conteudo = doDia.length === 0
             ? `<span class="text-muted small fst-italic">—</span>`
-            : doDia.map(t => `<span class="badge ${t.status === "concluido" ? "bg-success" : "bg-primary"} chip-tarefa mb-1 btn-tarefa-cal" data-id="${t.id}">${nomeDaMateria(t.materiaId)}: ${t.topico}</span>`).join("");
+            : doDia.map(t => `<span class="badge ${t.status === "concluido" ? "bg-success" : "bg-primary"} chip-tarefa mb-1 btn-tarefa-cal" data-id="${esc(t.id)}">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</span>`).join("");
         return `<td class="celula-calendario">${conteudo}</td>`;
     }).join("");
 
@@ -1406,7 +1421,7 @@ function renderizarEdital() {
         const cor = pct > 20 ? "bg-danger" : pct > 10 ? "bg-warning" : "bg-info";
         return `
         <tr>
-            <td class="fw-semibold">${nomeDaMateria(m.materiaId)}</td>
+            <td class="fw-semibold">${esc(nomeDaMateria(m.materiaId))}</td>
             <td class="text-center"><input type="number" min="0" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
             <td class="text-center"><input type="number" min="0" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
             <td class="text-center fw-bold">${pontos.toFixed(1)}</td>
@@ -1497,7 +1512,7 @@ function renderizarErros() {
         return;
     }
 
-    const porMateria = {};
+    const porMateria = Object.create(null);
     [...lista].reverse().forEach(er => {
         const nome = nomeDaMateria(er.materiaId);
         if (!porMateria[nome]) porMateria[nome] = [];
@@ -1506,14 +1521,14 @@ function renderizarErros() {
 
     container.innerHTML = Object.keys(porMateria).sort().map(nome => `
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white fw-bold">${nome} <span class="badge bg-secondary">${porMateria[nome].length}</span></div>
+            <div class="card-header bg-white fw-bold">${esc(nome)} <span class="badge bg-secondary">${porMateria[nome].length}</span></div>
             <ul class="list-group list-group-flush">
                 ${porMateria[nome].map(er => `
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="fw-semibold">${er.tema}</div>
-                            ${er.obs ? `<div class="small text-muted">${er.obs}</div>` : ""}
-                            <div class="small text-muted">${er.data || ""}</div>
+                            <div class="fw-semibold">${esc(er.tema)}</div>
+                            ${er.obs ? `<div class="small text-muted">${esc(er.obs)}</div>` : ""}
+                            <div class="small text-muted">${esc(er.data || "")}</div>
                         </div>
                         <button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}"><i class="bi-trash"></i></button>
                     </li>`).join("")}
@@ -1595,6 +1610,25 @@ Cada objeto: "pergunta" (string), "opcoes" (array de 4 strings sem prefixo de le
 
 let quizAtual = [];
 
+function validarQuestoesIA(questoes) {
+    if (!Array.isArray(questoes) || questoes.length === 0 || questoes.length > 20) {
+        throw new Error("A IA retornou uma quantidade inválida de questões.");
+    }
+    return questoes.map((q, indice) => {
+        if (!q || typeof q !== "object" || Array.isArray(q)) throw new Error(`Questão ${indice + 1} inválida.`);
+        const pergunta = typeof q.pergunta === "string" ? q.pergunta.trim() : "";
+        const explicacao = typeof q.explicacao === "string" ? q.explicacao.trim() : "";
+        if (!pergunta || pergunta.length > 4000 || explicacao.length > 8000) throw new Error(`Questão ${indice + 1} incompleta ou muito extensa.`);
+        if (!Array.isArray(q.opcoes) || q.opcoes.length !== 4 || q.opcoes.some(op => typeof op !== "string" || !op.trim() || op.length > 2000)) {
+            throw new Error(`Alternativas da questão ${indice + 1} inválidas.`);
+        }
+        const resposta = Number(q.resposta_correta_index);
+        if (!Number.isInteger(resposta) || resposta < 0 || resposta > 3) throw new Error(`Resposta da questão ${indice + 1} inválida.`);
+        const dificuldade = ["Fácil", "Médio", "Difícil"].includes(q.dificuldade) ? q.dificuldade : "Médio";
+        return { pergunta, opcoes: q.opcoes.map(op => op.trim()), resposta_correta_index: resposta, explicacao, dificuldade };
+    });
+}
+
 document.getElementById("formGerarSimulado").addEventListener("submit", async (e) => {
     e.preventDefault();
     const materiaId = document.getElementById("simMateria").value;
@@ -1626,7 +1660,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
 });
 
 function renderizarQuestoes(questoes, materiaId, materiaNome) {
-    quizAtual = questoes.map(q => ({ ...q, materiaId, materiaNome, respondida: false }));
+    quizAtual = validarQuestoesIA(questoes).map(q => ({ ...q, materiaId, materiaNome, respondida: false }));
     const area = document.getElementById("areaQuestoes");
     area.innerHTML = "";
 
@@ -1638,18 +1672,18 @@ function renderizarQuestoes(questoes, materiaId, materiaNome) {
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex gap-2 mb-2">
-                        <span class="badge bg-secondary">${materiaNome}</span>
+                        <span class="badge bg-secondary">${esc(materiaNome)}</span>
                         <span class="badge bg-${corDif}">${q.dificuldade || ""}</span>
                     </div>
-                    <p class="fw-semibold">${qIndex + 1}. ${q.pergunta}</p>
+                    <p class="fw-semibold">${qIndex + 1}. ${esc(q.pergunta)}</p>
                     <div class="list-group" id="opcoes-${qIndex}">
                         ${q.opcoes.map((op, oIndex) => `
                             <button type="button" class="list-group-item list-group-item-action opcao-resposta" data-qindex="${qIndex}" data-oindex="${oIndex}">
-                                ${String.fromCharCode(65 + oIndex)}) ${op}
+                                ${String.fromCharCode(65 + oIndex)}) ${esc(op)}
                             </button>`).join("")}
                     </div>
                     <div class="collapse mt-2" id="explicacao-${qIndex}">
-                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${q.explicacao}</div>
+                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${esc(q.explicacao)}</div>
                     </div>
                 </div>
             </div>`;
@@ -1723,7 +1757,7 @@ function renderizarDesempenho() {
         const d = desempenho[id];
         const pct = d.total > 0 ? Math.round((d.acertos / d.total) * 100) : 0;
         const cor = pct >= 70 ? "success" : pct >= 40 ? "warning" : "danger";
-        return `<span class="badge bg-${cor}-subtle text-${cor}-emphasis border d-block py-2 mb-1">${nomeDaMateria(id)}: ${pct}% (${d.acertos}/${d.total})</span>`;
+        return `<span class="badge bg-${cor}-subtle text-${cor}-emphasis border d-block py-2 mb-1">${esc(nomeDaMateria(id))}: ${pct}% (${d.acertos}/${d.total})</span>`;
     }).join("");
 
     const paleta = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#0dcaf0", "#6f42c1", "#fd7e14", "#20c997", "#d63384", "#6c757d"];
@@ -1746,13 +1780,140 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
+const VERSAO_BACKUP = 2;
+const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
+
+function objetoBackup(valor, campo) {
+    if (!valor || typeof valor !== "object" || Array.isArray(valor)) throw new Error(`${campo} inválido.`);
+    return valor;
+}
+function listaBackup(valor, campo, limite) {
+    if (!Array.isArray(valor) || valor.length > limite) throw new Error(`${campo} inválido ou acima do limite.`);
+    return valor;
+}
+function textoBackup(valor, campo, limite, padrao = "") {
+    if (valor == null) return padrao;
+    if (typeof valor !== "string" || valor.length > limite) throw new Error(`${campo} inválido ou muito extenso.`);
+    return valor;
+}
+function dataBackup(valor, campo) {
+    const data = textoBackup(valor, campo, 30);
+    if (data && !/^\d{4}-\d{2}-\d{2}$/.test(data) && !/^\d{2}\/\d{2}\/\d{4}$/.test(data)) throw new Error(`${campo} inválida.`);
+    return data;
+}
+function numeroBackup(valor, campo, minimo = 0, maximo = 1000000000, padrao = 0) {
+    if (valor == null || valor === "") return padrao;
+    const numero = Number(valor);
+    if (!Number.isFinite(numero) || numero < minimo || numero > maximo) throw new Error(`${campo} inválido.`);
+    return numero;
+}
+function idBackup(valor, campo) {
+    if (!["string", "number"].includes(typeof valor) || (typeof valor === "number" && !Number.isFinite(valor)) || !/^[A-Za-z0-9._:-]{1,80}$/.test(String(valor))) throw new Error(`${campo} inválido.`);
+    return valor;
+}
+
+function validarPayloadBackup(payload) {
+    objetoBackup(payload, "Backup");
+    if (payload.app !== "hub-estudos-gcm") throw new Error("Este arquivo não pertence ao Hub de Estudos GCM.");
+    const versao = numeroBackup(payload.versao, "Versão", 1, VERSAO_BACKUP, 1);
+    if (versao > VERSAO_BACKUP) throw new Error("Backup criado por uma versão mais recente do aplicativo.");
+    const dados = objetoBackup(payload.dados, "Dados");
+
+    const materias = listaBackup(dados.materias, "Matérias", 500).map((m, i) => {
+        objetoBackup(m, `Matéria ${i + 1}`);
+        const notas = listaBackup(m.notas, `Notas da matéria ${i + 1}`, 5000).map((n, j) => {
+            objetoBackup(n, `Nota ${j + 1}`);
+            if (typeof n.fixada !== "boolean") throw new Error(`Fixação da nota ${j + 1} inválida.`);
+            return {
+                id: idBackup(n.id, `ID da nota ${j + 1}`), titulo: textoBackup(n.titulo, "Título da nota", 500),
+                conteudo: textoBackup(n.conteudo, "Conteúdo da nota", 500000),
+                tags: listaBackup(n.tags || [], "Tags", 100).map(tag => textoBackup(tag, "Tag", 100)),
+                fixada: n.fixada, criadaEm: dataBackup(n.criadaEm, "Data de criação"), atualizadaEm: dataBackup(n.atualizadaEm, "Data de atualização")
+            };
+        });
+        const topicos = listaBackup(m.topicos || [], "Tópicos", 10000).map((t, j) => {
+            objetoBackup(t, `Tópico ${j + 1}`);
+            if (!Object.prototype.hasOwnProperty.call(STATUS_TOPICO, t.status)) throw new Error(`Status do tópico ${j + 1} inválido.`);
+            return { id: idBackup(t.id, "ID do tópico"), titulo: textoBackup(t.titulo, "Título do tópico", 1000), status: t.status, revisoes: numeroBackup(t.revisoes, "Revisões", 0, 100000) };
+        });
+        const cards = listaBackup(m.cards || [], "Flashcards", 10000).map((c, j) => {
+            objetoBackup(c, `Flashcard ${j + 1}`);
+            return {
+                id: idBackup(c.id, "ID do flashcard"), frente: textoBackup(c.frente, "Frente do flashcard", 5000), verso: textoBackup(c.verso, "Verso do flashcard", 10000),
+                caixa: numeroBackup(c.caixa, "Caixa", 1, 5, 1), proxima: dataBackup(c.proxima, "Próxima revisão"),
+                acertos: numeroBackup(c.acertos, "Acertos", 0, 1000000), erros: numeroBackup(c.erros, "Erros", 0, 1000000)
+            };
+        });
+        const links = listaBackup(m.links || [], "Links", 5000).map((l, j) => {
+            objetoBackup(l, `Link ${j + 1}`);
+            const url = urlHttpSegura(textoBackup(l.url, "URL", 4000));
+            if (!url) throw new Error(`URL do link ${j + 1} inválida.`);
+            return { id: idBackup(l.id, "ID do link"), titulo: textoBackup(l.titulo, "Título do link", 500), url };
+        });
+        const cor = CORES_PERMITIDAS.includes(m.cor) ? m.cor : "primary";
+        const prioridade = Object.prototype.hasOwnProperty.call(PRIORIDADES, m.prioridade) ? m.prioridade : "media";
+        return { id: idBackup(m.id, "ID da matéria"), nome: textoBackup(m.nome, "Nome da matéria", 500), desc: textoBackup(m.desc, "Descrição", 5000), cor, prioridade, notas, topicos, cards, links };
+    });
+
+    const tarefas = listaBackup(dados.tarefas, "Tarefas", 20000).map((t, i) => {
+        objetoBackup(t, `Tarefa ${i + 1}`);
+        if (!["pendente", "concluido"].includes(t.status)) throw new Error(`Status da tarefa ${i + 1} inválido.`);
+        return { id: idBackup(t.id, "ID da tarefa"), materiaId: idBackup(t.materiaId, "Matéria da tarefa"), topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status };
+    });
+
+    const editalOrigem = objetoBackup(dados.edital, "Edital");
+    const edital = {
+        nomeConcurso: textoBackup(editalOrigem.nomeConcurso, "Nome do concurso", 500), banca: textoBackup(editalOrigem.banca, "Banca", 300),
+        vagas: textoBackup(editalOrigem.vagas, "Vagas", 100), dataProva: dataBackup(editalOrigem.dataProva, "Data da prova"),
+        materias: listaBackup(editalOrigem.materias, "Matérias do edital", 500).map((m, i) => {
+            objetoBackup(m, `Matéria do edital ${i + 1}`);
+            return { id: idBackup(m.id, "ID da matéria do edital"), materiaId: idBackup(m.materiaId, "Matéria do edital"), questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000) };
+        })
+    };
+
+    const erros = listaBackup(dados.erros, "Erros", 20000).map((er, i) => {
+        objetoBackup(er, `Erro ${i + 1}`);
+        return { id: idBackup(er.id, "ID do erro"), materiaId: idBackup(er.materiaId, "Matéria do erro"), tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro") };
+    });
+
+    const desempenhoOrigem = objetoBackup(dados.desempenho, "Desempenho");
+    const entradasDesempenho = Object.entries(desempenhoOrigem);
+    if (entradasDesempenho.length > 1000) throw new Error("Desempenho acima do limite.");
+    const desempenho = {};
+    entradasDesempenho.forEach(([id, valor]) => {
+        idBackup(id, "ID de desempenho");
+        if (["__proto__", "constructor", "prototype"].includes(id)) throw new Error("ID de desempenho reservado.");
+        objetoBackup(valor, "Desempenho da matéria");
+        const total = numeroBackup(valor.total, "Total de respostas", 0, 10000000);
+        const acertos = numeroBackup(valor.acertos, "Total de acertos", 0, total);
+        desempenho[id] = { acertos, total };
+    });
+    return { materias, tarefas, edital, erros, desempenho };
+}
+
+function aplicarBackupValidado(dados) {
+    const itens = [
+        [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.edital, dados.edital],
+        [LS.erros, dados.erros], [LS.desempenho, dados.desempenho]
+    ];
+    const anteriores = itens.map(([chave]) => [chave, localStorage.getItem(chave)]);
+    const serializados = itens.map(([chave, valor]) => [chave, JSON.stringify(valor)]);
+    try {
+        serializados.forEach(([chave, valor]) => localStorage.setItem(chave, valor));
+    } catch (erro) {
+        anteriores.forEach(([chave, valor]) => valor == null ? localStorage.removeItem(chave) : localStorage.setItem(chave, valor));
+        throw new Error("Não foi possível salvar o backup. Os dados anteriores foram preservados.");
+    }
+}
+
 document.getElementById("btnExportar").addEventListener("click", () => {
     const payload = {
         app: "hub-estudos-gcm",
+        versao: VERSAO_BACKUP,
         dataExportacao: new Date().toISOString(),
         dados: {
             materias: obterMaterias(), tarefas: obterTarefas(), edital: obterEdital(),
-            erros: obterErros(), desempenho: obterDesempenho(), apiKey: obterApiKey()
+            erros: obterErros(), desempenho: obterDesempenho()
         }
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -1769,24 +1930,21 @@ document.getElementById("btnExportar").addEventListener("click", () => {
 document.getElementById("inputImportar").addEventListener("change", (e) => {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
-    if (!confirm("Isso vai substituir os dados atuais pelos do backup. Continuar?")) { e.target.value = ""; return; }
+    if (arquivo.size > TAMANHO_MAX_BACKUP) { alert("O backup excede o limite de 5 MB."); e.target.value = ""; return; }
     const leitor = new FileReader();
     leitor.onload = (evt) => {
         try {
             const payload = JSON.parse(evt.target.result);
-            if (!payload.dados) throw new Error("Arquivo inválido");
-            salvar(LS.materias, payload.dados.materias || []);
-            salvar(LS.tarefas, payload.dados.tarefas || []);
-            salvar(LS.edital, payload.dados.edital || { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] });
-            salvar(LS.erros, payload.dados.erros || []);
-            salvar(LS.desempenho, payload.dados.desempenho || {});
-            if (payload.dados.apiKey) salvarApiKeyLS(payload.dados.apiKey);
+            const dadosValidados = validarPayloadBackup(payload);
+            if (!confirm("Backup validado. Isso vai substituir os dados atuais. Continuar?")) return;
+            aplicarBackupValidado(dadosValidados);
             alert("Backup restaurado com sucesso!");
             iniciar();
         } catch (err) {
-            alert("Não foi possível ler esse arquivo de backup.");
+            alert("Não foi possível restaurar o backup: " + err.message);
         }
     };
+    leitor.onerror = () => alert("Não foi possível ler esse arquivo de backup.");
     leitor.readAsText(arquivo, "UTF-8");
     e.target.value = "";
 });
