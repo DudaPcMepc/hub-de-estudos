@@ -3,11 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hub de Estudos - Concurso GCM</title>
+<meta name="theme-color" content="#3b2923">
+<title>Hub de Estudos Pimentel | Concursos</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
 <style>
-    body { background-color: #f8f9fa; }
+    :root {
+        --pimentel-cafe: #3b2923;
+        --pimentel-cafe-claro: #60463b;
+        --pimentel-vermelho: #b8322a;
+        --pimentel-vermelho-escuro: #92271f;
+        --pimentel-terracota: #c9684a;
+        --pimentel-creme: #f7f0e6;
+        --pimentel-papel: #fffdf9;
+        --pimentel-verde: #64745a;
+        --pimentel-texto: #29211e;
+        --bs-primary: var(--pimentel-vermelho);
+        --bs-primary-rgb: 184, 50, 42;
+        --bs-success: var(--pimentel-verde);
+        --bs-success-rgb: 100, 116, 90;
+        --bs-body-color: var(--pimentel-texto);
+        --bs-body-bg: var(--pimentel-creme);
+    }
+    body { background-color: var(--pimentel-creme); color: var(--pimentel-texto); }
+    .navbar.bg-dark { background: linear-gradient(100deg, #2f201b 0%, var(--pimentel-cafe) 58%, #54362c 100%) !important; border-bottom: 3px solid var(--pimentel-vermelho); }
+    .navbar-brand { letter-spacing: .01em; }
+    .brand-subtitle { color: #e9c9b7; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+    .card { border-radius: .9rem; }
+    .shadow-sm { box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09) !important; }
+    .btn-primary {
+        --bs-btn-bg: var(--pimentel-vermelho);
+        --bs-btn-border-color: var(--pimentel-vermelho);
+        --bs-btn-hover-bg: var(--pimentel-vermelho-escuro);
+        --bs-btn-hover-border-color: var(--pimentel-vermelho-escuro);
+        --bs-btn-active-bg: #7f211b;
+        --bs-btn-active-border-color: #7f211b;
+        --bs-btn-focus-shadow-rgb: 184, 50, 42;
+    }
+    .btn-success {
+        --bs-btn-bg: var(--pimentel-verde);
+        --bs-btn-border-color: var(--pimentel-verde);
+        --bs-btn-hover-bg: #526149;
+        --bs-btn-hover-border-color: #526149;
+        --bs-btn-focus-shadow-rgb: 100, 116, 90;
+    }
+    .btn-outline-primary {
+        --bs-btn-color: var(--pimentel-vermelho);
+        --bs-btn-border-color: var(--pimentel-vermelho);
+        --bs-btn-hover-bg: var(--pimentel-vermelho);
+        --bs-btn-hover-border-color: var(--pimentel-vermelho);
+        --bs-btn-active-bg: var(--pimentel-vermelho-escuro);
+        --bs-btn-focus-shadow-rgb: 184, 50, 42;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(184, 50, 42, .65);
+        box-shadow: 0 0 0 .25rem rgba(184, 50, 42, .14);
+    }
+    .nav-tabs { border-bottom-color: rgba(59, 41, 35, .18); }
+    .nav-tabs .nav-link { color: var(--pimentel-cafe-claro); }
+    .nav-tabs .nav-link:hover { color: var(--pimentel-vermelho); border-color: transparent; }
+    .nav-tabs .nav-link.active { color: var(--pimentel-vermelho-escuro); background-color: var(--pimentel-papel); border-color: rgba(59, 41, 35, .14) rgba(59, 41, 35, .14) var(--pimentel-papel); }
+    .modal-content { border: 0; border-radius: 1rem; box-shadow: 0 1rem 3rem rgba(41, 33, 30, .2); }
+    .modal-header { border-bottom-color: rgba(59, 41, 35, .12); }
+    .alert-warning { --bs-alert-bg: #fff3e8; --bs-alert-border-color: #e7b89f; --bs-alert-color: #6f3525; }
     .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
     .card-materia:active { cursor: grabbing; }
     .card-materia:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
@@ -41,30 +99,144 @@
     .flashcard-face { min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.25rem; font-size: 1.05rem; }
     .ws-nav .nav-link { border-radius: 2rem; font-size: .9rem; }
     .tag-nota { font-size: .68rem; }
+    .auth-shell {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 15% 18%, rgba(201, 104, 74, .18), transparent 27%),
+            radial-gradient(circle at 85% 82%, rgba(100, 116, 90, .14), transparent 24%),
+            linear-gradient(145deg, #fbf6ef 0%, #f2e4d7 100%);
+    }
+    .auth-card { width: min(100% - 2rem, 430px); background: rgba(255, 253, 249, .97); border-top: 5px solid var(--pimentel-vermelho) !important; }
+    .brand-emblem {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 1rem;
+        display: grid;
+        place-items: center;
+        position: relative;
+        color: var(--pimentel-cafe);
+        background: #f4e2d4;
+        border: 1px solid rgba(184, 50, 42, .2);
+        border-radius: 50%;
+        font-size: 2rem;
+    }
+    .brand-emblem .brand-spark { position: absolute; right: -2px; top: -5px; color: var(--pimentel-vermelho); font-size: 1.2rem; }
+    .auth-tagline { color: var(--pimentel-cafe-claro); }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
 </style>
 </head>
 <body>
 
+<main id="authShell" class="auth-shell d-flex align-items-center justify-content-center py-5">
+    <div class="card auth-card border-0 shadow-lg">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="brand-emblem" aria-hidden="true"><i class="bi-cup-hot-fill"></i><span class="brand-spark"><i class="bi-fire"></i></span></div>
+                <h1 class="h4 fw-bold mb-1">Hub de Estudos Pimentel</h1>
+                <p class="auth-tagline small mb-1">Café, foco e constância.</p>
+                <p class="text-muted small mb-0">Entre com a conta que recebeu o convite.</p>
+            </div>
+            <div id="authMessage" class="alert d-none" role="alert"></div>
+            <form id="formLogin" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="loginEmail">E-mail</label>
+                    <input class="form-control" id="loginEmail" type="email" autocomplete="email" maxlength="254" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="loginSenha">Senha</label>
+                    <input class="form-control" id="loginSenha" type="password" autocomplete="current-password" maxlength="200" required>
+                </div>
+                <button class="btn btn-primary w-100" id="btnEntrar" type="submit">
+                    <span class="spinner-border spinner-border-sm d-none me-2" id="loginSpinner" aria-hidden="true"></span>
+                    <span id="loginButtonText">Entrar</span>
+                </button>
+                <button class="btn btn-link link-secondary w-100 mt-2" id="btnAbrirRecuperacao" type="button">Primeiro acesso ou esqueci minha senha</button>
+            </form>
+            <form id="formRecuperacao" class="d-none" novalidate>
+                <p class="small text-muted">Informe o e-mail que recebeu o convite. Se a conta existir, enviaremos um link seguro para criar uma nova senha.</p>
+                <div class="mb-3">
+                    <label class="form-label" for="recuperacaoEmail">E-mail</label>
+                    <input class="form-control" id="recuperacaoEmail" type="email" autocomplete="email" maxlength="254" required>
+                </div>
+                <button class="btn btn-primary w-100" id="btnEnviarRecuperacao" type="submit">
+                    <span class="spinner-border spinner-border-sm d-none me-2" id="recuperacaoSpinner" aria-hidden="true"></span>
+                    <span id="recuperacaoButtonText">Enviar link seguro</span>
+                </button>
+                <button class="btn btn-link link-secondary w-100 mt-2" id="btnVoltarLogin" type="button">Voltar para entrar</button>
+            </form>
+            <form id="formNovaSenha" class="d-none" novalidate>
+                <p class="small text-muted">Crie a senha que será usada nos próximos acessos.</p>
+                <div class="mb-3">
+                    <label class="form-label" for="novaSenha">Nova senha</label>
+                    <input class="form-control" id="novaSenha" type="password" autocomplete="new-password" minlength="8" maxlength="200" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="confirmarNovaSenha">Confirmar nova senha</label>
+                    <input class="form-control" id="confirmarNovaSenha" type="password" autocomplete="new-password" minlength="8" maxlength="200" required>
+                </div>
+                <p class="small text-muted"><i class="bi-shield-check me-1"></i>Use 8 ou mais caracteres, com maiúscula, minúscula, número e símbolo.</p>
+                <button class="btn btn-primary w-100" id="btnSalvarNovaSenha" type="submit">
+                    <span class="spinner-border spinner-border-sm d-none me-2" id="novaSenhaSpinner" aria-hidden="true"></span>
+                    <span id="novaSenhaButtonText">Salvar senha e entrar</span>
+                </button>
+            </form>
+            <p class="small text-muted text-center mt-3 mb-0"><i class="bi-shield-lock me-1"></i>Cadastro público desativado.</p>
+        </div>
+    </div>
+</main>
+
+<main id="legacyRecoveryShell" class="auth-shell d-none align-items-center justify-content-center py-5">
+    <div class="card auth-card border-0 shadow-lg">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="brand-emblem" aria-hidden="true"><i class="bi-archive-fill"></i><span class="brand-spark"><i class="bi-shield-check"></i></span></div>
+                <h1 class="h4 fw-bold mb-1">Recuperar dados antigos</h1>
+                <p class="text-muted small mb-0">Esta tela apenas cria uma cópia. Os dados originais permanecem neste navegador.</p>
+            </div>
+            <div id="legacyRecoveryMessage" class="alert alert-info" role="status">Verificando o armazenamento antigo...</div>
+            <ul id="legacyRecoverySummary" class="small mb-4"></ul>
+            <button class="btn btn-primary w-100" id="btnDownloadLegacyRecovery" type="button" disabled>
+                <i class="bi-download me-1"></i>Baixar cópia de recuperação
+            </button>
+            <p class="small text-muted text-center mt-3 mb-0"><i class="bi-shield-lock me-1"></i>Nenhuma senha ou chave de IA será incluída.</p>
+        </div>
+    </div>
+</main>
+
+<div id="appShell" class="d-none">
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container-fluid px-4">
-        <span class="navbar-brand fw-bold"><i class="bi-journal-bookmark-fill me-2"></i>Hub de Estudos - GCM</span>
-        <div class="d-flex gap-2">
+        <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
+            <i class="bi-cup-hot-fill text-warning"></i>
+            <span>Hub Pimentel <span class="brand-subtitle ms-1">Estudos para Concursos</span></span>
+        </span>
+        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
+            <span class="text-light small me-1" id="usuarioAtual"></span>
+            <button class="btn btn-sm btn-outline-light" id="btnPreviaMigracao" type="button" title="Comparar dados locais e na nuvem"><i class="bi-cloud-check me-1"></i>Nuvem</button>
             <button class="btn btn-sm btn-outline-light" id="btnExportar" title="Baixar backup"><i class="bi-download me-1"></i>Backup</button>
             <label class="btn btn-sm btn-outline-light mb-0" title="Restaurar backup">
                 <i class="bi-upload me-1"></i>Restaurar
                 <input type="file" id="inputImportar" accept=".json" class="d-none">
             </label>
+            <button class="btn btn-sm btn-outline-warning" id="btnSair" type="button"><i class="bi-box-arrow-right me-1"></i>Sair</button>
         </div>
     </div>
 </nav>
 
 <div class="container-fluid px-4 mb-5">
 
+    <div class="alert alert-warning d-none" id="avisoDadosLegados" role="status">
+        <i class="bi-exclamation-triangle-fill me-2"></i>
+        Encontramos dados antigos neste navegador. Eles continuam preservados e aguardam a etapa segura de migração para sua conta.
+    </div>
+
     <ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto" id="abas" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-cronograma" type="button"><i class="bi-calendar-week-fill me-1"></i>Cronograma</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-edital" type="button"><i class="bi-file-earmark-spreadsheet-fill me-1"></i>Edital &amp; Estratégia</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-lightning-charge-fill me-1"></i>Simulados (IA)</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-fire me-1"></i>Simulados (IA)</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-erros" type="button"><i class="bi-journal-x me-1"></i>Caderno de Erros</button></li>
     </ul>
 
@@ -112,14 +284,15 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small">O que vai estudar</label>
-                            <input type="text" class="form-control" id="tarefaTopico" placeholder="Ex: Art. 5º, incisos I a X" required>
+                            <input type="text" class="form-control" id="tarefaTopico" maxlength="2000" placeholder="Ex: Art. 5º, incisos I a X" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small">Data</label>
                             <input type="date" class="form-control" id="tarefaData" required>
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg"></i> Adicionar</button>
+                        <div class="col-md-2 d-grid gap-1">
+                            <button type="submit" class="btn btn-primary w-100" id="btnSalvarTarefa"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarTarefa">Adicionar</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicaoTarefa">Cancelar edição</button>
                         </div>
                     </form>
                 </div>
@@ -197,16 +370,14 @@
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-simulados">
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-2"><i class="bi-key-fill me-1"></i>Configuração da IA (Google Gemini)</h6>
-                    <p class="text-muted small mb-2">Cole sua chave gratuita. Consiga em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a>. Fica salva só neste navegador e não entra no backup.</p>
-                    <div class="input-group">
-                        <input type="password" id="inputApiKey" class="form-control" placeholder="Cole aqui sua chave (AIza...)">
-                        <button class="btn btn-outline-secondary" type="button" id="btnMostrarChave"><i class="bi-eye"></i></button>
-                        <button class="btn btn-success" type="button" id="btnSalvarChave">Salvar</button>
+            <div class="alert alert-success border-0 shadow-sm mb-4" role="status">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi-shield-lock-fill mt-1"></i>
+                    <div>
+                        <div class="fw-bold">IA protegida pelo servidor</div>
+                        <div class="small">Sua conta envia apenas os dados necessários para montar o simulado. A chave do Google Gemini não fica salva nem aparece neste navegador.</div>
+                        <div class="small mt-1" id="statusCotaIA">O limite diário é de 50 questões por usuário.</div>
                     </div>
-                    <div id="statusChave" class="form-text"></div>
                 </div>
             </div>
 
@@ -421,7 +592,10 @@
                     <form id="formCard" class="row g-2 mb-3">
                         <div class="col-md-5"><input type="text" class="form-control" id="cardFrente" placeholder="Pergunta / frente" required></div>
                         <div class="col-md-5"><input type="text" class="form-control" id="cardVerso" placeholder="Resposta / verso" required></div>
-                        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Criar</button></div>
+                        <div class="col-md-2 d-grid gap-1">
+                            <button type="submit" class="btn btn-primary w-100" id="btnSalvarCard"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarCard">Criar</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicaoCard">Cancelar edição</button>
+                        </div>
                     </form>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted small" id="resumoCards"></span>
@@ -432,9 +606,12 @@
 
                 <div class="tab-pane fade" id="ws-links">
                     <form id="formLink" class="row g-2 mb-3">
-                        <div class="col-md-4"><input type="text" class="form-control" id="linkTitulo" placeholder="Título (ex: Lei 13.022/2014)" required></div>
-                        <div class="col-md-6"><input type="url" class="form-control" id="linkUrl" placeholder="https://..." required></div>
-                        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Salvar</button></div>
+                        <div class="col-md-4"><input type="text" class="form-control" id="linkTitulo" maxlength="500" placeholder="Título (ex: Lei 13.022/2014)" required></div>
+                        <div class="col-md-6"><input type="url" class="form-control" id="linkUrl" maxlength="4000" placeholder="https://..." required></div>
+                        <div class="col-md-2 d-grid gap-1">
+                            <button type="submit" class="btn btn-primary w-100" id="btnSalvarLink"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarLink">Salvar</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicaoLink">Cancelar edição</button>
+                        </div>
                     </form>
                     <div id="listaLinks" class="list-group"></div>
                 </div>
@@ -484,13 +661,14 @@
         <div class="modal-header"><h5 class="modal-title fw-bold">Configurar Concurso</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
             <form id="formConfigEdital">
-                <div class="mb-3"><label class="form-label">Concurso / Órgão</label><input type="text" class="form-control" id="inputEditalNome" required></div>
-                <div class="mb-3"><label class="form-label">Banca</label><input type="text" class="form-control" id="inputEditalBanca"></div>
+                <div class="mb-3"><label class="form-label">Concurso / Órgão</label><input type="text" class="form-control" id="inputEditalNome" maxlength="500" required></div>
+                <div class="mb-3"><label class="form-label">Banca</label><input type="text" class="form-control" id="inputEditalBanca" maxlength="300"></div>
                 <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Vagas</label><input type="text" class="form-control" id="inputEditalVagas"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Vagas</label><input type="text" class="form-control" id="inputEditalVagas" maxlength="100"></div>
                     <div class="col-md-6 mb-3"><label class="form-label">Data da prova</label><input type="date" class="form-control" id="inputEditalData"></div>
                 </div>
                 <button type="submit" class="btn btn-success w-100 rounded-pill">Salvar</button>
+                <button type="button" class="btn btn-outline-danger w-100 rounded-pill mt-2" id="btnLimparConfigEdital">Limpar configuração</button>
             </form>
         </div>
     </div></div>
@@ -503,13 +681,47 @@
             <form id="formAddMateriaEdital">
                 <div class="mb-3"><label class="form-label">Matéria</label><select class="form-select" id="editalMateriaSelect" required></select></div>
                 <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Qtd. questões</label><input type="number" min="0" class="form-control" id="editalQuestoes" value="10" required></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Peso</label><input type="number" min="0" step="0.1" class="form-control" id="editalPeso" value="1" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Qtd. questões</label><input type="number" min="0" max="100000" class="form-control" id="editalQuestoes" value="10" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Peso</label><input type="number" min="0" max="100000" step="0.1" class="form-control" id="editalPeso" value="1" required></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="editalTopicos">Tópicos da matéria <span class="text-muted small">(opcional, um por linha)</span></label>
+                    <textarea class="form-control" id="editalTopicos" rows="5" maxlength="50000" placeholder="Art. 5º — direitos fundamentais&#10;Organização do Estado&#10;Controle de constitucionalidade"></textarea>
+                    <div class="form-text">Este checklist será pessoal e ficará separado dos tópicos compartilhados da matéria.</div>
                 </div>
                 <button type="submit" class="btn btn-success w-100 rounded-pill">Adicionar</button>
             </form>
         </div>
     </div></div>
+</div>
+
+<div class="modal fade" id="modalPreviaMigracao" tabindex="-1" aria-labelledby="tituloPreviaMigracao" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h5 class="modal-title fw-bold" id="tituloPreviaMigracao"><i class="bi-cloud-check me-2"></i>Prévia da migração</h5>
+                <p class="small text-muted mb-0">Comparação somente leitura. Nenhum dado será enviado nesta etapa.</p>
+            </div>
+            <button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+            <div id="mensagemPreviaMigracao" class="alert alert-info" role="status">Clique em “Atualizar prévia” para comparar os dados.</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-3">
+                    <thead><tr><th>Conteúdo</th><th class="text-end">Neste navegador</th><th class="text-end">No Supabase</th></tr></thead>
+                    <tbody id="corpoPreviaMigracao"></tbody>
+                </table>
+            </div>
+            <p class="small text-muted mb-0" id="identificacaoPreviaMigracao"></p>
+            <div id="mensagemConferenciaConteudo" class="alert alert-secondary d-none mt-3 mb-0" role="status"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success me-auto" id="btnExecutarMigracao" type="button" disabled title="Será habilitado somente após a atualização autorizada do banco"><i class="bi-cloud-upload me-1"></i>Migrar para o Supabase</button>
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Fechar</button>
+            <button class="btn btn-primary" id="btnAtualizarPreviaMigracao" type="button"><span class="spinner-border spinner-border-sm d-none me-2" id="spinnerPreviaMigracao" aria-hidden="true"></span>Atualizar prévia</button>
+        </div>
+    </div></div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -526,15 +738,34 @@ const LS = {
     tarefas: "hub_tarefas",
     edital: "hub_edital",
     erros: "hub_erros",
-    desempenho: "hub_desempenho",
-    apiKey: "hub_gemini_api_key"
+    desempenho: "hub_desempenho"
 };
 
+const CHAVE_GEMINI_LEGADA = "hub_gemini_api_key";
+
 const CHAVES_COM_FALHA = new Set();
+let USUARIO_ATUAL_ID = null;
+
+function definirUsuarioAtual(userId) {
+    const id = String(userId || "").trim();
+    if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Sessão de usuário inválida.");
+    USUARIO_ATUAL_ID = id;
+    CHAVES_COM_FALHA.clear();
+}
+
+function chaveDoUsuario(chave) {
+    if (!USUARIO_ATUAL_ID) throw new Error("Entre na sua conta antes de acessar os dados.");
+    return `hub_user_${USUARIO_ATUAL_ID}_${chave}`;
+}
+
+function possuiDadosLegados() {
+    return [LS.materias, LS.tarefas, LS.edital, LS.erros, LS.desempenho]
+        .some(chave => localStorage.getItem(chave) !== null);
+}
 
 function carregar(chave, padrao) {
     try {
-        const raw = localStorage.getItem(chave);
+        const raw = localStorage.getItem(chaveDoUsuario(chave));
         return raw ? JSON.parse(raw) : padrao;
     } catch (erro) {
         const primeiraFalha = !CHAVES_COM_FALHA.has(chave);
@@ -547,15 +778,15 @@ function carregar(chave, padrao) {
 function salvarLote(itens, opcoes = {}) {
     const permitirRecuperacao = opcoes.permitirRecuperacao === true;
     if (CHAVES_COM_FALHA.size && !permitirRecuperacao) throw new Error("A gravação foi bloqueada porque há dados locais ilegíveis. Restaure um backup válido antes de continuar.");
-    const serializados = itens.map(([chave, valor]) => [chave, JSON.stringify(valor)]);
+    const serializados = itens.map(([chave, valor]) => [chave, chaveDoUsuario(chave), JSON.stringify(valor)]);
     const anteriores = [];
     try {
-        itens.forEach(([chave]) => anteriores.push([chave, localStorage.getItem(chave)]));
-        serializados.forEach(([chave, valor]) => localStorage.setItem(chave, valor));
+        serializados.forEach(([chave, chavePersistida]) => anteriores.push([chave, chavePersistida, localStorage.getItem(chavePersistida)]));
+        serializados.forEach(([, chavePersistida, valor]) => localStorage.setItem(chavePersistida, valor));
         if (permitirRecuperacao) itens.forEach(([chave]) => CHAVES_COM_FALHA.delete(chave));
     } catch (erro) {
-        anteriores.forEach(([chave, valor]) => {
-            try { valor == null ? localStorage.removeItem(chave) : localStorage.setItem(chave, valor); }
+        anteriores.forEach(([, chavePersistida, valor]) => {
+            try { valor == null ? localStorage.removeItem(chavePersistida) : localStorage.setItem(chavePersistida, valor); }
             catch (erroRestauracao) { console.error("Falha ao restaurar dados locais", erroRestauracao); }
         });
         throw new Error("Não foi possível salvar os dados no navegador. Exporte um backup e verifique o espaço disponível.");
@@ -605,7 +836,7 @@ function esc(t) {
 function urlHttpSegura(valor) {
     try {
         const url = new URL(String(valor || "").trim());
-        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+        return ["http:", "https:"].includes(url.protocol) && url.hostname && !url.username && !url.password ? url.href : "";
     } catch (e) { return ""; }
 }
 function novoId() {
@@ -638,10 +869,10 @@ function normalizarMateria(m) {
 }
 function materiasNormalizadas() { return obterMaterias().map(normalizarMateria); }
 function salvarMaterias(lista) { salvar(LS.materias, lista); }
-(function migracaoInicial() {
+function prepararDadosUsuario() {
     const materias = materiasNormalizadas();
     if (!CHAVES_COM_FALHA.has(LS.materias)) salvarMaterias(materias);
-})();
+}
 
 function materiaPorId(id) { return materiasNormalizadas().find(m => String(m.id) === String(id)); }
 function atualizarMateria(id, fn) {
@@ -660,9 +891,11 @@ function cardsVencidos(m) { const h = hojeISO(); return m.cards.filter(c => (c.p
 function errosDaMateria(id) { return obterErros().filter(e => String(e.materiaId) === String(id)).length; }
 function pendenciasMateria(m) { return cardsVencidos(m).length + m.topicos.filter(t => t.status !== "dominado").length; }
 
-function excluirMateriaComRelacionados(id) {
+async function excluirMateriaComRelacionados(id) {
+    if (operacaoMateriaEmAndamento) return;
     const materia = materiaPorId(id);
     if (!materia) return;
+    const materiasOriginais = materiasNormalizadas();
     const tarefas = obterTarefas();
     const edital = obterEdital();
     const erros = obterErros();
@@ -675,22 +908,53 @@ function excluirMateriaComRelacionados(id) {
     const relacionados = `${tarefasRelacionadas} sessão(ões), ${editalRelacionado} item(ns) do edital, ${errosRelacionados} erro(s) e ${possuiDesempenho ? "1 histórico" : "nenhum histórico"} de desempenho`;
     if (!confirm(`Remover "${materia.nome}"?\n\nSerão excluídos:\n• ${internos}\n• ${relacionados}\n\nEssa ação não pode ser desfeita sem um backup.`)) return;
 
-    const materiasAtualizadas = materiasNormalizadas().filter(m => String(m.id) !== String(id));
+    const materiasAtualizadas = materiasOriginais.filter(m => String(m.id) !== String(id));
     const tarefasAtualizadas = tarefas.filter(t => String(t.materiaId) !== String(id));
     const editalAtualizado = { ...edital, materias: edital.materias.filter(m => String(m.materiaId) !== String(id)) };
     const errosAtualizados = erros.filter(e => String(e.materiaId) !== String(id));
     const desempenhoAtualizado = { ...desempenho };
     delete desempenhoAtualizado[String(id)];
 
+    const restaurarLocais = () => salvarLote([
+        [LS.materias, materiasOriginais], [LS.tarefas, tarefas], [LS.edital, edital],
+        [LS.erros, erros], [LS.desempenho, desempenho]
+    ]);
+
+    operacaoMateriaEmAndamento = true;
+    let exclusaoRemotaConfirmada = false;
     try {
         salvarLote([
             [LS.materias, materiasAtualizadas], [LS.tarefas, tarefasAtualizadas], [LS.edital, editalAtualizado],
             [LS.erros, errosAtualizados], [LS.desempenho, desempenhoAtualizado]
         ]);
+        await exigirNuvemMaterias().excluir(id);
+        exclusaoRemotaConfirmada = true;
+        if (materiasAtualizadas.length) {
+            await exigirNuvemMaterias().reordenar(materiasAtualizadas.map(materia => materia.id));
+        }
     } catch (erro) {
-        alert(erro.message);
+        if (exclusaoRemotaConfirmada) {
+            console.error("A matéria foi excluída, mas a ordem remota precisa de reparação", erro);
+            alert("A matéria foi excluída, mas a ordem ainda precisa ser conferida. Recarregue a página antes de fazer outra alteração.");
+            operacaoMateriaEmAndamento = false;
+            renderizarMaterias();
+            return;
+        }
+        try {
+            restaurarLocais();
+        } catch (erroRestauracao) {
+            console.error("Falha ao restaurar a exclusão local", erroRestauracao);
+            alert("A exclusão não pôde ser confirmada e a cópia local também precisa de conferência. Não faça novas alterações antes de gerar um backup.");
+            operacaoMateriaEmAndamento = false;
+            return;
+        }
+        console.error("Falha ao excluir matéria de forma sincronizada", erro);
+        alert("A matéria não foi excluída porque o Supabase não confirmou a operação. Os dados locais foram restaurados.");
+        renderizarMaterias();
+        operacaoMateriaEmAndamento = false;
         return;
     }
+    operacaoMateriaEmAndamento = false;
     if (String(materiaAbertaId) === String(id)) {
         materiaAbertaId = null;
         bootstrap.Modal.getInstance(document.getElementById("modalMateria"))?.hide();
@@ -732,6 +996,238 @@ function renderizarMarkdown(txt) {
 let sortableInstancia = null;
 let filtroMaterias = "";
 let ordemMaterias = "manual";
+let operacaoMateriaEmAndamento = false;
+
+function exigirNuvemMaterias() {
+    if (!window.HUB_CLOUD_SUBJECTS) throw new Error("A conexão com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_SUBJECTS;
+}
+
+function sincronizarListaDeMaterias(materiasRemotas) {
+    if (!Array.isArray(materiasRemotas)) throw new Error("A lista de matérias do Supabase é inválida.");
+    const locais = materiasNormalizadas();
+    const usados = new Set();
+    const sincronizadas = materiasRemotas.map(remota => {
+        const local = locais.find(materia => String(materia.id) === String(remota.id));
+        if (local) usados.add(String(local.id));
+        return normalizarMateria({
+            ...(local || { notas: [], topicos: [], cards: [], links: [] }),
+            id: local ? local.id : remota.id,
+            nome: remota.nome,
+            desc: remota.desc,
+            cor: remota.cor,
+            prioridade: remota.prioridade
+        });
+    });
+    const somenteLocais = locais.filter(materia => !usados.has(String(materia.id)));
+    salvarMaterias([...sincronizadas, ...somenteLocais]);
+    if (somenteLocais.length) {
+        console.warn(`${somenteLocais.length} matéria(s) local(is) foram preservadas para conferência antes da sincronização.`);
+    }
+}
+
+function sincronizarListaDeTopicos(topicosRemotos) {
+    if (!Array.isArray(topicosRemotos)) throw new Error("A lista de tópicos do Supabase é inválida.");
+    const materias = materiasNormalizadas();
+    materias.forEach(materia => {
+        const remotosDaMateria = topicosRemotos.filter(topico => String(topico.materiaId) === String(materia.id));
+        const usados = new Set();
+        const sincronizados = remotosDaMateria.map(remoto => {
+            const local = materia.topicos.find(topico => String(topico.id) === String(remoto.id));
+            if (local) usados.add(String(local.id));
+            return {
+                id: local ? local.id : remoto.id,
+                titulo: remoto.titulo,
+                status: remoto.status,
+                revisoes: remoto.revisoes
+            };
+        });
+        const somenteLocais = materia.topicos.filter(topico => !usados.has(String(topico.id)));
+        materia.topicos = [...sincronizados, ...somenteLocais];
+        if (somenteLocais.length) {
+            console.warn(`${somenteLocais.length} tópico(s) local(is) foram preservados para conferência antes da sincronização.`);
+        }
+    });
+    salvarMaterias(materias);
+}
+
+function sincronizarListaDeNotas(notasRemotas) {
+    if (!Array.isArray(notasRemotas)) throw new Error("A lista de notas do Supabase é inválida.");
+    const materias = materiasNormalizadas();
+    materias.forEach(materia => {
+        const remotasDaMateria = notasRemotas.filter(nota => String(nota.materiaId) === String(materia.id));
+        const usadas = new Set();
+        const sincronizadas = remotasDaMateria.map(remota => {
+            const local = materia.notas.find(nota => String(nota.id) === String(remota.id));
+            if (local) usadas.add(String(local.id));
+            return {
+                id: local ? local.id : remota.id,
+                titulo: remota.titulo,
+                conteudo: remota.conteudo,
+                tags: remota.tags,
+                fixada: remota.fixada,
+                criadaEm: remota.criadaEm || local?.criadaEm || hojeISO(),
+                atualizadaEm: remota.atualizadaEm || local?.atualizadaEm || hojeISO()
+            };
+        });
+        const somenteLocais = materia.notas.filter(nota => !usadas.has(String(nota.id)));
+        materia.notas = [...sincronizadas, ...somenteLocais];
+        if (somenteLocais.length) {
+            console.warn(`${somenteLocais.length} nota(s) local(is) foram preservadas para conferência antes da sincronização.`);
+        }
+    });
+    salvarMaterias(materias);
+}
+
+function sincronizarListaDeFlashcards(flashcardsRemotos) {
+    if (!Array.isArray(flashcardsRemotos)) throw new Error("A lista de flashcards do Supabase é inválida.");
+    const materias = materiasNormalizadas();
+    materias.forEach(materia => {
+        const remotosDaMateria = flashcardsRemotos.filter(card => String(card.materiaId) === String(materia.id));
+        const usados = new Set();
+        const sincronizados = remotosDaMateria.map(remoto => {
+            const local = materia.cards.find(card => String(card.id) === String(remoto.id));
+            if (local) usados.add(String(local.id));
+            return {
+                id: local ? local.id : remoto.id,
+                frente: remoto.frente,
+                verso: remoto.verso,
+                caixa: remoto.caixa,
+                proxima: remoto.proxima,
+                acertos: remoto.acertos,
+                erros: remoto.erros
+            };
+        });
+        const somenteLocais = materia.cards.filter(card => !usados.has(String(card.id)));
+        materia.cards = [...sincronizados, ...somenteLocais];
+        if (somenteLocais.length) {
+            console.warn(`${somenteLocais.length} flashcard(s) local(is) foram preservados para conferência antes da sincronização.`);
+        }
+    });
+    salvarMaterias(materias);
+}
+
+function sincronizarListaDeLinks(linksRemotos) {
+    if (!Array.isArray(linksRemotos)) throw new Error("A lista de materiais do Supabase é inválida.");
+    const materias = materiasNormalizadas();
+    materias.forEach(materia => {
+        const remotosDaMateria = linksRemotos.filter(link => String(link.materiaId) === String(materia.id));
+        const usados = new Set();
+        const sincronizados = remotosDaMateria.map(remoto => {
+            const local = materia.links.find(link => String(link.id) === String(remoto.id));
+            if (local) usados.add(String(local.id));
+            return {
+                id: local ? local.id : remoto.id,
+                titulo: remoto.titulo,
+                url: remoto.url
+            };
+        });
+        const somenteLocais = materia.links.filter(link => !usados.has(String(link.id)));
+        materia.links = [...sincronizados, ...somenteLocais];
+        if (somenteLocais.length) {
+            console.warn(`${somenteLocais.length} material(is) local(is) foram preservados para conferência antes da sincronização.`);
+        }
+    });
+    salvarMaterias(materias);
+}
+
+function sincronizarListaDeTarefas(tarefasRemotas) {
+    if (!Array.isArray(tarefasRemotas)) throw new Error("A lista do cronograma no Supabase é inválida.");
+    const locais = obterTarefas();
+    const usados = new Set();
+    const sincronizadas = tarefasRemotas.map(remota => {
+        const local = locais.find(tarefa => String(tarefa.id) === String(remota.id));
+        if (local) usados.add(String(local.id));
+        return {
+            id: local ? local.id : remota.id,
+            materiaId: remota.materiaId,
+            topico: remota.topico,
+            data: remota.data,
+            status: remota.status,
+            responsavelId: remota.responsavelId || local?.responsavelId || null
+        };
+    });
+    const somenteLocais = locais.filter(tarefa => !usados.has(String(tarefa.id)));
+    salvar(LS.tarefas, [...sincronizadas, ...somenteLocais]);
+    if (somenteLocais.length) {
+        console.warn(`${somenteLocais.length} sessão(ões) local(is) foram preservadas para conferência antes da sincronização.`);
+    }
+}
+
+function sincronizarListaDeErros(errosRemotos) {
+    if (!Array.isArray(errosRemotos)) throw new Error("A lista do caderno de erros no Supabase é inválida.");
+    const locais = obterErros();
+    const usados = new Set();
+    const sincronizados = errosRemotos.map(remoto => {
+        const local = locais.find(erro => String(erro.id) === String(remoto.id));
+        if (local) usados.add(String(local.id));
+        return {
+            id: local ? local.id : remoto.id,
+            materiaId: remoto.materiaId,
+            tema: remoto.tema,
+            obs: remoto.obs,
+            data: remoto.data
+        };
+    });
+    const somenteLocais = locais.filter(erro => !usados.has(String(erro.id)));
+    salvar(LS.erros, [...sincronizados, ...somenteLocais]);
+    if (somenteLocais.length) {
+        console.warn(`${somenteLocais.length} registro(s) local(is) do caderno de erros foram preservados para conferência.`);
+    }
+}
+
+function sincronizarDesempenho(desempenhoRemoto) {
+    if (!Array.isArray(desempenhoRemoto)) throw new Error("O histórico de desempenho do Supabase é inválido.");
+    const desempenho = { ...obterDesempenho() };
+    desempenhoRemoto.forEach(registro => {
+        const total = Math.max(0, Number(registro.total) || 0);
+        desempenho[String(registro.materiaId)] = {
+            acertos: Math.min(total, Math.max(0, Number(registro.acertos) || 0)),
+            total
+        };
+    });
+    salvar(LS.desempenho, desempenho);
+}
+
+function sincronizarEdital(editalRemoto) {
+    if (!editalRemoto || !Array.isArray(editalRemoto.materias)) throw new Error("O edital do Supabase é inválido.");
+    const local = obterEdital();
+    const usados = new Set();
+    const materias = editalRemoto.materias.map(remota => {
+        const itemLocal = local.materias.find(item => String(item.id) === String(remota.id));
+        if (itemLocal) usados.add(String(itemLocal.id));
+        return {
+            id: itemLocal ? itemLocal.id : remota.id,
+            materiaId: remota.materiaId,
+            questoes: remota.questoes,
+            peso: remota.peso,
+            topicos: Array.isArray(remota.topicos) ? remota.topicos.map(topico => ({
+                id: topico.id,
+                titulo: topico.titulo || "",
+                concluido: topico.concluido === true
+            })) : (itemLocal?.topicos || [])
+        };
+    });
+    const somenteLocais = local.materias.filter(item => !usados.has(String(item.id)));
+    const configuracao = editalRemoto.configuracaoExiste ? editalRemoto : local;
+    salvar(LS.edital, {
+        nomeConcurso: configuracao.nomeConcurso || "",
+        banca: configuracao.banca || "",
+        vagas: configuracao.vagas || "",
+        dataProva: configuracao.dataProva || "",
+        materias: [...materias, ...somenteLocais]
+    });
+    if (somenteLocais.length || (!editalRemoto.configuracaoExiste && Object.values(local).some(valor => Array.isArray(valor) ? valor.length : Boolean(valor)))) {
+        console.warn("Dados locais do edital foram preservados para conferência antes da sincronização.");
+    }
+}
+
+function limparFiltrosDeMaterias() {
+    filtroMaterias = "";
+    ordemMaterias = "manual";
+    document.getElementById("buscaMaterias").value = "";
+    document.getElementById("ordemMaterias").value = "manual";
+}
 
 function materiaCombina(m, q) {
     const alvo = [m.nome, m.desc,
@@ -803,7 +1299,7 @@ function renderizarMaterias() {
             </div>`;
     }).join("");
 
-    grid.querySelectorAll(".btn-abrir-materia").forEach(b => b.addEventListener("click", () => abrirMateria(b.dataset.id)));
+    grid.querySelectorAll(".btn-abrir-materia").forEach(b => b.addEventListener("click", async () => abrirMateria(b.dataset.id)));
     grid.querySelectorAll(".btn-editar-materia").forEach(b => b.addEventListener("click", () => abrirFormularioMateria(b.dataset.id)));
     grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => excluirMateriaComRelacionados(b.dataset.id)));
 
@@ -812,10 +1308,44 @@ function renderizarMaterias() {
         sortableInstancia = Sortable.create(grid, {
             animation: 150,
             ghostClass: "sortable-ghost",
-            onEnd: () => {
-                const ids = Array.from(grid.children).map(el => el.dataset.id);
+            onEnd: async evento => {
+                if (operacaoMateriaEmAndamento) {
+                    renderizarMaterias();
+                    return;
+                }
                 const atuais = materiasNormalizadas();
-                salvarMaterias(ids.map(id => atuais.find(m => String(m.id) === id)).filter(Boolean));
+                const idsAnteriores = atuais.map(m => String(m.id));
+                const indiceAnterior = evento.oldDraggableIndex ?? evento.oldIndex;
+                const indiceNovo = evento.newDraggableIndex ?? evento.newIndex;
+                if (!Number.isInteger(indiceAnterior) || !Number.isInteger(indiceNovo)
+                    || indiceAnterior < 0 || indiceNovo < 0
+                    || indiceAnterior >= idsAnteriores.length || indiceNovo >= idsAnteriores.length) {
+                    renderizarMaterias();
+                    return;
+                }
+                if (indiceAnterior === indiceNovo) return;
+                const ids = idsAnteriores.slice();
+                const [idMovido] = ids.splice(indiceAnterior, 1);
+                ids.splice(indiceNovo, 0, idMovido);
+                const ordenadas = ids.map(id => atuais.find(m => String(m.id) === id)).filter(Boolean);
+                if (ordenadas.length !== atuais.length) {
+                    renderizarMaterias();
+                    return;
+                }
+                operacaoMateriaEmAndamento = true;
+                try {
+                    await exigirNuvemMaterias().reordenar(ids);
+                    salvarMaterias(ordenadas);
+                } catch (erro) {
+                    console.error("Falha ao sincronizar a ordem das matérias", erro);
+                    try { await exigirNuvemMaterias().reordenar(idsAnteriores); } catch (erroRestauracao) {
+                        console.error("Falha ao restaurar a ordem remota", erroRestauracao);
+                    }
+                    alert("A nova ordem não foi salva porque o Supabase não confirmou todas as alterações.");
+                    renderizarMaterias();
+                } finally {
+                    operacaoMateriaEmAndamento = false;
+                }
             }
         });
     }
@@ -856,8 +1386,9 @@ function abrirFormularioMateria(id) {
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaMateria")).show();
 }
 
-document.getElementById("formMateria").addEventListener("submit", (e) => {
+document.getElementById("formMateria").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (operacaoMateriaEmAndamento) return;
     const id = document.getElementById("materiaEditandoId").value;
     const dados = {
         nome: document.getElementById("materiaNome").value.trim(),
@@ -865,16 +1396,50 @@ document.getElementById("formMateria").addEventListener("submit", (e) => {
         cor: document.getElementById("materiaCor").value,
         prioridade: document.getElementById("materiaPrioridade").value
     };
-    if (id) {
-        atualizarMateria(id, m => Object.assign(m, dados));
-    } else {
-        const lista = materiasNormalizadas();
-        lista.push(Object.assign({ id: novoId(), notas: [], topicos: [], cards: [], links: [] }, dados));
-        salvarMaterias(lista);
+    const botaoSalvar = e.target.querySelector('button[type="submit"]');
+    const textoOriginal = botaoSalvar.textContent;
+    botaoSalvar.disabled = true;
+    botaoSalvar.textContent = "Salvando...";
+    operacaoMateriaEmAndamento = true;
+
+    try {
+        if (id) {
+            const anterior = materiaPorId(id);
+            if (!anterior) throw new Error("A matéria não foi encontrada.");
+            await exigirNuvemMaterias().atualizar(id, dados);
+            try {
+                atualizarMateria(id, m => Object.assign(m, dados));
+            } catch (erroLocal) {
+                await exigirNuvemMaterias().atualizar(id, {
+                    nome: anterior.nome,
+                    desc: anterior.desc,
+                    cor: anterior.cor,
+                    prioridade: anterior.prioridade
+                });
+                throw erroLocal;
+            }
+        } else {
+            const lista = materiasNormalizadas();
+            const nova = Object.assign({ id: novoId(), notas: [], topicos: [], cards: [], links: [] }, dados);
+            await exigirNuvemMaterias().criar(nova, lista.length);
+            try {
+                salvarMaterias([...lista, nova]);
+            } catch (erroLocal) {
+                await exigirNuvemMaterias().excluir(nova.id);
+                throw erroLocal;
+            }
+        }
+        e.target.reset();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaMateria")).hide();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao salvar matéria de forma sincronizada", erro);
+        alert("A matéria não foi salva porque não foi possível confirmar a alteração nas duas cópias. Tente novamente.");
+    } finally {
+        operacaoMateriaEmAndamento = false;
+        botaoSalvar.disabled = false;
+        botaoSalvar.textContent = textoOriginal;
     }
-    e.target.reset();
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaMateria")).hide();
-    renderizarMaterias();
 });
 
 // ============================================================
@@ -886,11 +1451,41 @@ let filtroStatusTopico = "todos";
 let buscaNotasTexto = "";
 let timerAutoSave = null;
 let salvamentoNotaPendente = null;
+let salvamentoNotaEmAndamento = null;
+let operacaoNotaEmAndamento = false;
+let permitirFechamentoModalAposSalvar = false;
+let operacaoTopicoEmAndamento = false;
+let operacaoCardEmAndamento = false;
+let cardEmEdicaoId = null;
+let operacaoLinkEmAndamento = false;
+let linkEmEdicaoId = null;
 
-function abrirMateria(id) {
-    if (!salvarNotaPendente()) return;
+function exigirNuvemTopicos() {
+    if (!window.HUB_CLOUD_TOPICS) throw new Error("A conexão de tópicos com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_TOPICS;
+}
+
+function exigirNuvemNotas() {
+    if (!window.HUB_CLOUD_NOTES) throw new Error("A conexão de notas com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_NOTES;
+}
+
+function exigirNuvemFlashcards() {
+    if (!window.HUB_CLOUD_FLASHCARDS) throw new Error("A conexão de flashcards com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_FLASHCARDS;
+}
+
+function exigirNuvemLinks() {
+    if (!window.HUB_CLOUD_LINKS) throw new Error("A conexão de materiais com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_LINKS;
+}
+
+async function abrirMateria(id) {
+    if (!await salvarNotaPendente()) return;
     const m = materiaPorId(id);
     if (!m) return;
+    limparEdicaoCard();
+    limparEdicaoLink();
     materiaAbertaId = m.id;
     notaSelecionadaId = m.notas.length ? (m.notas.find(n => n.fixada) || m.notas[0]).id : null;
     buscaNotasTexto = "";
@@ -958,47 +1553,147 @@ function renderizarTopicos(m) {
         </div>`;
     }).join("");
 
-    container.querySelectorAll(".btn-ciclo-topico").forEach(b => b.addEventListener("click", () => {
-        atualizarMateria(materiaAbertaId, mm => {
-            const t = mm.topicos.find(x => String(x.id) === b.dataset.id);
-            if (!t) return;
-            t.status = CICLO_STATUS[(CICLO_STATUS.indexOf(t.status) + 1) % CICLO_STATUS.length];
-            t.revisoes = (t.revisoes || 0) + (t.status === "revisar" ? 1 : 0);
-        });
-        renderizarWorkspace();
-        renderizarMaterias();
+    container.querySelectorAll(".btn-ciclo-topico").forEach(b => b.addEventListener("click", async () => {
+        if (operacaoTopicoEmAndamento) return;
+        const materia = materiaPorId(materiaAbertaId);
+        const topico = materia?.topicos.find(x => String(x.id) === b.dataset.id);
+        if (!topico) return;
+        const anterior = { status: topico.status, revisoes: topico.revisoes || 0 };
+        const novoStatus = CICLO_STATUS[(CICLO_STATUS.indexOf(topico.status) + 1) % CICLO_STATUS.length];
+        const alteracoes = {
+            status: novoStatus,
+            revisoes: anterior.revisoes + (novoStatus === "revisar" ? 1 : 0)
+        };
+        operacaoTopicoEmAndamento = true;
+        b.disabled = true;
+        try {
+            await exigirNuvemTopicos().atualizar(topico.id, alteracoes);
+            try {
+                atualizarMateria(materiaAbertaId, mm => {
+                    const atual = mm.topicos.find(x => String(x.id) === String(topico.id));
+                    if (atual) Object.assign(atual, alteracoes);
+                });
+            } catch (erroLocal) {
+                await exigirNuvemTopicos().atualizar(topico.id, anterior);
+                throw erroLocal;
+            }
+            renderizarWorkspace();
+            renderizarMaterias();
+        } catch (erro) {
+            console.error("Falha ao atualizar o tópico de forma sincronizada", erro);
+            alert("O status do tópico não foi alterado porque o Supabase não confirmou a operação.");
+        } finally {
+            operacaoTopicoEmAndamento = false;
+            b.disabled = false;
+        }
     }));
-    container.querySelectorAll(".btn-excluir-topico").forEach(b => b.addEventListener("click", () => {
-        atualizarMateria(materiaAbertaId, mm => { mm.topicos = mm.topicos.filter(x => String(x.id) !== b.dataset.id); });
-        renderizarWorkspace();
-        renderizarMaterias();
+    container.querySelectorAll(".btn-excluir-topico").forEach(b => b.addEventListener("click", async () => {
+        if (operacaoTopicoEmAndamento) return;
+        const materia = materiaPorId(materiaAbertaId);
+        const topico = materia?.topicos.find(x => String(x.id) === b.dataset.id);
+        if (!topico || !confirm(`Excluir o tópico “${topico.titulo}” das duas cópias?`)) return;
+        const topicosAnteriores = materia.topicos.slice();
+        const topicosRestantes = topicosAnteriores.filter(item => String(item.id) !== String(topico.id));
+        let exclusaoRemotaConfirmada = false;
+        operacaoTopicoEmAndamento = true;
+        b.disabled = true;
+        try {
+            atualizarMateria(materiaAbertaId, mm => { mm.topicos = topicosRestantes; });
+            await exigirNuvemTopicos().excluir(topico.id);
+            exclusaoRemotaConfirmada = true;
+            if (topicosRestantes.length) {
+                await exigirNuvemTopicos().reordenar(materiaAbertaId, topicosRestantes.map(item => item.id));
+            }
+            renderizarWorkspace();
+            renderizarMaterias();
+        } catch (erro) {
+            if (!exclusaoRemotaConfirmada) {
+                try {
+                    atualizarMateria(materiaAbertaId, mm => { mm.topicos = topicosAnteriores; });
+                } catch (erroRestauracao) {
+                    console.error("Falha ao restaurar o tópico local", erroRestauracao);
+                }
+                alert("O tópico não foi excluído porque o Supabase não confirmou a operação.");
+            } else {
+                alert("O tópico foi excluído, mas a ordem dos tópicos precisa ser conferida após recarregar a página.");
+            }
+            console.error("Falha ao excluir tópico de forma sincronizada", erro);
+            renderizarWorkspace();
+            renderizarMaterias();
+        } finally {
+            operacaoTopicoEmAndamento = false;
+            b.disabled = false;
+        }
     }));
-    container.querySelectorAll(".btn-nota-topico").forEach(b => b.addEventListener("click", () => {
+    container.querySelectorAll(".btn-nota-topico").forEach(b => b.addEventListener("click", async () => {
         const t = materiaPorId(materiaAbertaId).topicos.find(x => String(x.id) === b.dataset.id);
         if (!t) return;
-        criarNota(t.titulo, "## " + t.titulo + "\n\n");
-        document.querySelector('[data-bs-target="#ws-notas"]').click();
+        if (await criarNota(t.titulo, "## " + t.titulo + "\n\n")) {
+            document.querySelector('[data-bs-target="#ws-notas"]').click();
+        }
     }));
 }
 
-document.getElementById("formTopico").addEventListener("submit", e => {
+document.getElementById("formTopico").addEventListener("submit", async e => {
     e.preventDefault();
+    if (operacaoTopicoEmAndamento) return;
     const titulo = document.getElementById("topicoTitulo").value.trim();
     if (!titulo) return;
-    atualizarMateria(materiaAbertaId, m => m.topicos.push({ id: novoId(), titulo, status: "nao", revisoes: 0 }));
-    e.target.reset();
-    renderizarWorkspace();
-    renderizarMaterias();
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia) return;
+    const topico = { id: novoId(), titulo, status: "nao", revisoes: 0 };
+    const botao = e.target.querySelector('button[type="submit"]');
+    operacaoTopicoEmAndamento = true;
+    botao.disabled = true;
+    try {
+        await exigirNuvemTopicos().criar(materiaAbertaId, topico, materia.topicos.length);
+        try {
+            atualizarMateria(materiaAbertaId, m => m.topicos.push(topico));
+        } catch (erroLocal) {
+            await exigirNuvemTopicos().excluir(topico.id);
+            throw erroLocal;
+        }
+        e.target.reset();
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao criar tópico de forma sincronizada", erro);
+        alert("O tópico não foi criado porque não foi possível confirmar a operação nas duas cópias.");
+    } finally {
+        operacaoTopicoEmAndamento = false;
+        botao.disabled = false;
+    }
 });
 
-document.getElementById("btnAddTopicosLote").addEventListener("click", () => {
+document.getElementById("btnAddTopicosLote").addEventListener("click", async () => {
+    if (operacaoTopicoEmAndamento) return;
     const area = document.getElementById("topicosEmLote");
     const linhas = area.value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     if (!linhas.length) return;
-    atualizarMateria(materiaAbertaId, m => linhas.forEach(l => m.topicos.push({ id: novoId(), titulo: l, status: "nao", revisoes: 0 })));
-    area.value = "";
-    renderizarWorkspace();
-    renderizarMaterias();
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia) return;
+    const topicos = linhas.map(titulo => ({ id: novoId(), titulo, status: "nao", revisoes: 0 }));
+    const botao = document.getElementById("btnAddTopicosLote");
+    operacaoTopicoEmAndamento = true;
+    botao.disabled = true;
+    try {
+        await exigirNuvemTopicos().criarLote(materiaAbertaId, topicos, materia.topicos.length);
+        try {
+            atualizarMateria(materiaAbertaId, m => m.topicos.push(...topicos));
+        } catch (erroLocal) {
+            await Promise.allSettled(topicos.map(topico => exigirNuvemTopicos().excluir(topico.id)));
+            throw erroLocal;
+        }
+        area.value = "";
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao criar tópicos em lote", erro);
+        alert("Os tópicos não foram adicionados porque não foi possível confirmar o lote nas duas cópias.");
+    } finally {
+        operacaoTopicoEmAndamento = false;
+        botao.disabled = false;
+    }
 });
 
 // ---------- Notas ----------
@@ -1026,8 +1721,8 @@ function renderizarListaNotas(m) {
             <div class="text-muted text-truncate" style="font-size:.72rem;">${esc((n.conteudo || "").replace(/\s+/g, " ").slice(0, 70))}</div>
             ${(n.tags || []).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${n.tags.map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
         </button>`).join("");
-    container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", () => {
-        if (String(notaSelecionadaId) === b.dataset.id || !salvarNotaPendente()) return;
+    container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", async () => {
+        if (String(notaSelecionadaId) === b.dataset.id || !await salvarNotaPendente()) return;
         notaSelecionadaId = b.dataset.id;
         const mm = materiaPorId(materiaAbertaId);
         renderizarListaNotas(mm);
@@ -1051,17 +1746,35 @@ function renderizarEditorNota(m) {
     if (!preview.classList.contains("d-none")) preview.innerHTML = renderizarMarkdown(nota.conteudo);
 }
 
-function criarNota(titulo, conteudo) {
-    if (!salvarNotaPendente()) return;
-    const id = novoId();
-    atualizarMateria(materiaAbertaId, m => m.notas.unshift({
-        id, titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [], fixada: false,
+async function criarNota(titulo, conteudo) {
+    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return false;
+    const nota = {
+        id: novoId(), titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [], fixada: false,
         criadaEm: hojeISO(), atualizadaEm: hojeISO()
-    }));
-    notaSelecionadaId = id;
-    renderizarWorkspace();
-    renderizarMaterias();
-    document.getElementById("notaTitulo").focus();
+    };
+    operacaoNotaEmAndamento = true;
+    try {
+        const registroRemoto = await exigirNuvemNotas().criar(materiaAbertaId, nota);
+        nota.criadaEm = registroRemoto.criadaEm || nota.criadaEm;
+        nota.atualizadaEm = registroRemoto.atualizadaEm || nota.atualizadaEm;
+        try {
+            atualizarMateria(materiaAbertaId, m => m.notas.unshift(nota));
+        } catch (erroLocal) {
+            await exigirNuvemNotas().excluir(nota.id);
+            throw erroLocal;
+        }
+        notaSelecionadaId = nota.id;
+        renderizarWorkspace();
+        renderizarMaterias();
+        document.getElementById("notaTitulo").focus();
+        return true;
+    } catch (erro) {
+        console.error("Falha ao criar nota de forma sincronizada", erro);
+        alert("A nota não foi criada porque não foi possível confirmar a operação nas duas cópias.");
+        return false;
+    } finally {
+        operacaoNotaEmAndamento = false;
+    }
 }
 
 function capturarNotaParaSalvar() {
@@ -1075,37 +1788,76 @@ function capturarNotaParaSalvar() {
     };
 }
 
-function salvarNotaPendente() {
-    if (!salvamentoNotaPendente) return true;
+async function salvarNotaPendente() {
     clearTimeout(timerAutoSave);
     timerAutoSave = null;
-    const pendente = salvamentoNotaPendente;
-    try {
-        atualizarMateria(pendente.materiaId, m => {
-            const n = m.notas.find(x => String(x.id) === String(pendente.notaId));
-            if (!n) return;
-            n.titulo = pendente.titulo;
-            n.conteudo = pendente.conteudo;
-            n.tags = pendente.tags;
-            n.atualizadaEm = hojeISO();
-        });
-        salvamentoNotaPendente = null;
-        if (String(materiaAbertaId) === String(pendente.materiaId) && String(notaSelecionadaId) === String(pendente.notaId)) {
-            const status = document.getElementById("statusSalvamento");
-            status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Salvo</span>';
-            setTimeout(() => {
-                if (!salvamentoNotaPendente) status.textContent = "Salva sozinho enquanto você digita.";
-            }, 1500);
-            const materiaAtual = materiaPorId(materiaAbertaId);
-            if (materiaAtual) renderizarListaNotas(materiaAtual);
-        }
-        renderizarMaterias();
+    if (salvamentoNotaEmAndamento) {
+        const salvouAnterior = await salvamentoNotaEmAndamento;
+        if (!salvouAnterior) return false;
+        if (salvamentoNotaPendente) return salvarNotaPendente();
         return true;
-    } catch (erro) {
-        const status = document.getElementById("statusSalvamento");
-        status.innerHTML = '<span class="text-danger"><i class="bi-exclamation-triangle-fill"></i> Não foi possível salvar.</span>';
-        return false;
     }
+    if (!salvamentoNotaPendente) return true;
+    const pendente = salvamentoNotaPendente;
+    salvamentoNotaPendente = null;
+    const materia = materiaPorId(pendente.materiaId);
+    const notaAtual = materia?.notas.find(nota => String(nota.id) === String(pendente.notaId));
+    if (!notaAtual) return true;
+    const anterior = {
+        titulo: notaAtual.titulo,
+        conteudo: notaAtual.conteudo,
+        tags: [...(notaAtual.tags || [])]
+    };
+    const tarefa = (async () => {
+        try {
+            const registroRemoto = await exigirNuvemNotas().atualizar(pendente.notaId, {
+                titulo: pendente.titulo,
+                conteudo: pendente.conteudo,
+                tags: pendente.tags
+            });
+            try {
+                atualizarMateria(pendente.materiaId, m => {
+                    const n = m.notas.find(x => String(x.id) === String(pendente.notaId));
+                    if (!n) return;
+                    n.titulo = pendente.titulo;
+                    n.conteudo = pendente.conteudo;
+                    n.tags = pendente.tags;
+                    n.atualizadaEm = registroRemoto.atualizadaEm || hojeISO();
+                });
+            } catch (erroLocal) {
+                await exigirNuvemNotas().atualizar(pendente.notaId, anterior);
+                throw erroLocal;
+            }
+            if (String(materiaAbertaId) === String(pendente.materiaId) && String(notaSelecionadaId) === String(pendente.notaId)) {
+                const status = document.getElementById("statusSalvamento");
+                status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Salvo na nuvem</span>';
+                setTimeout(() => {
+                    if (!salvamentoNotaPendente && !salvamentoNotaEmAndamento) status.textContent = "Salva sozinho enquanto você digita.";
+                }, 1500);
+                const materiaAtual = materiaPorId(materiaAbertaId);
+                if (materiaAtual) {
+                    renderizarListaNotas(materiaAtual);
+                    const notaAtual = materiaAtual.notas.find(nota => String(nota.id) === String(pendente.notaId));
+                    if (notaAtual) {
+                        document.getElementById("infoNota").textContent = `Criada em ${dataBR(notaAtual.criadaEm)} · ${document.getElementById("notaConteudo").value.length} caracteres`;
+                    }
+                }
+            }
+            renderizarMaterias();
+            return true;
+        } catch (erro) {
+            if (!salvamentoNotaPendente) salvamentoNotaPendente = pendente;
+            console.error("Falha no salvamento automático da nota", erro);
+            const status = document.getElementById("statusSalvamento");
+            status.innerHTML = '<span class="text-danger"><i class="bi-exclamation-triangle-fill"></i> Não foi possível salvar na nuvem.</span>';
+            return false;
+        }
+    })();
+    salvamentoNotaEmAndamento = tarefa;
+    const salvou = await tarefa;
+    salvamentoNotaEmAndamento = null;
+    if (salvou && salvamentoNotaPendente) return salvarNotaPendente();
+    return salvou;
 }
 
 function agendarSalvamento() {
@@ -1113,28 +1865,72 @@ function agendarSalvamento() {
     if (!salvamentoNotaPendente) return;
     document.getElementById("statusSalvamento").innerHTML = '<span class="text-muted"><i class="bi-pencil"></i> Digitando...</span>';
     clearTimeout(timerAutoSave);
-    timerAutoSave = setTimeout(salvarNotaPendente, 600);
+    timerAutoSave = setTimeout(() => { void salvarNotaPendente(); }, 600);
 }
 ["notaTitulo", "notaConteudo", "notaTags"].forEach(id => document.getElementById(id).addEventListener("input", agendarSalvamento));
 
-document.getElementById("btnNovaNota").addEventListener("click", () => criarNota("Nova nota", ""));
+document.getElementById("btnNovaNota").addEventListener("click", async () => criarNota("Nova nota", ""));
 document.getElementById("buscaNotas").addEventListener("input", e => { buscaNotasTexto = e.target.value; renderizarListaNotas(materiaPorId(materiaAbertaId)); });
-document.getElementById("btnFixarNota").addEventListener("click", () => {
-    if (!salvarNotaPendente()) return;
-    atualizarMateria(materiaAbertaId, m => {
-        const n = m.notas.find(x => String(x.id) === String(notaSelecionadaId));
-        if (n) n.fixada = !n.fixada;
-    });
-    renderizarWorkspace();
+document.getElementById("btnFixarNota").addEventListener("click", async () => {
+    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return;
+    const materia = materiaPorId(materiaAbertaId);
+    const nota = materia?.notas.find(item => String(item.id) === String(notaSelecionadaId));
+    if (!nota) return;
+    const fixadaAnterior = nota.fixada === true;
+    const novaFixacao = !fixadaAnterior;
+    operacaoNotaEmAndamento = true;
+    try {
+        const registroRemoto = await exigirNuvemNotas().atualizar(nota.id, { fixada: novaFixacao });
+        try {
+            atualizarMateria(materiaAbertaId, m => {
+                const atual = m.notas.find(item => String(item.id) === String(nota.id));
+                if (atual) {
+                    atual.fixada = novaFixacao;
+                    atual.atualizadaEm = registroRemoto.atualizadaEm || atual.atualizadaEm;
+                }
+            });
+        } catch (erroLocal) {
+            await exigirNuvemNotas().atualizar(nota.id, { fixada: fixadaAnterior });
+            throw erroLocal;
+        }
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao fixar a nota de forma sincronizada", erro);
+        alert("A fixação não foi alterada porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoNotaEmAndamento = false;
+    }
 });
-document.getElementById("btnExcluirNota").addEventListener("click", () => {
-    if (!salvarNotaPendente()) return;
-    if (!confirm("Excluir esta nota?")) return;
-    atualizarMateria(materiaAbertaId, m => { m.notas = m.notas.filter(x => String(x.id) !== String(notaSelecionadaId)); });
-    const m = materiaPorId(materiaAbertaId);
-    notaSelecionadaId = m.notas.length ? m.notas[0].id : null;
-    renderizarWorkspace();
-    renderizarMaterias();
+document.getElementById("btnExcluirNota").addEventListener("click", async () => {
+    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return;
+    const materia = materiaPorId(materiaAbertaId);
+    const nota = materia?.notas.find(item => String(item.id) === String(notaSelecionadaId));
+    if (!nota || !confirm(`Excluir a nota “${nota.titulo || "Sem título"}” das duas cópias?`)) return;
+    const notasAnteriores = materia.notas.slice();
+    operacaoNotaEmAndamento = true;
+    try {
+        atualizarMateria(materiaAbertaId, m => {
+            m.notas = m.notas.filter(item => String(item.id) !== String(nota.id));
+        });
+        try {
+            await exigirNuvemNotas().excluir(nota.id);
+        } catch (erroRemoto) {
+            atualizarMateria(materiaAbertaId, m => { m.notas = notasAnteriores; });
+            throw erroRemoto;
+        }
+        const materiaAtual = materiaPorId(materiaAbertaId);
+        notaSelecionadaId = materiaAtual.notas.length ? (materiaAtual.notas.find(item => item.fixada) || materiaAtual.notas[0]).id : null;
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao excluir nota de forma sincronizada", erro);
+        alert("A nota não foi excluída porque o Supabase não confirmou a operação.");
+        renderizarWorkspace();
+        renderizarMaterias();
+    } finally {
+        operacaoNotaEmAndamento = false;
+    }
 });
 document.getElementById("btnPreviewNota").addEventListener("click", () => {
     const area = document.getElementById("notaConteudo");
@@ -1164,19 +1960,50 @@ function aplicarFormatoLinha(marca) {
 document.querySelectorAll("[data-fmt]").forEach(b => b.addEventListener("click", () => aplicarFormato(b.dataset.fmt, b.dataset.fmt)));
 document.querySelectorAll("[data-linha]").forEach(b => b.addEventListener("click", () => aplicarFormatoLinha(b.dataset.linha)));
 
-document.getElementById("btnNotaViraCard").addEventListener("click", () => {
-    if (!salvarNotaPendente()) return;
+document.getElementById("btnNotaViraCard").addEventListener("click", async () => {
+    if (!await salvarNotaPendente()) return;
     const area = document.getElementById("notaConteudo");
     const selecionado = area.value.slice(area.selectionStart, area.selectionEnd).trim();
     if (!selecionado) { alert("Selecione no texto o trecho que vira a resposta do flashcard."); return; }
     const frente = prompt("Pergunta do flashcard:", document.getElementById("notaTitulo").value);
     if (!frente) return;
-    atualizarMateria(materiaAbertaId, m => m.cards.push({ id: novoId(), frente, verso: selecionado, caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 }));
-    renderizarWorkspace();
-    renderizarMaterias();
+    await criarFlashcardSincronizado(frente, selecionado);
 });
 
 // ---------- Flashcards ----------
+function limparEdicaoCard() {
+    cardEmEdicaoId = null;
+    document.getElementById("formCard").reset();
+    document.getElementById("textoBtnSalvarCard").textContent = "Criar";
+    document.querySelector("#btnSalvarCard i").className = "bi-plus-lg me-1";
+    document.getElementById("btnCancelarEdicaoCard").classList.add("d-none");
+}
+
+async function criarFlashcardSincronizado(frente, verso) {
+    if (operacaoCardEmAndamento) return false;
+    const card = { id: novoId(), frente: frente.trim(), verso: verso.trim(), caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 };
+    if (!card.frente || !card.verso) return false;
+    operacaoCardEmAndamento = true;
+    try {
+        await exigirNuvemFlashcards().criar(materiaAbertaId, card);
+        try {
+            atualizarMateria(materiaAbertaId, m => m.cards.push(card));
+        } catch (erroLocal) {
+            await exigirNuvemFlashcards().excluir(card.id);
+            throw erroLocal;
+        }
+        renderizarWorkspace();
+        renderizarMaterias();
+        return true;
+    } catch (erro) {
+        console.error("Falha ao criar flashcard de forma sincronizada", erro);
+        alert("O flashcard não foi criado porque não foi possível confirmar o conteúdo e o progresso nas duas cópias.");
+        return false;
+    } finally {
+        operacaoCardEmAndamento = false;
+    }
+}
+
 function renderizarCards(m) {
     const venc = cardsVencidos(m).length;
     document.getElementById("resumoCards").innerHTML =
@@ -1196,30 +2023,98 @@ function renderizarCards(m) {
                     <div class="text-muted small">${esc(c.verso)}</div>
                     <div class="text-muted" style="font-size:.7rem;">Próxima revisão: ${dataBR(c.proxima)} · ${c.acertos} acertos / ${c.erros} erros</div>
                 </div>
-                <button class="btn btn-sm btn-outline-danger btn-excluir-card" data-id="${c.id}"><i class="bi-trash"></i></button>
+                <button class="btn btn-sm btn-outline-secondary btn-editar-card" data-id="${c.id}" title="Editar flashcard"><i class="bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger btn-excluir-card" data-id="${c.id}" title="Excluir flashcard"><i class="bi-trash"></i></button>
             </div>
         </div>`).join("");
-    container.querySelectorAll(".btn-excluir-card").forEach(b => b.addEventListener("click", () => {
-        atualizarMateria(materiaAbertaId, mm => { mm.cards = mm.cards.filter(x => String(x.id) !== b.dataset.id); });
-        renderizarWorkspace();
-        renderizarMaterias();
+    container.querySelectorAll(".btn-editar-card").forEach(b => b.addEventListener("click", () => {
+        if (operacaoCardEmAndamento) return;
+        const card = materiaPorId(materiaAbertaId)?.cards.find(item => String(item.id) === b.dataset.id);
+        if (!card) return;
+        cardEmEdicaoId = card.id;
+        document.getElementById("cardFrente").value = card.frente;
+        document.getElementById("cardVerso").value = card.verso;
+        document.getElementById("textoBtnSalvarCard").textContent = "Salvar";
+        document.querySelector("#btnSalvarCard i").className = "bi-check-lg me-1";
+        document.getElementById("btnCancelarEdicaoCard").classList.remove("d-none");
+        document.getElementById("cardFrente").focus();
+    }));
+    container.querySelectorAll(".btn-excluir-card").forEach(b => b.addEventListener("click", async () => {
+        if (operacaoCardEmAndamento) return;
+        const materia = materiaPorId(materiaAbertaId);
+        const card = materia?.cards.find(item => String(item.id) === b.dataset.id);
+        if (!card || !confirm(`Excluir o flashcard “${card.frente}” e o progresso relacionado de todos os participantes?`)) return;
+        const cardsAnteriores = materia.cards.slice();
+        operacaoCardEmAndamento = true;
+        try {
+            atualizarMateria(materiaAbertaId, mm => { mm.cards = mm.cards.filter(item => String(item.id) !== String(card.id)); });
+            try {
+                await exigirNuvemFlashcards().excluir(card.id);
+            } catch (erroRemoto) {
+                atualizarMateria(materiaAbertaId, mm => { mm.cards = cardsAnteriores; });
+                throw erroRemoto;
+            }
+            if (String(cardEmEdicaoId) === String(card.id)) limparEdicaoCard();
+            renderizarWorkspace();
+            renderizarMaterias();
+        } catch (erro) {
+            console.error("Falha ao excluir flashcard de forma sincronizada", erro);
+            alert("O flashcard não foi excluído porque o Supabase não confirmou a operação.");
+            renderizarWorkspace();
+            renderizarMaterias();
+        } finally {
+            operacaoCardEmAndamento = false;
+        }
     }));
 }
 
-document.getElementById("formCard").addEventListener("submit", e => {
+document.getElementById("formCard").addEventListener("submit", async e => {
     e.preventDefault();
-    atualizarMateria(materiaAbertaId, m => m.cards.push({
-        id: novoId(),
-        frente: document.getElementById("cardFrente").value.trim(),
-        verso: document.getElementById("cardVerso").value.trim(),
-        caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0
-    }));
-    e.target.reset();
-    renderizarWorkspace();
-    renderizarMaterias();
+    if (operacaoCardEmAndamento) return;
+    const frente = document.getElementById("cardFrente").value.trim();
+    const verso = document.getElementById("cardVerso").value.trim();
+    if (!frente || !verso) return;
+    if (!cardEmEdicaoId) {
+        if (await criarFlashcardSincronizado(frente, verso)) limparEdicaoCard();
+        return;
+    }
+    const materia = materiaPorId(materiaAbertaId);
+    const card = materia?.cards.find(item => String(item.id) === String(cardEmEdicaoId));
+    if (!card) { limparEdicaoCard(); return; }
+    const anterior = { frente: card.frente, verso: card.verso };
+    operacaoCardEmAndamento = true;
+    try {
+        await exigirNuvemFlashcards().atualizar(card.id, { frente, verso });
+        try {
+            atualizarMateria(materiaAbertaId, m => {
+                const atual = m.cards.find(item => String(item.id) === String(card.id));
+                if (atual) Object.assign(atual, { frente, verso });
+            });
+        } catch (erroLocal) {
+            await exigirNuvemFlashcards().atualizar(card.id, anterior);
+            throw erroLocal;
+        }
+        limparEdicaoCard();
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao editar flashcard de forma sincronizada", erro);
+        alert("O flashcard não foi alterado porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoCardEmAndamento = false;
+    }
 });
+document.getElementById("btnCancelarEdicaoCard").addEventListener("click", limparEdicaoCard);
 
 // ---------- Materiais / links ----------
+function limparEdicaoLink() {
+    linkEmEdicaoId = null;
+    document.getElementById("formLink").reset();
+    document.getElementById("textoBtnSalvarLink").textContent = "Salvar";
+    document.querySelector("#btnSalvarLink i").className = "bi-plus-lg me-1";
+    document.getElementById("btnCancelarEdicaoLink").classList.add("d-none");
+}
+
 function renderizarLinks(m) {
     const container = document.getElementById("listaLinks");
     if (!m.links.length) {
@@ -1229,34 +2124,115 @@ function renderizarLinks(m) {
     container.innerHTML = m.links.map(l => {
         const href = urlHttpSegura(l.url);
         return `
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-            <div class="min-w-0">
+        <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+            <div class="min-w-0 flex-grow-1">
                 <div class="fw-semibold small">${esc(l.titulo)}</div>
                 ${href
                     ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="small text-truncate d-block">${esc(l.url)}</a>`
                     : `<span class="small text-danger">URL inválida</span>`}
             </div>
-            <button class="btn btn-sm btn-outline-danger btn-excluir-link" data-id="${l.id}"><i class="bi-trash"></i></button>
+            <button class="btn btn-sm btn-outline-secondary btn-editar-link" data-id="${l.id}" title="Editar material"><i class="bi-pencil"></i></button>
+            <button class="btn btn-sm btn-outline-danger btn-excluir-link" data-id="${l.id}" title="Excluir material"><i class="bi-trash"></i></button>
         </div>`;
     }).join("");
-    container.querySelectorAll(".btn-excluir-link").forEach(b => b.addEventListener("click", () => {
-        atualizarMateria(materiaAbertaId, mm => { mm.links = mm.links.filter(x => String(x.id) !== b.dataset.id); });
-        renderizarWorkspace();
+    container.querySelectorAll(".btn-editar-link").forEach(b => b.addEventListener("click", () => {
+        if (operacaoLinkEmAndamento) return;
+        const link = materiaPorId(materiaAbertaId)?.links.find(item => String(item.id) === b.dataset.id);
+        if (!link) return;
+        linkEmEdicaoId = link.id;
+        document.getElementById("linkTitulo").value = link.titulo;
+        document.getElementById("linkUrl").value = link.url;
+        document.getElementById("textoBtnSalvarLink").textContent = "Atualizar";
+        document.querySelector("#btnSalvarLink i").className = "bi-check-lg me-1";
+        document.getElementById("btnCancelarEdicaoLink").classList.remove("d-none");
+        document.getElementById("linkTitulo").focus();
+    }));
+    container.querySelectorAll(".btn-excluir-link").forEach(b => b.addEventListener("click", async () => {
+        if (operacaoLinkEmAndamento) return;
+        const materia = materiaPorId(materiaAbertaId);
+        const link = materia?.links.find(item => String(item.id) === b.dataset.id);
+        if (!link || !confirm(`Excluir o material “${link.titulo}” do espaço compartilhado para todos os participantes?`)) return;
+        const linksAnteriores = materia.links.slice();
+        operacaoLinkEmAndamento = true;
+        try {
+            atualizarMateria(materiaAbertaId, mm => { mm.links = mm.links.filter(item => String(item.id) !== String(link.id)); });
+            try {
+                await exigirNuvemLinks().excluir(link.id);
+            } catch (erroRemoto) {
+                atualizarMateria(materiaAbertaId, mm => { mm.links = linksAnteriores; });
+                throw erroRemoto;
+            }
+            if (String(linkEmEdicaoId) === String(link.id)) limparEdicaoLink();
+            renderizarWorkspace();
+            renderizarMaterias();
+        } catch (erro) {
+            console.error("Falha ao excluir material de forma sincronizada", erro);
+            alert("O material não foi excluído porque o Supabase não confirmou a operação.");
+            renderizarWorkspace();
+            renderizarMaterias();
+        } finally {
+            operacaoLinkEmAndamento = false;
+        }
     }));
 }
 
-document.getElementById("formLink").addEventListener("submit", e => {
+document.getElementById("formLink").addEventListener("submit", async e => {
     e.preventDefault();
+    if (operacaoLinkEmAndamento) return;
+    const titulo = document.getElementById("linkTitulo").value.trim();
     const url = urlHttpSegura(document.getElementById("linkUrl").value);
     if (!url) { alert("Informe uma URL válida iniciada por http:// ou https://."); return; }
-    atualizarMateria(materiaAbertaId, m => m.links.push({
-        id: novoId(),
-        titulo: document.getElementById("linkTitulo").value.trim(),
-        url
-    }));
-    e.target.reset();
-    renderizarWorkspace();
+    if (!titulo) return;
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia) return;
+    if (!linkEmEdicaoId) {
+        const link = { id: novoId(), titulo, url };
+        operacaoLinkEmAndamento = true;
+        try {
+            await exigirNuvemLinks().criar(materia.id, link);
+            try {
+                atualizarMateria(materia.id, m => m.links.push(link));
+            } catch (erroLocal) {
+                await exigirNuvemLinks().excluir(link.id);
+                throw erroLocal;
+            }
+            limparEdicaoLink();
+            renderizarWorkspace();
+            renderizarMaterias();
+        } catch (erro) {
+            console.error("Falha ao criar material de forma sincronizada", erro);
+            alert("O material não foi criado porque o Supabase não confirmou a operação.");
+        } finally {
+            operacaoLinkEmAndamento = false;
+        }
+        return;
+    }
+    const link = materia.links.find(item => String(item.id) === String(linkEmEdicaoId));
+    if (!link) { limparEdicaoLink(); return; }
+    const anterior = { titulo: link.titulo, url: link.url };
+    operacaoLinkEmAndamento = true;
+    try {
+        await exigirNuvemLinks().atualizar(link.id, { titulo, url });
+        try {
+            atualizarMateria(materia.id, m => {
+                const atual = m.links.find(item => String(item.id) === String(link.id));
+                if (atual) Object.assign(atual, { titulo, url });
+            });
+        } catch (erroLocal) {
+            await exigirNuvemLinks().atualizar(link.id, anterior);
+            throw erroLocal;
+        }
+        limparEdicaoLink();
+        renderizarWorkspace();
+        renderizarMaterias();
+    } catch (erro) {
+        console.error("Falha ao editar material de forma sincronizada", erro);
+        alert("O material não foi alterado porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoLinkEmAndamento = false;
+    }
 });
+document.getElementById("btnCancelarEdicaoLink").addEventListener("click", limparEdicaoLink);
 
 // ---------- Resumo da matéria ----------
 function renderizarResumoMateria(m) {
@@ -1363,28 +2339,51 @@ document.getElementById("btnMostrarVerso").addEventListener("click", () => {
     document.getElementById("btnMostrarVerso").classList.add("d-none");
 });
 
-document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEventListener("click", async () => {
+    if (operacaoCardEmAndamento) return;
     const item = filaRevisao[indiceRevisao];
     if (!item) return;
     const nivel = b.dataset.nivel;
-    let cardFrente = "";
-    atualizarMateria(item.materiaId, m => {
-        const c = m.cards.find(x => String(x.id) === String(item.cardId));
-        if (!c) return;
-        cardFrente = c.frente;
-        if (nivel === "acertei") { c.caixa = Math.min(5, c.caixa + 1); c.acertos++; }
-        else if (nivel === "dificil") { c.acertos++; }
-        else { c.caixa = 1; c.erros++; }
-        c.proxima = somarDias(hojeISO(), nivel === "errei" ? 1 : INTERVALO_CAIXA[c.caixa]);
-    });
-    if (nivel === "errei" && document.getElementById("chkRegistrarErro").checked && cardFrente) {
-        registrarErro(item.materiaId, cardFrente, "Errei na revisão de flashcards");
-        if (document.getElementById("listaErros")) renderizarErros();
+    const materia = materiaPorId(item.materiaId);
+    const card = materia?.cards.find(c => String(c.id) === String(item.cardId));
+    if (!card) return;
+    const anterior = { caixa: card.caixa, proxima: card.proxima, acertos: card.acertos, erros: card.erros };
+    const novo = { ...anterior };
+    if (nivel === "acertei") { novo.caixa = Math.min(5, novo.caixa + 1); novo.acertos += 1; }
+    else if (nivel === "dificil") { novo.acertos += 1; }
+    else { novo.caixa = 1; novo.erros += 1; }
+    novo.proxima = somarDias(hojeISO(), nivel === "errei" ? 1 : INTERVALO_CAIXA[novo.caixa]);
+    operacaoCardEmAndamento = true;
+    try {
+        await exigirNuvemFlashcards().atualizarProgresso(card.id, novo);
+        try {
+            atualizarMateria(item.materiaId, m => {
+                const atual = m.cards.find(c => String(c.id) === String(card.id));
+                if (atual) Object.assign(atual, novo);
+            });
+        } catch (erroLocal) {
+            await exigirNuvemFlashcards().atualizarProgresso(card.id, anterior);
+            throw erroLocal;
+        }
+        if (nivel === "errei" && document.getElementById("chkRegistrarErro").checked) {
+            try {
+                await registrarErro(item.materiaId, card.frente, "Errei na revisão de flashcards");
+                if (document.getElementById("listaErros")) renderizarErros();
+            } catch (falhaErro) {
+                console.error("Falha ao enviar o erro do flashcard ao caderno", falhaErro);
+                alert("O progresso do flashcard foi salvo, mas o registro não entrou no Caderno de Erros. Tente registrá-lo manualmente.");
+            }
+        }
+        indiceRevisao++;
+        mostrarCardRevisao();
+        renderizarMaterias();
+        if (materiaAbertaId) { const mm = materiaPorId(materiaAbertaId); if (mm) renderizarCards(mm); }
+    } catch (erro) {
+        console.error("Falha ao salvar a revisão do flashcard", erro);
+        alert("A resposta não foi registrada porque o Supabase não confirmou o progresso. Tente novamente.");
+    } finally {
+        operacaoCardEmAndamento = false;
     }
-    indiceRevisao++;
-    mostrarCardRevisao();
-    renderizarMaterias();
-    if (materiaAbertaId) { const mm = materiaPorId(materiaAbertaId); if (mm) renderizarCards(mm); }
 }));
 
 document.getElementById("btnRevisarTudo").addEventListener("click", () => iniciarRevisao(null));
@@ -1394,6 +2393,51 @@ document.getElementById("btnRevisarMateria").addEventListener("click", () => ini
 // ============================================================
 // CRONOGRAMA
 // ============================================================
+let operacaoTarefaEmAndamento = false;
+let tarefaEmEdicaoId = null;
+
+function exigirNuvemTarefas() {
+    if (!window.HUB_CLOUD_TASKS) throw new Error("A conexão do cronograma com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_TASKS;
+}
+
+function limparEdicaoTarefa() {
+    tarefaEmEdicaoId = null;
+    document.getElementById("formTarefa").reset();
+    document.getElementById("tarefaData").value = hojeISO();
+    document.getElementById("textoBtnSalvarTarefa").textContent = "Adicionar";
+    document.querySelector("#btnSalvarTarefa i").className = "bi-plus-lg me-1";
+    document.getElementById("btnCancelarEdicaoTarefa").classList.add("d-none");
+}
+
+async function alternarStatusTarefaSincronizada(id) {
+    if (operacaoTarefaEmAndamento) return;
+    const tarefa = obterTarefas().find(item => String(item.id) === String(id));
+    if (!tarefa) return;
+    const statusAnterior = tarefa.status;
+    const novoStatus = statusAnterior === "pendente" ? "concluido" : "pendente";
+    operacaoTarefaEmAndamento = true;
+    try {
+        await exigirNuvemTarefas().atualizar(tarefa.id, { status: novoStatus });
+        try {
+            const tarefas = obterTarefas();
+            const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
+            if (atual) atual.status = novoStatus;
+            salvar(LS.tarefas, tarefas);
+        } catch (erroLocal) {
+            await exigirNuvemTarefas().atualizar(tarefa.id, { status: statusAnterior });
+            throw erroLocal;
+        }
+        renderizarTudoCronograma();
+        if (materiaAbertaId) renderizarWorkspace();
+    } catch (erro) {
+        console.error("Falha ao alterar o estado da sessão", erro);
+        alert("O estado da sessão não foi alterado porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoTarefaEmAndamento = false;
+    }
+}
+
 function renderizarTarefas() {
     const tarefas = obterTarefas();
     const pendentes = tarefas.filter(t => t.status === "pendente").sort((a, b) => (a.data || "").localeCompare(b.data || ""));
@@ -1407,8 +2451,9 @@ function renderizarTarefas() {
                     <div class="fw-semibold">${esc(t.topico)}</div>
                 </div>
                 <div class="d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-${concluida ? "secondary" : "success"} btn-toggle-tarefa" data-id="${t.id}"><i class="bi-${concluida ? "arrow-counterclockwise" : "check-lg"}"></i></button>
-                    <button class="btn btn-sm btn-outline-danger btn-excluir-tarefa" data-id="${t.id}"><i class="bi-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary btn-editar-tarefa" data-id="${t.id}" title="Editar sessão"><i class="bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-${concluida ? "secondary" : "success"} btn-toggle-tarefa" data-id="${t.id}" title="${concluida ? "Reabrir" : "Concluir"} sessão"><i class="bi-${concluida ? "arrow-counterclockwise" : "check-lg"}"></i></button>
+                    <button class="btn btn-sm btn-outline-danger btn-excluir-tarefa" data-id="${t.id}" title="Excluir sessão"><i class="bi-trash"></i></button>
                 </div>
             </div>
         </div>`;
@@ -1416,35 +2461,104 @@ function renderizarTarefas() {
     document.getElementById("listaPendentes").innerHTML = pendentes.length ? pendentes.map(t => linha(t, false)).join("") : `<p class="text-muted small fst-italic">Nada pendente.</p>`;
     document.getElementById("listaConcluidas").innerHTML = concluidas.length ? concluidas.map(t => linha(t, true)).join("") : `<p class="text-muted small fst-italic">Nenhuma concluída ainda.</p>`;
 
-    document.querySelectorAll(".btn-toggle-tarefa").forEach(btn => btn.addEventListener("click", () => {
-        const tarefas2 = obterTarefas();
-        const t = tarefas2.find(x => String(x.id) === btn.dataset.id);
-        if (!t) return;
-        t.status = t.status === "pendente" ? "concluido" : "pendente";
-        salvar(LS.tarefas, tarefas2);
-        renderizarTudoCronograma();
+    document.querySelectorAll(".btn-editar-tarefa").forEach(btn => btn.addEventListener("click", () => {
+        if (operacaoTarefaEmAndamento) return;
+        const tarefa = obterTarefas().find(item => String(item.id) === btn.dataset.id);
+        if (!tarefa) return;
+        tarefaEmEdicaoId = tarefa.id;
+        document.getElementById("tarefaMateria").value = tarefa.materiaId;
+        document.getElementById("tarefaTopico").value = tarefa.topico;
+        document.getElementById("tarefaData").value = tarefa.data;
+        document.getElementById("textoBtnSalvarTarefa").textContent = "Atualizar";
+        document.querySelector("#btnSalvarTarefa i").className = "bi-check-lg me-1";
+        document.getElementById("btnCancelarEdicaoTarefa").classList.remove("d-none");
+        document.getElementById("tarefaTopico").focus();
     }));
-    document.querySelectorAll(".btn-excluir-tarefa").forEach(btn => btn.addEventListener("click", () => {
-        salvar(LS.tarefas, obterTarefas().filter(x => String(x.id) !== btn.dataset.id));
-        renderizarTudoCronograma();
+    document.querySelectorAll(".btn-toggle-tarefa").forEach(btn => btn.addEventListener("click", async () => {
+        await alternarStatusTarefaSincronizada(btn.dataset.id);
+    }));
+    document.querySelectorAll(".btn-excluir-tarefa").forEach(btn => btn.addEventListener("click", async () => {
+        if (operacaoTarefaEmAndamento) return;
+        const tarefas = obterTarefas();
+        const tarefa = tarefas.find(item => String(item.id) === btn.dataset.id);
+        if (!tarefa || !confirm(`Excluir a sessão “${tarefa.topico}” do cronograma compartilhado?`)) return;
+        operacaoTarefaEmAndamento = true;
+        try {
+            salvar(LS.tarefas, tarefas.filter(item => String(item.id) !== String(tarefa.id)));
+            try {
+                await exigirNuvemTarefas().excluir(tarefa.id);
+            } catch (erroRemoto) {
+                salvar(LS.tarefas, tarefas);
+                throw erroRemoto;
+            }
+            if (String(tarefaEmEdicaoId) === String(tarefa.id)) limparEdicaoTarefa();
+            renderizarTudoCronograma();
+            if (materiaAbertaId) renderizarWorkspace();
+        } catch (erro) {
+            console.error("Falha ao excluir sessão de forma sincronizada", erro);
+            alert("A sessão não foi excluída porque o Supabase não confirmou a operação.");
+            renderizarTudoCronograma();
+        } finally {
+            operacaoTarefaEmAndamento = false;
+        }
     }));
 }
 
-document.getElementById("formTarefa").addEventListener("submit", (e) => {
+document.getElementById("formTarefa").addEventListener("submit", async e => {
     e.preventDefault();
+    if (operacaoTarefaEmAndamento) return;
     const materiaId = document.getElementById("tarefaMateria").value;
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
-    const tarefas = obterTarefas();
-    tarefas.push({
-        id: novoId(), materiaId,
-        topico: document.getElementById("tarefaTopico").value.trim(),
-        data: document.getElementById("tarefaData").value,
-        status: "pendente"
-    });
-    salvar(LS.tarefas, tarefas);
-    e.target.reset();
-    renderizarTudoCronograma();
+    const topico = document.getElementById("tarefaTopico").value.trim();
+    const data = document.getElementById("tarefaData").value;
+    if (!topico || !data) return;
+    if (!tarefaEmEdicaoId) {
+        const tarefa = { id: novoId(), materiaId, topico, data, status: "pendente", responsavelId: window.HUB_SESSION_CONTEXT?.userId || null };
+        operacaoTarefaEmAndamento = true;
+        try {
+            await exigirNuvemTarefas().criar(tarefa);
+            try {
+                salvar(LS.tarefas, [...obterTarefas(), tarefa]);
+            } catch (erroLocal) {
+                await exigirNuvemTarefas().excluir(tarefa.id);
+                throw erroLocal;
+            }
+            limparEdicaoTarefa();
+            renderizarTudoCronograma();
+        } catch (erro) {
+            console.error("Falha ao criar sessão de forma sincronizada", erro);
+            alert("A sessão não foi criada porque o Supabase não confirmou a operação.");
+        } finally {
+            operacaoTarefaEmAndamento = false;
+        }
+        return;
+    }
+    const tarefa = obterTarefas().find(item => String(item.id) === String(tarefaEmEdicaoId));
+    if (!tarefa) { limparEdicaoTarefa(); return; }
+    const anterior = { materiaId: tarefa.materiaId, topico: tarefa.topico, data: tarefa.data };
+    operacaoTarefaEmAndamento = true;
+    try {
+        await exigirNuvemTarefas().atualizar(tarefa.id, { materiaId, topico, data });
+        try {
+            const tarefas = obterTarefas();
+            const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
+            if (atual) Object.assign(atual, { materiaId, topico, data });
+            salvar(LS.tarefas, tarefas);
+        } catch (erroLocal) {
+            await exigirNuvemTarefas().atualizar(tarefa.id, anterior);
+            throw erroLocal;
+        }
+        limparEdicaoTarefa();
+        renderizarTudoCronograma();
+        if (materiaAbertaId) renderizarWorkspace();
+    } catch (erro) {
+        console.error("Falha ao editar sessão de forma sincronizada", erro);
+        alert("A sessão não foi alterada porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoTarefaEmAndamento = false;
+    }
 });
+document.getElementById("btnCancelarEdicaoTarefa").addEventListener("click", limparEdicaoTarefa);
 
 // ---------- Calendário semanal ----------
 let offsetSemana = 0;
@@ -1489,13 +2603,8 @@ function renderizarCalendario() {
         return `<td class="celula-calendario">${conteudo}</td>`;
     }).join("");
 
-    document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", () => {
-        const tarefas2 = obterTarefas();
-        const t = tarefas2.find(x => String(x.id) === el.dataset.id);
-        if (!t) return;
-        t.status = t.status === "pendente" ? "concluido" : "pendente";
-        salvar(LS.tarefas, tarefas2);
-        renderizarTudoCronograma();
+    document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
+        await alternarStatusTarefaSincronizada(el.dataset.id);
     }));
 }
 
@@ -1511,6 +2620,13 @@ function renderizarTudoCronograma() {
 // ============================================================
 // EDITAL & ESTRATÉGIA
 // ============================================================
+let operacaoEditalEmAndamento = false;
+
+function exigirNuvemEdital() {
+    if (!window.HUB_CLOUD_EXAM) throw new Error("A conexão do edital com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_EXAM;
+}
+
 function calcularPontosTotais(edital) {
     return edital.materias.reduce((acc, m) => acc + (Number(m.questoes) * Number(m.peso)), 0);
 }
@@ -1537,11 +2653,21 @@ function renderizarEdital() {
         const pontos = Number(m.questoes) * Number(m.peso);
         const pct = total > 0 ? (pontos / total) * 100 : 0;
         const cor = pct > 20 ? "bg-danger" : pct > 10 ? "bg-warning" : "bg-info";
+        const topicos = Array.isArray(m.topicos) ? m.topicos : [];
+        const dominados = topicos.filter(topico => topico.concluido === true).length;
+        const checklist = topicos.length ? topicos.map(topico => {
+            const info = topico.concluido ? STATUS_TOPICO.dominado : STATUS_TOPICO.nao;
+            return `<label class="d-flex align-items-center gap-2 py-1 px-2 border rounded bg-white">
+                <input class="form-check-input m-0 check-topico-edital" type="checkbox" data-item-id="${m.id}" data-id="${topico.id}" ${topico.concluido ? "checked" : ""}>
+                <span class="small flex-grow-1">${esc(topico.titulo)}</span>
+                <span class="badge text-bg-${info.cor}">${info.rotulo}</span>
+            </label>`;
+        }).join("") : '<span class="text-muted small fst-italic">Nenhum tópico cadastrado neste edital pessoal.</span>';
         return `
         <tr>
-            <td class="fw-semibold">${esc(nomeDaMateria(m.materiaId))}</td>
-            <td class="text-center"><input type="number" min="0" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
-            <td class="text-center"><input type="number" min="0" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
+            <td class="fw-semibold">${esc(nomeDaMateria(m.materiaId))}<div class="text-muted small fw-normal">${dominados}/${topicos.length} tópicos concluídos</div></td>
+            <td class="text-center"><input type="number" min="0" max="100000" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
+            <td class="text-center"><input type="number" min="0" max="100000" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
             <td class="text-center fw-bold">${pontos.toFixed(1)}</td>
             <td class="text-center" style="min-width:170px;">
                 <div class="d-flex align-items-center gap-2">
@@ -1549,39 +2675,126 @@ function renderizarEdital() {
                     <div class="progress flex-grow-1" style="height:8px;"><div class="progress-bar ${cor}" style="width:${pct}%"></div></div>
                 </div>
             </td>
-            <td class="text-center"><button class="btn btn-sm btn-outline-danger btn-remover-edital" data-id="${m.id}"><i class="bi-trash"></i></button></td>
-        </tr>`;
+            <td class="text-center"><div class="d-flex justify-content-center gap-1"><button class="btn btn-sm btn-outline-success btn-salvar-edital" data-id="${m.id}" title="Salvar questões e peso"><i class="bi-check-lg"></i></button><button class="btn btn-sm btn-outline-danger btn-remover-edital" data-id="${m.id}" title="Remover matéria do edital"><i class="bi-trash"></i></button></div></td>
+        </tr>
+        <tr class="table-light"><td colspan="6"><div class="fw-semibold small mb-2"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><div class="d-grid gap-1">${checklist}</div></td></tr>`;
     }).join("");
 
-    tabela.querySelectorAll(".campo-questoes").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(input.dataset.id, "questoes", Number(input.value) || 0)));
-    tabela.querySelectorAll(".campo-peso").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(input.dataset.id, "peso", Number(input.value) || 0)));
-    tabela.querySelectorAll(".btn-remover-edital").forEach(btn => btn.addEventListener("click", () => {
-        const edital2 = obterEdital();
-        edital2.materias = edital2.materias.filter(m => String(m.id) !== btn.dataset.id);
-        salvar(LS.edital, edital2);
-        renderizarEdital();
+    tabela.querySelectorAll(".btn-salvar-edital").forEach(btn => btn.addEventListener("click", async () => {
+        const questoes = [...tabela.querySelectorAll(".campo-questoes")].find(input => input.dataset.id === btn.dataset.id);
+        const peso = [...tabela.querySelectorAll(".campo-peso")].find(input => input.dataset.id === btn.dataset.id);
+        if (questoes && peso) await atualizarCamposEdital(btn.dataset.id, Number(questoes.value), Number(peso.value));
+    }));
+    tabela.querySelectorAll(".check-topico-edital").forEach(input => input.addEventListener("change", async () => {
+        if (operacaoEditalEmAndamento) { renderizarEdital(); return; }
+        const edital = obterEdital();
+        const item = edital.materias.find(materia => String(materia.id) === input.dataset.itemId);
+        const topico = item?.topicos?.find(atual => String(atual.id) === input.dataset.id);
+        if (!item || !topico) return;
+        const valorAnterior = topico.concluido === true;
+        const novoValor = input.checked;
+        operacaoEditalEmAndamento = true;
+        try {
+            await exigirNuvemEdital().atualizarTopico(topico.id, novoValor);
+            try {
+                topico.concluido = novoValor;
+                salvar(LS.edital, edital);
+            } catch (erroLocal) {
+                await exigirNuvemEdital().atualizarTopico(topico.id, valorAnterior);
+                throw erroLocal;
+            }
+            renderizarEdital();
+        } catch (erro) {
+            console.error("Falha ao atualizar checklist do edital", erro);
+            alert("O tópico não foi alterado porque o Supabase não confirmou a operação.");
+            renderizarEdital();
+        } finally {
+            operacaoEditalEmAndamento = false;
+        }
+    }));
+    tabela.querySelectorAll(".btn-remover-edital").forEach(btn => btn.addEventListener("click", async () => {
+        if (operacaoEditalEmAndamento) return;
+        const edital = obterEdital();
+        const item = edital.materias.find(materia => String(materia.id) === btn.dataset.id);
+        if (!item || !confirm(`Remover “${nomeDaMateria(item.materiaId)}” da sua matriz? O checklist pessoal desta matéria também será removido.`)) return;
+        operacaoEditalEmAndamento = true;
+        try {
+            edital.materias = edital.materias.filter(materia => String(materia.id) !== String(item.id));
+            salvar(LS.edital, edital);
+            try {
+                await exigirNuvemEdital().excluirMateria(item.id);
+            } catch (erroRemoto) {
+                const restaurado = obterEdital();
+                restaurado.materias.push(item);
+                salvar(LS.edital, restaurado);
+                throw erroRemoto;
+            }
+            renderizarEdital();
+        } catch (erro) {
+            console.error("Falha ao remover matéria do edital", erro);
+            alert("A matéria não foi removida do edital porque o Supabase não confirmou a operação.");
+            renderizarEdital();
+        } finally {
+            operacaoEditalEmAndamento = false;
+        }
     }));
 }
 
-function atualizarCampoEdital(id, campo, valor) {
+async function atualizarCamposEdital(id, questoes, peso) {
+    if (operacaoEditalEmAndamento) return;
     const edital = obterEdital();
     const m = edital.materias.find(x => String(x.id) === String(id));
     if (!m) return;
-    m[campo] = valor;
-    salvar(LS.edital, edital);
-    renderizarEdital();
+    const anterior = { questoes: m.questoes, peso: m.peso };
+    operacaoEditalEmAndamento = true;
+    try {
+        await exigirNuvemEdital().atualizarMateria(m.id, { questoes, peso });
+        try {
+            Object.assign(m, { questoes, peso });
+            salvar(LS.edital, edital);
+        } catch (erroLocal) {
+            await exigirNuvemEdital().atualizarMateria(m.id, anterior);
+            throw erroLocal;
+        }
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao atualizar matriz do edital", erro);
+        alert("A matriz não foi alterada porque o Supabase não confirmou a operação. Recarregue se ela estiver aberta em outra sessão.");
+        renderizarEdital();
+    } finally {
+        operacaoEditalEmAndamento = false;
+    }
 }
 
-document.getElementById("formConfigEdital").addEventListener("submit", (e) => {
+document.getElementById("formConfigEdital").addEventListener("submit", async e => {
     e.preventDefault();
+    if (operacaoEditalEmAndamento) return;
     const edital = obterEdital();
-    edital.nomeConcurso = document.getElementById("inputEditalNome").value.trim();
-    edital.banca = document.getElementById("inputEditalBanca").value.trim();
-    edital.vagas = document.getElementById("inputEditalVagas").value.trim();
-    edital.dataProva = document.getElementById("inputEditalData").value;
-    salvar(LS.edital, edital);
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConfigEdital")).hide();
-    renderizarEdital();
+    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva };
+    const configuracao = {
+        nomeConcurso: document.getElementById("inputEditalNome").value.trim(),
+        banca: document.getElementById("inputEditalBanca").value.trim(),
+        vagas: document.getElementById("inputEditalVagas").value.trim(),
+        dataProva: document.getElementById("inputEditalData").value
+    };
+    operacaoEditalEmAndamento = true;
+    try {
+        await exigirNuvemEdital().salvarConfiguracao(configuracao);
+        try {
+            Object.assign(edital, configuracao);
+            salvar(LS.edital, edital);
+        } catch (erroLocal) {
+            await exigirNuvemEdital().salvarConfiguracao(anterior);
+            throw erroLocal;
+        }
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConfigEdital")).hide();
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao salvar configuração do edital", erro);
+        alert("A configuração não foi salva porque o Supabase não confirmou a operação. Recarregue se ela estiver aberta em outra sessão.");
+    } finally {
+        operacaoEditalEmAndamento = false;
+    }
 });
 document.getElementById("modalConfigEdital").addEventListener("show.bs.modal", () => {
     const edital = obterEdital();
@@ -1589,32 +2802,122 @@ document.getElementById("modalConfigEdital").addEventListener("show.bs.modal", (
     document.getElementById("inputEditalBanca").value = edital.banca || "";
     document.getElementById("inputEditalVagas").value = edital.vagas || "";
     document.getElementById("inputEditalData").value = edital.dataProva || "";
+    document.getElementById("btnLimparConfigEdital").classList.toggle("d-none", ![edital.nomeConcurso, edital.banca, edital.vagas, edital.dataProva].some(Boolean));
+});
+document.getElementById("btnLimparConfigEdital").addEventListener("click", async () => {
+    if (operacaoEditalEmAndamento || !confirm("Limpar a configuração geral do concurso? A matriz de matérias e os tópicos serão preservados.")) return;
+    const edital = obterEdital();
+    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva };
+    operacaoEditalEmAndamento = true;
+    try {
+        Object.assign(edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "" });
+        salvar(LS.edital, edital);
+        try {
+            await exigirNuvemEdital().limparConfiguracao();
+        } catch (erroRemoto) {
+            Object.assign(edital, anterior);
+            salvar(LS.edital, edital);
+            throw erroRemoto;
+        }
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConfigEdital")).hide();
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao limpar configuração do edital", erro);
+        alert("A configuração não foi removida porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoEditalEmAndamento = false;
+    }
 });
 
-document.getElementById("formAddMateriaEdital").addEventListener("submit", (e) => {
+document.getElementById("formAddMateriaEdital").addEventListener("submit", async e => {
     e.preventDefault();
+    if (operacaoEditalEmAndamento) return;
     const materiaId = document.getElementById("editalMateriaSelect").value;
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
     const edital = obterEdital();
     if (edital.materias.some(m => String(m.materiaId) === String(materiaId))) { alert("Essa matéria já está na matriz."); return; }
-    edital.materias.push({
-        id: novoId(), materiaId,
-        questoes: Number(document.getElementById("editalQuestoes").value) || 0,
-        peso: Number(document.getElementById("editalPeso").value) || 1
+    const materia = materiaPorId(materiaId);
+    if (!materia) return;
+    const titulos = [];
+    const vistos = new Set();
+    document.getElementById("editalTopicos").value.split(/\r?\n/).map(linha => linha.trim()).filter(Boolean).forEach(titulo => {
+        const chave = titulo.toLocaleLowerCase("pt-BR");
+        if (!vistos.has(chave)) {
+            vistos.add(chave);
+            titulos.push(titulo);
+        }
     });
-    salvar(LS.edital, edital);
-    e.target.reset();
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalAddMateriaEdital")).hide();
-    renderizarEdital();
+    if (titulos.length > 500 || titulos.some(titulo => titulo.length > 1000)) {
+        alert("Informe no máximo 500 tópicos, com até 1.000 caracteres em cada linha.");
+        return;
+    }
+    const item = {
+        id: novoId(), materiaId,
+        questoes: Number(document.getElementById("editalQuestoes").value),
+        peso: Number(document.getElementById("editalPeso").value),
+        topicos: titulos.map(titulo => ({ id: novoId(), titulo, concluido: false }))
+    };
+    operacaoEditalEmAndamento = true;
+    let itemRemotoCriado = false;
+    let topicosRemotosCriados = false;
+    try {
+        await exigirNuvemEdital().adicionarMateria(item);
+        itemRemotoCriado = true;
+        if (item.topicos.length) {
+            await exigirNuvemEdital().adicionarTopicos(item.id, item.topicos);
+            topicosRemotosCriados = true;
+        }
+        try {
+            edital.materias.push(item);
+            salvar(LS.edital, edital);
+        } catch (erroLocal) {
+            await exigirNuvemEdital().excluirMateria(item.id);
+            throw erroLocal;
+        }
+        e.target.reset();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalAddMateriaEdital")).hide();
+        renderizarEdital();
+    } catch (erro) {
+        if (itemRemotoCriado && !topicosRemotosCriados && item.topicos.length) {
+            try { await exigirNuvemEdital().excluirMateria(item.id); } catch (erroCompensacao) {
+                console.error("Falha ao desfazer matéria do edital após erro nos tópicos", erroCompensacao);
+            }
+        }
+        console.error("Falha ao adicionar matéria e tópicos ao edital", erro);
+        alert("A matéria não foi adicionada porque o Supabase não confirmou toda a operação.");
+    } finally {
+        operacaoEditalEmAndamento = false;
+    }
 });
 
 // ============================================================
 // CADERNO DE ERROS
 // ============================================================
-function registrarErro(materiaId, tema, obs) {
+let operacaoErroEmAndamento = false;
+
+function exigirNuvemErros() {
+    if (!window.HUB_CLOUD_ERRORS) throw new Error("A conexão do caderno de erros com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_ERRORS;
+}
+
+function exibirDataErro(data) {
+    const valor = String(data || "");
+    const correspondencia = /^(\d{4})-(\d{2})-(\d{2})$/.exec(valor);
+    return correspondencia ? `${correspondencia[3]}/${correspondencia[2]}/${correspondencia[1]}` : valor;
+}
+
+async function registrarErro(materiaId, tema, obs) {
     const erros = obterErros();
-    erros.push({ id: novoId(), materiaId, tema, obs, data: new Date().toLocaleDateString("pt-BR") });
-    salvar(LS.erros, erros);
+    const erro = { id: novoId(), materiaId, tema, obs, data: hojeISO() };
+    await exigirNuvemErros().criar(erro);
+    try {
+        erros.push(erro);
+        salvar(LS.erros, erros);
+    } catch (erroLocal) {
+        await exigirNuvemErros().excluir(erro.id);
+        throw erroLocal;
+    }
+    return erro;
 }
 
 function renderizarErros() {
@@ -1646,85 +2949,61 @@ function renderizarErros() {
                         <div>
                             <div class="fw-semibold">${esc(er.tema)}</div>
                             ${er.obs ? `<div class="small text-muted">${esc(er.obs)}</div>` : ""}
-                            <div class="small text-muted">${esc(er.data || "")}</div>
+                            <div class="small text-muted">${esc(exibirDataErro(er.data))}</div>
                         </div>
                         <button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}"><i class="bi-trash"></i></button>
                     </li>`).join("")}
             </ul>
         </div>`).join("");
 
-    container.querySelectorAll(".btn-excluir-erro").forEach(btn => btn.addEventListener("click", () => {
-        salvar(LS.erros, obterErros().filter(x => String(x.id) !== btn.dataset.id));
-        renderizarErros();
+    container.querySelectorAll(".btn-excluir-erro").forEach(btn => btn.addEventListener("click", async () => {
+        if (operacaoErroEmAndamento) return;
+        const erros = obterErros();
+        const erro = erros.find(item => String(item.id) === btn.dataset.id);
+        if (!erro || !confirm(`Excluir o registro “${erro.tema}” do seu caderno de erros?`)) return;
+        operacaoErroEmAndamento = true;
+        try {
+            await exigirNuvemErros().excluir(erro.id);
+            salvar(LS.erros, erros.filter(item => String(item.id) !== String(erro.id)));
+            renderizarErros();
+            renderizarMaterias();
+            if (String(materiaAbertaId) === String(erro.materiaId)) renderizarWorkspace();
+        } catch (falha) {
+            console.error("Falha ao excluir registro do caderno de erros", falha);
+            alert("O registro não foi excluído porque o Supabase não confirmou a operação.");
+        } finally {
+            operacaoErroEmAndamento = false;
+        }
     }));
 }
 
-document.getElementById("formErro").addEventListener("submit", (e) => {
+document.getElementById("formErro").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (operacaoErroEmAndamento) return;
     const materiaId = document.getElementById("erroMateria").value;
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
-    registrarErro(materiaId, document.getElementById("erroTema").value.trim(), document.getElementById("erroObs").value.trim());
-    e.target.reset();
-    renderizarErros();
+    operacaoErroEmAndamento = true;
+    try {
+        await registrarErro(materiaId, document.getElementById("erroTema").value.trim(), document.getElementById("erroObs").value.trim());
+        e.target.reset();
+        renderizarErros();
+        renderizarMaterias();
+    } catch (falha) {
+        console.error("Falha ao registrar erro manualmente", falha);
+        alert("O erro não foi registrado porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoErroEmAndamento = false;
+    }
 });
 document.getElementById("filtroErroMateria").addEventListener("change", renderizarErros);
 
 // ============================================================
 // SIMULADOS COM IA (Google Gemini)
 // ============================================================
-const MODELO_GEMINI = "gemini-3.6-flash";
-
-function obterApiKey() { return localStorage.getItem(LS.apiKey) || ""; }
-function salvarApiKeyLS(key) { localStorage.setItem(LS.apiKey, key.trim()); }
-
-function atualizarStatusChave() {
-    const status = document.getElementById("statusChave");
-    const key = obterApiKey();
-    if (key) {
-        status.innerHTML = '<span class="text-success"><i class="bi-check-circle-fill"></i> Chave salva. Pronto para gerar questões.</span>';
-        document.getElementById("inputApiKey").value = key;
-    } else {
-        status.innerHTML = '<span class="text-danger"><i class="bi-exclamation-circle-fill"></i> Nenhuma chave configurada.</span>';
-    }
+function exigirNuvemIA() {
+    if (!window.HUB_CLOUD_AI) throw new Error("A geração segura de simulados ainda não está disponível.");
+    return window.HUB_CLOUD_AI;
 }
-document.getElementById("btnSalvarChave").addEventListener("click", () => {
-    const valor = document.getElementById("inputApiKey").value.trim();
-    if (!valor) return;
-    salvarApiKeyLS(valor);
-    atualizarStatusChave();
-});
-document.getElementById("btnMostrarChave").addEventListener("click", () => {
-    const input = document.getElementById("inputApiKey");
-    input.type = input.type === "password" ? "text" : "password";
-});
-
-async function chamarGemini(systemPrompt, userPrompt) {
-    const apiKey = obterApiKey();
-    if (!apiKey) throw new Error("Configure sua chave da API do Gemini primeiro.");
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-        })
-    });
-    if (!resp.ok) {
-        const textoErro = await resp.text();
-        throw new Error(`Falha na API (status ${resp.status}): ${textoErro.slice(0, 200)}`);
-    }
-    const data = await resp.json();
-    const candidato = data.candidates && data.candidates[0];
-    if (!candidato || !candidato.content) throw new Error("A IA não retornou conteúdo válido.");
-    const texto = candidato.content.parts.map(p => p.text || "").join("");
-    const limpo = texto.replace(/```json|```/g, "").trim();
-    return JSON.parse(limpo);
-}
-
-const SYSTEM_PROMPT = `Você é um elaborador de questões de concurso público (estilo VUNESP/FGV/CESPE) para Guarda Civil Municipal (GCM) no Brasil.
-Responda SOMENTE com um JSON válido (array de objetos), sem markdown, sem texto antes ou depois.
-Cada objeto: "pergunta" (string), "opcoes" (array de 4 strings sem prefixo de letra), "resposta_correta_index" (0 a 3), "explicacao" (string curta), "dificuldade" ("Fácil"|"Médio"|"Difícil").`;
 
 let quizAtual = [];
 
@@ -1764,11 +3043,19 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     document.getElementById("areaResultado").classList.add("d-none");
 
     try {
-        let prompt = `Gere ${qtd} questões de múltipla escolha, nível ${dificuldade}, sobre a matéria "${materiaNome}"`;
-        if (tema) prompt += `, focando no tema: "${tema}"`;
-        prompt += `. Relevantes para concurso de Guarda Civil Municipal (GCM) no Brasil.`;
-        const questoes = await chamarGemini(SYSTEM_PROMPT, prompt);
-        renderizarQuestoes(questoes, materiaId, materiaNome);
+        const edital = obterEdital();
+        const resultado = await exigirNuvemIA().gerarSimulado({
+            subjectName: materiaNome,
+            topic: tema,
+            difficulty: dificuldade,
+            quantity: Number(qtd),
+            examName: edital.nomeConcurso || "",
+            boardName: edital.banca || ""
+        });
+        if (resultado.quota) {
+            document.getElementById("statusCotaIA").textContent = `Você ainda pode gerar ${resultado.quota.remaining} de ${resultado.quota.limit} questões hoje.`;
+        }
+        renderizarQuestoes(resultado.questions, materiaId, materiaNome);
     } catch (err) {
         erroDiv.textContent = "Não foi possível gerar as questões: " + err.message;
         erroDiv.classList.remove("d-none");
@@ -1811,7 +3098,7 @@ function renderizarQuestoes(questoes, materiaId, materiaNome) {
     area.querySelectorAll(".opcao-resposta").forEach(btn => btn.addEventListener("click", onResponder));
 }
 
-function onResponder(e) {
+async function onResponder(e) {
     const btn = e.currentTarget;
     const qIndex = parseInt(btn.dataset.qindex);
     const oIndex = parseInt(btn.dataset.oindex);
@@ -1827,23 +3114,48 @@ function onResponder(e) {
     const acertou = oIndex === correta;
     if (!acertou) {
         grupo.children[oIndex].classList.add("incorreta");
-        registrarErro(q.materiaId, q.pergunta.slice(0, 120), "Errei no simulado gerado por IA. Resposta correta: " + q.opcoes[correta]);
+        q.registroPendente = true;
+        try {
+            await registrarErro(q.materiaId, q.pergunta.slice(0, 120), "Errei no simulado gerado por IA. Resposta correta: " + q.opcoes[correta]);
+            q.erroRegistrado = true;
+        } catch (falhaErro) {
+            q.falhaRegistroErro = true;
+            console.error("Falha ao enviar o erro do simulado ao caderno", falhaErro);
+            alert("A resposta foi corrigida, mas o erro não entrou no Caderno de Erros. Tente registrá-lo manualmente.");
+        } finally {
+            q.registroPendente = false;
+        }
     }
 
     document.getElementById(`explicacao-${qIndex}`).classList.add("show");
-    registrarDesempenho(q.materiaId, acertou);
+    q.desempenhoPendente = true;
+    try {
+        await registrarDesempenho(q.materiaId, acertou);
+    } catch (falhaDesempenho) {
+        q.falhaDesempenho = true;
+        console.error("Falha ao atualizar o desempenho do simulado", falhaDesempenho);
+        alert("A resposta foi corrigida, mas o histórico de desempenho não foi atualizado. Tente novamente em outro simulado.");
+    } finally {
+        q.desempenhoPendente = false;
+    }
     verificarFimDoSimulado();
 }
 
 function verificarFimDoSimulado() {
-    if (!quizAtual.every(q => q.respondida)) return;
+    if (!quizAtual.every(q => q.respondida) || quizAtual.some(q => q.registroPendente || q.desempenhoPendente)) return;
     const acertos = quizAtual.filter((q, i) => {
         const grupo = document.getElementById(`opcoes-${i}`);
         return grupo && !grupo.querySelector(".incorreta");
     }).length;
     const total = quizAtual.length;
     const areaResultado = document.getElementById("areaResultado");
-    areaResultado.innerHTML = `Simulado concluído! Você acertou <strong>${acertos} de ${total}</strong> questões. ${acertos < total ? "As erradas já foram salvas no Caderno de Erros." : "Mandou muito bem! 🎉"}`;
+    const complemento = acertos === total
+        ? "Mandou muito bem! 🎉"
+        : quizAtual.some(q => q.falhaRegistroErro)
+            ? "Algumas erradas não puderam ser salvas no Caderno de Erros. Registre-as manualmente."
+            : "As erradas foram confirmadas no Caderno de Erros.";
+    const avisoDesempenho = quizAtual.some(q => q.falhaDesempenho) ? " O histórico de desempenho ficou incompleto por uma falha de sincronização." : "";
+    areaResultado.innerHTML = `Simulado concluído! Você acertou <strong>${acertos} de ${total}</strong> questões. ${complemento}${avisoDesempenho}`;
     areaResultado.classList.remove("d-none");
     renderizarErros();
 }
@@ -1851,13 +3163,22 @@ function verificarFimDoSimulado() {
 // ---------- Desempenho + gráfico de pizza ----------
 let graficoPizzaInstancia = null;
 
-function registrarDesempenho(materiaId, acertou) {
+function exigirNuvemDesempenho() {
+    if (!window.HUB_CLOUD_PERFORMANCE) throw new Error("A conexão do histórico de desempenho com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_PERFORMANCE;
+}
+
+async function registrarDesempenho(materiaId, acertou) {
     const desempenho = obterDesempenho();
-    if (!desempenho[materiaId]) desempenho[materiaId] = { acertos: 0, total: 0 };
-    desempenho[materiaId].total += 1;
-    if (acertou) desempenho[materiaId].acertos += 1;
-    salvar(LS.desempenho, desempenho);
+    const atualizado = await exigirNuvemDesempenho().registrarResposta(materiaId, acertou);
+    desempenho[materiaId] = atualizado;
+    try {
+        salvar(LS.desempenho, desempenho);
+    } catch (erroLocal) {
+        console.warn("O desempenho foi confirmado no Supabase, mas a cópia local será reparada na próxima entrada.", erroLocal);
+    }
     renderizarDesempenho();
+    return atualizado;
 }
 
 function renderizarDesempenho() {
@@ -1898,7 +3219,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 2;
+const VERSAO_BACKUP = 3;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -1944,7 +3265,7 @@ function garantirReferenciaMateria(materiaId, idsMaterias, campo) {
 
 function validarPayloadBackup(payload) {
     objetoBackup(payload, "Backup");
-    if (payload.app !== "hub-estudos-gcm") throw new Error("Este arquivo não pertence ao Hub de Estudos GCM.");
+    if (!["hub-estudos-gcm", "hub-estudos-concursos"].includes(payload.app)) throw new Error("Este arquivo não pertence ao Hub de Estudos Pimentel.");
     const versao = numeroBackup(payload.versao, "Versão", 1, VERSAO_BACKUP, 1);
     if (versao > VERSAO_BACKUP) throw new Error("Backup criado por uma versão mais recente do aplicativo.");
     const dados = objetoBackup(payload.dados, "Dados");
@@ -2007,7 +3328,18 @@ function validarPayloadBackup(payload) {
             objetoBackup(m, `Matéria do edital ${i + 1}`);
             const materiaId = idBackup(m.materiaId, "Matéria do edital");
             garantirReferenciaMateria(materiaId, idsMaterias, `Matéria do edital ${i + 1}`);
-            return { id: idBackup(m.id, "ID da matéria do edital"), materiaId, questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000) };
+            const topicosOrigem = versao >= 3
+                ? listaBackup(m.topicos || [], "Checklist do edital", 500)
+                : (materias.find(item => String(item.id) === String(materiaId))?.topicos || []).map(topico => ({
+                    id: topico.id, titulo: topico.titulo, concluido: topico.status === "dominado"
+                }));
+            const topicos = topicosOrigem.map((topico, indice) => {
+                objetoBackup(topico, `Tópico pessoal ${indice + 1}`);
+                if (typeof topico.concluido !== "boolean") throw new Error(`Estado do tópico pessoal ${indice + 1} inválido.`);
+                return { id: idBackup(topico.id, "ID do tópico pessoal"), titulo: textoBackup(topico.titulo, "Título do tópico pessoal", 1000), concluido: topico.concluido };
+            });
+            garantirIdsUnicos(topicos, "Checklist do edital");
+            return { id: idBackup(m.id, "ID da matéria do edital"), materiaId, questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000), topicos };
         })
     };
     garantirIdsUnicos(edital.materias, "Matérias do edital");
@@ -2046,7 +3378,7 @@ function aplicarBackupValidado(dados) {
 
 document.getElementById("btnExportar").addEventListener("click", () => {
     const payload = {
-        app: "hub-estudos-gcm",
+        app: "hub-estudos-concursos",
         versao: VERSAO_BACKUP,
         dataExportacao: new Date().toISOString(),
         dados: {
@@ -2058,7 +3390,7 @@ document.getElementById("btnExportar").addEventListener("click", () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `backup-hub-gcm-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `backup-hub-concursos-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -2070,21 +3402,29 @@ document.getElementById("inputImportar").addEventListener("change", (e) => {
     if (!arquivo) return;
     if (arquivo.size > TAMANHO_MAX_BACKUP) { alert("O backup excede o limite de 5 MB."); e.target.value = ""; return; }
     const leitor = new FileReader();
-    leitor.onload = (evt) => {
+    leitor.onload = async (evt) => {
         try {
             const payload = JSON.parse(evt.target.result);
             const dadosValidados = validarPayloadBackup(payload);
-            if (!confirm("Backup validado. Isso vai substituir os dados atuais. Continuar?")) return;
+            if (!confirm("Backup validado. Isso substituirá os dados atuais do seu espaço pessoal no Supabase e neste navegador. Continuar?")) return;
+            if (!window.HUB_CLOUD_BACKUP || !window.HUB_SESSION_CONTEXT) {
+                throw new Error("A restauração segura ainda não está disponível para esta sessão.");
+            }
+            e.target.disabled = true;
+            await window.HUB_CLOUD_BACKUP.restaurar(window.HUB_SESSION_CONTEXT, dadosValidados);
             aplicarBackupValidado(dadosValidados);
-            alert("Backup restaurado com sucesso!");
-            iniciar();
+            alert("Backup restaurado e confirmado no Supabase. A página será recarregada para conferir os dados.");
+            window.location.reload();
         } catch (err) {
+            console.error("Falha na restauração segura do backup", err);
             alert("Não foi possível restaurar o backup: " + err.message);
+        } finally {
+            e.target.disabled = false;
+            e.target.value = "";
         }
     };
     leitor.onerror = () => alert("Não foi possível ler esse arquivo de backup.");
     leitor.readAsText(arquivo, "UTF-8");
-    e.target.value = "";
 });
 
 // ============================================================
@@ -2099,10 +3439,20 @@ function limparBackdropsOrfaos() {
 }
 document.querySelectorAll(".modal").forEach(modalEl => modalEl.addEventListener("hidden.bs.modal", limparBackdropsOrfaos));
 document.getElementById("modalMateria").addEventListener("hide.bs.modal", evento => {
-    if (!salvarNotaPendente()) evento.preventDefault();
+    if (permitirFechamentoModalAposSalvar) {
+        permitirFechamentoModalAposSalvar = false;
+        return;
+    }
+    if (!salvamentoNotaPendente && !salvamentoNotaEmAndamento) return;
+    evento.preventDefault();
+    void salvarNotaPendente().then(salvou => {
+        if (!salvou) return;
+        permitirFechamentoModalAposSalvar = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalMateria")).hide();
+    });
 });
 window.addEventListener("beforeunload", evento => {
-    if (!salvarNotaPendente()) {
+    if (salvamentoNotaPendente || salvamentoNotaEmAndamento) {
         evento.preventDefault();
         evento.returnValue = "";
     }
@@ -2112,15 +3462,209 @@ window.addEventListener("beforeunload", evento => {
 // INICIALIZAÇÃO
 // ============================================================
 function iniciar() {
+    prepararDadosUsuario();
+    try {
+        localStorage.removeItem(CHAVE_GEMINI_LEGADA);
+        localStorage.removeItem(chaveDoUsuario(CHAVE_GEMINI_LEGADA));
+    } catch (erro) {
+        console.warn("Não foi possível remover uma configuração antiga da IA.", erro);
+    }
     renderizarMaterias();
+    limparEdicaoTarefa();
     renderizarTudoCronograma();
     renderizarEdital();
     renderizarErros();
     renderizarDesempenho();
-    atualizarStatusChave();
     limparBackdropsOrfaos();
 }
-iniciar();
+window.obterDadosParaPreviaMigracao = () => {
+    const materias = materiasNormalizadas();
+    return {
+        dados: {
+            materias,
+            tarefas: obterTarefas(),
+            edital: obterEdital(),
+            erros: obterErros(),
+            desempenho: obterDesempenho()
+        },
+        contagens: {
+            subjects: materias.length,
+            topics: materias.reduce((total, materia) => total + materia.topicos.length, 0),
+            notes: materias.reduce((total, materia) => total + materia.notas.length, 0),
+            flashcards: materias.reduce((total, materia) => total + materia.cards.length, 0),
+            flashcard_progress: materias.reduce((total, materia) => total + materia.cards.length, 0),
+            study_links: materias.reduce((total, materia) => total + materia.links.length, 0),
+            study_tasks: obterTarefas().length,
+            exam_settings: Object.values(obterEdital()).some(valor => Array.isArray(valor) ? valor.length > 0 : Boolean(valor)) ? 1 : 0,
+            exam_subjects: obterEdital().materias.length,
+            exam_topics: obterEdital().materias.reduce((total, materia) => total + (materia.topicos?.length || 0), 0),
+            error_entries: obterErros().length,
+            subject_performance: Object.keys(obterDesempenho()).length
+        }
+    };
+};
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto) => {
+    definirUsuarioAtual(contexto.userId);
+    sincronizarListaDeMaterias(materiasRemotas);
+    sincronizarListaDeTopicos(topicosRemotos);
+    sincronizarListaDeNotas(notasRemotas);
+    sincronizarListaDeFlashcards(flashcardsRemotos);
+    sincronizarListaDeLinks(linksRemotos);
+    sincronizarListaDeTarefas(tarefasRemotas);
+    sincronizarEdital(editalRemoto);
+    sincronizarListaDeErros(errosRemotos);
+    sincronizarDesempenho(desempenhoRemoto);
+    limparFiltrosDeMaterias();
+    window.HUB_SESSION_CONTEXT = Object.freeze({ ...contexto });
+    document.getElementById("usuarioAtual").textContent = contexto.displayName || contexto.email || "Usuário";
+    document.getElementById("avisoDadosLegados").classList.toggle("d-none", !possuiDadosLegados());
+    iniciar();
+};
+window.prepararSaidaHub = async () => salvarNotaPendente();
+window.encerrarHub = () => {
+    clearTimeout(timerAutoSave);
+    timerAutoSave = null;
+    salvamentoNotaPendente = null;
+    salvamentoNotaEmAndamento = null;
+    operacaoNotaEmAndamento = false;
+    permitirFechamentoModalAposSalvar = false;
+    operacaoCardEmAndamento = false;
+    cardEmEdicaoId = null;
+    operacaoLinkEmAndamento = false;
+    linkEmEdicaoId = null;
+    operacaoTarefaEmAndamento = false;
+    tarefaEmEdicaoId = null;
+    operacaoEditalEmAndamento = false;
+    operacaoErroEmAndamento = false;
+    materiaAbertaId = null;
+    notaSelecionadaId = null;
+    filaRevisao = [];
+    indiceRevisao = 0;
+    quizAtual = [];
+    offsetSemana = 0;
+    if (graficoPizzaInstancia) {
+        graficoPizzaInstancia.destroy();
+        graficoPizzaInstancia = null;
+    }
+    document.querySelectorAll(".modal.show").forEach(modal => bootstrap.Modal.getInstance(modal)?.hide());
+    ["notaTitulo", "notaConteudo", "notaTags"].forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) campo.value = "";
+    });
+    ["previewNota", "areaQuestoes", "areaResultado"].forEach(id => {
+        const area = document.getElementById(id);
+        if (area) area.textContent = "";
+    });
+    document.getElementById("usuarioAtual").textContent = "";
+    USUARIO_ATUAL_ID = null;
+    CHAVES_COM_FALHA.clear();
+    window.HUB_SESSION_CONTEXT = null;
+};
+</script>
+<script>
+(function prepararRecuperacaoDeDadosAntigos() {
+    if (window.location.protocol !== "file:") return;
+
+    const shell = document.getElementById("legacyRecoveryShell");
+    const mensagem = document.getElementById("legacyRecoveryMessage");
+    const resumo = document.getElementById("legacyRecoverySummary");
+    const botao = document.getElementById("btnDownloadLegacyRecovery");
+    document.getElementById("authShell").classList.add("d-none");
+    shell.classList.remove("d-none");
+    shell.classList.add("d-flex");
+
+    const configuracao = [
+        ["hub_materias", "Matérias", []],
+        ["hub_tarefas", "Sessões do cronograma", []],
+        ["hub_edital", "Itens do edital", { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] }],
+        ["hub_erros", "Registros do caderno de erros", []],
+        ["hub_desempenho", "Históricos de desempenho", {}]
+    ];
+    const dadosOriginais = {};
+    const dados = {};
+    const falhas = [];
+
+    configuracao.forEach(([chave, rotulo, padrao]) => {
+        const raw = localStorage.getItem(chave);
+        if (raw === null) {
+            dadosOriginais[chave] = null;
+            dados[chave] = padrao;
+            return;
+        }
+        dadosOriginais[chave] = raw;
+        try {
+            dados[chave] = JSON.parse(raw);
+        } catch (erro) {
+            dados[chave] = padrao;
+            falhas.push(rotulo);
+        }
+    });
+
+    const quantidade = valor => Array.isArray(valor) ? valor.length : (valor && typeof valor === "object" ? Object.keys(valor).length : 0);
+    const materias = Array.isArray(dados.hub_materias) ? dados.hub_materias.map(materia => normalizarMateria({ ...materia })) : [];
+    const edital = dados.hub_edital && typeof dados.hub_edital === "object" && !Array.isArray(dados.hub_edital)
+        ? dados.hub_edital
+        : { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] };
+    const payload = {
+        app: "hub-estudos-concursos",
+        versao: VERSAO_BACKUP,
+        dataExportacao: new Date().toISOString(),
+        origem: "recuperacao-file-local",
+        dados: {
+            materias,
+            tarefas: Array.isArray(dados.hub_tarefas) ? dados.hub_tarefas : [],
+            edital,
+            erros: Array.isArray(dados.hub_erros) ? dados.hub_erros : [],
+            desempenho: dados.hub_desempenho && typeof dados.hub_desempenho === "object" && !Array.isArray(dados.hub_desempenho) ? dados.hub_desempenho : {}
+        },
+        resgateOriginal: dadosOriginais
+    };
+
+    resumo.innerHTML = [
+        `<li><strong>${materias.length}</strong> matéria(s)</li>`,
+        `<li><strong>${quantidade(payload.dados.tarefas)}</strong> sessão(ões) do cronograma</li>`,
+        `<li><strong>${quantidade(edital.materias)}</strong> item(ns) do edital</li>`,
+        `<li><strong>${quantidade(payload.dados.erros)}</strong> registro(s) no caderno de erros</li>`
+    ].join("");
+
+    const encontrouDados = configuracao.some(([chave]) => localStorage.getItem(chave) !== null);
+    let importavel = false;
+    if (encontrouDados && falhas.length === 0) {
+        try {
+            payload.dados = validarPayloadBackup(payload);
+            importavel = true;
+            mensagem.className = "alert alert-success";
+            mensagem.textContent = "Dados antigos encontrados. A cópia está pronta para ser importada na sua conta.";
+        } catch (erro) {
+            mensagem.className = "alert alert-warning";
+            mensagem.textContent = "Os dados foram encontrados, mas precisam de conversão antes da importação. A cópia original será preservada para análise.";
+        }
+    } else if (falhas.length) {
+        mensagem.className = "alert alert-warning";
+        mensagem.textContent = "Alguns registros antigos estão ilegíveis. A cópia original ainda pode ser baixada para análise.";
+    } else {
+        mensagem.className = "alert alert-secondary";
+        mensagem.textContent = "Nenhum dado antigo foi encontrado neste endereço do navegador.";
+    }
+
+    botao.disabled = !encontrouDados;
+    botao.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = importavel
+            ? `backup-hub-recuperado-${new Date().toISOString().slice(0, 10)}.json`
+            : `resgate-bruto-hub-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
+})();
+</script>
+<script type="module">
+if (window.location.protocol !== "file:") import("/src/auth.js");
 </script>
 </body>
 </html>
