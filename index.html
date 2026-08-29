@@ -530,11 +530,41 @@ const LS = {
     apiKey: "hub_gemini_api_key"
 };
 
+const CHAVES_COM_FALHA = new Set();
+
 function carregar(chave, padrao) {
-    try { const raw = localStorage.getItem(chave); return raw ? JSON.parse(raw) : padrao; }
-    catch (e) { return padrao; }
+    try {
+        const raw = localStorage.getItem(chave);
+        return raw ? JSON.parse(raw) : padrao;
+    } catch (erro) {
+        const primeiraFalha = !CHAVES_COM_FALHA.has(chave);
+        CHAVES_COM_FALHA.add(chave);
+        console.error(`Dados locais inválidos em ${chave}`, erro);
+        if (primeiraFalha) setTimeout(() => alert("Alguns dados locais estão ilegíveis. A gravação foi bloqueada para evitar perda; restaure um backup válido."), 0);
+        return padrao;
+    }
 }
-function salvar(chave, valor) { localStorage.setItem(chave, JSON.stringify(valor)); }
+function salvarLote(itens, opcoes = {}) {
+    const permitirRecuperacao = opcoes.permitirRecuperacao === true;
+    if (CHAVES_COM_FALHA.size && !permitirRecuperacao) throw new Error("A gravação foi bloqueada porque há dados locais ilegíveis. Restaure um backup válido antes de continuar.");
+    const serializados = itens.map(([chave, valor]) => [chave, JSON.stringify(valor)]);
+    const anteriores = [];
+    try {
+        itens.forEach(([chave]) => anteriores.push([chave, localStorage.getItem(chave)]));
+        serializados.forEach(([chave, valor]) => localStorage.setItem(chave, valor));
+        if (permitirRecuperacao) itens.forEach(([chave]) => CHAVES_COM_FALHA.delete(chave));
+    } catch (erro) {
+        anteriores.forEach(([chave, valor]) => {
+            try { valor == null ? localStorage.removeItem(chave) : localStorage.setItem(chave, valor); }
+            catch (erroRestauracao) { console.error("Falha ao restaurar dados locais", erroRestauracao); }
+        });
+        throw new Error("Não foi possível salvar os dados no navegador. Exporte um backup e verifique o espaço disponível.");
+    }
+}
+function salvar(chave, valor) {
+    try { salvarLote([[chave, valor]]); }
+    catch (erro) { alert(erro.message); throw erro; }
+}
 
 const MATERIAS_PADRAO = [
     { id: 1, nome: "Direito Constitucional", desc: "Princípios, direitos fundamentais, organização do Estado.", cor: "primary", notas: "" },
@@ -578,7 +608,14 @@ function urlHttpSegura(valor) {
         return ["http:", "https:"].includes(url.protocol) ? url.href : "";
     } catch (e) { return ""; }
 }
-function novoId() { return Date.now() + Math.floor(Math.random() * 10000); }
+function novoId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        return Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+    }
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
 function hojeISO() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function somarDias(iso, n) { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function dataBR(iso) { return iso ? iso.split("-").reverse().join("/") : "—"; }
@@ -601,7 +638,10 @@ function normalizarMateria(m) {
 }
 function materiasNormalizadas() { return obterMaterias().map(normalizarMateria); }
 function salvarMaterias(lista) { salvar(LS.materias, lista); }
-(function migracaoInicial() { salvarMaterias(materiasNormalizadas()); })();
+(function migracaoInicial() {
+    const materias = materiasNormalizadas();
+    if (!CHAVES_COM_FALHA.has(LS.materias)) salvarMaterias(materias);
+})();
 
 function materiaPorId(id) { return materiasNormalizadas().find(m => String(m.id) === String(id)); }
 function atualizarMateria(id, fn) {
@@ -619,6 +659,48 @@ function progressoMateria(m) {
 function cardsVencidos(m) { const h = hojeISO(); return m.cards.filter(c => (c.proxima || h) <= h); }
 function errosDaMateria(id) { return obterErros().filter(e => String(e.materiaId) === String(id)).length; }
 function pendenciasMateria(m) { return cardsVencidos(m).length + m.topicos.filter(t => t.status !== "dominado").length; }
+
+function excluirMateriaComRelacionados(id) {
+    const materia = materiaPorId(id);
+    if (!materia) return;
+    const tarefas = obterTarefas();
+    const edital = obterEdital();
+    const erros = obterErros();
+    const desempenho = obterDesempenho();
+    const tarefasRelacionadas = tarefas.filter(t => String(t.materiaId) === String(id)).length;
+    const editalRelacionado = edital.materias.filter(m => String(m.materiaId) === String(id)).length;
+    const errosRelacionados = erros.filter(e => String(e.materiaId) === String(id)).length;
+    const possuiDesempenho = Object.prototype.hasOwnProperty.call(desempenho, String(id));
+    const internos = `${materia.topicos.length} tópico(s), ${materia.notas.length} nota(s), ${materia.cards.length} flashcard(s) e ${materia.links.length} link(s)`;
+    const relacionados = `${tarefasRelacionadas} sessão(ões), ${editalRelacionado} item(ns) do edital, ${errosRelacionados} erro(s) e ${possuiDesempenho ? "1 histórico" : "nenhum histórico"} de desempenho`;
+    if (!confirm(`Remover "${materia.nome}"?\n\nSerão excluídos:\n• ${internos}\n• ${relacionados}\n\nEssa ação não pode ser desfeita sem um backup.`)) return;
+
+    const materiasAtualizadas = materiasNormalizadas().filter(m => String(m.id) !== String(id));
+    const tarefasAtualizadas = tarefas.filter(t => String(t.materiaId) !== String(id));
+    const editalAtualizado = { ...edital, materias: edital.materias.filter(m => String(m.materiaId) !== String(id)) };
+    const errosAtualizados = erros.filter(e => String(e.materiaId) !== String(id));
+    const desempenhoAtualizado = { ...desempenho };
+    delete desempenhoAtualizado[String(id)];
+
+    try {
+        salvarLote([
+            [LS.materias, materiasAtualizadas], [LS.tarefas, tarefasAtualizadas], [LS.edital, editalAtualizado],
+            [LS.erros, errosAtualizados], [LS.desempenho, desempenhoAtualizado]
+        ]);
+    } catch (erro) {
+        alert(erro.message);
+        return;
+    }
+    if (String(materiaAbertaId) === String(id)) {
+        materiaAbertaId = null;
+        bootstrap.Modal.getInstance(document.getElementById("modalMateria"))?.hide();
+    }
+    renderizarMaterias();
+    renderizarTudoCronograma();
+    renderizarEdital();
+    renderizarErros();
+    renderizarDesempenho();
+}
 
 // ---------- Mini-markdown ----------
 function renderizarMarkdown(txt) {
@@ -723,12 +805,7 @@ function renderizarMaterias() {
 
     grid.querySelectorAll(".btn-abrir-materia").forEach(b => b.addEventListener("click", () => abrirMateria(b.dataset.id)));
     grid.querySelectorAll(".btn-editar-materia").forEach(b => b.addEventListener("click", () => abrirFormularioMateria(b.dataset.id)));
-    grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => {
-        const m = materiaPorId(b.dataset.id);
-        if (!confirm(`Remover "${m ? m.nome : ""}"? Notas, tópicos e flashcards dela serão apagados.`)) return;
-        salvarMaterias(materiasNormalizadas().filter(x => String(x.id) !== String(b.dataset.id)));
-        renderizarMaterias();
-    }));
+    grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => excluirMateriaComRelacionados(b.dataset.id)));
 
     if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
     if (ordemMaterias === "manual" && !q) {
@@ -1284,7 +1361,7 @@ document.getElementById("btnRevisarMateria").addEventListener("click", () => ini
 function renderizarTarefas() {
     const tarefas = obterTarefas();
     const pendentes = tarefas.filter(t => t.status === "pendente").sort((a, b) => (a.data || "").localeCompare(b.data || ""));
-    const concluidas = tarefas.filter(t => t.status === "concluido").sort((a, b) => b.id - a.id);
+    const concluidas = tarefas.filter(t => t.status === "concluido").reverse();
 
     const linha = (t, concluida) => `
         <div class="card border-0 shadow-sm tarefa-item ${concluida ? "concluida" : ""}">
@@ -1323,7 +1400,7 @@ document.getElementById("formTarefa").addEventListener("submit", (e) => {
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
     const tarefas = obterTarefas();
     tarefas.push({
-        id: Date.now(), materiaId,
+        id: novoId(), materiaId,
         topico: document.getElementById("tarefaTopico").value.trim(),
         data: document.getElementById("tarefaData").value,
         status: "pendente"
@@ -1435,11 +1512,11 @@ function renderizarEdital() {
         </tr>`;
     }).join("");
 
-    tabela.querySelectorAll(".campo-questoes").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(Number(input.dataset.id), "questoes", Number(input.value) || 0)));
-    tabela.querySelectorAll(".campo-peso").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(Number(input.dataset.id), "peso", Number(input.value) || 0)));
+    tabela.querySelectorAll(".campo-questoes").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(input.dataset.id, "questoes", Number(input.value) || 0)));
+    tabela.querySelectorAll(".campo-peso").forEach(input => input.addEventListener("change", () => atualizarCampoEdital(input.dataset.id, "peso", Number(input.value) || 0)));
     tabela.querySelectorAll(".btn-remover-edital").forEach(btn => btn.addEventListener("click", () => {
         const edital2 = obterEdital();
-        edital2.materias = edital2.materias.filter(m => m.id !== Number(btn.dataset.id));
+        edital2.materias = edital2.materias.filter(m => String(m.id) !== btn.dataset.id);
         salvar(LS.edital, edital2);
         renderizarEdital();
     }));
@@ -1447,7 +1524,7 @@ function renderizarEdital() {
 
 function atualizarCampoEdital(id, campo, valor) {
     const edital = obterEdital();
-    const m = edital.materias.find(x => x.id === id);
+    const m = edital.materias.find(x => String(x.id) === String(id));
     if (!m) return;
     m[campo] = valor;
     salvar(LS.edital, edital);
@@ -1480,7 +1557,7 @@ document.getElementById("formAddMateriaEdital").addEventListener("submit", (e) =
     const edital = obterEdital();
     if (edital.materias.some(m => String(m.materiaId) === String(materiaId))) { alert("Essa matéria já está na matriz."); return; }
     edital.materias.push({
-        id: Date.now(), materiaId,
+        id: novoId(), materiaId,
         questoes: Number(document.getElementById("editalQuestoes").value) || 0,
         peso: Number(document.getElementById("editalPeso").value) || 1
     });
@@ -1495,7 +1572,7 @@ document.getElementById("formAddMateriaEdital").addEventListener("submit", (e) =
 // ============================================================
 function registrarErro(materiaId, tema, obs) {
     const erros = obterErros();
-    erros.push({ id: Date.now() + Math.random(), materiaId, tema, obs, data: new Date().toLocaleDateString("pt-BR") });
+    erros.push({ id: novoId(), materiaId, tema, obs, data: new Date().toLocaleDateString("pt-BR") });
     salvar(LS.erros, erros);
 }
 
@@ -1811,6 +1888,18 @@ function idBackup(valor, campo) {
     if (!["string", "number"].includes(typeof valor) || (typeof valor === "number" && !Number.isFinite(valor)) || !/^[A-Za-z0-9._:-]{1,80}$/.test(String(valor))) throw new Error(`${campo} inválido.`);
     return valor;
 }
+function garantirIdsUnicos(lista, campo) {
+    const ids = new Set();
+    lista.forEach(item => {
+        const id = String(item.id);
+        if (ids.has(id)) throw new Error(`${campo} contém IDs duplicados.`);
+        ids.add(id);
+    });
+    return ids;
+}
+function garantirReferenciaMateria(materiaId, idsMaterias, campo) {
+    if (!idsMaterias.has(String(materiaId))) throw new Error(`${campo} referencia uma matéria inexistente.`);
+}
 
 function validarPayloadBackup(payload) {
     objetoBackup(payload, "Backup");
@@ -1852,14 +1941,22 @@ function validarPayloadBackup(payload) {
         });
         const cor = CORES_PERMITIDAS.includes(m.cor) ? m.cor : "primary";
         const prioridade = Object.prototype.hasOwnProperty.call(PRIORIDADES, m.prioridade) ? m.prioridade : "media";
+        garantirIdsUnicos(notas, "Notas");
+        garantirIdsUnicos(topicos, "Tópicos");
+        garantirIdsUnicos(cards, "Flashcards");
+        garantirIdsUnicos(links, "Links");
         return { id: idBackup(m.id, "ID da matéria"), nome: textoBackup(m.nome, "Nome da matéria", 500), desc: textoBackup(m.desc, "Descrição", 5000), cor, prioridade, notas, topicos, cards, links };
     });
+    const idsMaterias = garantirIdsUnicos(materias, "Matérias");
 
     const tarefas = listaBackup(dados.tarefas, "Tarefas", 20000).map((t, i) => {
         objetoBackup(t, `Tarefa ${i + 1}`);
         if (!["pendente", "concluido"].includes(t.status)) throw new Error(`Status da tarefa ${i + 1} inválido.`);
-        return { id: idBackup(t.id, "ID da tarefa"), materiaId: idBackup(t.materiaId, "Matéria da tarefa"), topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status };
+        const materiaId = idBackup(t.materiaId, "Matéria da tarefa");
+        garantirReferenciaMateria(materiaId, idsMaterias, `Tarefa ${i + 1}`);
+        return { id: idBackup(t.id, "ID da tarefa"), materiaId, topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status };
     });
+    garantirIdsUnicos(tarefas, "Tarefas");
 
     const editalOrigem = objetoBackup(dados.edital, "Edital");
     const edital = {
@@ -1867,14 +1964,20 @@ function validarPayloadBackup(payload) {
         vagas: textoBackup(editalOrigem.vagas, "Vagas", 100), dataProva: dataBackup(editalOrigem.dataProva, "Data da prova"),
         materias: listaBackup(editalOrigem.materias, "Matérias do edital", 500).map((m, i) => {
             objetoBackup(m, `Matéria do edital ${i + 1}`);
-            return { id: idBackup(m.id, "ID da matéria do edital"), materiaId: idBackup(m.materiaId, "Matéria do edital"), questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000) };
+            const materiaId = idBackup(m.materiaId, "Matéria do edital");
+            garantirReferenciaMateria(materiaId, idsMaterias, `Matéria do edital ${i + 1}`);
+            return { id: idBackup(m.id, "ID da matéria do edital"), materiaId, questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000) };
         })
     };
+    garantirIdsUnicos(edital.materias, "Matérias do edital");
 
     const erros = listaBackup(dados.erros, "Erros", 20000).map((er, i) => {
         objetoBackup(er, `Erro ${i + 1}`);
-        return { id: idBackup(er.id, "ID do erro"), materiaId: idBackup(er.materiaId, "Matéria do erro"), tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro") };
+        const materiaId = idBackup(er.materiaId, "Matéria do erro");
+        garantirReferenciaMateria(materiaId, idsMaterias, `Erro ${i + 1}`);
+        return { id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro") };
     });
+    garantirIdsUnicos(erros, "Erros");
 
     const desempenhoOrigem = objetoBackup(dados.desempenho, "Desempenho");
     const entradasDesempenho = Object.entries(desempenhoOrigem);
@@ -1883,6 +1986,7 @@ function validarPayloadBackup(payload) {
     entradasDesempenho.forEach(([id, valor]) => {
         idBackup(id, "ID de desempenho");
         if (["__proto__", "constructor", "prototype"].includes(id)) throw new Error("ID de desempenho reservado.");
+        garantirReferenciaMateria(id, idsMaterias, "Desempenho");
         objetoBackup(valor, "Desempenho da matéria");
         const total = numeroBackup(valor.total, "Total de respostas", 0, 10000000);
         const acertos = numeroBackup(valor.acertos, "Total de acertos", 0, total);
@@ -1896,14 +2000,7 @@ function aplicarBackupValidado(dados) {
         [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.edital, dados.edital],
         [LS.erros, dados.erros], [LS.desempenho, dados.desempenho]
     ];
-    const anteriores = itens.map(([chave]) => [chave, localStorage.getItem(chave)]);
-    const serializados = itens.map(([chave, valor]) => [chave, JSON.stringify(valor)]);
-    try {
-        serializados.forEach(([chave, valor]) => localStorage.setItem(chave, valor));
-    } catch (erro) {
-        anteriores.forEach(([chave, valor]) => valor == null ? localStorage.removeItem(chave) : localStorage.setItem(chave, valor));
-        throw new Error("Não foi possível salvar o backup. Os dados anteriores foram preservados.");
-    }
+    salvarLote(itens, { permitirRecuperacao: true });
 }
 
 document.getElementById("btnExportar").addEventListener("click", () => {
