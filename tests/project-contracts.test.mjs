@@ -4,10 +4,21 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
 import { extrairDispositivos } from "../scripts/import-legal-sources.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const readProjectFile = (relativePath) => readFileSync(join(projectRoot, relativePath), "utf8");
+
+const carregarRenderizadorDeGrifos = () => {
+    const html = readProjectFile("index.html");
+    const inicio = html.indexOf("function textoJuridicoComGrifos");
+    const fim = html.indexOf("\nfunction renderizarIndiceLeitor", inicio);
+    assert.ok(inicio >= 0 && fim > inicio, "A função de renderização dos grifos deve continuar isolável para teste.");
+    return runInNewContext(`${html.slice(inicio, fim)}\ntextoJuridicoComGrifos;`, {
+        esc: (valor) => String(valor ?? "")
+    });
+};
 
 test("arquivos versionados não contêm formatos conhecidos de chaves secretas", () => {
     const trackedFiles = execFileSync("git", ["ls-files"], { cwd: projectRoot, encoding: "utf8" })
@@ -184,6 +195,48 @@ test("o leitor usa navegação fixa, modo foco e grifos com função didática",
     assert.match(repository, /new Set\(\["yellow", "red", "green", "blue", "pink"\]\)/);
     assert.match(migration, /check \(color in \('yellow', 'red', 'green', 'blue', 'pink'\)\)/);
     assert.match(migration, /pink é mantido para compatibilidade/);
+});
+
+test("grifos sobrepostos permanecem visíveis, combinam cores e respeitam o filtro", () => {
+    const renderizar = carregarRenderizadorDeGrifos();
+    const texto = "abcdefghij";
+    const amarelo = { texto: "cdef", prefixo: "ab", sufixo: "ghij", cor: "yellow" };
+    const vermelho = { texto: "efgh", prefixo: "abcd", sufixo: "ij", cor: "red" };
+    const sobreposto = renderizar(texto, [amarelo, vermelho]);
+
+    assert.match(sobreposto, /<mark class="highlight-yellow">cd<\/mark>/);
+    assert.match(sobreposto, /<mark class="highlight-overlap"[^>]*title="Grifos sobrepostos: regra ou conceito \+ exceção ou prazo"[^>]*>ef<\/mark>/);
+    assert.match(sobreposto, /<mark class="highlight-red">gh<\/mark>/);
+
+    const total = renderizar(texto, [
+        { texto: "bcdefghi", prefixo: "a", sufixo: "j", cor: "yellow" },
+        { texto: "def", prefixo: "abc", sufixo: "ghij", cor: "blue" }
+    ]);
+    assert.match(total, /<mark class="highlight-yellow">bc<\/mark>/);
+    assert.match(total, /<mark class="highlight-overlap"[^>]*>def<\/mark>/);
+    assert.match(total, /<mark class="highlight-yellow">ghi<\/mark>/);
+
+    const mesmaCor = renderizar(texto, [amarelo, { ...vermelho, cor: "yellow" }]);
+    assert.match(mesmaCor, /<mark class="highlight-yellow">cdefgh<\/mark>/);
+    assert.doesNotMatch(mesmaCor, /highlight-overlap/);
+
+    const filtrado = renderizar(texto, [amarelo, vermelho], "red");
+    assert.match(filtrado, /^<span class="legal-filter-context">abcd<\/span><mark class="highlight-red">efgh<\/mark><span class="legal-filter-context">ij<\/span>$/);
+
+    const repetido = renderizar("regra x regra", [{ texto: "regra", prefixo: "regra x ", sufixo: "", cor: "green" }]);
+    assert.equal(repetido, 'regra x <mark class="highlight-green">regra</mark>');
+});
+
+test("o histórico de leitura informa sincronização sem repetir automaticamente a contagem", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="wsStatusHistoricoLeitura"[^>]*role="status"[^>]*aria-live="polite"/);
+    assert.match(html, /mostrarStatusHistoricoLeitura\("pending", "Salvando leitura\.\.\."/);
+    assert.match(html, /mostrarStatusHistoricoLeitura\("success", "Histórico sincronizado"/);
+    assert.match(html, /mostrarStatusHistoricoLeitura\("error", "Leitura aberta · histórico não sincronizado"/);
+    assert.match(html, /const geracao = \+\+geracaoRegistroLeitura;/);
+    assert.match(html, /geracao !== geracaoRegistroLeitura/);
+    assert.doesNotMatch(html, /registrarLeituraAtual\([^)]*\)[\s\S]*?setTimeout\([^)]*registrarLeituraAtual/);
 });
 
 test("anotações e flashcards do leitor usam os repositórios seguros já existentes", () => {

@@ -655,10 +655,14 @@
     .legal-reader-paper mark.highlight-green, .legal-highlight-dot.highlight-green { background: rgba(100, 116, 90, .24); }
     .legal-reader-paper mark.highlight-blue, .legal-highlight-dot.highlight-blue { background: rgba(13, 110, 253, .17); }
     .legal-reader-paper mark.highlight-pink, .legal-highlight-dot.highlight-pink { background: rgba(214, 51, 132, .16); }
+    .legal-reader-paper mark.highlight-overlap { background-color: transparent; }
     .legal-reader-paper-text.is-highlight-filtered .legal-filter-context { opacity: .16; transition: opacity .15s ease; }
     .legal-reader-paper-text.is-highlight-filtered:hover .legal-filter-context { opacity: .32; }
     .legal-reader-source { flex-shrink: 0; padding: .7rem 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-top: 1px solid rgba(59, 41, 35, .08); font-size: .7rem; }
     .legal-reader-search { width: min(250px, 100%); }
+    .legal-reading-sync { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .55rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .055); border: 1px solid rgba(59, 41, 35, .08); border-radius: 999px; font-size: .65rem; line-height: 1.2; }
+    .legal-reading-sync.is-success { color: #526047; background: rgba(100, 116, 90, .1); border-color: rgba(100, 116, 90, .2); }
+    .legal-reading-sync.is-error { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .07); border-color: rgba(184, 50, 42, .18); }
     .legal-highlight-list { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
     .legal-highlight-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: rgba(255, 193, 7, .08); border: 1px solid rgba(59, 41, 35, .08); border-radius: .65rem; font-size: .72rem; }
     #btnFavoritarArtigo[aria-pressed="true"] { color: #fff; background: var(--pimentel-vermelho-escuro); border-color: var(--pimentel-vermelho-escuro); }
@@ -1434,6 +1438,7 @@
                             </select>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="btnFavoritarArtigo" aria-pressed="false"><i class="bi-bookmark me-1"></i><span>Favoritar</span></button>
                             <button type="button" class="btn btn-sm btn-outline-primary" id="btnModoFoco" aria-pressed="false"><i class="bi-arrows-fullscreen me-1"></i><span>Modo foco</span></button>
+                            <span class="legal-reading-sync d-none" id="wsStatusHistoricoLeitura" role="status" aria-live="polite"></span>
                             <div class="legal-highlight-legend" aria-label="Significado das cores">
                                 <span><i class="legal-highlight-dot highlight-yellow"></i>Regra/conceito</span>
                                 <span><i class="legal-highlight-dot highlight-red"></i>Exceção/prazo</span>
@@ -2272,6 +2277,8 @@ let grifosJuridicos = [];
 let favoritosJuridicos = [];
 let historicoLeituraJuridica = [];
 let geracaoSessaoHub = 0;
+let geracaoRegistroLeitura = 0;
+let temporizadorStatusHistoricoLeitura = null;
 let documentoLeitorAtual = null;
 let dispositivoLeitorAtual = null;
 let filtroCorGrifoAtual = "all";
@@ -2470,21 +2477,55 @@ function renderizarAtalhosLeitura(materia) {
     painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => abrirAtalhoLeitura(botao.dataset.readingId, materia)));
 }
 
+function mostrarStatusHistoricoLeitura(tipo = "", mensagem = "", geracao = geracaoRegistroLeitura) {
+    const status = document.getElementById("wsStatusHistoricoLeitura");
+    clearTimeout(temporizadorStatusHistoricoLeitura);
+    temporizadorStatusHistoricoLeitura = null;
+    status.className = `legal-reading-sync ${tipo ? `is-${tipo}` : "d-none"}`;
+    status.innerHTML = mensagem ? `<i class="bi-${tipo === "error" ? "cloud-slash" : tipo === "success" ? "cloud-check" : "cloud-arrow-up"}"></i><span>${esc(mensagem)}</span>` : "";
+    if (tipo === "success") {
+        temporizadorStatusHistoricoLeitura = setTimeout(() => {
+            if (geracao === geracaoRegistroLeitura) mostrarStatusHistoricoLeitura();
+        }, 2200);
+    }
+}
+
 async function registrarLeituraAtual(materia, dispositivo) {
     if (!window.HUB_CLOUD_LEGAL) return;
     const sessao = capturarSessaoHubAtual();
+    const geracao = ++geracaoRegistroLeitura;
+    mostrarStatusHistoricoLeitura("pending", "Salvando leitura...", geracao);
     try {
         const salvo = await window.HUB_CLOUD_LEGAL.registrarLeitura(materia.id, dispositivo.id);
-        if (!sessaoHubPermaneceAtual(sessao)) return;
+        if (!sessaoHubPermaneceAtual(sessao) || geracao !== geracaoRegistroLeitura) return;
         historicoLeituraJuridica = historicoLeituraJuridica.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id));
         historicoLeituraJuridica.unshift(salvo);
         renderizarAtalhosLeitura(materia);
+        mostrarStatusHistoricoLeitura("success", "Histórico sincronizado", geracao);
     } catch (erro) {
         console.error("Falha ao registrar histórico de leitura", erro);
+        if (sessaoHubPermaneceAtual(sessao) && geracao === geracaoRegistroLeitura) {
+            mostrarStatusHistoricoLeitura("error", "Leitura aberta · histórico não sincronizado", geracao);
+        }
     }
 }
 
 function textoJuridicoComGrifos(textoOriginal, grifos, corFiltro = "all") {
+    const ordemCores = ["yellow", "red", "green", "blue", "pink"];
+    const coresCss = {
+        yellow: "rgba(255, 193, 7, .3)",
+        red: "rgba(184, 50, 42, .2)",
+        green: "rgba(100, 116, 90, .24)",
+        blue: "rgba(13, 110, 253, .17)",
+        pink: "rgba(214, 51, 132, .16)"
+    };
+    const nomesCores = {
+        yellow: "regra ou conceito",
+        red: "exceção ou prazo",
+        green: "competência",
+        blue: "punição ou sanção",
+        pink: "grifo legado"
+    };
     const intervalos = [];
     const grifosVisiveis = corFiltro === "all" ? grifos : grifos.filter(grifo => grifo.cor === corFiltro);
     grifosVisiveis.forEach(grifo => {
@@ -2494,17 +2535,33 @@ function textoJuridicoComGrifos(textoOriginal, grifos, corFiltro = "all") {
         if (inicioContexto >= 0) inicio = inicioContexto + (grifo.prefixo || "").length;
         if (inicio < 0) inicio = textoOriginal.indexOf(grifo.texto);
         const fim = inicio + grifo.texto.length;
-        if (inicio >= 0 && !intervalos.some(item => inicio < item.fim && fim > item.inicio)) {
+        if (inicio >= 0 && fim > inicio) {
             intervalos.push({ inicio, fim, cor: grifo.cor });
         }
     });
-    intervalos.sort((a, b) => a.inicio - b.inicio);
+    const limites = [...new Set(intervalos.flatMap(item => [item.inicio, item.fim]))].sort((a, b) => a - b);
+    const segmentos = [];
+    for (let indice = 0; indice < limites.length - 1; indice += 1) {
+        const inicio = limites[indice];
+        const fim = limites[indice + 1];
+        const cores = ordemCores.filter(cor => intervalos.some(item => item.cor === cor && inicio < item.fim && fim > item.inicio));
+        if (!cores.length) continue;
+        const anterior = segmentos.at(-1);
+        if (anterior?.fim === inicio && anterior.cores.join("|") === cores.join("|")) anterior.fim = fim;
+        else segmentos.push({ inicio, fim, cores });
+    }
     let cursor = 0;
     let html = "";
     const trechoContexto = trecho => corFiltro === "all" ? esc(trecho) : `<span class="legal-filter-context">${esc(trecho)}</span>`;
-    intervalos.forEach(item => {
+    segmentos.forEach(item => {
         html += trechoContexto(textoOriginal.slice(cursor, item.inicio));
-        html += `<mark class="highlight-${esc(item.cor)}">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+        if (item.cores.length === 1) {
+            html += `<mark class="highlight-${esc(item.cores[0])}">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+        } else {
+            const faixas = item.cores.map((cor, indice) => `${coresCss[cor]} ${indice * 6}px ${(indice + 1) * 6}px`).join(", ");
+            const descricao = item.cores.map(cor => nomesCores[cor]).join(" + ");
+            html += `<mark class="highlight-overlap" title="Grifos sobrepostos: ${esc(descricao)}" style="background-image:repeating-linear-gradient(135deg, ${faixas});background-size:${item.cores.length * 6}px ${item.cores.length * 6}px">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+        }
         cursor = item.fim;
     });
     return html + trechoContexto(textoOriginal.slice(cursor));
