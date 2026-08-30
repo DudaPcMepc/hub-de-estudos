@@ -358,6 +358,18 @@ test("a correção do Código Penal cria nova versão e preserva todos os dados 
     assert.match(html, /epigrafe \? `\$\{dispositivo\.rotulo\} — \$\{epigrafe\}` : dispositivo\.rotulo/);
 });
 
+test("a biblioteca carrega somente versões atuais e pagina cada documento jurídico", () => {
+    const repository = readProjectFile("src/cloud-core-repository.js");
+
+    assert.match(repository, /const TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS = 1000/);
+    assert.match(repository, /async function carregarDispositivosJuridicosPorVersao\(versaoId\)/);
+    assert.match(repository, /\.eq\("version_id", versaoId\)/);
+    assert.match(repository, /\.range\(inicio, inicio \+ TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS - 1\)/);
+    assert.match(repository, /\.in\("id", versoesAtuaisIds\)/);
+    assert.match(repository, /Promise\.all\(versoesAtuaisIds\.map\(carregarDispositivosJuridicosPorVersao\)\)/);
+    assert.doesNotMatch(repository, /supabase\.from\("legal_provisions"\)[\s\S]{0,220}\.order\("sequence"[^\n]+\)(?![\s\S]{0,120}\.range)/);
+});
+
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {
     const migration = readProjectFile("supabase/migrations/202608300002_subject_catalog_widgets.sql");
 
