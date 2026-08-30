@@ -14,6 +14,8 @@ import {
     atualizarPosicoesMaterias,
     atualizarPosicoesTopicos,
     atualizarTopico,
+    carregarCatalogoMaterias,
+    carregarBibliotecaJuridica,
     carregarMateriasRemotas,
     carregarNotasRemotas,
     carregarFlashcardsRemotos,
@@ -23,6 +25,9 @@ import {
     carregarErrosRemotos,
     carregarDesempenhoRemoto,
     carregarTopicosRemotos,
+    carregarWidgetsMaterias,
+    carregarGrifosJuridicos,
+    carregarEstadoLeituraJuridica,
     criarMateria,
     criarNota,
     criarFlashcard,
@@ -31,6 +36,8 @@ import {
     criarMateriaEdital,
     criarTopicosEdital,
     criarErro,
+    criarGrifoJuridico,
+    atualizarNotaGrifoJuridico,
     criarTopico,
     criarTopicos,
     encerrarRepositorioRemoto,
@@ -42,10 +49,14 @@ import {
     excluirMateriaEdital,
     excluirConfiguracaoEdital,
     excluirErro,
+    excluirGrifoJuridico,
+    registrarLeituraJuridica,
+    salvarFavoritoJuridico,
     excluirTopico,
     prepararRepositorioRemoto,
     registrarRespostaDesempenho,
-    salvarConfiguracaoEdital
+    salvarConfiguracaoEdital,
+    salvarLayoutWidgets
 } from "./cloud-core-repository.js";
 
 window.HUB_CLOUD_SUBJECTS = Object.freeze({
@@ -54,6 +65,26 @@ window.HUB_CLOUD_SUBJECTS = Object.freeze({
     excluir: excluirMateria,
     listar: carregarMateriasRemotas,
     reordenar: atualizarPosicoesMaterias
+});
+
+window.HUB_CLOUD_CATALOG = Object.freeze({
+    listar: carregarCatalogoMaterias
+});
+
+window.HUB_CLOUD_WIDGETS = Object.freeze({
+    listar: carregarWidgetsMaterias,
+    salvarLayout: salvarLayoutWidgets
+});
+
+window.HUB_CLOUD_LEGAL = Object.freeze({
+    atualizarNotaGrifo: atualizarNotaGrifoJuridico,
+    carregarEstado: carregarEstadoLeituraJuridica,
+    criarGrifo: criarGrifoJuridico,
+    excluirGrifo: excluirGrifoJuridico,
+    listarDocumentos: carregarBibliotecaJuridica,
+    listarGrifos: carregarGrifosJuridicos,
+    registrarLeitura: registrarLeituraJuridica,
+    salvarFavorito: salvarFavoritoJuridico
 });
 
 window.HUB_CLOUD_TOPICS = Object.freeze({
@@ -368,7 +399,14 @@ async function ativarSessao(session) {
             const editalRemoto = await carregarEditalRemoto();
             const errosRemotos = await carregarErrosRemotos();
             const desempenhoRemoto = await carregarDesempenhoRemoto();
-            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto);
+            const [catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto] = await Promise.all([
+                carregarCatalogoMaterias(),
+                carregarWidgetsMaterias(),
+                carregarBibliotecaJuridica(),
+                carregarGrifosJuridicos(),
+                carregarEstadoLeituraJuridica()
+            ]);
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto);
             iniciarPreviaMigracao(contexto);
             await iniciarAdministracao();
             usuarioAtivoId = session.user.id;

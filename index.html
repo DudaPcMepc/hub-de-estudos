@@ -80,6 +80,25 @@
         font-size: .88rem;
     }
     .brand-code-logo-nav .code-angle { color: #ef9a7d; }
+    .navbar-support-btn {
+        width: 2.15rem;
+        height: 2.15rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: rgba(255, 253, 249, .72);
+        background: rgba(255, 255, 255, .045);
+        border: 1px solid transparent;
+        border-radius: .65rem;
+        transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+    }
+    .navbar-support-btn:hover,
+    .navbar-support-btn:focus-visible {
+        color: #fff;
+        background: rgba(255, 255, 255, .11);
+        border-color: rgba(233, 201, 183, .2);
+    }
     .card { border-radius: .9rem; }
     .shadow-sm { box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09) !important; }
     .btn-primary {
@@ -118,14 +137,368 @@
     .modal-header { border-bottom-color: rgba(59, 41, 35, .12); }
     .alert-warning { --bs-alert-bg: #fff3e8; --bs-alert-border-color: #e7b89f; --bs-alert-color: #6f3525; }
     .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
+    .card-materia .card-body { padding: 1.3rem; }
+    .card-materia .card-actions { padding-top: .35rem; }
     .card-materia:active { cursor: grabbing; }
     .card-materia:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
     .card-materia.sortable-ghost { opacity: .35; }
     .badge-cor { width: 34px; height: 34px; border-radius: .5rem; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
-    .tarefa-item.concluida { opacity: .55; text-decoration: line-through; }
+    .materia-progress-bar { background-color: var(--pimentel-vermelho); }
+    .study-overview {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: .7rem;
+        padding: .9rem;
+        background: linear-gradient(120deg, rgba(255, 253, 249, .98), rgba(244, 226, 212, .78));
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-left: 4px solid var(--pimentel-vermelho);
+        border-radius: 1rem;
+        box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .07);
+    }
+    .study-stat {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        padding: .55rem .65rem;
+        border-radius: .75rem;
+    }
+    .study-stat + .study-stat { border-left: 1px solid rgba(59, 41, 35, .1); }
+    .study-stat-icon {
+        width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .09);
+        border-radius: .65rem;
+    }
+    .study-stat-value { display: block; color: var(--pimentel-cafe); font-size: 1.05rem; line-height: 1.05; }
+    .study-stat-label { display: block; margin-top: .2rem; color: var(--pimentel-cafe-claro); font-size: .68rem; line-height: 1.15; }
+    .study-stat.is-due .study-stat-icon { color: #7a4a00; background: rgba(255, 193, 7, .17); }
+    .tarefa-item.concluida { opacity: .65; }
+    .tarefa-item.concluida .tarefa-descricao { text-decoration: line-through; }
     .nav-tabs .nav-link.active { font-weight: 600; }
-    .celula-calendario { min-height: 110px; vertical-align: top; }
-    .chip-tarefa { cursor: pointer; font-size: .72rem; display: block; white-space: normal; text-align: left; }
+    .study-session-card {
+        background: linear-gradient(135deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .78));
+        border: 1px solid rgba(59, 41, 35, .1) !important;
+    }
+    .study-session-form {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.15fr) minmax(280px, 1.65fr) minmax(170px, .8fr) minmax(145px, .65fr);
+        gap: .8rem;
+        align-items: end;
+    }
+    .study-session-form .form-label { color: var(--pimentel-cafe); font-weight: 600; }
+    .study-session-form .form-control,
+    .study-session-form .form-select {
+        min-height: 44px;
+        background-color: #fffdf9;
+        border-color: rgba(59, 41, 35, .22);
+        box-shadow: inset 0 1px 2px rgba(59, 41, 35, .03);
+    }
+    .study-session-form .form-control:focus,
+    .study-session-form .form-select:focus {
+        border-color: rgba(184, 50, 42, .58);
+        box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11);
+    }
+    .session-actions .btn-primary { min-height: 44px; }
+    .weekly-calendar-scroll { overflow-x: auto; padding: .2rem .1rem .55rem; }
+    .weekly-calendar-grid {
+        min-width: 880px;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(112px, 1fr));
+        gap: .65rem;
+    }
+    .calendar-day {
+        min-height: 156px;
+        overflow: hidden;
+        background: #fffdf9;
+        border: 1px solid rgba(59, 41, 35, .12);
+        border-radius: .9rem;
+        box-shadow: 0 .25rem .7rem rgba(59, 41, 35, .05);
+    }
+    .calendar-day.is-today {
+        background: linear-gradient(180deg, rgba(184, 50, 42, .1), #fffdf9 48%);
+        border-color: rgba(184, 50, 42, .38);
+        box-shadow: inset 0 3px 0 var(--pimentel-vermelho), 0 .3rem .8rem rgba(59, 41, 35, .07);
+    }
+    .calendar-day-header { padding: .75rem .7rem .6rem; text-align: center; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .calendar-weekday { display: block; color: var(--pimentel-cafe); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .calendar-date { display: block; margin-top: .12rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
+    .calendar-day.is-today .calendar-weekday { color: var(--pimentel-vermelho-escuro); }
+    .calendar-day-body { min-height: 94px; padding: .65rem; }
+    .calendar-empty { min-height: 76px; display: grid; place-items: center; align-content: center; gap: .3rem; color: rgba(91, 67, 58, .58); font-size: .7rem; text-align: center; }
+    .calendar-empty i { font-size: 1rem; opacity: .65; }
+    .calendar-task {
+        width: 100%;
+        display: block;
+        margin-bottom: .4rem;
+        padding: .45rem .5rem;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .09);
+        border: 1px solid rgba(184, 50, 42, .16);
+        border-radius: .6rem;
+        font-size: .7rem;
+        line-height: 1.25;
+        text-align: left;
+    }
+    .calendar-task:hover { background: rgba(184, 50, 42, .15); }
+    .calendar-task.is-complete { color: #27623d; background: rgba(43, 122, 72, .1); border-color: rgba(43, 122, 72, .18); }
+    .schedule-list-panel {
+        padding: 1rem;
+        background: rgba(255, 253, 249, .78);
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: 1rem;
+    }
+    .schedule-list-heading { color: var(--pimentel-cafe); }
+    .schedule-count { min-width: 1.65rem; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .1); }
+    .schedule-list-panel.is-complete .schedule-count { color: #27623d; background: rgba(43, 122, 72, .11); }
+    .schedule-empty {
+        min-height: 130px;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: .25rem;
+        padding: 1.25rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(244, 226, 212, .35);
+        border: 1px dashed rgba(59, 41, 35, .14);
+        border-radius: .85rem;
+        text-align: center;
+    }
+    .schedule-empty i { margin-bottom: .25rem; color: var(--pimentel-vermelho); font-size: 1.45rem; }
+    .schedule-empty strong { color: var(--pimentel-cafe); }
+    .schedule-empty small { max-width: 360px; }
+    .exam-header-card { border: 1px solid rgba(59, 41, 35, .1) !important; }
+    .exam-action { min-height: 34px; border-radius: .65rem !important; }
+    .exam-summary-card {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .9rem;
+        background: linear-gradient(135deg, #fffdf9, rgba(244, 226, 212, .48));
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: .85rem;
+        text-align: left;
+    }
+    .exam-summary-icon {
+        width: 2.35rem;
+        height: 2.35rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .1);
+        border-radius: .7rem;
+        font-size: 1rem;
+    }
+    .exam-summary-label { display: block; color: var(--pimentel-cafe-claro); font-size: .68rem; line-height: 1.1; }
+    .exam-summary-value { display: block; margin-top: .2rem; color: var(--pimentel-cafe); font-size: .96rem; line-height: 1.2; }
+    .exam-matrix-heading { gap: .75rem; }
+    .exam-total-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .42rem .7rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(184, 50, 42, .08);
+        border: 1px solid rgba(184, 50, 42, .14);
+        border-radius: 999px;
+        font-size: .72rem;
+        white-space: nowrap;
+    }
+    .exam-total-badge strong { color: var(--pimentel-vermelho-escuro); font-size: .8rem; }
+    .exam-matrix-table { overflow: hidden; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
+    .exam-matrix-table .table { --bs-table-hover-bg: rgba(184, 50, 42, .035); }
+    .exam-matrix-table thead th { padding-block: .75rem; color: var(--pimentel-cafe-claro); background: rgba(244, 226, 212, .48); border-bottom-color: rgba(59, 41, 35, .1); font-size: .72rem; text-transform: uppercase; letter-spacing: .025em; }
+    .exam-matrix-table .numeric-column { text-align: center; }
+    .exam-empty {
+        min-height: 190px;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: .4rem;
+        padding: 1.5rem;
+        color: var(--pimentel-cafe-claro);
+    }
+    .exam-empty-icon {
+        width: 3rem;
+        height: 3rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: .15rem;
+        color: rgba(91, 67, 58, .58);
+        background: rgba(91, 67, 58, .07);
+        border-radius: .9rem;
+        font-size: 1.35rem;
+    }
+    .exam-empty strong { color: var(--pimentel-cafe); }
+    .exam-empty small { max-width: 390px; }
+    .simulation-generator-card {
+        background: linear-gradient(135deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .72));
+        border: 1px solid rgba(59, 41, 35, .1) !important;
+    }
+    .simulation-generator-form {
+        display: grid;
+        grid-template-columns: minmax(190px, 1.15fr) minmax(230px, 1.45fr) minmax(140px, .85fr) minmax(120px, .7fr) minmax(120px, .65fr);
+        gap: .75rem;
+        align-items: end;
+    }
+    .simulation-generator-form .form-label { color: var(--pimentel-cafe); font-weight: 600; }
+    .simulation-generator-form .form-control,
+    .simulation-generator-form .form-select,
+    .simulation-generator-form .btn { min-height: 44px; }
+    .simulation-generator-form .form-control,
+    .simulation-generator-form .form-select { background: #fffdf9; border-color: rgba(59, 41, 35, .22); }
+    .simulation-generator-form .form-control:focus,
+    .simulation-generator-form .form-select:focus { border-color: rgba(184, 50, 42, .58); box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11); }
+    .ai-callout {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        margin-top: 1rem;
+        padding: .7rem .8rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(91, 67, 58, .045);
+        border: 1px solid rgba(59, 41, 35, .09);
+        border-radius: .75rem;
+    }
+    .ai-callout-icon {
+        width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .09);
+        border-radius: .6rem;
+    }
+    .ai-callout-copy { min-width: 0; flex: 1; font-size: .72rem; line-height: 1.35; }
+    .ai-callout-copy strong { display: block; color: var(--pimentel-cafe); font-size: .78rem; }
+    .ai-quota-badge {
+        flex-shrink: 0;
+        padding: .38rem .62rem;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .09);
+        border: 1px solid rgba(184, 50, 42, .14);
+        border-radius: 999px;
+        font-size: .7rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .performance-card { border: 1px solid rgba(59, 41, 35, .1) !important; }
+    .performance-empty {
+        min-height: 250px;
+        display: grid;
+        grid-template-columns: minmax(150px, 220px) minmax(220px, 420px);
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        padding: 1.5rem;
+        background: rgba(244, 226, 212, .28);
+        border: 1px dashed rgba(59, 41, 35, .13);
+        border-radius: .9rem;
+    }
+    .performance-placeholder { display: flex; align-items: end; justify-content: center; gap: 1rem; opacity: .62; }
+    .performance-donut {
+        width: 112px;
+        height: 112px;
+        position: relative;
+        flex-shrink: 0;
+        background: conic-gradient(rgba(91, 67, 58, .2) 0 42%, rgba(184, 50, 42, .18) 42% 68%, rgba(91, 67, 58, .08) 68% 100%);
+        border-radius: 50%;
+    }
+    .performance-donut::after { content: ""; position: absolute; inset: 25%; background: #f8efe7; border-radius: 50%; }
+    .performance-bars { height: 104px; display: flex; align-items: end; gap: .32rem; }
+    .performance-bars span { width: 14px; background: rgba(91, 67, 58, .16); border-radius: .3rem .3rem 0 0; }
+    .performance-bars span:nth-child(1) { height: 42%; }
+    .performance-bars span:nth-child(2) { height: 72%; background: rgba(184, 50, 42, .18); }
+    .performance-bars span:nth-child(3) { height: 55%; }
+    .performance-bars span:nth-child(4) { height: 88%; background: rgba(184, 50, 42, .14); }
+    .performance-empty-copy strong { display: block; color: var(--pimentel-cafe); font-size: 1rem; }
+    .performance-empty-copy p { max-width: 390px; margin: .35rem 0 .9rem; color: var(--pimentel-cafe-claro); font-size: .82rem; }
+    .error-form-card {
+        background: linear-gradient(135deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .72));
+        border: 1px solid rgba(59, 41, 35, .1) !important;
+    }
+    .error-entry-form {
+        display: grid;
+        grid-template-columns: minmax(220px, .9fr) minmax(300px, 1.5fr);
+        gap: .85rem;
+    }
+    .error-entry-form .form-label { color: var(--pimentel-cafe); font-weight: 600; }
+    .error-entry-form .form-control,
+    .error-entry-form .form-select {
+        background: #fffdf9;
+        border-color: rgba(59, 41, 35, .22);
+    }
+    .error-entry-form .form-control:focus,
+    .error-entry-form .form-select:focus { border-color: rgba(184, 50, 42, .58); box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11); }
+    .error-notes { grid-column: 1 / -1; }
+    .error-notes textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
+    .error-form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+    .error-form-actions .btn { min-width: 170px; min-height: 42px; border-radius: .65rem; }
+    .error-list-panel {
+        overflow: hidden;
+        background: rgba(255, 253, 249, .82);
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: 1rem;
+        box-shadow: 0 .3rem .9rem rgba(59, 41, 35, .045);
+    }
+    .error-list-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .9rem 1rem;
+        background: rgba(91, 67, 58, .045);
+        border-bottom: 1px solid rgba(59, 41, 35, .09);
+    }
+    .error-list-title { color: var(--pimentel-cafe); }
+    .error-list-summary {
+        display: inline-flex;
+        align-items: center;
+        margin-top: .2rem;
+        color: var(--pimentel-cafe-claro);
+        font-size: .7rem;
+    }
+    .error-list-filter { width: min(100%, 230px); background-color: #fffdf9; border-color: rgba(59, 41, 35, .18); }
+    .error-list-content { padding: 1rem; }
+    .error-list-content > .card:last-child { margin-bottom: 0 !important; }
+    .error-empty {
+        min-height: 220px;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: .35rem;
+        padding: 1.5rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(244, 226, 212, .25);
+        border: 1px dashed rgba(59, 41, 35, .13);
+        border-radius: .85rem;
+        text-align: center;
+    }
+    .error-empty-icon {
+        width: 3.2rem;
+        height: 3.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: .2rem;
+        color: rgba(91, 67, 58, .58);
+        background: rgba(91, 67, 58, .07);
+        border-radius: .9rem;
+        font-size: 1.4rem;
+    }
+    .error-empty strong { color: var(--pimentel-cafe); }
+    .error-empty small { max-width: 380px; }
     .opcao-resposta { cursor: pointer; text-align: left; }
     .opcao-resposta.correta { background-color: #d1e7dd !important; border-color: #badbcc !important; font-weight: 600; }
     .opcao-resposta.incorreta { background-color: #f8d7da !important; border-color: #f5c2c7 !important; }
@@ -149,6 +522,171 @@
     .topico-item.st-dominado { border-left-color: var(--bs-success); background-color: #f6fff9; }
     .flashcard-face { min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.25rem; font-size: 1.05rem; }
     .ws-nav .nav-link { border-radius: 2rem; font-size: .9rem; }
+    .library-prototype-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: .7rem;
+        padding: .75rem .85rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(91, 67, 58, .045);
+        border: 1px solid rgba(59, 41, 35, .09);
+        border-radius: .8rem;
+        font-size: .76rem;
+    }
+    .library-prototype-notice i { color: var(--pimentel-vermelho-escuro); font-size: 1rem; }
+    .library-hero {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-block: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(255, 253, 249, .98), rgba(244, 226, 212, .58));
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: 1rem;
+    }
+    .library-hero-icon {
+        width: 3.25rem;
+        height: 3.25rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .1);
+        border-radius: .95rem;
+        font-size: 1.35rem;
+    }
+    .library-hero h6 { color: var(--pimentel-cafe); }
+    .library-hero p { color: var(--pimentel-cafe-claro); font-size: .78rem; }
+    .library-feature-badge { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); border: 1px solid rgba(184, 50, 42, .13); }
+    .library-widget {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #fffdf9;
+        border: 1px solid rgba(59, 41, 35, .11);
+        border-radius: .95rem;
+        box-shadow: 0 .3rem .85rem rgba(59, 41, 35, .05);
+    }
+    .library-widget-top { display: flex; align-items: flex-start; gap: .8rem; padding: 1.1rem; }
+    .library-widget-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .09);
+        border-radius: .75rem;
+        font-size: 1.1rem;
+    }
+    .library-widget-copy { min-width: 0; }
+    .library-widget h6 { color: var(--pimentel-cafe); font-size: .94rem; }
+    .library-widget p { color: var(--pimentel-cafe-claro); font-size: .75rem; line-height: 1.5; }
+    .library-widget-source { display: block; margin-top: .55rem; color: rgba(91, 67, 58, .62); font-size: .65rem; }
+    .library-widget-actions { display: flex; gap: .5rem; margin-top: auto; padding: .8rem 1.1rem; background: rgba(244, 226, 212, .25); border-top: 1px solid rgba(59, 41, 35, .07); }
+    .library-safety-wrap { display: flex; justify-content: flex-end; margin-bottom: .4rem; }
+    .library-safety-note { position: relative; color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    .library-safety-note summary { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .55rem; cursor: pointer; list-style: none; border-radius: 999px; }
+    .library-safety-note summary::-webkit-details-marker { display: none; }
+    .library-safety-note summary:hover, .library-safety-note[open] summary { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .07); }
+    .library-safety-note p { position: absolute; right: 0; z-index: 15; width: min(320px, 78vw); margin: .35rem 0 0; padding: .65rem .75rem; color: var(--pimentel-cafe); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .12); border-radius: .7rem; box-shadow: 0 .5rem 1.2rem rgba(59, 41, 35, .12); font-size: .7rem; line-height: 1.45; }
+    .library-widget-settings { margin-bottom: 1rem; padding: .9rem; background: rgba(255, 253, 249, .9); border: 1px solid rgba(59, 41, 35, .11); border-radius: .9rem; }
+    .library-widget-setting { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: .65rem; padding: .55rem .65rem; border-bottom: 1px solid rgba(59, 41, 35, .07); }
+    .library-widget-setting:last-child { border-bottom: 0; }
+    .library-widget-setting strong { color: var(--pimentel-cafe); font-size: .8rem; }
+    .library-widget-setting small { color: var(--pimentel-cafe-claro); }
+    .library-widget-order { display: flex; gap: .3rem; }
+    .library-widget-status { min-height: 1.2rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
+    .library-widget.is-future { background: rgba(255, 253, 249, .62); border-style: dashed; }
+    .library-widget.is-future .library-widget-icon { color: rgba(91, 67, 58, .62); background: rgba(91, 67, 58, .07); }
+    .legal-reading-overview { margin-bottom: 1rem; padding: .8rem; background: rgba(255, 253, 249, .8); border: 1px solid rgba(59, 41, 35, .09); border-radius: .9rem; }
+    .legal-reading-overview-grid { display: grid; grid-template-columns: minmax(210px, 1.2fr) repeat(2, minmax(170px, 1fr)); gap: .65rem; }
+    .legal-reading-shortcut { min-width: 0; padding: .7rem .8rem; text-align: left; background: rgba(244, 226, 212, .24); border: 1px solid rgba(59, 41, 35, .08); border-radius: .7rem; }
+    .legal-reading-shortcut:hover { border-color: rgba(184, 50, 42, .28); background: rgba(184, 50, 42, .055); }
+    .legal-reading-shortcut strong, .legal-reading-shortcut small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .legal-reading-shortcut strong { color: var(--pimentel-cafe); font-size: .76rem; }
+    .legal-reading-shortcut small { margin-top: .18rem; color: var(--pimentel-cafe-claro); font-size: .65rem; }
+    .legal-reading-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+    .legal-reading-chip { max-width: 100%; color: var(--pimentel-cafe-claro); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: 999px; font-size: .65rem; }
+    .legal-reader-prototype {
+        margin-top: 1rem;
+        overflow: hidden;
+        background: #fffdf9;
+        border: 1px solid rgba(59, 41, 35, .12);
+        border-radius: 1rem;
+        box-shadow: 0 .45rem 1rem rgba(59, 41, 35, .06);
+    }
+    .legal-reader-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; background: rgba(244, 226, 212, .42); border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .legal-reader-title { color: var(--pimentel-cafe); }
+    .legal-reader-toolbar { position: sticky; top: 0; z-index: 12; display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; padding: .7rem 1rem; background: rgba(255, 253, 249, .97); border-bottom: 1px solid rgba(59, 41, 35, .08); box-shadow: 0 .25rem .65rem rgba(59, 41, 35, .045); backdrop-filter: blur(8px); }
+    .legal-reader-toolbar .btn:disabled { opacity: .58; }
+    .legal-toolbar-divider { width: 1px; height: 1.6rem; margin-inline: .1rem; background: rgba(59, 41, 35, .12); }
+    .legal-highlight-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .35rem .8rem; padding-top: .25rem; color: var(--pimentel-cafe-claro); font-size: .64rem; }
+    .legal-highlight-legend span { display: inline-flex; align-items: center; gap: .3rem; }
+    .legal-highlight-dot { width: .55rem; height: .55rem; border-radius: 50%; }
+    .legal-reader-action-panel { padding: .85rem 1rem; background: rgba(244, 226, 212, .3); border-bottom: 1px solid rgba(59, 41, 35, .09); }
+    .legal-reader-action-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .65rem; }
+    .legal-selection-preview { max-height: 5.2rem; overflow-y: auto; margin-bottom: .65rem; padding: .55rem .65rem; color: var(--pimentel-cafe-claro); background: rgba(255, 253, 249, .86); border-left: 3px solid var(--pimentel-vermelho); border-radius: .35rem; font-size: .7rem; line-height: 1.45; }
+    .legal-reader-action-grid { display: grid; grid-template-columns: minmax(180px, .75fr) minmax(280px, 1.5fr) auto; align-items: end; gap: .6rem; }
+    .legal-reader-action-grid.is-note { grid-template-columns: minmax(280px, 1fr) auto; }
+    .legal-reader-action-grid label { color: var(--pimentel-cafe-claro); font-size: .68rem; font-weight: 700; }
+    .legal-reader-action-grid textarea { min-height: 4.6rem; resize: vertical; }
+    .legal-reader-layout { display: grid; grid-template-columns: minmax(170px, .55fr) minmax(0, 1.8fr); min-height: 280px; }
+    .legal-reader-index { max-height: 68vh; overflow-y: auto; padding: 1rem; background: rgba(91, 67, 58, .035); border-right: 1px solid rgba(59, 41, 35, .08); }
+    .legal-reader-index span, .legal-reader-index button { display: block; margin-bottom: .4rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
+    .legal-reader-index button { position: relative; padding-left: .8rem; border: 0; }
+    .legal-reader-index button:hover, .legal-reader-index button.is-active { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); font-weight: 700; }
+    .legal-reader-index button.is-active::before { content: ""; position: absolute; inset: .18rem auto .18rem 0; width: 3px; background: var(--pimentel-vermelho); border-radius: 999px; }
+    .legal-index-count { padding-bottom: .55rem; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .legal-index-group { margin-top: .7rem; }
+    .legal-index-group-title { position: sticky; top: -.05rem; z-index: 1; padding: .35rem .25rem; color: var(--pimentel-cafe); background: #fbf8f5; font-size: .67rem; font-weight: 800; line-height: 1.25; text-transform: uppercase; }
+    .legal-index-subtitle { margin: .4rem .25rem .25rem; color: var(--pimentel-cafe-claro); font-size: .64rem; font-weight: 700; line-height: 1.25; }
+    .legal-reader-paper { min-width: 0; padding: 1.25rem 1.4rem; color: var(--pimentel-cafe); line-height: 1.7; }
+    .legal-reader-paper-text { white-space: pre-line; font-size: .88rem; }
+    .legal-reader-paper mark { padding: .02em .08em; color: inherit; border-radius: .16em; line-height: inherit; box-decoration-break: clone; -webkit-box-decoration-break: clone; background-clip: padding-box; }
+    .legal-reader-paper mark.highlight-yellow, .legal-highlight-dot.highlight-yellow { background: rgba(255, 193, 7, .3); }
+    .legal-reader-paper mark.highlight-red, .legal-highlight-dot.highlight-red { background: rgba(184, 50, 42, .2); }
+    .legal-reader-paper mark.highlight-green, .legal-highlight-dot.highlight-green { background: rgba(100, 116, 90, .24); }
+    .legal-reader-paper mark.highlight-blue, .legal-highlight-dot.highlight-blue { background: rgba(13, 110, 253, .17); }
+    .legal-reader-paper mark.highlight-pink, .legal-highlight-dot.highlight-pink { background: rgba(214, 51, 132, .16); }
+    .legal-reader-paper-text.is-highlight-filtered .legal-filter-context { opacity: .16; transition: opacity .15s ease; }
+    .legal-reader-paper-text.is-highlight-filtered:hover .legal-filter-context { opacity: .32; }
+    .legal-reader-source { padding: .7rem 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-top: 1px solid rgba(59, 41, 35, .08); font-size: .7rem; }
+    .legal-reader-search { width: min(250px, 100%); }
+    .legal-highlight-list { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
+    .legal-highlight-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: rgba(255, 193, 7, .08); border: 1px solid rgba(59, 41, 35, .08); border-radius: .65rem; font-size: .72rem; }
+    #btnFavoritarArtigo[aria-pressed="true"] { color: #fff; background: var(--pimentel-vermelho-escuro); border-color: var(--pimentel-vermelho-escuro); }
+    .legal-reader-paper .prototype-law-line { height: .55rem; margin-bottom: .65rem; background: rgba(91, 67, 58, .09); border-radius: 999px; }
+    .legal-reader-paper .prototype-law-line:nth-child(2) { width: 92%; }
+    .legal-reader-paper .prototype-law-line:nth-child(3) { width: 78%; }
+    .legal-reader-paper .prototype-law-line.is-highlighted { width: 86%; background: rgba(255, 193, 7, .28); }
+    .legal-reader-footnote { color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    #modalMateria.legal-focus-mode .modal-dialog { width: 100%; max-width: none; height: 100%; margin: 0; }
+    #modalMateria.legal-focus-mode .modal-content { height: 100vh; border: 0; border-radius: 0; }
+    #modalMateria.legal-focus-mode .modal-header,
+    #modalMateria.legal-focus-mode .modal-content > .px-3,
+    #modalMateria.legal-focus-mode #ws-biblioteca > .library-safety-wrap,
+    #modalMateria.legal-focus-mode #ws-biblioteca > .library-hero,
+    #modalMateria.legal-focus-mode #wsConfigWidgets,
+    #modalMateria.legal-focus-mode #wsWidgetsBiblioteca,
+    #modalMateria.legal-focus-mode .legal-reader-header,
+    #modalMateria.legal-focus-mode .legal-reader-source { display: none !important; }
+    #modalMateria.legal-focus-mode .modal-body { height: 100vh; padding: 0 !important; overflow: hidden; }
+    #modalMateria.legal-focus-mode .tab-content,
+    #modalMateria.legal-focus-mode #ws-biblioteca,
+    #modalMateria.legal-focus-mode #wsLeitorPrototipo { height: 100%; }
+    #modalMateria.legal-focus-mode #wsLeitorPrototipo { display: flex; flex-direction: column; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+    #modalMateria.legal-focus-mode .legal-reader-toolbar { flex-shrink: 0; }
+    #modalMateria.legal-focus-mode .legal-reader-action-panel { flex-shrink: 0; }
+    #modalMateria.legal-focus-mode .legal-reader-layout { flex: 1; grid-template-columns: 1fr; min-height: 0; }
+    #modalMateria.legal-focus-mode .legal-reader-index { display: none; }
+    #modalMateria.legal-focus-mode .legal-reader-paper { overflow-y: auto; padding: 2.2rem max(1.25rem, calc((100vw - 850px) / 2)); font-family: Georgia, "Times New Roman", serif; font-size: 1.03rem; line-height: 1.85; }
+    #modalMateria.legal-focus-mode .legal-reader-paper-text { font-size: 1rem; }
+    #modalMateria.legal-focus-mode #btnModoFoco { color: #fff; background: var(--pimentel-vermelho-escuro); border-color: var(--pimentel-vermelho-escuro); }
+    @media (max-width: 800px) { .legal-reading-overview-grid { grid-template-columns: 1fr; } }
     .tag-nota { font-size: .68rem; }
     .auth-shell {
         min-height: 100vh;
@@ -179,6 +717,38 @@
         .brand-code-logo-nav { min-width: 58px; padding-inline: .4rem; font-size: .78rem; }
         .brand-title { font-size: .98rem; }
         .brand-subtitle { font-size: .56rem; letter-spacing: .08em; }
+        .card-materia .card-body { padding: 1.15rem; }
+        .study-session-form { grid-template-columns: 1fr; }
+        .calendar-card-header { align-items: flex-start !important; }
+        .ai-callout { align-items: flex-start; flex-wrap: wrap; }
+        .ai-quota-badge { margin-left: 2.7rem; }
+        .performance-empty { grid-template-columns: 1fr; gap: 1rem; text-align: center; }
+        .performance-placeholder { align-items: center; }
+        .error-entry-form { grid-template-columns: 1fr; }
+        .error-notes, .error-form-actions { grid-column: auto; }
+        .error-form-actions .btn { width: 100%; }
+        .error-list-toolbar { align-items: stretch; flex-direction: column; }
+        .error-list-filter { width: 100%; }
+        .library-hero { align-items: flex-start; }
+        .legal-reader-header { align-items: flex-start; flex-direction: column; }
+        .legal-reader-layout { grid-template-columns: 1fr; }
+        .legal-reader-index { max-height: 260px; border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+        .legal-reader-action-grid, .legal-reader-action-grid.is-note { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 991.98px) {
+        .study-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .study-stat + .study-stat { border-left: 0; }
+        .study-stat:last-child { grid-column: 1 / -1; }
+        .study-session-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .session-actions { grid-column: 1 / -1; }
+        .simulation-generator-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .simulation-actions { grid-column: 1 / -1; }
+    }
+    @media (max-width: 575.98px) {
+        .study-session-form { grid-template-columns: 1fr; }
+        .session-actions { grid-column: auto; }
+        .simulation-generator-form { grid-template-columns: 1fr; }
+        .simulation-actions { grid-column: auto; }
     }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -300,10 +870,10 @@
         </span>
         <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <span class="text-light small me-1" id="usuarioAtual"></span>
-            <button class="btn btn-sm btn-outline-light" id="btnPreviaMigracao" type="button" title="Comparar dados locais e na nuvem"><i class="bi-cloud-check me-1"></i>Nuvem</button>
-            <button class="btn btn-sm btn-outline-light" id="btnExportar" title="Baixar backup"><i class="bi-download me-1"></i>Backup</button>
-            <label class="btn btn-sm btn-outline-light mb-0" title="Restaurar backup">
-                <i class="bi-upload me-1"></i>Restaurar
+            <button class="btn btn-sm navbar-support-btn" id="btnPreviaMigracao" type="button" title="Conferir dados na nuvem" aria-label="Conferir dados na nuvem"><i class="bi-cloud-check"></i><span class="visually-hidden">Nuvem</span></button>
+            <button class="btn btn-sm navbar-support-btn" id="btnExportar" type="button" title="Baixar backup" aria-label="Baixar backup"><i class="bi-download"></i><span class="visually-hidden">Backup</span></button>
+            <label class="btn btn-sm navbar-support-btn mb-0" title="Restaurar backup" aria-label="Restaurar backup">
+                <i class="bi-upload"></i><span class="visually-hidden">Restaurar backup</span>
                 <input type="file" id="inputImportar" accept=".json" class="d-none">
             </label>
             <button class="btn btn-sm btn-outline-warning" id="btnSair" type="button"><i class="bi-box-arrow-right me-1"></i>Sair</button>
@@ -353,7 +923,7 @@
                     <button class="btn btn-success rounded-pill" id="btnNovaMateria"><i class="bi-plus-circle me-1"></i>Nova Matéria</button>
                 </div>
             </div>
-            <p class="text-muted small mb-3" id="resumoMaterias"></p>
+            <section class="study-overview mb-4" id="resumoMaterias" aria-label="Resumo de desempenho"></section>
             <div class="row g-3" id="gridMaterias"></div>
         </div>
 
@@ -361,23 +931,23 @@
         <!-- CRONOGRAMA + CALENDÁRIO -->
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-cronograma">
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card study-session-card shadow-sm mb-4">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="bi-plus-circle me-1"></i>Nova sessão de estudo</h6>
-                    <form id="formTarefa" class="row g-2 align-items-end">
-                        <div class="col-md-3">
+                    <form id="formTarefa" class="study-session-form">
+                        <div class="session-field session-subject">
                             <label class="form-label small">Matéria</label>
                             <select class="form-select" id="tarefaMateria" required></select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="session-field session-topic">
                             <label class="form-label small">O que vai estudar</label>
                             <input type="text" class="form-control" id="tarefaTopico" maxlength="2000" placeholder="Ex: Art. 5º, incisos I a X" required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="session-field session-date">
                             <label class="form-label small">Data</label>
                             <input type="date" class="form-control" id="tarefaData" required>
                         </div>
-                        <div class="col-md-2 d-grid gap-1">
+                        <div class="session-actions d-grid gap-1">
                             <button type="submit" class="btn btn-primary w-100" id="btnSalvarTarefa"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarTarefa">Adicionar</span></button>
                             <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicaoTarefa">Cancelar edição</button>
                         </div>
@@ -387,7 +957,7 @@
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="calendar-card-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <h6 class="fw-bold mb-0"><i class="bi-calendar3 me-1"></i>Calendário semanal</h6>
                         <div class="btn-group btn-group-sm">
                             <button class="btn btn-outline-secondary" id="btnSemanaAnterior"><i class="bi-chevron-left"></i></button>
@@ -395,23 +965,30 @@
                             <button class="btn btn-outline-secondary" id="btnSemanaProxima"><i class="bi-chevron-right"></i></button>
                         </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered mb-0" id="tabelaCalendario">
-                            <thead class="table-light text-center"><tr id="cabecalhoCalendario"></tr></thead>
-                            <tbody><tr id="corpoCalendario"></tr></tbody>
-                        </table>
+                    <div class="weekly-calendar-scroll">
+                        <div class="weekly-calendar-grid" id="calendarioSemanal" aria-label="Calendário semanal"></div>
                     </div>
                 </div>
             </div>
 
             <div class="row g-3">
-                <div class="col-md-6">
-                    <h6 class="fw-bold text-primary"><i class="bi-hourglass-split me-1"></i>Pendentes</h6>
-                    <div id="listaPendentes" class="d-flex flex-column gap-2"></div>
+                <div class="col-12">
+                    <section class="schedule-list-panel" aria-labelledby="tituloPendentes">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="schedule-list-heading fw-bold mb-0" id="tituloPendentes"><i class="bi-hourglass-split me-2"></i>Pendentes</h6>
+                            <span class="schedule-count badge rounded-pill" id="contadorPendentes">0</span>
+                        </div>
+                        <div id="listaPendentes" class="d-flex flex-column gap-2"></div>
+                    </section>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="fw-bold text-success"><i class="bi-check-circle-fill me-1"></i>Concluídas</h6>
-                    <div id="listaConcluidas" class="d-flex flex-column gap-2"></div>
+                <div class="col-12">
+                    <section class="schedule-list-panel is-complete" aria-labelledby="tituloConcluidas">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="schedule-list-heading fw-bold mb-0" id="tituloConcluidas"><i class="bi-check-circle-fill me-2 text-success"></i>Concluídas</h6>
+                            <span class="schedule-count badge rounded-pill" id="contadorConcluidas">0</span>
+                        </div>
+                        <div id="listaConcluidas" class="d-flex flex-column gap-2"></div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -420,30 +997,30 @@
         <!-- EDITAL & ESTRATÉGIA -->
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-edital">
-            <div class="card border-0 shadow-sm mb-3">
+            <div class="card exam-header-card shadow-sm mb-3">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h6 class="fw-bold m-0"><i class="bi-file-earmark-spreadsheet-fill text-success me-2"></i>Edital &amp; Estratégia da Prova</h6>
+                    <h6 class="fw-bold m-0"><i class="bi-file-earmark-spreadsheet-fill text-primary me-2"></i>Edital &amp; Estratégia da Prova</h6>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#modalConfigEdital"><i class="bi-gear-fill me-1"></i>Configurar Concurso</button>
-                        <button class="btn btn-sm btn-success rounded-pill" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Adicionar Matéria</button>
+                        <button class="btn btn-sm btn-outline-primary exam-action" data-bs-toggle="modal" data-bs-target="#modalConfigEdital"><i class="bi-gear-fill me-1"></i>Configurar Concurso</button>
+                        <button class="btn btn-sm btn-primary exam-action" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Adicionar Matéria</button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 mb-4 text-center">
-                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Concurso</span><strong id="editalNome">Aguardando</strong></div></div>
-                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Banca</span><strong id="editalBanca">—</strong></div></div>
-                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Vagas</span><strong id="editalVagas">—</strong></div></div>
-                        <div class="col-md-3 col-6"><div class="p-2 border rounded bg-light h-100"><span class="text-muted small d-block">Data da prova</span><strong id="editalData">—</strong></div></div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-trophy" aria-hidden="true"></i></span><span><span class="exam-summary-label">Concurso</span><strong class="exam-summary-value" id="editalNome">Aguardando configuração</strong></span></div></div>
+                        <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-bank" aria-hidden="true"></i></span><span><span class="exam-summary-label">Banca</span><strong class="exam-summary-value" id="editalBanca">Não informada</strong></span></div></div>
+                        <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-people" aria-hidden="true"></i></span><span><span class="exam-summary-label">Vagas</span><strong class="exam-summary-value" id="editalVagas">A definir</strong></span></div></div>
+                        <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-calendar-event" aria-hidden="true"></i></span><span><span class="exam-summary-label">Data da prova</span><strong class="exam-summary-value" id="editalData">A definir</strong></span></div></div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="exam-matrix-heading d-flex justify-content-between align-items-center flex-wrap mb-2">
                         <h6 class="fw-bold mb-0"><i class="bi-calculator me-1"></i>Matriz de Pesos e Relevância</h6>
-                        <span class="text-muted small">Total da prova: <strong id="editalTotalPontos" class="text-primary">0 pts</strong></span>
+                        <span class="exam-total-badge"><i class="bi-bar-chart-line" aria-hidden="true"></i>Total da prova <strong id="editalTotalPontos">0 pts</strong></span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle border">
-                            <thead class="table-light">
-                                <tr><th>Matéria</th><th class="text-center">Questões</th><th class="text-center">Peso</th><th class="text-center">Pontos</th><th class="text-center">% da prova</th><th class="text-center">Ações</th></tr>
+                    <div class="exam-matrix-table table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr><th>Matéria</th><th class="numeric-column">Questões</th><th class="numeric-column">Peso</th><th class="numeric-column">Pontos</th><th class="numeric-column">% da prova</th><th class="numeric-column">Ações</th></tr>
                             </thead>
                             <tbody id="tabelaEdital"></tbody>
                         </table>
@@ -456,24 +1033,63 @@
         <!-- SIMULADOS COM IA -->
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-simulados">
-
-            <div class="alert alert-success border-0 shadow-sm mb-4" role="status">
-                <div class="d-flex gap-2 align-items-start">
-                    <i class="bi-shield-lock-fill mt-1"></i>
-                    <div>
-                        <div class="fw-bold">IA protegida pelo servidor</div>
-                        <div class="small">Sua conta envia apenas os dados necessários para montar o simulado. A chave do Google Gemini não fica salva nem aparece neste navegador.</div>
-                        <div class="small mt-1" id="statusCotaIA">O limite diário é de 50 questões por usuário.</div>
+            <div class="card simulation-generator-card shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi-magic me-1"></i>Gerar Simulado</h6>
+                    <form id="formGerarSimulado" class="simulation-generator-form">
+                        <div class="simulation-field">
+                            <label class="form-label small">Matéria</label>
+                            <select class="form-select" id="simMateria" required></select>
+                        </div>
+                        <div class="simulation-field">
+                            <label class="form-label small">Tema (opcional)</label>
+                            <input type="text" class="form-control" id="simTema" placeholder="Ex: Prisão em flagrante">
+                        </div>
+                        <div class="simulation-field">
+                            <label class="form-label small">Dificuldade</label>
+                            <select class="form-select" id="simDificuldade">
+                                <option>Fácil</option><option selected>Médio</option><option>Difícil</option>
+                            </select>
+                        </div>
+                        <div class="simulation-field">
+                            <label class="form-label small">Quantidade</label>
+                            <select class="form-select" id="simQtd">
+                                <option value="3">3</option><option value="5" selected>5</option><option value="10">10</option>
+                            </select>
+                        </div>
+                        <div class="simulation-actions">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi-stars me-1"></i>Gerar</button>
+                        </div>
+                    </form>
+                    <div class="ai-callout" role="status">
+                        <span class="ai-callout-icon"><i class="bi-shield-lock-fill" aria-hidden="true"></i></span>
+                        <div class="ai-callout-copy"><strong>IA protegida pelo servidor</strong>Só os dados necessários são enviados; a chave do Google Gemini nunca aparece no navegador.</div>
+                        <span class="ai-quota-badge" id="statusCotaIA">Limite: 50 questões por dia</span>
                     </div>
+                    <div id="loadingIA" class="mt-3 text-muted small d-none">
+                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>A IA está gerando as questões...
+                    </div>
+                    <div id="erroIA" class="alert alert-danger mt-3 d-none"></div>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card performance-card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0"><i class="bi-pie-chart-fill me-1"></i>Desempenho por matéria</h6>
                     </div>
-                    <div class="row">
+                    <div id="estadoVazioDesempenho" class="performance-empty d-none">
+                        <div class="performance-placeholder" aria-hidden="true">
+                            <span class="performance-donut"></span>
+                            <span class="performance-bars"><span></span><span></span><span></span><span></span></span>
+                        </div>
+                        <div class="performance-empty-copy">
+                            <strong>Seu desempenho aparecerá aqui.</strong>
+                            <p>Gere e responda o primeiro simulado para acompanhar acertos e evolução por matéria.</p>
+                            <button type="button" class="btn btn-sm btn-outline-primary exam-action" id="btnIrGeradorSimulado"><i class="bi-stars me-1"></i>Gerar primeiro simulado</button>
+                        </div>
+                    </div>
+                    <div class="row align-items-center" id="conteudoDesempenho">
                         <div class="col-md-5">
                             <div id="badgesDesempenho" class="d-flex flex-wrap gap-2"></div>
                         </div>
@@ -486,41 +1102,6 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-3"><i class="bi-magic me-1"></i>Gerar Simulado</h6>
-                    <form id="formGerarSimulado" class="row g-2 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label small">Matéria</label>
-                            <select class="form-select" id="simMateria" required></select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small">Tema (opcional)</label>
-                            <input type="text" class="form-control" id="simTema" placeholder="Ex: Prisão em flagrante">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small">Dificuldade</label>
-                            <select class="form-select" id="simDificuldade">
-                                <option>Fácil</option><option selected>Médio</option><option>Difícil</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small">Quantidade</label>
-                            <select class="form-select" id="simQtd">
-                                <option value="3">3</option><option value="5" selected>5</option><option value="10">10</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100"><i class="bi-stars me-1"></i>Gerar</button>
-                        </div>
-                    </form>
-                    <div id="loadingIA" class="mt-3 text-muted small d-none">
-                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>A IA está gerando as questões...
-                    </div>
-                    <div id="erroIA" class="alert alert-danger mt-3 d-none"></div>
-                </div>
-            </div>
-
             <div id="areaQuestoes" class="row g-3"></div>
             <div id="areaResultado" class="alert alert-info mt-3 d-none"></div>
         </div>
@@ -529,33 +1110,38 @@
         <!-- CADERNO DE ERROS -->
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-erros">
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card error-form-card shadow-sm mb-4">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="bi-plus-circle me-1"></i>Registrar erro manualmente</h6>
-                    <form id="formErro" class="row g-2 align-items-end">
-                        <div class="col-md-3">
+                    <form id="formErro" class="error-entry-form">
+                        <div class="error-subject">
                             <label class="form-label small">Matéria</label>
                             <select class="form-select" id="erroMateria" required></select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="error-topic">
                             <label class="form-label small">Tema / questão</label>
                             <input type="text" class="form-control" id="erroTema" placeholder="Ex: Prisão em flagrante" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="error-notes">
                             <label class="form-label small">O que errei / por quê</label>
-                            <input type="text" class="form-control" id="erroObs" placeholder="Ex: Confundi flagrante com ordem judicial">
+                            <textarea class="form-control" id="erroObs" rows="4" placeholder="Ex: Confundi flagrante com ordem judicial"></textarea>
                         </div>
-                        <div class="col-md-1">
-                            <button type="submit" class="btn btn-danger w-100"><i class="bi-plus-lg"></i></button>
+                        <div class="error-form-actions">
+                            <button type="submit" class="btn btn-primary"><i class="bi-journal-plus me-1"></i>Adicionar erro</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted small" id="resumoErros"></span>
-                <select class="form-select form-select-sm" id="filtroErroMateria" style="width:auto;"><option value="">Todas as matérias</option></select>
-            </div>
-            <div id="listaErros"></div>
+            <section class="error-list-panel" aria-labelledby="tituloListaErros">
+                <header class="error-list-toolbar">
+                    <div>
+                        <h6 class="error-list-title fw-bold mb-0" id="tituloListaErros"><i class="bi-journal-text me-2"></i>Registros do caderno</h6>
+                        <span class="error-list-summary" id="resumoErros"></span>
+                    </div>
+                    <select class="form-select form-select-sm error-list-filter" id="filtroErroMateria" aria-label="Filtrar erros por matéria"><option value="">Todas as matérias</option></select>
+                </header>
+                <div class="error-list-content" id="listaErros"></div>
+            </section>
         </div>
 
         <!-- ============================================================ -->
@@ -638,6 +1224,13 @@
             <form id="formMateria">
                 <input type="hidden" id="materiaEditandoId">
                 <div class="mb-3"><label class="form-label">Nome</label><input type="text" class="form-control" id="materiaNome" required></div>
+                <div class="mb-3">
+                    <label class="form-label" for="materiaCatalogo">Tipo da matéria <span class="text-muted fw-normal">(opcional)</span></label>
+                    <select class="form-select" id="materiaCatalogo">
+                        <option value="">Matéria personalizada / sem classificação</option>
+                    </select>
+                    <div class="form-text">Ajuda o sistema a sugerir bibliotecas e ferramentas adequadas. Não altera o conteúdo da matéria.</div>
+                </div>
                 <div class="mb-3"><label class="form-label">Descrição breve</label><input type="text" class="form-control" id="materiaDesc"></div>
                 <div class="row">
                     <div class="col-md-6 mb-3"><label class="form-label">Cor</label>
@@ -677,6 +1270,7 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-notas" type="button"><i class="bi-journal-text me-1"></i>Notas</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-cards" type="button"><i class="bi-card-heading me-1"></i>Flashcards</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-links" type="button"><i class="bi-link-45deg me-1"></i>Materiais</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-biblioteca" type="button"><i class="bi-bookshelf me-1"></i>Biblioteca</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-resumo" type="button"><i class="bi-graph-up me-1"></i>Resumo</button></li>
             </ul>
         </div>
@@ -769,6 +1363,104 @@
                         </div>
                     </form>
                     <div id="listaLinks" class="list-group"></div>
+                </div>
+
+                <div class="tab-pane fade" id="ws-biblioteca">
+                    <div class="library-safety-wrap">
+                        <details class="library-safety-note">
+                            <summary><i class="bi-info-circle" aria-hidden="true"></i>Biblioteca segura</summary>
+                            <p>As fontes oficiais são compartilhadas, enquanto a organização dos widgets e todos os seus grifos permanecem privados no seu perfil.</p>
+                        </details>
+                    </div>
+                    <div class="library-hero">
+                        <span class="library-hero-icon"><i class="bi-book-half" id="wsBibliotecaIcone" aria-hidden="true"></i></span>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1" id="wsBibliotecaTitulo">Biblioteca da matéria</h6>
+                            <p class="mb-2" id="wsBibliotecaDescricao"></p>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge library-feature-badge">Fonte oficial</span>
+                                <span class="badge library-feature-badge">Grifos privados</span>
+                                <span class="badge library-feature-badge">Widgets configuráveis</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" id="btnOrganizarWidgets"><i class="bi-sliders me-1"></i>Organizar</button>
+                    </div>
+                    <section class="legal-reading-overview d-none" id="wsAtalhosLeitura" aria-label="Atalhos pessoais de leitura"></section>
+                    <section class="library-widget-settings d-none" id="wsConfigWidgets" aria-label="Organização dos widgets">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                            <div><strong class="d-block small">Seus widgets</strong><small class="text-muted">Ative, oculte e escolha a ordem desta matéria.</small></div>
+                            <button type="button" class="btn btn-sm btn-primary" id="btnSalvarWidgets"><i class="bi-cloud-check me-1"></i>Salvar organização</button>
+                        </div>
+                        <div id="wsListaConfigWidgets"></div>
+                        <div class="library-widget-status mt-2" id="wsStatusWidgets" role="status"></div>
+                    </section>
+                    <div class="row g-3" id="wsWidgetsBiblioteca"></div>
+                    <section class="legal-reader-prototype d-none" id="wsLeitorPrototipo" aria-labelledby="wsLeitorTitulo">
+                        <header class="legal-reader-header">
+                            <div>
+                                <span class="text-muted d-block" style="font-size:.66rem;" id="wsLeitorEstado">LEITOR JURÍDICO</span>
+                                <strong class="legal-reader-title" id="wsLeitorTitulo">Documento jurídico</strong>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnFecharLeitorPrototipo"><i class="bi-x-lg me-1"></i>Fechar leitor</button>
+                        </header>
+                        <div class="legal-reader-toolbar" aria-label="Ferramentas do leitor">
+                            <input type="search" class="form-control form-control-sm legal-reader-search" id="wsBuscaArtigo" placeholder="Buscar artigo ou palavra">
+                            <select class="form-select form-select-sm" id="wsCorGrifo" aria-label="Função didática do grifo" style="width:auto" title="Escolha o significado do grifo">
+                                <option value="yellow">Amarelo · Regra</option>
+                                <option value="red">Vermelho · Exceção/prazo</option>
+                                <option value="green">Verde · Competência</option>
+                                <option value="blue">Azul · Sanção</option>
+                            </select>
+                            <button type="button" class="btn btn-sm btn-outline-warning" id="btnGrifarTrecho"><i class="bi-highlighter me-1"></i>Grifar seleção</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAnotarTrecho"><i class="bi-chat-left-text me-1"></i>Anotar</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCopiarArtigo"><i class="bi-clipboard me-1"></i>Copiar com citação</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnCriarCardArtigo"><i class="bi-card-heading me-1"></i>Criar flashcard</button>
+                            <span class="legal-toolbar-divider" aria-hidden="true"></span>
+                            <select class="form-select form-select-sm" id="wsFiltroGrifo" aria-label="Filtrar grifos por função" style="width:auto">
+                                <option value="all">Todos os grifos</option>
+                                <option value="yellow">Só regras</option>
+                                <option value="red">Só exceções/prazos</option>
+                                <option value="green">Só competências</option>
+                                <option value="blue">Só sanções</option>
+                                <option value="pink">Rosa · legado</option>
+                            </select>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnFavoritarArtigo" aria-pressed="false"><i class="bi-bookmark me-1"></i><span>Favoritar</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnModoFoco" aria-pressed="false"><i class="bi-arrows-fullscreen me-1"></i><span>Modo foco</span></button>
+                            <div class="legal-highlight-legend" aria-label="Significado das cores">
+                                <span><i class="legal-highlight-dot highlight-yellow"></i>Regra/conceito</span>
+                                <span><i class="legal-highlight-dot highlight-red"></i>Exceção/prazo</span>
+                                <span><i class="legal-highlight-dot highlight-green"></i>Competência</span>
+                                <span><i class="legal-highlight-dot highlight-blue"></i>Punição/sanção</span>
+                            </div>
+                        </div>
+                        <section class="legal-reader-action-panel d-none" id="wsPainelAcaoLeitor" aria-labelledby="wsAcaoLeitorTitulo">
+                            <header>
+                                <div><strong class="d-block small" id="wsAcaoLeitorTitulo">Ação do leitor</strong><small class="text-muted" id="wsAcaoLeitorAjuda"></small></div>
+                                <button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnCancelarAcaoLeitor" aria-label="Fechar formulário"><i class="bi-x-lg"></i></button>
+                            </header>
+                            <div class="legal-selection-preview" id="wsPreviaSelecaoLeitor"></div>
+                            <form id="formAcaoLeitor">
+                                <div class="legal-reader-action-grid" id="wsCamposAcaoLeitor">
+                                    <div id="wsCampoPerguntaLeitor"><label class="form-label mb-1" for="wsPerguntaCardLeitor">Pergunta</label><input class="form-control form-control-sm" id="wsPerguntaCardLeitor" maxlength="5000"></div>
+                                    <div><label class="form-label mb-1" for="wsConteudoAcaoLeitor" id="wsLabelConteudoAcaoLeitor">Conteúdo</label><textarea class="form-control form-control-sm" id="wsConteudoAcaoLeitor" maxlength="10000" required></textarea></div>
+                                    <button type="submit" class="btn btn-sm btn-primary" id="btnSalvarAcaoLeitor"><i class="bi-cloud-check me-1"></i>Salvar</button>
+                                </div>
+                            </form>
+                        </section>
+                        <div class="legal-reader-layout">
+                            <aside class="legal-reader-index" id="wsLeitorIndice" aria-label="Índice do documento"></aside>
+                            <div class="legal-reader-paper">
+                                <div class="small text-muted mb-1" id="wsLeitorCaminho"></div>
+                                <h6 class="fw-bold" id="wsLeitorDocumento">Documento jurídico</h6>
+                                <div class="legal-reader-paper-text" id="wsLeitorTexto"></div>
+                                <div class="legal-highlight-list" id="wsListaGrifosArtigo"></div>
+                                <p class="legal-reader-footnote mt-3 mb-0" id="wsLeitorOrientacao">Selecione um trecho do artigo para grifar.</p>
+                            </div>
+                        </div>
+                        <footer class="legal-reader-source">
+                            <strong id="wsLeitorVersao"></strong><span class="mx-1">·</span><span id="wsLeitorEscopo"></span><span class="mx-1">·</span><a id="wsLeitorFonte" href="#" target="_blank" rel="noopener noreferrer">Abrir fonte oficial</a>
+                        </footer>
+                    </section>
                 </div>
 
                 <div class="tab-pane fade" id="ws-resumo">
@@ -1018,6 +1710,7 @@ function normalizarMateria(m) {
     if (!Array.isArray(m.topicos)) m.topicos = [];
     if (!Array.isArray(m.cards)) m.cards = [];
     if (!Array.isArray(m.links)) m.links = [];
+    m.catalogoId = String(m.catalogoId || "");
     m.topicos.forEach(t => { if (!STATUS_TOPICO[t.status]) t.status = "nao"; });
     m.cards.forEach(c => { c.caixa = Number(c.caixa) || 1; c.proxima = c.proxima || hojeISO(); c.acertos = c.acertos || 0; c.erros = c.erros || 0; });
     return m;
@@ -1152,10 +1845,28 @@ let sortableInstancia = null;
 let filtroMaterias = "";
 let ordemMaterias = "manual";
 let operacaoMateriaEmAndamento = false;
+let catalogoMaterias = [];
+let widgetsPorMateria = new Map();
 
 function exigirNuvemMaterias() {
     if (!window.HUB_CLOUD_SUBJECTS) throw new Error("A conexão com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_SUBJECTS;
+}
+
+function preencherCatalogoMaterias() {
+    const select = document.getElementById("materiaCatalogo");
+    if (!select) return;
+    const valorAtual = select.value;
+    const grupos = [
+        ["juridica", "Matérias jurídicas"],
+        ["geral", "Matérias gerais"]
+    ];
+    select.innerHTML = `<option value="">Matéria personalizada / sem classificação</option>` + grupos.map(([categoria, titulo]) => {
+        const opcoes = catalogoMaterias.filter(item => item.categoria === categoria)
+            .map(item => `<option value="${esc(item.id)}">${esc(item.nome)}</option>`).join("");
+        return opcoes ? `<optgroup label="${esc(titulo)}">${opcoes}</optgroup>` : "";
+    }).join("");
+    select.value = catalogoMaterias.some(item => item.id === valorAtual) ? valorAtual : "";
 }
 
 function sincronizarListaDeMaterias(materiasRemotas) {
@@ -1171,7 +1882,8 @@ function sincronizarListaDeMaterias(materiasRemotas) {
             nome: remota.nome,
             desc: remota.desc,
             cor: remota.cor,
-            prioridade: remota.prioridade
+            prioridade: remota.prioridade,
+            catalogoId: remota.catalogoId || ""
         });
     });
     const somenteLocais = locais.filter(materia => !usados.has(String(materia.id)));
@@ -1408,8 +2120,27 @@ function renderizarMaterias() {
     const totalNotas = todas.reduce((a, m) => a + m.notas.length, 0);
     const totalCards = todas.reduce((a, m) => a + m.cards.length, 0);
     const vencidos = todas.reduce((a, m) => a + cardsVencidos(m).length, 0);
-    document.getElementById("resumoMaterias").innerHTML =
-        `<strong>${todas.length}</strong> matérias · <strong>${dominados}/${totalTopicos}</strong> tópicos dominados · <strong>${totalNotas}</strong> notas · <strong>${totalCards}</strong> flashcards · <strong class="text-warning-emphasis">${vencidos}</strong> para revisar hoje`;
+    document.getElementById("resumoMaterias").innerHTML = `
+        <div class="study-stat">
+            <span class="study-stat-icon"><i class="bi-collection-fill"></i></span>
+            <span><strong class="study-stat-value">${todas.length}</strong><small class="study-stat-label">Matérias</small></span>
+        </div>
+        <div class="study-stat">
+            <span class="study-stat-icon"><i class="bi-check2-circle"></i></span>
+            <span><strong class="study-stat-value">${dominados}/${totalTopicos}</strong><small class="study-stat-label">Tópicos dominados</small></span>
+        </div>
+        <div class="study-stat">
+            <span class="study-stat-icon"><i class="bi-journal-text"></i></span>
+            <span><strong class="study-stat-value">${totalNotas}</strong><small class="study-stat-label">Notas</small></span>
+        </div>
+        <div class="study-stat">
+            <span class="study-stat-icon"><i class="bi-card-heading"></i></span>
+            <span><strong class="study-stat-value">${totalCards}</strong><small class="study-stat-label">Flashcards</small></span>
+        </div>
+        <div class="study-stat is-due">
+            <span class="study-stat-icon"><i class="bi-alarm"></i></span>
+            <span><strong class="study-stat-value">${vencidos}</strong><small class="study-stat-label">Para revisar hoje</small></span>
+        </div>`;
     const contador = document.getElementById("contadorRevisao");
     if (contador) contador.textContent = vencidos;
 
@@ -1437,15 +2168,15 @@ function renderizarMaterias() {
                             ${m.prioridade === "alta" ? '<i class="bi-fire text-danger" title="Prioridade alta"></i>' : ""}
                         </div>
                         <p class="text-secondary small mb-2">${esc(m.desc || "")}</p>
-                        <div class="progress materia-progress mb-2"><div class="progress-bar bg-${m.cor}" style="width:${p}%"></div></div>
+                        <div class="progress materia-progress mb-2"><div class="progress-bar materia-progress-bar" style="width:${p}%"></div></div>
                         <div class="d-flex flex-wrap gap-1 mb-3">
                             <span class="badge bg-light text-dark border badge-mini"><i class="bi-journal-text me-1"></i>${m.notas.length}</span>
                             <span class="badge bg-light text-dark border badge-mini"><i class="bi-card-heading me-1"></i>${m.cards.length}</span>
                             ${venc ? `<span class="badge bg-warning text-dark badge-mini"><i class="bi-alarm me-1"></i>${venc} p/ revisar</span>` : ""}
                             ${err ? `<span class="badge bg-danger-subtle text-danger border badge-mini"><i class="bi-x-circle me-1"></i>${err} erros</span>` : ""}
                         </div>
-                        <div class="mt-auto d-flex gap-2">
-                            <button class="btn btn-sm btn-${m.cor} flex-grow-1 btn-abrir-materia" data-id="${m.id}"><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
+                        <div class="card-actions mt-auto d-flex gap-2">
+                            <button class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia" data-id="${m.id}"><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
                             <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar"><i class="bi-pencil"></i></button>
                             <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir"><i class="bi-trash"></i></button>
                         </div>
@@ -1535,6 +2266,7 @@ function abrirFormularioMateria(id) {
     document.getElementById("tituloModalMateria").textContent = m ? "Editar Matéria" : "Nova Matéria";
     document.getElementById("materiaEditandoId").value = m ? m.id : "";
     document.getElementById("materiaNome").value = m ? m.nome : "";
+    document.getElementById("materiaCatalogo").value = m ? (m.catalogoId || "") : "";
     document.getElementById("materiaDesc").value = m ? (m.desc || "") : "";
     document.getElementById("materiaCor").value = m ? m.cor : "primary";
     document.getElementById("materiaPrioridade").value = m ? m.prioridade : "media";
@@ -1549,7 +2281,8 @@ document.getElementById("formMateria").addEventListener("submit", async (e) => {
         nome: document.getElementById("materiaNome").value.trim(),
         desc: document.getElementById("materiaDesc").value.trim(),
         cor: document.getElementById("materiaCor").value,
-        prioridade: document.getElementById("materiaPrioridade").value
+        prioridade: document.getElementById("materiaPrioridade").value,
+        catalogoId: document.getElementById("materiaCatalogo").value
     };
     const botaoSalvar = e.target.querySelector('button[type="submit"]');
     const textoOriginal = botaoSalvar.textContent;
@@ -1569,7 +2302,8 @@ document.getElementById("formMateria").addEventListener("submit", async (e) => {
                     nome: anterior.nome,
                     desc: anterior.desc,
                     cor: anterior.cor,
-                    prioridade: anterior.prioridade
+                    prioridade: anterior.prioridade,
+                    catalogoId: anterior.catalogoId || ""
                 });
                 throw erroLocal;
             }
@@ -1614,6 +2348,15 @@ let operacaoCardEmAndamento = false;
 let cardEmEdicaoId = null;
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
+let documentosJuridicos = [];
+let grifosJuridicos = [];
+let favoritosJuridicos = [];
+let historicoLeituraJuridica = [];
+let documentoLeitorAtual = null;
+let dispositivoLeitorAtual = null;
+let filtroCorGrifoAtual = "all";
+let modoFocoLeitorAtivo = false;
+let acaoLeitorAtual = null;
 
 function exigirNuvemTopicos() {
     if (!window.HUB_CLOUD_TOPICS) throw new Error("A conexão de tópicos com o Supabase ainda não está pronta.");
@@ -1634,6 +2377,541 @@ function exigirNuvemLinks() {
     if (!window.HUB_CLOUD_LINKS) throw new Error("A conexão de materiais com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_LINKS;
 }
+
+function chaveMateriaCatalogo(nome) {
+    return String(nome || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function catalogoDaMateria(materia) {
+    return catalogoMaterias.find(item => item.id === materia.catalogoId) || null;
+}
+
+function recursoLegalDaMateria(materia) {
+    const catalogo = catalogoDaMateria(materia);
+    const chave = catalogo?.slug || chaveMateriaCatalogo(materia.nome);
+    if (chave.includes("constitucional")) return { titulo: "Constituição Federal", descricao: "Leitura estruturada por títulos, capítulos e artigos, com fonte e versão visíveis.", fonte: "Planalto / Senado Federal", icone: "bi-bank" };
+    if (chave.includes("processo-penal") || chave.includes("processo penal")) return { titulo: "Código de Processo Penal", descricao: "Consulta rápida ao CPP com busca por artigo, favoritos e vínculos com tópicos.", fonte: "Fonte oficial a definir", icone: "bi-shield-check" };
+    if (chave.includes("penal")) return { titulo: "Código Penal", descricao: "Leitor do Código Penal preparado para grifos, notas e criação de flashcards.", fonte: "Fonte oficial a definir", icone: "bi-shield-lock" };
+    if (chave.includes("administrativ")) return { titulo: "Biblioteca Administrativa", descricao: "Coleção configurável para Constituição, licitações, improbidade e normas do edital.", fonte: "Fontes oficiais selecionadas", icone: "bi-building" };
+    if (chave.includes("gcm") || chave.includes("guarda")) return { titulo: "Estatuto Geral das Guardas", descricao: "Lei nº 13.022/2014 organizada para leitura, marcações e revisão por artigos.", fonte: "Planalto", icone: "bi-shield" };
+    if (chave.includes("transito") || chave.includes("trânsito") || chave.includes("ctb")) return { titulo: "Código de Trânsito Brasileiro", descricao: "Consulta temática ao CTB com favoritos e artigos ligados ao seu edital.", fonte: "Planalto", icone: "bi-signpost-2" };
+    if (chave.includes("direitos-humanos")) return { titulo: "Biblioteca de Direitos Humanos", descricao: "Tratados, Constituição e normas relacionadas, organizados por assunto.", fonte: "Fontes oficiais selecionadas", icone: "bi-globe-americas" };
+    return { titulo: "Biblioteca de legislação", descricao: "Adicione normas oficiais relacionadas a esta matéria.", fonte: "Configuração futura", icone: catalogo?.icone || "bi-bank" };
+}
+
+function documentosJuridicosDaMateria(materia) {
+    const catalogo = catalogoDaMateria(materia);
+    if (catalogo) {
+        const vinculados = documentosJuridicos.filter(documento => documento.catalogoIds.includes(catalogo.id));
+        if (vinculados.length) return vinculados;
+    }
+    const chave = chaveMateriaCatalogo(materia.nome);
+    return chave.includes("constitucional")
+        ? documentosJuridicos.filter(documento => ["constituicao-federal-1988", "ato-disposicoes-constitucionais-transitorias-1988"].includes(documento.slug))
+        : [];
+}
+
+function documentoJuridicoDaMateria(materia) {
+    return documentosJuridicosDaMateria(materia)[0] || null;
+}
+
+function definicoesWidgetsMateria(materia) {
+    const legal = recursoLegalDaMateria(materia);
+    const documentos = documentosJuridicosDaMateria(materia);
+    const documento = documentos[0] || null;
+    if (documento) {
+        legal.fonte = documentos.length > 1 ? `${documentos.length} documentos oficiais verificados` : documento.versao.fonteNome;
+        legal.descricao = documentos.length > 1
+            ? "Constituição e ADCT integrais, organizados por artigos, com versões identificadas e grifos privados."
+            : `${documento.versao.escopo}. Texto com versão identificada e grifos privados.`;
+    }
+    return [
+        { tipo: "legal_library", ...legal, demo: true, documento, documentos },
+        { tipo: "personal_vade", titulo: "Meu Vade Mecum", descricao: "Um caderno pessoal para reunir normas oficiais, favoritos, grifos e índices temáticos.", fonte: "Coleção privada do usuário", icone: "bi-journals", demo: true },
+        { tipo: "private_documents", titulo: "Meus materiais", descricao: "Espaço privado para PDFs, resumos e outros documentos ligados a esta matéria.", fonte: "Conteúdo privado do usuário", icone: "bi-folder2-open", demo: true },
+        { tipo: "community", titulo: "Comunidade da matéria", descricao: "Resumos, dicas e flashcards publicados voluntariamente, com importação para o espaço pessoal.", fonte: "Etapa futura com moderação", icone: "bi-people", demo: false, futuro: true }
+    ];
+}
+
+function configuracaoWidgetsMateria(materia) {
+    const definicoes = definicoesWidgetsMateria(materia);
+    const salvas = widgetsPorMateria.get(String(materia.id)) || [];
+    if (salvas.length) {
+        const porTipo = new Map(salvas.map(item => [item.tipo, item]));
+        return [...salvas].sort((a, b) => a.posicao - b.posicao)
+            .concat(definicoes.filter(item => !porTipo.has(item.tipo)).map((item, indice) => ({ tipo: item.tipo, ativo: false, posicao: salvas.length + indice, configuracao: {} })));
+    }
+    const catalogo = catalogoDaMateria(materia);
+    let padroes = catalogo?.widgetsPadrao || [];
+    if (!padroes.length) {
+        const chave = chaveMateriaCatalogo(materia.nome);
+        const juridica = ["constitucional", "penal", "administrativ", "gcm", "guarda", "transito", "trânsito", "ctb", "direitos humanos"].some(termo => chave.includes(termo));
+        padroes = juridica ? ["legal_library", "personal_vade"] : ["private_documents", "personal_vade"];
+    }
+    return definicoes.map((item, indice) => ({ tipo: item.tipo, ativo: padroes.includes(item.tipo), posicao: indice, configuracao: {} }));
+}
+
+function recursosSugeridosParaMateria(materia) {
+    const definicoes = new Map(definicoesWidgetsMateria(materia).map(item => [item.tipo, item]));
+    return configuracaoWidgetsMateria(materia).filter(item => item.ativo).flatMap(item => {
+        const recurso = { ...definicoes.get(item.tipo), ...item };
+        if (item.tipo !== "legal_library" || !recurso.documentos?.length) {
+            return [{ ...recurso, chaveVisual: item.tipo }];
+        }
+        return recurso.documentos.map(documento => ({
+            ...recurso,
+            chaveVisual: `${item.tipo}-${documento.id}`,
+            titulo: documento.tituloCurto,
+            descricao: documento.versao.escopo,
+            fonte: documento.versao.fonteNome,
+            icone: documento.slug.includes("disposicoes-constitucionais") ? "bi-hourglass-split" : "bi-bank",
+            documento,
+            documentos: [documento]
+        }));
+    });
+}
+
+function grifosDoDispositivo(materiaId, dispositivoId) {
+    return grifosJuridicos.filter(grifo => String(grifo.materiaId) === String(materiaId) && grifo.dispositivoId === dispositivoId);
+}
+
+function localizarDispositivoJuridico(dispositivoId) {
+    for (const documento of documentosJuridicos) {
+        const dispositivo = documento.versao?.dispositivos.find(item => item.id === dispositivoId);
+        if (dispositivo) return { documento, dispositivo };
+    }
+    return null;
+}
+
+function favoritoDoDispositivo(materiaId, dispositivoId) {
+    return favoritosJuridicos.some(item => String(item.materiaId) === String(materiaId) && item.dispositivoId === dispositivoId);
+}
+
+function historicoDaMateria(materiaId) {
+    return historicoLeituraJuridica
+        .filter(item => String(item.materiaId) === String(materiaId))
+        .sort((a, b) => String(b.ultimaLeituraEm).localeCompare(String(a.ultimaLeituraEm)));
+}
+
+function abrirAtalhoLeitura(dispositivoId, materia) {
+    const localizado = localizarDispositivoJuridico(dispositivoId);
+    if (!localizado) return;
+    abrirLeitorJuridico(localizado.documento, materia, localizado.dispositivo.id);
+}
+
+function renderizarAtalhosLeitura(materia) {
+    const painel = document.getElementById("wsAtalhosLeitura");
+    const historico = historicoDaMateria(materia.id).filter(item => localizarDispositivoJuridico(item.dispositivoId));
+    const favoritos = favoritosJuridicos
+        .filter(item => String(item.materiaId) === String(materia.id) && localizarDispositivoJuridico(item.dispositivoId))
+        .sort((a, b) => String(b.criadoEm).localeCompare(String(a.criadoEm)));
+    if (!historico.length && !favoritos.length) {
+        painel.classList.add("d-none");
+        painel.innerHTML = "";
+        return;
+    }
+    const descricao = item => {
+        const localizado = localizarDispositivoJuridico(item.dispositivoId);
+        return localizado ? `${localizado.documento.tituloCurto} · ${localizado.dispositivo.rotulo}` : "Artigo";
+    };
+    const ultimo = historico[0];
+    painel.innerHTML = `<div class="legal-reading-overview-grid">
+        <button type="button" class="legal-reading-shortcut" ${ultimo ? `data-reading-id="${esc(ultimo.dispositivoId)}"` : "disabled"}>
+            <strong><i class="bi-play-circle me-1"></i>Continuar de onde parei</strong>
+            <small>${ultimo ? esc(descricao(ultimo)) : "Sua última leitura aparecerá aqui"}</small>
+        </button>
+        <div class="legal-reading-shortcut">
+            <strong><i class="bi-bookmark-heart me-1"></i>Favoritos (${favoritos.length})</strong>
+            <div class="legal-reading-list">${favoritos.length ? favoritos.slice(0, 5).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<small>Nenhum artigo favorito.</small>`}</div>
+        </div>
+        <div class="legal-reading-shortcut">
+            <strong><i class="bi-clock-history me-1"></i>Artigos recentes</strong>
+            <div class="legal-reading-list">${historico.length ? historico.slice(0, 5).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<small>Nenhuma leitura recente.</small>`}</div>
+        </div>
+    </div>`;
+    painel.classList.remove("d-none");
+    painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => abrirAtalhoLeitura(botao.dataset.readingId, materia)));
+}
+
+async function registrarLeituraAtual(materia, dispositivo) {
+    if (!window.HUB_CLOUD_LEGAL) return;
+    const existente = historicoLeituraJuridica.find(item => String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id);
+    try {
+        const salvo = await window.HUB_CLOUD_LEGAL.registrarLeitura(materia.id, dispositivo.id, existente?.visitas || 0);
+        historicoLeituraJuridica = historicoLeituraJuridica.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id));
+        historicoLeituraJuridica.unshift(salvo);
+        renderizarAtalhosLeitura(materia);
+    } catch (erro) {
+        console.error("Falha ao registrar histórico de leitura", erro);
+    }
+}
+
+function textoJuridicoComGrifos(textoOriginal, grifos, corFiltro = "all") {
+    const intervalos = [];
+    const grifosVisiveis = corFiltro === "all" ? grifos : grifos.filter(grifo => grifo.cor === corFiltro);
+    grifosVisiveis.forEach(grifo => {
+        let inicio = -1;
+        const contexto = `${grifo.prefixo || ""}${grifo.texto}${grifo.sufixo || ""}`;
+        const inicioContexto = contexto ? textoOriginal.indexOf(contexto) : -1;
+        if (inicioContexto >= 0) inicio = inicioContexto + (grifo.prefixo || "").length;
+        if (inicio < 0) inicio = textoOriginal.indexOf(grifo.texto);
+        const fim = inicio + grifo.texto.length;
+        if (inicio >= 0 && !intervalos.some(item => inicio < item.fim && fim > item.inicio)) {
+            intervalos.push({ inicio, fim, cor: grifo.cor });
+        }
+    });
+    intervalos.sort((a, b) => a.inicio - b.inicio);
+    let cursor = 0;
+    let html = "";
+    const trechoContexto = trecho => corFiltro === "all" ? esc(trecho) : `<span class="legal-filter-context">${esc(trecho)}</span>`;
+    intervalos.forEach(item => {
+        html += trechoContexto(textoOriginal.slice(cursor, item.inicio));
+        html += `<mark class="highlight-${esc(item.cor)}">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+        cursor = item.fim;
+    });
+    return html + trechoContexto(textoOriginal.slice(cursor));
+}
+
+function renderizarIndiceLeitor(filtro = "") {
+    if (!documentoLeitorAtual?.versao) return;
+    const termo = chaveMateriaCatalogo(filtro);
+    const dispositivos = documentoLeitorAtual.versao.dispositivos.filter(item => !termo
+        || chaveMateriaCatalogo(`${item.rotulo} ${item.titulo} ${item.conteudo}`).includes(termo));
+    const indice = document.getElementById("wsLeitorIndice");
+    const grupos = new Map();
+    dispositivos.forEach(item => {
+        const titulo = item.caminho[0] || "DISPOSITIVOS";
+        const subtitulo = item.caminho[1] || "";
+        if (!grupos.has(titulo)) grupos.set(titulo, new Map());
+        const subgrupos = grupos.get(titulo);
+        if (!subgrupos.has(subtitulo)) subgrupos.set(subtitulo, []);
+        subgrupos.get(subtitulo).push(item);
+    });
+    indice.innerHTML = dispositivos.length ? `
+        <span class="legal-index-count">${dispositivos.length} artigo(s) ${termo ? "encontrado(s)" : "nesta versão"}</span>
+        ${[...grupos].map(([titulo, subgrupos]) => `<section class="legal-index-group">
+            <div class="legal-index-group-title">${esc(titulo)}</div>
+            ${[...subgrupos].map(([subtitulo, itens]) => `${subtitulo ? `<div class="legal-index-subtitle">${esc(subtitulo)}</div>` : ""}${itens.map(item => `
+                <button type="button" class="btn btn-sm w-100 text-start ${item.id === dispositivoLeitorAtual?.id ? "is-active" : ""} btn-artigo-leitor" data-id="${esc(item.id)}">${esc(item.rotulo)}</button>`).join("")}`).join("")}
+        </section>`).join("")}`
+        : `<span class="text-muted">Nenhum artigo encontrado.</span>`;
+    indice.querySelectorAll(".btn-artigo-leitor").forEach(botao => botao.addEventListener("click", () => {
+        const item = documentoLeitorAtual.versao.dispositivos.find(dispositivo => dispositivo.id === botao.dataset.id);
+        if (item) renderizarDispositivoLeitor(item, { registrarLeitura: true });
+    }));
+    if (dispositivos.length && !dispositivos.some(item => item.id === dispositivoLeitorAtual?.id)) renderizarDispositivoLeitor(dispositivos[0], { registrarLeitura: true });
+}
+
+function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } = {}) {
+    if (!documentoLeitorAtual || !dispositivo) return;
+    if (acaoLeitorAtual?.dispositivoId && acaoLeitorAtual.dispositivoId !== dispositivo.id) fecharPainelAcaoLeitor();
+    dispositivoLeitorAtual = dispositivo;
+    const materia = materiaPorId(materiaAbertaId);
+    const grifos = materia ? grifosDoDispositivo(materia.id, dispositivo.id) : [];
+    const grifosVisiveis = filtroCorGrifoAtual === "all" ? grifos : grifos.filter(grifo => grifo.cor === filtroCorGrifoAtual);
+    document.getElementById("wsLeitorCaminho").textContent = dispositivo.caminho.join(" · ");
+    document.getElementById("wsLeitorDocumento").textContent = dispositivo.rotulo;
+    const textoLeitor = document.getElementById("wsLeitorTexto");
+    textoLeitor.classList.toggle("is-highlight-filtered", filtroCorGrifoAtual !== "all");
+    textoLeitor.innerHTML = textoJuridicoComGrifos(dispositivo.conteudo, grifos, filtroCorGrifoAtual);
+    const lista = document.getElementById("wsListaGrifosArtigo");
+    lista.innerHTML = grifosVisiveis.length ? `<small class="fw-semibold">Meus grifos neste artigo</small>` + grifosVisiveis.map(grifo => `
+        <div class="legal-highlight-item">
+            <div><span><i class="legal-highlight-dot highlight-${esc(grifo.cor)} d-inline-block me-1"></i>“${esc(grifo.texto)}”</span>${grifo.nota ? `<small class="d-block text-muted mt-1"><i class="bi-chat-left-text me-1"></i>${esc(grifo.nota)}</small>` : ""}</div>
+            <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-link text-secondary p-0 btn-grifo-erro" data-id="${esc(grifo.id)}" aria-label="Enviar grifo ao Caderno de Erros" title="Enviar ao Caderno de Erros"><i class="bi-journal-x"></i></button><button type="button" class="btn btn-sm btn-link text-secondary p-0 btn-anotar-grifo" data-id="${esc(grifo.id)}" aria-label="${grifo.nota ? "Editar" : "Adicionar"} anotação"><i class="bi-pencil-square"></i></button><button type="button" class="btn btn-sm btn-link text-danger p-0 btn-excluir-grifo" data-id="${esc(grifo.id)}" aria-label="Excluir grifo"><i class="bi-trash"></i></button></div>
+        </div>`).join("") : "";
+    lista.querySelectorAll(".btn-grifo-erro").forEach(botao => botao.addEventListener("click", async () => {
+        const grifo = grifosJuridicos.find(item => item.id === botao.dataset.id);
+        if (!materia || !grifo) return;
+        botao.disabled = true;
+        try {
+            await registrarErro(materia.id, `${dispositivo.rotulo}: ${grifo.texto}`, grifo.nota || `Trecho revisado em ${documentoLeitorAtual.tituloCurto}.`);
+            renderizarErros();
+            botao.innerHTML = '<i class="bi-check2"></i>';
+            botao.title = "Adicionado ao Caderno de Erros";
+            document.getElementById("wsLeitorOrientacao").textContent = "Grifo adicionado ao seu Caderno de Erros.";
+        } catch (erro) {
+            console.error("Falha ao enviar grifo ao Caderno de Erros", erro);
+            document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível adicionar o grifo ao Caderno de Erros.";
+            botao.disabled = false;
+        }
+    }));
+    lista.querySelectorAll(".btn-anotar-grifo").forEach(botao => botao.addEventListener("click", () => {
+        const grifo = grifosJuridicos.find(item => item.id === botao.dataset.id);
+        if (grifo) abrirPainelAnotacaoLeitor(grifo);
+    }));
+    lista.querySelectorAll(".btn-excluir-grifo").forEach(botao => botao.addEventListener("click", async () => {
+        botao.disabled = true;
+        try {
+            if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
+            await window.HUB_CLOUD_LEGAL.excluirGrifo(botao.dataset.id);
+            grifosJuridicos = grifosJuridicos.filter(item => item.id !== botao.dataset.id);
+            renderizarDispositivoLeitor(dispositivoLeitorAtual);
+        } catch (erro) {
+            console.error("Falha ao excluir grifo", erro);
+            document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível excluir o grifo. Tente novamente.";
+            botao.disabled = false;
+        }
+    }));
+    const orientacao = document.getElementById("wsLeitorOrientacao");
+    if (filtroCorGrifoAtual === "all") {
+        orientacao.textContent = "Selecione um trecho do artigo para grifar. Seus grifos são privados.";
+    } else {
+        orientacao.textContent = grifosVisiveis.length
+            ? `${grifosVisiveis.length} grifo(s) em destaque com o filtro escolhido. O restante do artigo permanece suavizado como contexto.`
+            : "Este artigo ainda não possui grifos com o filtro escolhido.";
+    }
+    const favorito = materia ? favoritoDoDispositivo(materia.id, dispositivo.id) : false;
+    const btnFavorito = document.getElementById("btnFavoritarArtigo");
+    btnFavorito.setAttribute("aria-pressed", String(favorito));
+    btnFavorito.querySelector("i").className = `${favorito ? "bi-bookmark-fill" : "bi-bookmark"} me-1`;
+    btnFavorito.querySelector("span").textContent = favorito ? "Favoritado" : "Favoritar";
+    renderizarIndiceLeitor(document.getElementById("wsBuscaArtigo").value);
+    if (registrarLeitura && materia) registrarLeituraAtual(materia, dispositivo);
+}
+
+function definirModoFocoLeitor(ativo) {
+    modoFocoLeitorAtivo = ativo === true;
+    const modal = document.getElementById("modalMateria");
+    const botao = document.getElementById("btnModoFoco");
+    modal.classList.toggle("legal-focus-mode", modoFocoLeitorAtivo);
+    botao.setAttribute("aria-pressed", String(modoFocoLeitorAtivo));
+    botao.querySelector("i").className = `${modoFocoLeitorAtivo ? "bi-fullscreen-exit" : "bi-arrows-fullscreen"} me-1`;
+    botao.querySelector("span").textContent = modoFocoLeitorAtivo ? "Sair do foco" : "Modo foco";
+}
+
+function obterSelecaoAtualLeitor(limite = 2000) {
+    const container = document.getElementById("wsLeitorTexto");
+    const selecao = window.getSelection();
+    if (!dispositivoLeitorAtual || !selecao?.rangeCount) return null;
+    const range = selecao.getRangeAt(0);
+    if (!container.contains(range.commonAncestorContainer)) return null;
+    const textoBruto = selecao.toString();
+    const textoSelecionado = textoBruto.trim();
+    if (!textoSelecionado || textoSelecionado.length > limite) return null;
+    const antes = document.createRange();
+    antes.selectNodeContents(container);
+    antes.setEnd(range.startContainer, range.startOffset);
+    const ajuste = textoBruto.length - textoBruto.trimStart().length;
+    const inicio = Math.max(0, antes.toString().length + ajuste);
+    const conteudo = dispositivoLeitorAtual.conteudo;
+    return {
+        texto: textoSelecionado,
+        prefixo: conteudo.slice(Math.max(0, inicio - 120), inicio),
+        sufixo: conteudo.slice(inicio + textoSelecionado.length, inicio + textoSelecionado.length + 120)
+    };
+}
+
+function fecharPainelAcaoLeitor() {
+    acaoLeitorAtual = null;
+    document.getElementById("formAcaoLeitor").reset();
+    document.getElementById("wsPainelAcaoLeitor").classList.add("d-none");
+}
+
+function prepararPainelAcaoLeitor({ tipo, titulo, ajuda, previa, conteudo, pergunta = "", grifoId = null, selecao = null }) {
+    acaoLeitorAtual = { tipo, grifoId, selecao, dispositivoId: dispositivoLeitorAtual?.id || null };
+    document.getElementById("wsAcaoLeitorTitulo").textContent = titulo;
+    document.getElementById("wsAcaoLeitorAjuda").textContent = ajuda;
+    document.getElementById("wsPreviaSelecaoLeitor").textContent = previa;
+    document.getElementById("wsPerguntaCardLeitor").value = pergunta;
+    const area = document.getElementById("wsConteudoAcaoLeitor");
+    area.value = conteudo;
+    area.maxLength = tipo === "note" ? 5000 : 10000;
+    document.getElementById("wsLabelConteudoAcaoLeitor").textContent = tipo === "note" ? "Minha anotação" : "Resposta";
+    document.getElementById("wsCampoPerguntaLeitor").classList.toggle("d-none", tipo === "note");
+    document.getElementById("wsCamposAcaoLeitor").classList.toggle("is-note", tipo === "note");
+    document.getElementById("wsPainelAcaoLeitor").classList.remove("d-none");
+    area.focus();
+}
+
+function abrirPainelAnotacaoLeitor(grifo = null) {
+    const selecao = grifo ? null : obterSelecaoAtualLeitor(2000);
+    if (!grifo && !selecao) {
+        document.getElementById("wsLeitorOrientacao").textContent = "Selecione um trecho de até 2.000 caracteres para adicionar uma anotação.";
+        return;
+    }
+    prepararPainelAcaoLeitor({
+        tipo: "note",
+        titulo: grifo ? "Editar anotação do grifo" : "Anotar trecho selecionado",
+        ajuda: grifo ? "A alteração será salva apenas no seu perfil." : "O trecho será grifado e a anotação ficará vinculada a ele.",
+        previa: grifo?.texto || selecao.texto,
+        conteudo: grifo?.nota || "",
+        grifoId: grifo?.id || null,
+        selecao
+    });
+}
+
+function abrirPainelFlashcardLeitor() {
+    if (!dispositivoLeitorAtual || !documentoLeitorAtual) return;
+    const selecao = obterSelecaoAtualLeitor(10000);
+    const conteudoIntegral = dispositivoLeitorAtual.conteudo;
+    const resposta = selecao?.texto || conteudoIntegral.slice(0, 9500);
+    const truncado = !selecao && conteudoIntegral.length > resposta.length;
+    prepararPainelAcaoLeitor({
+        tipo: "flashcard",
+        titulo: "Criar flashcard deste artigo",
+        ajuda: truncado ? "O artigo é extenso; a resposta foi limitada e pode ser editada antes de salvar." : "Revise a pergunta e a resposta antes de salvar no conjunto da matéria.",
+        previa: selecao?.texto || `${dispositivoLeitorAtual.rotulo} completo como base`,
+        pergunta: `O que dispõe o ${dispositivoLeitorAtual.rotulo} da ${documentoLeitorAtual.tituloCurto}?`,
+        conteudo: resposta,
+        selecao
+    });
+    document.getElementById("wsPerguntaCardLeitor").focus();
+}
+
+async function criarGrifoLeitor(materia, selecao, nota = "") {
+    const grifo = {
+        dispositivoId: dispositivoLeitorAtual.id,
+        texto: selecao.texto,
+        prefixo: selecao.prefixo,
+        sufixo: selecao.sufixo,
+        cor: document.getElementById("wsCorGrifo").value,
+        nota
+    };
+    const salvo = await window.HUB_CLOUD_LEGAL.criarGrifo(materia.id, grifo);
+    grifosJuridicos.push(salvo);
+    window.getSelection()?.removeAllRanges();
+    return salvo;
+}
+
+function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+    fecharPainelAcaoLeitor();
+    documentoLeitorAtual = documento;
+    dispositivoLeitorAtual = documento.versao.dispositivos.find(item => item.id === dispositivoInicialId) || documento.versao.dispositivos[0] || null;
+    document.getElementById("wsLeitorEstado").textContent = "TEXTO OFICIAL ESTRUTURADO";
+    document.getElementById("wsLeitorTitulo").textContent = documento.tituloCurto;
+    document.getElementById("wsLeitorVersao").textContent = documento.versao.rotulo;
+    document.getElementById("wsLeitorEscopo").textContent = documento.versao.escopo;
+    const fonte = document.getElementById("wsLeitorFonte");
+    fonte.href = urlHttpSegura(documento.versao.fonteUrl) || "#";
+    fonte.textContent = documento.versao.fonteNome;
+    fonte.classList.remove("d-none");
+    document.getElementById("wsBuscaArtigo").value = "";
+    filtroCorGrifoAtual = "all";
+    document.getElementById("wsFiltroGrifo").value = "all";
+    document.getElementById("wsLeitorOrientacao").textContent = "Selecione um trecho do artigo para grifar. Seus grifos são privados.";
+    document.getElementById("wsLeitorPrototipo").classList.remove("d-none");
+    if (dispositivoLeitorAtual) renderizarDispositivoLeitor(dispositivoLeitorAtual, { registrarLeitura: true });
+    else document.getElementById("wsLeitorTexto").textContent = "Nenhum artigo foi importado para esta versão.";
+    document.getElementById("wsLeitorPrototipo").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+let rascunhoWidgets = null;
+
+function renderizarConfiguradorWidgets(materia) {
+    if (!rascunhoWidgets) rascunhoWidgets = configuracaoWidgetsMateria(materia).map(item => ({ ...item }));
+    const definicoes = new Map(definicoesWidgetsMateria(materia).map(item => [item.tipo, item]));
+    const lista = document.getElementById("wsListaConfigWidgets");
+    lista.innerHTML = rascunhoWidgets.map((item, indice) => {
+        const definicao = definicoes.get(item.tipo);
+        return `<div class="library-widget-setting">
+            <div><strong><i class="${esc(definicao.icone)} me-1"></i>${esc(definicao.titulo)}</strong><small class="d-block">${item.ativo ? "Visível na biblioteca" : "Oculto na biblioteca"}</small></div>
+            <div class="form-check form-switch mb-0"><input class="form-check-input alternar-widget" type="checkbox" data-widget-type="${esc(item.tipo)}" ${item.ativo ? "checked" : ""} aria-label="Exibir ${esc(definicao.titulo)}"></div>
+            <div class="library-widget-order">
+                <button type="button" class="btn btn-sm btn-outline-secondary mover-widget" data-index="${indice}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover ${esc(definicao.titulo)} para cima"><i class="bi-arrow-up"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary mover-widget" data-index="${indice}" data-direcao="1" ${indice === rascunhoWidgets.length - 1 ? "disabled" : ""} aria-label="Mover ${esc(definicao.titulo)} para baixo"><i class="bi-arrow-down"></i></button>
+            </div>
+        </div>`;
+    }).join("");
+    lista.querySelectorAll(".alternar-widget").forEach(campo => campo.addEventListener("change", () => {
+        const item = rascunhoWidgets.find(widget => widget.tipo === campo.dataset.widgetType);
+        if (item) item.ativo = campo.checked;
+        renderizarConfiguradorWidgets(materia);
+    }));
+    lista.querySelectorAll(".mover-widget").forEach(botao => botao.addEventListener("click", () => {
+        const origem = Number(botao.dataset.index);
+        const destino = origem + Number(botao.dataset.direcao);
+        if (destino < 0 || destino >= rascunhoWidgets.length) return;
+        [rascunhoWidgets[origem], rascunhoWidgets[destino]] = [rascunhoWidgets[destino], rascunhoWidgets[origem]];
+        renderizarConfiguradorWidgets(materia);
+    }));
+}
+
+function renderizarBibliotecaMateria(materia) {
+    const recursos = recursosSugeridosParaMateria(materia);
+    const catalogo = catalogoDaMateria(materia);
+    document.getElementById("wsBibliotecaTitulo").textContent = `Biblioteca de ${materia.nome}`;
+    document.getElementById("wsBibliotecaDescricao").textContent = catalogo
+        ? `Tipo: ${catalogo.nome}. Os widgets abaixo seguem sua configuração individual.`
+        : "Matéria ainda sem classificação. As sugestões usam o nome como referência e podem ser personalizadas.";
+    document.getElementById("wsBibliotecaIcone").className = catalogo?.icone || "bi-book-half";
+    const leitor = document.getElementById("wsLeitorPrototipo");
+    leitor.classList.add("d-none");
+    document.getElementById("wsConfigWidgets").classList.add("d-none");
+    document.getElementById("wsStatusWidgets").textContent = "";
+    rascunhoWidgets = null;
+    renderizarAtalhosLeitura(materia);
+    const container = document.getElementById("wsWidgetsBiblioteca");
+    container.innerHTML = recursos.length ? recursos.map(recurso => `
+        <div class="col-lg-4 col-md-6">
+            <article class="library-widget ${recurso.futuro ? "is-future" : ""}">
+                <div class="library-widget-top">
+                    <span class="library-widget-icon"><i class="${recurso.icone}" aria-hidden="true"></i></span>
+                    <div class="library-widget-copy"><h6 class="fw-bold mb-1">${esc(recurso.titulo)}</h6><p class="mb-0">${esc(recurso.descricao)}</p><small class="library-widget-source">${esc(recurso.fonte)}</small></div>
+                </div>
+                <div class="library-widget-actions flex-wrap">
+                    ${recurso.demo
+                        ? (recurso.documentos?.length
+                            ? `<button type="button" class="btn btn-sm btn-primary btn-abrir-recurso-demo" data-resource-key="${esc(recurso.chaveVisual)}" data-document-id="${esc(recurso.documento.id)}"><i class="bi-book me-1"></i>Abrir documento</button>`
+                            : `<button type="button" class="btn btn-sm btn-primary btn-abrir-recurso-demo" data-resource-key="${esc(recurso.chaveVisual)}"><i class="bi-journal-bookmark me-1"></i>${recurso.tipo === "personal_vade" ? "Abrir Vade Mecum" : "Acessar recurso"}</button>`)
+                        : `<button type="button" class="btn btn-sm btn-outline-secondary" disabled><i class="bi-lock me-1"></i>Em planejamento</button>`}
+                </div>
+            </article>
+        </div>`).join("") : `<div class="col-12"><div class="text-center text-muted py-4"><i class="bi-grid d-block fs-3 mb-2"></i><p class="mb-2">Nenhum widget está visível nesta matéria.</p><button type="button" class="btn btn-sm btn-outline-primary" id="btnAtivarPrimeiroWidget">Escolher widgets</button></div></div>`;
+    container.querySelectorAll(".btn-abrir-recurso-demo").forEach(botao => botao.addEventListener("click", () => {
+        const recurso = recursos.find(item => item.chaveVisual === botao.dataset.resourceKey);
+        if (!recurso) return;
+        const documento = recurso.documentos?.find(item => item.id === botao.dataset.documentId) || recurso.documento;
+        if (documento) {
+            abrirLeitorJuridico(documento, materia);
+            return;
+        }
+        document.getElementById("wsLeitorTitulo").textContent = recurso.titulo;
+        document.getElementById("wsLeitorDocumento").textContent = recurso.titulo;
+        document.getElementById("wsLeitorEstado").textContent = "PRÉVIA VISUAL";
+        document.getElementById("wsLeitorTexto").textContent = "Este recurso ainda não possui conteúdo oficial estruturado.";
+        document.getElementById("wsLeitorIndice").innerHTML = "";
+        document.getElementById("wsLeitorVersao").textContent = "Em planejamento";
+        document.getElementById("wsLeitorEscopo").textContent = "Nenhum texto armazenado";
+        document.getElementById("wsLeitorFonte").classList.add("d-none");
+        leitor.classList.remove("d-none");
+        leitor.scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
+    document.getElementById("btnAtivarPrimeiroWidget")?.addEventListener("click", () => document.getElementById("btnOrganizarWidgets").click());
+}
+
+document.getElementById("btnOrganizarWidgets").addEventListener("click", () => {
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia) return;
+    const painel = document.getElementById("wsConfigWidgets");
+    const abrir = painel.classList.contains("d-none");
+    painel.classList.toggle("d-none", !abrir);
+    if (abrir) renderizarConfiguradorWidgets(materia);
+});
+
+document.getElementById("btnSalvarWidgets").addEventListener("click", async () => {
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia || !rascunhoWidgets) return;
+    const botao = document.getElementById("btnSalvarWidgets");
+    const status = document.getElementById("wsStatusWidgets");
+    botao.disabled = true;
+    status.textContent = "Salvando no seu perfil...";
+    try {
+        if (!window.HUB_CLOUD_WIDGETS) throw new Error("A conexão de widgets ainda não está pronta.");
+        const salvos = await window.HUB_CLOUD_WIDGETS.salvarLayout(materia.id, rascunhoWidgets);
+        widgetsPorMateria.set(String(materia.id), salvos);
+        renderizarBibliotecaMateria(materia);
+        document.getElementById("wsConfigWidgets").classList.remove("d-none");
+        rascunhoWidgets = salvos.map(item => ({ ...item }));
+        renderizarConfiguradorWidgets(materia);
+        document.getElementById("wsStatusWidgets").textContent = "Organização salva no Supabase.";
+    } catch (erro) {
+        console.error("Falha ao salvar widgets", erro);
+        status.textContent = "Não foi possível salvar a organização. Tente novamente.";
+    } finally {
+        botao.disabled = false;
+    }
+});
 
 async function abrirMateria(id) {
     if (!await salvarNotaPendente()) return;
@@ -1665,8 +2943,132 @@ function renderizarWorkspace() {
     renderizarEditorNota(m);
     renderizarCards(m);
     renderizarLinks(m);
+    renderizarBibliotecaMateria(m);
     renderizarResumoMateria(m);
 }
+
+document.getElementById("btnFecharLeitorPrototipo").addEventListener("click", () => {
+    definirModoFocoLeitor(false);
+    fecharPainelAcaoLeitor();
+    document.getElementById("wsLeitorPrototipo").classList.add("d-none");
+});
+
+document.getElementById("wsBuscaArtigo").addEventListener("input", e => renderizarIndiceLeitor(e.target.value));
+
+document.getElementById("wsFiltroGrifo").addEventListener("change", e => {
+    filtroCorGrifoAtual = e.target.value;
+    if (dispositivoLeitorAtual) renderizarDispositivoLeitor(dispositivoLeitorAtual);
+});
+
+document.getElementById("btnModoFoco").addEventListener("click", () => definirModoFocoLeitor(!modoFocoLeitorAtivo));
+
+document.getElementById("btnFavoritarArtigo").addEventListener("click", async () => {
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia || !dispositivoLeitorAtual) return;
+    const botao = document.getElementById("btnFavoritarArtigo");
+    const adicionar = !favoritoDoDispositivo(materia.id, dispositivoLeitorAtual.id);
+    botao.disabled = true;
+    try {
+        if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
+        const salvo = await window.HUB_CLOUD_LEGAL.salvarFavorito(materia.id, dispositivoLeitorAtual.id, adicionar);
+        favoritosJuridicos = favoritosJuridicos.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivoLeitorAtual.id));
+        if (salvo) favoritosJuridicos.unshift(salvo);
+        renderizarDispositivoLeitor(dispositivoLeitorAtual);
+        renderizarAtalhosLeitura(materia);
+        document.getElementById("wsLeitorOrientacao").textContent = adicionar ? "Artigo salvo nos seus favoritos." : "Artigo removido dos seus favoritos.";
+    } catch (erro) {
+        console.error("Falha ao atualizar artigo favorito", erro);
+        document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível atualizar seus favoritos.";
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+document.getElementById("modalMateria").addEventListener("hidden.bs.modal", () => definirModoFocoLeitor(false));
+
+document.getElementById("btnAnotarTrecho").addEventListener("click", () => abrirPainelAnotacaoLeitor());
+document.getElementById("btnCriarCardArtigo").addEventListener("click", abrirPainelFlashcardLeitor);
+document.getElementById("btnCancelarAcaoLeitor").addEventListener("click", fecharPainelAcaoLeitor);
+
+document.getElementById("formAcaoLeitor").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!acaoLeitorAtual || !dispositivoLeitorAtual) return;
+    const materia = materiaPorId(materiaAbertaId);
+    const conteudo = document.getElementById("wsConteudoAcaoLeitor").value.trim();
+    const pergunta = document.getElementById("wsPerguntaCardLeitor").value.trim();
+    const botao = document.getElementById("btnSalvarAcaoLeitor");
+    const status = document.getElementById("wsLeitorOrientacao");
+    if (!materia || !conteudo || (acaoLeitorAtual.tipo === "flashcard" && !pergunta)) {
+        status.textContent = "Preencha os campos do formulário antes de salvar.";
+        return;
+    }
+    botao.disabled = true;
+    status.textContent = acaoLeitorAtual.tipo === "note" ? "Salvando sua anotação..." : "Criando seu flashcard...";
+    try {
+        if (acaoLeitorAtual.tipo === "note") {
+            if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
+            if (acaoLeitorAtual.grifoId) {
+                const salvo = await window.HUB_CLOUD_LEGAL.atualizarNotaGrifo(acaoLeitorAtual.grifoId, conteudo);
+                const grifo = grifosJuridicos.find(item => item.id === salvo.id);
+                if (grifo) grifo.nota = salvo.nota;
+            } else {
+                await criarGrifoLeitor(materia, acaoLeitorAtual.selecao, conteudo);
+            }
+            fecharPainelAcaoLeitor();
+            renderizarDispositivoLeitor(dispositivoLeitorAtual);
+            status.textContent = "Anotação salva no seu perfil.";
+            return;
+        }
+        const criado = await criarFlashcardSincronizado(pergunta, conteudo, { preservarLeitor: true });
+        if (!criado) return;
+        fecharPainelAcaoLeitor();
+        status.textContent = "Flashcard criado nesta matéria e preparado para revisão.";
+    } catch (erro) {
+        console.error("Falha na ação do leitor jurídico", erro);
+        status.textContent = acaoLeitorAtual?.tipo === "note"
+            ? "Não foi possível salvar a anotação. Tente novamente."
+            : "Não foi possível criar o flashcard. Tente novamente.";
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+document.getElementById("btnGrifarTrecho").addEventListener("click", async () => {
+    const materia = materiaPorId(materiaAbertaId);
+    const status = document.getElementById("wsLeitorOrientacao");
+    const selecao = obterSelecaoAtualLeitor(2000);
+    if (!materia || !selecao) {
+        status.textContent = "Selecione um trecho com até 2.000 caracteres.";
+        return;
+    }
+    const botao = document.getElementById("btnGrifarTrecho");
+    botao.disabled = true;
+    status.textContent = "Salvando seu grifo...";
+    try {
+        if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
+        await criarGrifoLeitor(materia, selecao);
+        renderizarDispositivoLeitor(dispositivoLeitorAtual);
+        status.textContent = "Grifo salvo no seu perfil.";
+    } catch (erro) {
+        console.error("Falha ao criar grifo", erro);
+        status.textContent = "Não foi possível salvar o grifo. Tente novamente.";
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+document.getElementById("btnCopiarArtigo").addEventListener("click", async () => {
+    if (!documentoLeitorAtual || !dispositivoLeitorAtual) return;
+    const citacao = `${dispositivoLeitorAtual.rotulo} — ${dispositivoLeitorAtual.conteudo}\n\nFonte: ${documentoLeitorAtual.versao.fonteNome}. ${documentoLeitorAtual.versao.rotulo}. ${documentoLeitorAtual.versao.fonteUrl}`;
+    const status = document.getElementById("wsLeitorOrientacao");
+    try {
+        await navigator.clipboard.writeText(citacao);
+        status.textContent = "Artigo copiado com a fonte e a versão.";
+    } catch (erro) {
+        console.error("Falha ao copiar artigo", erro);
+        status.textContent = "O navegador não permitiu copiar automaticamente.";
+    }
+});
 
 // ---------- Tópicos ----------
 function renderizarTopicos(m) {
@@ -2134,7 +3536,7 @@ function limparEdicaoCard() {
     document.getElementById("btnCancelarEdicaoCard").classList.add("d-none");
 }
 
-async function criarFlashcardSincronizado(frente, verso) {
+async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = false } = {}) {
     if (operacaoCardEmAndamento) return false;
     const card = { id: novoId(), frente: frente.trim(), verso: verso.trim(), caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 };
     if (!card.frente || !card.verso) return false;
@@ -2147,7 +3549,15 @@ async function criarFlashcardSincronizado(frente, verso) {
             await exigirNuvemFlashcards().excluir(card.id);
             throw erroLocal;
         }
-        renderizarWorkspace();
+        if (preservarLeitor) {
+            const materia = materiaPorId(materiaAbertaId);
+            const progresso = progressoMateria(materia);
+            renderizarCards(materia);
+            document.getElementById("wsSubtitulo").textContent =
+                `${progresso}% dominado · ${materia.topicos.length} tópicos · ${materia.notas.length} notas · ${materia.cards.length} flashcards · prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`;
+        } else {
+            renderizarWorkspace();
+        }
         renderizarMaterias();
         return true;
     } catch (erro) {
@@ -2603,7 +4013,7 @@ function renderizarTarefas() {
             <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
                 <div>
                     <div class="small text-muted">${esc(nomeDaMateria(t.materiaId))}${t.data ? " · " + esc(t.data) : ""}</div>
-                    <div class="fw-semibold">${esc(t.topico)}</div>
+                    <div class="tarefa-descricao fw-semibold">${esc(t.topico)}</div>
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-secondary btn-editar-tarefa" data-id="${t.id}" title="Editar sessão"><i class="bi-pencil"></i></button>
@@ -2613,8 +4023,14 @@ function renderizarTarefas() {
             </div>
         </div>`;
 
-    document.getElementById("listaPendentes").innerHTML = pendentes.length ? pendentes.map(t => linha(t, false)).join("") : `<p class="text-muted small fst-italic">Nada pendente.</p>`;
-    document.getElementById("listaConcluidas").innerHTML = concluidas.length ? concluidas.map(t => linha(t, true)).join("") : `<p class="text-muted small fst-italic">Nenhuma concluída ainda.</p>`;
+    document.getElementById("contadorPendentes").textContent = pendentes.length;
+    document.getElementById("contadorConcluidas").textContent = concluidas.length;
+    document.getElementById("listaPendentes").innerHTML = pendentes.length
+        ? pendentes.map(t => linha(t, false)).join("")
+        : `<div class="schedule-empty"><i class="bi-check2-circle" aria-hidden="true"></i><strong>Tudo em dia por aqui! 🚀</strong><small>Quando você planejar uma nova sessão, ela aparecerá neste espaço.</small></div>`;
+    document.getElementById("listaConcluidas").innerHTML = concluidas.length
+        ? concluidas.map(t => linha(t, true)).join("")
+        : `<div class="schedule-empty"><i class="bi-stars" aria-hidden="true"></i><strong>Sua próxima conquista começa aqui.</strong><small>As sessões finalizadas ficarão guardadas neste espaço.</small></div>`;
 
     document.querySelectorAll(".btn-editar-tarefa").forEach(btn => btn.addEventListener("click", () => {
         if (operacaoTarefaEmAndamento) return;
@@ -2745,17 +4161,20 @@ function renderizarCalendario() {
     const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
     const tarefas = obterTarefas();
 
-    document.getElementById("cabecalhoCalendario").innerHTML = dias.map((d, i) =>
-        `<th class="text-center ${ehHoje(d) ? "table-primary" : ""}">${nomesDias[i]}<br><span class="small text-muted">${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span></th>`
-    ).join("");
-
-    document.getElementById("corpoCalendario").innerHTML = dias.map(d => {
+    document.getElementById("calendarioSemanal").innerHTML = dias.map((d, i) => {
         const iso = paraISO(d);
         const doDia = tarefas.filter(t => t.data === iso);
         const conteudo = doDia.length === 0
-            ? `<span class="text-muted small fst-italic">—</span>`
-            : doDia.map(t => `<span class="badge ${t.status === "concluido" ? "bg-success" : "bg-primary"} chip-tarefa mb-1 btn-tarefa-cal" data-id="${esc(t.id)}">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</span>`).join("");
-        return `<td class="celula-calendario">${conteudo}</td>`;
+            ? `<div class="calendar-empty"><i class="bi-calendar2" aria-hidden="true"></i><span>Sem sessões</span></div>`
+            : doDia.map(t => `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Reabrir" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</button>`).join("");
+        return `
+            <article class="calendar-day ${ehHoje(d) ? "is-today" : ""}">
+                <header class="calendar-day-header">
+                    <span class="calendar-weekday">${nomesDias[i]}</span>
+                    <span class="calendar-date">${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>
+                </header>
+                <div class="calendar-day-body">${conteudo}</div>
+            </article>`;
     }).join("");
 
     document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
@@ -2788,17 +4207,24 @@ function calcularPontosTotais(edital) {
 
 function renderizarEdital() {
     const edital = obterEdital();
-    document.getElementById("editalNome").textContent = edital.nomeConcurso || "Aguardando";
-    document.getElementById("editalBanca").textContent = edital.banca || "—";
-    document.getElementById("editalVagas").textContent = edital.vagas || "—";
-    document.getElementById("editalData").textContent = edital.dataProva || "—";
+    document.getElementById("editalNome").textContent = edital.nomeConcurso || "Aguardando configuração";
+    document.getElementById("editalBanca").textContent = edital.banca || "Não informada";
+    document.getElementById("editalVagas").textContent = edital.vagas || "A definir";
+    document.getElementById("editalData").textContent = edital.dataProva || "A definir";
 
     const total = calcularPontosTotais(edital);
     document.getElementById("editalTotalPontos").textContent = total.toFixed(1) + " pts";
 
     const tabela = document.getElementById("tabelaEdital");
     if (edital.materias.length === 0) {
-        tabela.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhuma matéria na matriz ainda.</td></tr>`;
+        tabela.innerHTML = `<tr><td colspan="6" class="p-0">
+            <div class="exam-empty">
+                <span class="exam-empty-icon"><i class="bi-grid-3x3-gap" aria-hidden="true"></i></span>
+                <strong>Sua matriz ainda está vazia.</strong>
+                <small>Cadastre a primeira matéria para distribuir questões, pesos e prioridades da prova.</small>
+                <button type="button" class="btn btn-sm btn-outline-primary exam-action mt-2" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Cadastrar primeira matéria</button>
+            </div>
+        </td></tr>`;
         return;
     }
 
@@ -2821,16 +4247,16 @@ function renderizarEdital() {
         return `
         <tr>
             <td class="fw-semibold">${esc(nomeDaMateria(m.materiaId))}<div class="text-muted small fw-normal">${dominados}/${topicos.length} tópicos concluídos</div></td>
-            <td class="text-center"><input type="number" min="0" max="100000" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
-            <td class="text-center"><input type="number" min="0" max="100000" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
-            <td class="text-center fw-bold">${pontos.toFixed(1)}</td>
-            <td class="text-center" style="min-width:170px;">
+            <td class="numeric-column"><input type="number" min="0" max="100000" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
+            <td class="numeric-column"><input type="number" min="0" max="100000" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
+            <td class="numeric-column fw-bold">${pontos.toFixed(1)}</td>
+            <td class="numeric-column" style="min-width:170px;">
                 <div class="d-flex align-items-center gap-2">
                     <small class="fw-bold" style="min-width:40px;">${pct.toFixed(1)}%</small>
                     <div class="progress flex-grow-1" style="height:8px;"><div class="progress-bar ${cor}" style="width:${pct}%"></div></div>
                 </div>
             </td>
-            <td class="text-center"><div class="d-flex justify-content-center gap-1"><button class="btn btn-sm btn-outline-success btn-salvar-edital" data-id="${m.id}" title="Salvar questões e peso"><i class="bi-check-lg"></i></button><button class="btn btn-sm btn-outline-danger btn-remover-edital" data-id="${m.id}" title="Remover matéria do edital"><i class="bi-trash"></i></button></div></td>
+            <td class="numeric-column"><div class="d-flex justify-content-center gap-1"><button class="btn btn-sm btn-outline-primary btn-salvar-edital" data-id="${m.id}" title="Salvar questões e peso"><i class="bi-check-lg"></i></button><button class="btn btn-sm btn-outline-danger btn-remover-edital" data-id="${m.id}" title="Remover matéria do edital"><i class="bi-trash"></i></button></div></td>
         </tr>
         <tr class="table-light"><td colspan="6"><div class="fw-semibold small mb-2"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><div class="d-grid gap-1">${checklist}</div></td></tr>`;
     }).join("");
@@ -3081,10 +4507,16 @@ function renderizarErros() {
     const lista = filtro ? erros.filter(e => String(e.materiaId) === String(filtro)) : erros;
     const container = document.getElementById("listaErros");
 
-    document.getElementById("resumoErros").textContent = `${erros.length} erro(s) registrado(s)` + (filtro ? ` · mostrando ${lista.length}` : "");
+    const resumoTotal = erros.length === 0 ? "Nenhum erro registrado" : erros.length === 1 ? "1 erro registrado" : `${erros.length} erros registrados`;
+    document.getElementById("resumoErros").textContent = resumoTotal + (filtro ? ` · ${lista.length} nesta matéria` : "");
 
     if (lista.length === 0) {
-        container.innerHTML = `<p class="text-muted">Nenhum erro ${filtro ? "nesta matéria" : "registrado"} ainda.</p>`;
+        container.innerHTML = `
+            <div class="error-empty">
+                <span class="error-empty-icon"><i class="bi-journal-x" aria-hidden="true"></i></span>
+                <strong>${filtro ? "Nenhum erro encontrado nesta matéria." : "Seu caderno está pronto para começar."}</strong>
+                <small>${filtro ? "Escolha outra matéria no filtro ou registre um novo aprendizado acima." : "Registre os pontos que confundiram você para transformá-los em revisão."}</small>
+            </div>`;
         return;
     }
 
@@ -3181,6 +4613,11 @@ function validarQuestoesIA(questoes) {
     });
 }
 
+document.getElementById("btnIrGeradorSimulado").addEventListener("click", () => {
+    document.getElementById("formGerarSimulado").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("simMateria").focus();
+});
+
 document.getElementById("formGerarSimulado").addEventListener("submit", async (e) => {
     e.preventDefault();
     const materiaId = document.getElementById("simMateria").value;
@@ -3208,7 +4645,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
             boardName: edital.banca || ""
         });
         if (resultado.quota) {
-            document.getElementById("statusCotaIA").textContent = `Você ainda pode gerar ${resultado.quota.remaining} de ${resultado.quota.limit} questões hoje.`;
+            document.getElementById("statusCotaIA").textContent = `${resultado.quota.remaining}/${resultado.quota.limit} questões disponíveis hoje`;
         }
         renderizarQuestoes(resultado.questions, materiaId, materiaNome);
     } catch (err) {
@@ -3340,13 +4777,19 @@ function renderizarDesempenho() {
     const desempenho = obterDesempenho();
     const ids = Object.keys(desempenho);
     const badgesDiv = document.getElementById("badgesDesempenho");
+    const estadoVazio = document.getElementById("estadoVazioDesempenho");
+    const conteudo = document.getElementById("conteudoDesempenho");
 
     if (ids.length === 0) {
-        badgesDiv.innerHTML = '<span class="text-muted small">Sem dados ainda. Responda um simulado.</span>';
+        badgesDiv.innerHTML = "";
+        estadoVazio.classList.remove("d-none");
+        conteudo.classList.add("d-none");
         if (graficoPizzaInstancia) { graficoPizzaInstancia.destroy(); graficoPizzaInstancia = null; }
         return;
     }
 
+    estadoVazio.classList.add("d-none");
+    conteudo.classList.remove("d-none");
     badgesDiv.innerHTML = ids.map(id => {
         const d = desempenho[id];
         const pct = d.total > 0 ? Math.round((d.acertos / d.total) * 100) : 0;
@@ -3658,8 +5101,22 @@ window.obterDadosParaPreviaMigracao = () => {
         }
     };
 };
-window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto) => {
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
     definirUsuarioAtual(contexto.userId);
+    if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
+    if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
+    catalogoMaterias = catalogoRemoto;
+    documentosJuridicos = documentosJuridicosRemotos;
+    grifosJuridicos = grifosJuridicosRemotos;
+    favoritosJuridicos = estadoLeituraJuridicaRemoto.favoritos;
+    historicoLeituraJuridica = estadoLeituraJuridicaRemoto.historico;
+    widgetsPorMateria = new Map();
+    widgetsRemotos.forEach(item => {
+        const chave = String(item.materiaId);
+        if (!widgetsPorMateria.has(chave)) widgetsPorMateria.set(chave, []);
+        widgetsPorMateria.get(chave).push(item);
+    });
+    preencherCatalogoMaterias();
     sincronizarListaDeMaterias(materiasRemotas);
     sincronizarListaDeTopicos(topicosRemotos);
     sincronizarListaDeNotas(notasRemotas);
@@ -3697,6 +5154,16 @@ window.encerrarHub = () => {
     indiceRevisao = 0;
     quizAtual = [];
     offsetSemana = 0;
+    catalogoMaterias = [];
+    widgetsPorMateria = new Map();
+    rascunhoWidgets = null;
+    documentosJuridicos = [];
+    grifosJuridicos = [];
+    favoritosJuridicos = [];
+    historicoLeituraJuridica = [];
+    documentoLeitorAtual = null;
+    dispositivoLeitorAtual = null;
+    preencherCatalogoMaterias();
     if (graficoPizzaInstancia) {
         graficoPizzaInstancia.destroy();
         graficoPizzaInstancia = null;
