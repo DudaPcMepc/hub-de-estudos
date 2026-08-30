@@ -109,12 +109,18 @@ test("a recuperação por código funciona sem depender do navegador de origem",
 
     assert.match(html, /id=["']formCodigoRecuperacao["']/);
     assert.match(html, /autocomplete=["']one-time-code["']/);
+    assert.match(html, /id=["']authLoadingShell["'][^>]*class=["'][^"']*d-flex/);
+    assert.match(html, /id=["']authShell["'][^>]*class=["'][^"']*d-none/);
     assert.match(auth, /supabase\.auth\.verifyOtp\(\{/);
     assert.match(auth, /type:\s*["']recovery["']/);
     assert.match(auth, /supabase\.auth\.resetPasswordForEmail\(email\)/);
     assert.match(
         auth,
         /catch \(erro\) \{[\s\S]*?Falha ao definir nova senha[\s\S]*?definirCarregandoNovaSenha\(false\);[\s\S]*?different from the old password/
+    );
+    assert.match(
+        auth,
+        /updateUser\(\{ password: senha \}\)[\s\S]*?refreshSession\(\)[\s\S]*?ativarSessao\(sessaoAtualizada\.session\)/
     );
     assert.doesNotMatch(client, /flowType:\s*["']implicit["']/);
     assert.match(config, /\[auth\.email\.template\.recovery\][\s\S]*?content_path\s*=\s*["']\.\/supabase\/templates\/recovery\.html["']/);
