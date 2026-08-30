@@ -155,7 +155,7 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.doesNotMatch(html, /Visualizar protótipo/);
     assert.match(architecture, /O vínculo com o catálogo comum é opcional/);
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
-    assert.match(architecture, /Fase 2 iniciada/);
+    assert.match(architecture, /Fase 3 preparada/);
     assert.match(architecture, /ativar, ocultar e ordenar widgets por usuário/);
 });
 
@@ -290,13 +290,42 @@ test("o importador jurídico reconhece hierarquia, artigos acrescidos e entidade
     const dispositivos = extrairDispositivos(`
         <p>T&Iacute;TULO I</p><p>DOS PRINC&Iacute;PIOS FUNDAMENTAIS</p>
         <p>Art. 1&ordm; Texto inicial.</p><p>Par&aacute;grafo &uacute;nico. Continuação.</p>
-        <p>Art. 1-A. Artigo acrescido.</p>
+        <p>Art. 1-A. Pena \u0096 artigo acrescido.</p>
     `);
 
     assert.equal(dispositivos.length, 2);
     assert.deepEqual(dispositivos.map(item => item.chave), ["art-1", "art-1-a"]);
     assert.deepEqual(dispositivos[0].caminho, ["TÍTULO I — DOS PRINCÍPIOS FUNDAMENTAIS"]);
     assert.match(dispositivos[0].conteudo, /Parágrafo único/);
+    assert.match(dispositivos[1].conteudo, /Pena – artigo acrescido/);
+});
+
+test("o importador jurídico reconhece a hierarquia penal e artigos com sufixos compostos", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>PARTE ESPECIAL</p>
+        <p>TÍTULO I</p><p>(Incluído pela Lei nº 14.197, de 2021)</p><p>DOS CRIMES</p>
+        <p>Art. 359-M-A. Regra de concurso.</p>
+        <p>Art. 359-M-B. Regra de redução.</p>
+    `, { raiz: "CÓDIGO PENAL" });
+
+    assert.deepEqual(dispositivos.map(item => item.chave), ["art-359-m-a", "art-359-m-b"]);
+    assert.deepEqual(dispositivos[0].caminho, ["CÓDIGO PENAL", "PARTE ESPECIAL", "TÍTULO I — DOS CRIMES"]);
+});
+
+test("o Código Penal integral usa fonte oficial e é vinculado somente ao catálogo de Direito Penal", () => {
+    const migration = readProjectFile("supabase/migrations/202608300007_complete_penal_code.sql");
+    const chavesImportadas = [...migration.matchAll(/"chave":"art-/g)];
+
+    assert.equal(chavesImportadas.length, 429);
+    assert.match(migration, /https:\/\/www\.planalto\.gov\.br\/ccivil_03\/decreto-lei\/del2848compilado\.htm/);
+    assert.match(migration, /Texto compilado consultado em 30\/08\/2026/);
+    assert.match(migration, /"chave":"art-121-b"/);
+    assert.match(migration, /"chave":"art-359-m-a"/);
+    assert.match(migration, /"chave":"art-359-m-b"/);
+    assert.match(migration, /"chave":"art-361"/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000002/);
+    assert.match(migration, /update public\.legal_documents[\s\S]*?current_version_id/);
+    assert.doesNotMatch(migration, /user_legal_highlights/);
 });
 
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {
