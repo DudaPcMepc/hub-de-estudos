@@ -144,6 +144,7 @@ window.HUB_CLOUD_BACKUP = Object.freeze({
     restaurar: restaurarBackupRemoto
 });
 
+const authLoadingShell = document.getElementById("authLoadingShell");
 const authShell = document.getElementById("authShell");
 const appShell = document.getElementById("appShell");
 const formLogin = document.getElementById("formLogin");
@@ -180,6 +181,7 @@ let usuarioAtivoId = null;
 let ativacaoEmAndamento = null;
 let modoNovaSenhaAtivo = false;
 let sessaoParaNovaSenha = null;
+let verificacaoInicialEmAndamento = true;
 
 function mostrarMensagem(texto, tipo = "danger") {
     authMessage.textContent = texto;
@@ -189,6 +191,21 @@ function mostrarMensagem(texto, tipo = "danger") {
 function limparMensagem() {
     authMessage.textContent = "";
     authMessage.className = "alert d-none";
+}
+
+function ocultarShellFlex(elemento) {
+    elemento.classList.add("d-none");
+    elemento.classList.remove("d-flex");
+}
+
+function mostrarShellFlex(elemento) {
+    elemento.classList.remove("d-none");
+    elemento.classList.add("d-flex");
+}
+
+function mostrarShellAutenticacao() {
+    ocultarShellFlex(authLoadingShell);
+    mostrarShellFlex(authShell);
 }
 
 function mostrarSomenteFormulario(formulario) {
@@ -242,6 +259,7 @@ function mensagemDeErro(erro) {
 }
 
 function mostrarLogin(mensagem = "", tipo = "danger") {
+    verificacaoInicialEmAndamento = false;
     usuarioAtivoId = null;
     modoNovaSenhaAtivo = false;
     sessaoParaNovaSenha = null;
@@ -249,7 +267,7 @@ function mostrarLogin(mensagem = "", tipo = "danger") {
     encerrarRepositorioRemoto();
     encerrarPreviaMigracao();
     appShell.classList.add("d-none");
-    authShell.classList.remove("d-none");
+    mostrarShellAutenticacao();
     mostrarSomenteFormulario(formLogin);
     inputSenha.value = "";
     definirCarregandoLogin(false);
@@ -263,7 +281,7 @@ function mostrarLogin(mensagem = "", tipo = "danger") {
 function mostrarRecuperacao() {
     window.encerrarHub?.();
     appShell.classList.add("d-none");
-    authShell.classList.remove("d-none");
+    mostrarShellAutenticacao();
     mostrarSomenteFormulario(formRecuperacao);
     recuperacaoEmail.value = inputEmail.value.trim();
     limparMensagem();
@@ -274,7 +292,7 @@ function mostrarRecuperacao() {
 function mostrarCodigoRecuperacao(email = "", mensagem = "") {
     window.encerrarHub?.();
     appShell.classList.add("d-none");
-    authShell.classList.remove("d-none");
+    mostrarShellAutenticacao();
     mostrarSomenteFormulario(formCodigoRecuperacao);
     codigoRecuperacaoEmail.value = email.trim();
     recuperacaoCodigo.value = "";
@@ -285,11 +303,12 @@ function mostrarCodigoRecuperacao(email = "", mensagem = "") {
 }
 
 function mostrarDefinicaoDeSenha(session) {
+    verificacaoInicialEmAndamento = false;
     modoNovaSenhaAtivo = true;
     sessaoParaNovaSenha = session;
     window.encerrarHub?.();
     appShell.classList.add("d-none");
-    authShell.classList.remove("d-none");
+    mostrarShellAutenticacao();
     mostrarSomenteFormulario(formNovaSenha);
     novaSenha.value = "";
     confirmarNovaSenha.value = "";
@@ -327,7 +346,7 @@ async function ativarSessao(session) {
     if (ativacaoEmAndamento) return ativacaoEmAndamento;
 
     ativacaoEmAndamento = (async () => {
-        authShell.classList.remove("d-none");
+        if (!verificacaoInicialEmAndamento) mostrarShellAutenticacao();
         appShell.classList.add("d-none");
         definirCarregandoLogin(true);
         mostrarMensagem("Validando sua sessão e seu espaço de estudos...", "info");
@@ -350,8 +369,10 @@ async function ativarSessao(session) {
             await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto);
             iniciarPreviaMigracao(contexto);
             usuarioAtivoId = session.user.id;
+            verificacaoInicialEmAndamento = false;
             limparMensagem();
-            authShell.classList.add("d-none");
+            ocultarShellFlex(authLoadingShell);
+            ocultarShellFlex(authShell);
             appShell.classList.remove("d-none");
         } catch (erro) {
             console.error("Falha ao preparar a sessão autenticada", erro);
@@ -489,13 +510,14 @@ formNovaSenha.addEventListener("submit", async evento => {
     try {
         const { error } = await supabase.auth.updateUser({ password: senha });
         if (error) throw error;
+        const { data: sessaoAtualizada, error: erroSessao } = await supabase.auth.refreshSession();
+        if (erroSessao || !sessaoAtualizada.session) throw erroSessao || new Error("RECOVERY_SESSION_REFRESH_FAILED");
         novaSenha.value = "";
         confirmarNovaSenha.value = "";
         window.history.replaceState({}, document.title, window.location.pathname);
         modoNovaSenhaAtivo = false;
         sessaoParaNovaSenha = null;
-        const { data } = await supabase.auth.getSession();
-        await ativarSessao(data.session);
+        await ativarSessao(sessaoAtualizada.session);
     } catch (erro) {
         console.error("Falha ao definir nova senha", erro);
         definirCarregandoNovaSenha(false);
@@ -533,7 +555,7 @@ btnSair.addEventListener("click", async () => {
 
 async function iniciarAutenticacao() {
     if (erroConfiguracaoSupabase || !supabase) {
-        mostrarMensagem(erroConfiguracaoSupabase || "Supabase indisponível.");
+        mostrarLogin(erroConfiguracaoSupabase || "Supabase indisponível.");
         btnEntrar.disabled = true;
         inputEmail.disabled = true;
         inputSenha.disabled = true;

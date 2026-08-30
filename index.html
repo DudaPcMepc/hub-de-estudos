@@ -129,7 +129,18 @@
 </head>
 <body>
 
-<main id="authShell" class="auth-shell d-flex align-items-center justify-content-center py-5">
+<main id="authLoadingShell" class="auth-shell d-flex align-items-center justify-content-center py-5" aria-live="polite">
+    <div class="card auth-card border-0 shadow-lg">
+        <div class="card-body p-4 p-md-5 text-center">
+            <div class="brand-emblem" aria-hidden="true"><i class="bi-cup-hot-fill"></i><span class="brand-spark"><i class="bi-fire"></i></span></div>
+            <h1 class="h4 fw-bold mb-2">Hub de Estudos Pimentel</h1>
+            <div class="spinner-border text-primary my-3" role="status"><span class="visually-hidden">Carregando</span></div>
+            <p class="auth-tagline mb-0">Carregando seu espaço de estudos...</p>
+        </div>
+    </div>
+</main>
+
+<main id="authShell" class="auth-shell d-none align-items-center justify-content-center py-5">
     <div class="card auth-card border-0 shadow-lg">
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
@@ -3586,6 +3597,8 @@ window.encerrarHub = () => {
     const mensagem = document.getElementById("legacyRecoveryMessage");
     const resumo = document.getElementById("legacyRecoverySummary");
     const botao = document.getElementById("btnDownloadLegacyRecovery");
+    document.getElementById("authLoadingShell").classList.add("d-none");
+    document.getElementById("authLoadingShell").classList.remove("d-flex");
     document.getElementById("authShell").classList.add("d-none");
     shell.classList.remove("d-none");
     shell.classList.add("d-flex");
