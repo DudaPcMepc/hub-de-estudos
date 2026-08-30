@@ -1,4 +1,5 @@
 import { erroConfiguracaoSupabase, supabase, tipoDoLinkDeAutenticacao } from "./supabase-client.js";
+import { encerrarAdministracao, iniciarAdministracao } from "./admin.js";
 import { encerrarPreviaMigracao, iniciarPreviaMigracao } from "./migration-preview.js";
 import { restaurarBackupRemoto } from "./migration-import.js";
 import {
@@ -266,6 +267,7 @@ function mostrarLogin(mensagem = "", tipo = "danger") {
     window.encerrarHub?.();
     encerrarRepositorioRemoto();
     encerrarPreviaMigracao();
+    encerrarAdministracao();
     appShell.classList.add("d-none");
     mostrarShellAutenticacao();
     mostrarSomenteFormulario(formLogin);
@@ -368,6 +370,7 @@ async function ativarSessao(session) {
             const desempenhoRemoto = await carregarDesempenhoRemoto();
             await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto);
             iniciarPreviaMigracao(contexto);
+            await iniciarAdministracao();
             usuarioAtivoId = session.user.id;
             verificacaoInicialEmAndamento = false;
             limparMensagem();
