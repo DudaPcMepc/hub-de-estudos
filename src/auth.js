@@ -498,6 +498,7 @@ formNovaSenha.addEventListener("submit", async evento => {
         await ativarSessao(data.session);
     } catch (erro) {
         console.error("Falha ao definir nova senha", erro);
+        definirCarregandoNovaSenha(false);
         const mensagem = String(erro?.message || "").toLowerCase();
         if (mensagem.includes("different from the old password")) {
             mostrarMensagem("Escolha uma senha diferente da anterior.");
@@ -505,7 +506,6 @@ formNovaSenha.addEventListener("submit", async evento => {
             mostrarLogin("Este link expirou ou já foi usado. Solicite um novo link.");
         } else {
             mostrarMensagem("Não foi possível salvar a senha. Confira os requisitos e tente novamente.");
-            definirCarregandoNovaSenha(false);
         }
     }
 });
