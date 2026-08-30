@@ -2271,11 +2271,29 @@ let documentosJuridicos = [];
 let grifosJuridicos = [];
 let favoritosJuridicos = [];
 let historicoLeituraJuridica = [];
+let geracaoSessaoHub = 0;
 let documentoLeitorAtual = null;
 let dispositivoLeitorAtual = null;
 let filtroCorGrifoAtual = "all";
 let modoFocoLeitorAtivo = false;
 let acaoLeitorAtual = null;
+
+function capturarSessaoHubAtual() {
+    const contexto = window.HUB_SESSION_CONTEXT;
+    return {
+        geracao: geracaoSessaoHub,
+        usuarioId: String(contexto?.userId || ""),
+        workspaceId: String(contexto?.workspaceId || "")
+    };
+}
+
+function sessaoHubPermaneceAtual(sessao) {
+    const contexto = window.HUB_SESSION_CONTEXT;
+    return Boolean(sessao?.usuarioId && sessao?.workspaceId)
+        && sessao.geracao === geracaoSessaoHub
+        && sessao.usuarioId === String(contexto?.userId || "")
+        && sessao.workspaceId === String(contexto?.workspaceId || "");
+}
 
 function exigirNuvemTopicos() {
     if (!window.HUB_CLOUD_TOPICS) throw new Error("A conexão de tópicos com o Supabase ainda não está pronta.");
@@ -2454,9 +2472,11 @@ function renderizarAtalhosLeitura(materia) {
 
 async function registrarLeituraAtual(materia, dispositivo) {
     if (!window.HUB_CLOUD_LEGAL) return;
+    const sessao = capturarSessaoHubAtual();
     const existente = historicoLeituraJuridica.find(item => String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id);
     try {
         const salvo = await window.HUB_CLOUD_LEGAL.registrarLeitura(materia.id, dispositivo.id, existente?.visitas || 0);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
         historicoLeituraJuridica = historicoLeituraJuridica.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id));
         historicoLeituraJuridica.unshift(salvo);
         renderizarAtalhosLeitura(materia);
@@ -2564,10 +2584,12 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
         if (grifo) abrirPainelAnotacaoLeitor(grifo);
     }));
     lista.querySelectorAll(".btn-excluir-grifo").forEach(botao => botao.addEventListener("click", async () => {
+        const sessao = capturarSessaoHubAtual();
         botao.disabled = true;
         try {
             if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
             await window.HUB_CLOUD_LEGAL.excluirGrifo(botao.dataset.id);
+            if (!sessaoHubPermaneceAtual(sessao)) return;
             grifosJuridicos = grifosJuridicos.filter(item => item.id !== botao.dataset.id);
             renderizarDispositivoLeitor(dispositivoLeitorAtual);
         } catch (erro) {
@@ -2686,6 +2708,7 @@ function abrirPainelFlashcardLeitor() {
 }
 
 async function criarGrifoLeitor(materia, selecao, nota = "") {
+    const sessao = capturarSessaoHubAtual();
     const grifo = {
         dispositivoId: dispositivoLeitorAtual.id,
         texto: selecao.texto,
@@ -2695,6 +2718,7 @@ async function criarGrifoLeitor(materia, selecao, nota = "") {
         nota
     };
     const salvo = await window.HUB_CLOUD_LEGAL.criarGrifo(materia.id, grifo);
+    if (!sessaoHubPermaneceAtual(sessao)) return null;
     grifosJuridicos.push(salvo);
     window.getSelection()?.removeAllRanges();
     return salvo;
@@ -2891,17 +2915,25 @@ document.getElementById("btnModoFoco").addEventListener("click", () => definirMo
 document.getElementById("btnFavoritarArtigo").addEventListener("click", async () => {
     const materia = materiaPorId(materiaAbertaId);
     if (!materia || !dispositivoLeitorAtual) return;
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOperacao = materia.id;
+    const dispositivoIdOperacao = dispositivoLeitorAtual.id;
     const botao = document.getElementById("btnFavoritarArtigo");
-    const adicionar = !favoritoDoDispositivo(materia.id, dispositivoLeitorAtual.id);
+    const adicionar = !favoritoDoDispositivo(materiaIdOperacao, dispositivoIdOperacao);
     botao.disabled = true;
     try {
         if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
-        const salvo = await window.HUB_CLOUD_LEGAL.salvarFavorito(materia.id, dispositivoLeitorAtual.id, adicionar);
-        favoritosJuridicos = favoritosJuridicos.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivoLeitorAtual.id));
+        const salvo = await window.HUB_CLOUD_LEGAL.salvarFavorito(materiaIdOperacao, dispositivoIdOperacao, adicionar);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        favoritosJuridicos = favoritosJuridicos.filter(item => !(String(item.materiaId) === String(materiaIdOperacao) && item.dispositivoId === dispositivoIdOperacao));
         if (salvo) favoritosJuridicos.unshift(salvo);
-        renderizarDispositivoLeitor(dispositivoLeitorAtual);
-        renderizarAtalhosLeitura(materia);
-        document.getElementById("wsLeitorOrientacao").textContent = adicionar ? "Artigo salvo nos seus favoritos." : "Artigo removido dos seus favoritos.";
+        const artigoContinuaAberto = String(materiaAbertaId) === String(materiaIdOperacao)
+            && dispositivoLeitorAtual?.id === dispositivoIdOperacao;
+        if (artigoContinuaAberto) {
+            renderizarDispositivoLeitor(dispositivoLeitorAtual);
+            renderizarAtalhosLeitura(materia);
+            document.getElementById("wsLeitorOrientacao").textContent = adicionar ? "Artigo salvo nos seus favoritos." : "Artigo removido dos seus favoritos.";
+        }
     } catch (erro) {
         console.error("Falha ao atualizar artigo favorito", erro);
         document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível atualizar seus favoritos.";
@@ -2924,6 +2956,7 @@ document.getElementById("formAcaoLeitor").addEventListener("submit", async event
     const pergunta = document.getElementById("wsPerguntaCardLeitor").value.trim();
     const botao = document.getElementById("btnSalvarAcaoLeitor");
     const status = document.getElementById("wsLeitorOrientacao");
+    const sessao = capturarSessaoHubAtual();
     if (!materia || !conteudo || (acaoLeitorAtual.tipo === "flashcard" && !pergunta)) {
         status.textContent = "Preencha os campos do formulário antes de salvar.";
         return;
@@ -2935,10 +2968,12 @@ document.getElementById("formAcaoLeitor").addEventListener("submit", async event
             if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
             if (acaoLeitorAtual.grifoId) {
                 const salvo = await window.HUB_CLOUD_LEGAL.atualizarNotaGrifo(acaoLeitorAtual.grifoId, conteudo);
+                if (!sessaoHubPermaneceAtual(sessao)) return;
                 const grifo = grifosJuridicos.find(item => item.id === salvo.id);
                 if (grifo) grifo.nota = salvo.nota;
             } else {
-                await criarGrifoLeitor(materia, acaoLeitorAtual.selecao, conteudo);
+                const salvo = await criarGrifoLeitor(materia, acaoLeitorAtual.selecao, conteudo);
+                if (!salvo || !sessaoHubPermaneceAtual(sessao)) return;
             }
             fecharPainelAcaoLeitor();
             renderizarDispositivoLeitor(dispositivoLeitorAtual);
@@ -2946,7 +2981,7 @@ document.getElementById("formAcaoLeitor").addEventListener("submit", async event
             return;
         }
         const criado = await criarFlashcardSincronizado(pergunta, conteudo, { preservarLeitor: true });
-        if (!criado) return;
+        if (!criado || !sessaoHubPermaneceAtual(sessao)) return;
         fecharPainelAcaoLeitor();
         status.textContent = "Flashcard criado nesta matéria e preparado para revisão.";
     } catch (erro) {
@@ -2968,11 +3003,13 @@ document.getElementById("btnGrifarTrecho").addEventListener("click", async () =>
         return;
     }
     const botao = document.getElementById("btnGrifarTrecho");
+    const sessao = capturarSessaoHubAtual();
     botao.disabled = true;
     status.textContent = "Salvando seu grifo...";
     try {
         if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
-        await criarGrifoLeitor(materia, selecao);
+        const salvo = await criarGrifoLeitor(materia, selecao);
+        if (!salvo || !sessaoHubPermaneceAtual(sessao)) return;
         renderizarDispositivoLeitor(dispositivoLeitorAtual);
         status.textContent = "Grifo salvo no seu perfil.";
     } catch (erro) {
@@ -3464,24 +3501,28 @@ function limparEdicaoCard() {
 
 async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = false } = {}) {
     if (operacaoCardEmAndamento) return false;
+    const materiaIdOperacao = materiaAbertaId;
+    const sessao = capturarSessaoHubAtual();
     const card = { id: novoId(), frente: frente.trim(), verso: verso.trim(), caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 };
-    if (!card.frente || !card.verso) return false;
+    if (!materiaIdOperacao || !card.frente || !card.verso) return false;
     operacaoCardEmAndamento = true;
     try {
-        await exigirNuvemFlashcards().criar(materiaAbertaId, card);
+        await exigirNuvemFlashcards().criar(materiaIdOperacao, card);
+        if (!sessaoHubPermaneceAtual(sessao)) return false;
         try {
-            atualizarMateria(materiaAbertaId, m => m.cards.push(card));
+            atualizarMateria(materiaIdOperacao, m => m.cards.push(card));
         } catch (erroLocal) {
             await exigirNuvemFlashcards().excluir(card.id);
             throw erroLocal;
         }
-        if (preservarLeitor) {
-            const materia = materiaPorId(materiaAbertaId);
+        const materiaContinuaAberta = String(materiaAbertaId) === String(materiaIdOperacao);
+        if (preservarLeitor && materiaContinuaAberta) {
+            const materia = materiaPorId(materiaIdOperacao);
             const progresso = progressoMateria(materia);
             renderizarCards(materia);
             document.getElementById("wsSubtitulo").textContent =
                 `${progresso}% dominado · ${materia.topicos.length} tópicos · ${materia.notas.length} notas · ${materia.cards.length} flashcards · prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`;
-        } else {
+        } else if (!preservarLeitor && materiaContinuaAberta) {
             renderizarWorkspace();
         }
         renderizarMaterias();
@@ -5028,6 +5069,7 @@ window.obterDadosParaPreviaMigracao = () => {
     };
 };
 window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
+    geracaoSessaoHub += 1;
     definirUsuarioAtual(contexto.userId);
     if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
@@ -5060,6 +5102,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
 };
 window.prepararSaidaHub = async () => salvarNotaPendente();
 window.encerrarHub = () => {
+    geracaoSessaoHub += 1;
     clearTimeout(timerAutoSave);
     timerAutoSave = null;
     salvamentoNotaPendente = null;
