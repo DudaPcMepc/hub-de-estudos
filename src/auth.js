@@ -16,6 +16,7 @@ import {
     atualizarTopico,
     carregarCatalogoMaterias,
     carregarBibliotecaJuridica,
+    carregarColecoesVade,
     carregarMateriasRemotas,
     carregarNotasRemotas,
     carregarFlashcardsRemotos,
@@ -37,6 +38,7 @@ import {
     criarTopicosEdital,
     criarErro,
     criarGrifoJuridico,
+    criarColecaoVade,
     atualizarNotaGrifoJuridico,
     criarTopico,
     criarTopicos,
@@ -50,12 +52,15 @@ import {
     excluirConfiguracaoEdital,
     excluirErro,
     excluirGrifoJuridico,
+    excluirColecaoVade,
     registrarLeituraJuridica,
     salvarFavoritoJuridico,
     excluirTopico,
     prepararRepositorioRemoto,
     registrarRespostaDesempenho,
     salvarConfiguracaoEdital,
+    atualizarColecaoVade,
+    salvarDocumentosColecaoVade,
     salvarLayoutWidgets
 } from "./cloud-core-repository.js";
 
@@ -85,6 +90,14 @@ window.HUB_CLOUD_LEGAL = Object.freeze({
     listarGrifos: carregarGrifosJuridicos,
     registrarLeitura: registrarLeituraJuridica,
     salvarFavorito: salvarFavoritoJuridico
+});
+
+window.HUB_CLOUD_VADE = Object.freeze({
+    atualizar: atualizarColecaoVade,
+    criar: criarColecaoVade,
+    excluir: excluirColecaoVade,
+    listar: carregarColecoesVade,
+    salvarDocumentos: salvarDocumentosColecaoVade
 });
 
 window.HUB_CLOUD_TOPICS = Object.freeze({

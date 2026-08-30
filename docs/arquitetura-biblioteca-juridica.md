@@ -96,10 +96,14 @@ O leitor jurídico terá índice, pesquisa, favoritos, grifos, notas, cópia com
 6. Documentos privados com Storage e controles de segurança.
 7. Comunidade, importação, moderação, votos e denúncias.
 
-## Estado atual: Fase 3 preparada
+## Estado atual: Fase 4 concluída e fundação da Fase 5 preparada localmente
 
 O catálogo e as preferências individuais de widgets já possuem tabelas protegidas no Supabase. O vínculo da matéria ao catálogo continua opcional, e matérias ainda não classificadas recebem sugestões compatíveis pelo nome.
 
 A interface já permite ativar, ocultar e ordenar widgets por usuário. A Constituição Federal e o ADCT estão disponíveis integralmente a partir das fontes oficiais da Câmara dos Deputados. A integração integral do Código Penal está preparada a partir do texto compilado oficial da Presidência da República.
 
-O leitor informa a fonte, a versão e o escopo importado, permite pesquisa entre os dispositivos disponíveis, cópia com citação e grifos privados. O texto oficial é compartilhado e somente leitura; os grifos ficam separados por usuário, matéria e espaço. Documentos privados, notas de margem e criação de flashcards continuam nas fases seguintes.
+O leitor informa a fonte, a versão e o escopo importado, permite pesquisa entre os dispositivos disponíveis, cópia com citação, grifos privados, notas de margem, favoritos, retomada de leitura e criação de flashcards. O texto oficial é compartilhado e somente leitura; todos os dados pessoais de leitura ficam separados por usuário, matéria e espaço.
+
+A fundação local da Fase 5 acrescenta cadernos pessoais de Vade Mecum e uma lista ordenada de normas oficiais. Cada caderno pertence simultaneamente ao usuário e ao espaço de estudos. A lista de normas só pode ser substituída por uma função transacional que valida a sessão, a participação no espaço, o limite de 100 itens, duplicidades e a disponibilidade dos documentos antes de gravar. O navegador recebe acesso direto de leitura aos itens, mas não recebe permissão direta para inseri-los, alterá-los ou excluí-los.
+
+A migration `202608300010_personal_vade_collections.sql` ainda precisa ser revisada e aplicada ao Supabase antes que a interface do Meu Vade Mecum seja habilitada. Documentos privados e comunidade permanecem reservados às fases posteriores.
