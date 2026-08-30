@@ -6,7 +6,7 @@ Aplicação de organização de estudos com matérias, notas, flashcards, cronog
 
 ## Estado atual
 
-O frontend já exige autenticação pelo Supabase antes de liberar o Hub. A primeira cópia dos dados locais para o banco remoto já foi executada e conferida. Durante o uso normal, matérias, tópicos, notas, flashcards, materiais, links, sessões do cronograma, edital, caderno de erros e histórico de desempenho são mantidos no Supabase e em uma cópia local isolada pelo identificador de cada usuário. O nome visível do produto é **Hub Pimentel — Estudos para Concursos**.
+O frontend já exige autenticação pelo Supabase antes de liberar o Hub. A primeira cópia dos dados locais para o banco remoto já foi executada e conferida. Durante o uso normal, matérias, tópicos, notas, flashcards, materiais, links, sessões do cronograma, edital, caderno de erros e histórico de desempenho são mantidos no Supabase e em uma cópia local isolada pelo identificador de cada usuário. O nome visível do produto é **Esquema de Estudos**, com a assinatura visual `<🌶☕/>` inspirada em pimenta, café e código.
 
 A área autenticada possui uma prévia de migração somente leitura, que compara as contagens locais com o espaço pessoal no Supabase e calcula uma identificação do conjunto antes de qualquer transferência. Depois da importação, uma conferência semântica reconstrói o conteúdo remoto e compara assinaturas por categoria sem exibir matérias ou notas nos registros.
 

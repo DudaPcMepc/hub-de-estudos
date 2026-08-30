@@ -8,6 +8,8 @@ const CORES = new Set(["primary", "secondary", "success", "danger", "warning", "
 const PRIORIDADES = new Set(["alta", "media", "baixa"]);
 const STATUS_TOPICOS = new Set(["nao", "estudando", "revisar", "dominado"]);
 const STATUS_TAREFAS = new Set(["pendente", "concluido"]);
+const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
+const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
 
 let contextoAtivo = null;
 let mapasLegados = new Map();
@@ -154,7 +156,7 @@ export function encerrarRepositorioRemoto() {
 export async function carregarMateriasRemotas() {
     const contexto = obterContexto();
     const resposta = await supabase.from("subjects")
-        .select("id, name, description, color, priority, position")
+        .select("id, name, description, color, priority, position, catalog_subject_id")
         .eq("workspace_id", contexto.workspaceId)
         .order("position", { ascending: true })
         .order("created_at", { ascending: true });
@@ -166,8 +168,287 @@ export async function carregarMateriasRemotas() {
         desc: materia.description || "",
         cor: CORES.has(materia.color) ? materia.color : "primary",
         prioridade: PRIORIDADES.has(materia.priority) ? materia.priority : "media",
+        catalogoId: materia.catalog_subject_id || "",
         position: Number(materia.position)
     }));
+}
+
+export async function carregarCatalogoMaterias() {
+    obterContexto();
+    const resposta = await supabase.from("catalog_subjects")
+        .select("id, slug, name, category, icon, default_widget_types")
+        .eq("active", true)
+        .order("category", { ascending: true })
+        .order("name", { ascending: true });
+    const itens = verificarResposta(resposta, "Não foi possível carregar o catálogo de matérias.") || [];
+    return itens.map(item => ({
+        id: item.id,
+        slug: item.slug,
+        nome: item.name,
+        categoria: item.category,
+        icone: item.icon,
+        widgetsPadrao: Array.isArray(item.default_widget_types)
+            ? item.default_widget_types.filter(tipo => TIPOS_WIDGET.has(tipo))
+            : []
+    }));
+}
+
+export async function carregarWidgetsMaterias() {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("user_subject_widgets")
+        .select("subject_id, widget_type, enabled, position, config")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("subject_id", { ascending: true })
+        .order("position", { ascending: true });
+    const itens = verificarResposta(resposta, "Não foi possível carregar as preferências da biblioteca.") || [];
+    const materiasLegadas = idsLocaisPorRemotos.get("subject");
+    return itens.filter(item => TIPOS_WIDGET.has(item.widget_type)).map(item => ({
+        materiaId: materiasLegadas?.get(item.subject_id) || item.subject_id,
+        tipo: item.widget_type,
+        ativo: item.enabled === true,
+        posicao: Math.max(0, Number(item.position) || 0),
+        configuracao: item.config && typeof item.config === "object" && !Array.isArray(item.config) ? item.config : {}
+    }));
+}
+
+export async function salvarLayoutWidgets(idMateriaLocal, layout) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", idMateriaLocal);
+    if (!Array.isArray(layout) || layout.length > TIPOS_WIDGET.size) {
+        throw erroRepositorio("A configuração dos widgets é inválida.");
+    }
+    const tipos = layout.map(item => item?.tipo);
+    if (tipos.some(tipo => !TIPOS_WIDGET.has(tipo)) || new Set(tipos).size !== tipos.length) {
+        throw erroRepositorio("A configuração contém widgets inválidos ou repetidos.");
+    }
+    const registros = layout.map((item, posicao) => ({
+        workspace_id: contexto.workspaceId,
+        subject_id: subjectId,
+        user_id: contexto.userId,
+        widget_type: item.tipo,
+        enabled: item.ativo === true,
+        position: posicao,
+        config: item.configuracao && typeof item.configuracao === "object" && !Array.isArray(item.configuracao)
+            ? item.configuracao
+            : {}
+    }));
+    if (!registros.length) return [];
+    const resposta = await supabase.from("user_subject_widgets")
+        .upsert(registros, { onConflict: "subject_id,user_id,widget_type" })
+        .select("widget_type, enabled, position, config")
+        .order("position", { ascending: true });
+    const salvos = verificarResposta(resposta, "Não foi possível salvar a organização dos widgets.") || [];
+    if (salvos.length !== registros.length) throw erroRepositorio("O Supabase não confirmou todos os widgets configurados.");
+    return salvos.map(item => ({
+        materiaId: idMateriaLocal,
+        tipo: item.widget_type,
+        ativo: item.enabled === true,
+        posicao: Number(item.position),
+        configuracao: item.config || {}
+    }));
+}
+
+export async function carregarBibliotecaJuridica() {
+    obterContexto();
+    const [documentosResposta, versoesResposta, dispositivosResposta, vinculosResposta] = await Promise.all([
+        supabase.from("legal_documents")
+            .select("id, slug, title, short_title, issuing_body, current_version_id")
+            .eq("active", true)
+            .order("title", { ascending: true }),
+        supabase.from("legal_document_versions")
+            .select("id, document_id, version_label, content_scope, official_source_url, official_source_label, source_checked_on"),
+        supabase.from("legal_provisions")
+            .select("id, version_id, provision_key, sequence, heading_path, heading, label, content")
+            .order("sequence", { ascending: true }),
+        supabase.from("catalog_subject_documents")
+            .select("catalog_subject_id, document_id, position")
+            .order("position", { ascending: true })
+    ]);
+    const documentos = verificarResposta(documentosResposta, "Não foi possível carregar os documentos jurídicos.") || [];
+    const versoes = verificarResposta(versoesResposta, "Não foi possível carregar as versões dos documentos jurídicos.") || [];
+    const dispositivos = verificarResposta(dispositivosResposta, "Não foi possível carregar os artigos dos documentos jurídicos.") || [];
+    const vinculos = verificarResposta(vinculosResposta, "Não foi possível carregar as sugestões jurídicas das matérias.") || [];
+    return documentos.map(documento => {
+        const versao = versoes.find(item => item.id === documento.current_version_id);
+        return {
+            id: documento.id,
+            slug: documento.slug,
+            titulo: documento.title,
+            tituloCurto: documento.short_title,
+            orgao: documento.issuing_body,
+            catalogoIds: vinculos.filter(item => item.document_id === documento.id).map(item => item.catalog_subject_id),
+            versao: versao ? {
+                id: versao.id,
+                rotulo: versao.version_label,
+                escopo: versao.content_scope,
+                fonteUrl: versao.official_source_url,
+                fonteNome: versao.official_source_label,
+                conferidaEm: versao.source_checked_on,
+                dispositivos: dispositivos.filter(item => item.version_id === versao.id).map(item => ({
+                    id: item.id,
+                    chave: item.provision_key,
+                    sequencia: Number(item.sequence),
+                    caminho: Array.isArray(item.heading_path) ? item.heading_path : [],
+                    titulo: item.heading || "",
+                    rotulo: item.label,
+                    conteudo: item.content
+                }))
+            } : null
+        };
+    }).filter(documento => documento.versao);
+}
+
+export async function carregarGrifosJuridicos() {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("user_legal_highlights")
+        .select("id, subject_id, provision_id, selected_text, prefix_text, suffix_text, color, note, created_at")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("created_at", { ascending: true });
+    const itens = verificarResposta(resposta, "Não foi possível carregar seus grifos jurídicos.") || [];
+    const materiasLegadas = idsLocaisPorRemotos.get("subject");
+    return itens.map(item => ({
+        id: item.id,
+        materiaId: materiasLegadas?.get(item.subject_id) || item.subject_id,
+        dispositivoId: item.provision_id,
+        texto: item.selected_text,
+        prefixo: item.prefix_text || "",
+        sufixo: item.suffix_text || "",
+        cor: CORES_GRIFO.has(item.color) ? item.color : "yellow",
+        nota: item.note || "",
+        criadoEm: item.created_at
+    }));
+}
+
+export async function carregarEstadoLeituraJuridica() {
+    const contexto = obterContexto();
+    const [favoritosResposta, historicoResposta] = await Promise.all([
+        supabase.from("user_legal_bookmarks")
+            .select("subject_id, provision_id, created_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("created_at", { ascending: false }),
+        supabase.from("user_legal_reading_history")
+            .select("subject_id, provision_id, visit_count, first_read_at, last_read_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("last_read_at", { ascending: false })
+    ]);
+    const favoritos = verificarResposta(favoritosResposta, "Não foi possível carregar seus artigos favoritos.") || [];
+    const historico = verificarResposta(historicoResposta, "Não foi possível carregar seu histórico de leitura.") || [];
+    const materiasLegadas = idsLocaisPorRemotos.get("subject");
+    const materiaLocal = id => materiasLegadas?.get(id) || id;
+    return {
+        favoritos: favoritos.map(item => ({
+            materiaId: materiaLocal(item.subject_id),
+            dispositivoId: item.provision_id,
+            criadoEm: item.created_at
+        })),
+        historico: historico.map(item => ({
+            materiaId: materiaLocal(item.subject_id),
+            dispositivoId: item.provision_id,
+            visitas: Number(item.visit_count) || 1,
+            primeiraLeituraEm: item.first_read_at,
+            ultimaLeituraEm: item.last_read_at
+        }))
+    };
+}
+
+export async function salvarFavoritoJuridico(idMateriaLocal, provisionId, favorito) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", idMateriaLocal);
+    const dispositivoId = exigirUuidNovo(provisionId, "Artigo selecionado");
+    if (favorito === true) {
+        const resposta = await supabase.from("user_legal_bookmarks").upsert({
+            workspace_id: contexto.workspaceId,
+            subject_id: subjectId,
+            user_id: contexto.userId,
+            provision_id: dispositivoId
+        }, { onConflict: "user_id,subject_id,provision_id" })
+            .select("provision_id, created_at")
+            .single();
+        const salvo = verificarRegistro(resposta, "Não foi possível favoritar o artigo.");
+        return { materiaId: idMateriaLocal, dispositivoId: salvo.provision_id, criadoEm: salvo.created_at };
+    }
+    verificarRegistro(await supabase.from("user_legal_bookmarks").delete()
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("subject_id", subjectId)
+        .eq("user_id", contexto.userId)
+        .eq("provision_id", dispositivoId)
+        .select("provision_id")
+        .maybeSingle(), "Não foi possível remover o artigo dos favoritos.");
+    return null;
+}
+
+export async function registrarLeituraJuridica(idMateriaLocal, provisionId, visitasAtuais = 0) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", idMateriaLocal);
+    const dispositivoId = exigirUuidNovo(provisionId, "Artigo selecionado");
+    const agora = new Date().toISOString();
+    const resposta = await supabase.from("user_legal_reading_history").upsert({
+        workspace_id: contexto.workspaceId,
+        subject_id: subjectId,
+        user_id: contexto.userId,
+        provision_id: dispositivoId,
+        visit_count: Math.min(1000000, Math.max(1, Number(visitasAtuais) + 1)),
+        last_read_at: agora
+    }, { onConflict: "user_id,subject_id,provision_id" })
+        .select("provision_id, visit_count, first_read_at, last_read_at")
+        .single();
+    const salvo = verificarRegistro(resposta, "Não foi possível registrar sua leitura.");
+    return {
+        materiaId: idMateriaLocal,
+        dispositivoId: salvo.provision_id,
+        visitas: Number(salvo.visit_count) || 1,
+        primeiraLeituraEm: salvo.first_read_at,
+        ultimaLeituraEm: salvo.last_read_at
+    };
+}
+
+export async function criarGrifoJuridico(idMateriaLocal, grifo) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", idMateriaLocal);
+    const provisionId = exigirUuidNovo(grifo.dispositivoId, "Artigo selecionado");
+    const resposta = await supabase.from("user_legal_highlights").insert({
+        workspace_id: contexto.workspaceId,
+        subject_id: subjectId,
+        user_id: contexto.userId,
+        provision_id: provisionId,
+        selected_text: texto(grifo.texto, 2000, "Trecho selecionado", true),
+        prefix_text: texto(grifo.prefixo, 300, "Contexto anterior"),
+        suffix_text: texto(grifo.sufixo, 300, "Contexto posterior"),
+        color: CORES_GRIFO.has(grifo.cor) ? grifo.cor : "yellow",
+        note: texto(grifo.nota, 5000, "Nota do grifo")
+    }).select("id, created_at").single();
+    const salvo = verificarRegistro(resposta, "Não foi possível salvar o grifo.");
+    return { ...grifo, id: salvo.id, materiaId: idMateriaLocal, criadoEm: salvo.created_at };
+}
+
+export async function atualizarNotaGrifoJuridico(id, nota) {
+    const contexto = exigirContexto();
+    const grifoId = exigirUuidNovo(id, "Grifo");
+    const resposta = await supabase.from("user_legal_highlights").update({
+        note: texto(nota, 5000, "Nota do grifo")
+    })
+        .eq("id", grifoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id, note, updated_at")
+        .maybeSingle();
+    const salvo = verificarRegistro(resposta, "Não foi possível salvar a anotação do grifo.");
+    return { id: salvo.id, nota: salvo.note || "", atualizadoEm: salvo.updated_at };
+}
+
+export async function excluirGrifoJuridico(id) {
+    const contexto = exigirContexto();
+    const grifoId = exigirUuidNovo(id, "Grifo");
+    verificarRegistro(await supabase.from("user_legal_highlights").delete()
+        .eq("id", grifoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível excluir o grifo.");
 }
 
 export async function carregarTopicosRemotos() {
@@ -406,6 +687,7 @@ export async function criarMateria(materia, position) {
         description: texto(materia.desc, 5000, "Descrição"),
         color: CORES.has(materia.cor) ? materia.cor : "primary",
         priority: PRIORIDADES.has(materia.prioridade) ? materia.prioridade : "media",
+        catalog_subject_id: materia.catalogoId ? exigirUuidNovo(materia.catalogoId, "Tipo da matéria") : null,
         position: Math.max(0, Number(position) || 0),
         created_by: contexto.userId
     });
@@ -422,6 +704,9 @@ export async function atualizarMateria(idLocal, alteracoes) {
     if (Object.hasOwn(alteracoes, "desc")) valores.description = texto(alteracoes.desc, 5000, "Descrição");
     if (Object.hasOwn(alteracoes, "cor")) valores.color = CORES.has(alteracoes.cor) ? alteracoes.cor : "primary";
     if (Object.hasOwn(alteracoes, "prioridade")) valores.priority = PRIORIDADES.has(alteracoes.prioridade) ? alteracoes.prioridade : "media";
+    if (Object.hasOwn(alteracoes, "catalogoId")) valores.catalog_subject_id = alteracoes.catalogoId
+        ? exigirUuidNovo(alteracoes.catalogoId, "Tipo da matéria")
+        : null;
     if (Object.hasOwn(alteracoes, "position")) valores.position = Math.max(0, Number(alteracoes.position) || 0);
     if (!Object.keys(valores).length) return;
     verificarRegistro(await supabase.from("subjects").update(valores)
