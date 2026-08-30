@@ -249,9 +249,16 @@ test("anotações e flashcards do leitor usam os repositórios seguros já exist
     assert.doesNotMatch(html, /id="btnAnotarTrecho"[^>]*disabled/);
     assert.doesNotMatch(html, /id="btnCriarCardArtigo"[^>]*disabled/);
     assert.match(html, /id="wsPainelAcaoLeitor"/);
+    assert.match(html, /id="wsMateriaCardLeitor"/);
+    assert.match(html, /prepararMateriasDestinoFlashcard[\s\S]*?materiasNormalizadas\(\)\.map/);
     assert.match(html, /function obterSelecaoAtualLeitor\(limite = 2000\)/);
     assert.match(html, /function abrirPainelAnotacaoLeitor\(grifo = null\)/);
-    assert.match(html, /criarFlashcardSincronizado\(pergunta, conteudo, \{ preservarLeitor: true \}\)/);
+    assert.match(html, /const rodape = `Referência: \$\{referencia\}/);
+    assert.match(html, /Fonte oficial: \$\{fonte\}/);
+    assert.match(html, /const limiteBase = Math\.max\(1, 10000 - rodape\.length - 2\)/);
+    assert.match(html, /materiaDestino\.cards\.some/);
+    assert.match(html, /criarFlashcardSincronizado\(pergunta, conteudo, \{ preservarLeitor: true, materiaId: materiaDestinoId, propagarErro: true \}\)/);
+    assert.match(html, /if \(propagarErro\) throw erro;/);
     assert.match(repository, /export async function atualizarNotaGrifoJuridico/);
     assert.match(repository, /user_legal_highlights"\)\.update\([\s\S]*?\.eq\("user_id", contexto\.userId\)/);
     assert.match(auth, /atualizarNotaGrifo: atualizarNotaGrifoJuridico/);
@@ -267,7 +274,7 @@ test("respostas atrasadas do leitor não atravessam sessões nem trocam a matér
     assert.match(html, /window\.encerrarHub = \(\) => \{[\s\S]*?geracaoSessaoHub \+= 1;/);
     assert.match(html, /async function criarGrifoLeitor[\s\S]*?const sessao = capturarSessaoHubAtual\(\)[\s\S]*?if \(!sessaoHubPermaneceAtual\(sessao\)\) return null;/);
     assert.match(html, /const dispositivoIdOperacao = dispositivoLeitorAtual\.id;[\s\S]*?salvarFavorito\(materiaIdOperacao, dispositivoIdOperacao, adicionar\)/);
-    assert.match(html, /async function criarFlashcardSincronizado[\s\S]*?const materiaIdOperacao = materiaAbertaId;[\s\S]*?\.criar\(materiaIdOperacao, card\)[\s\S]*?atualizarMateria\(materiaIdOperacao,/);
+    assert.match(html, /async function criarFlashcardSincronizado[\s\S]*?const materiaIdOperacao = materiaId \|\| materiaAbertaId;[\s\S]*?\.criar\(materiaIdOperacao, card\)[\s\S]*?atualizarMateria\(materiaIdOperacao,/);
     assert.match(html, /const materiaContinuaAberta = String\(materiaAbertaId\) === String\(materiaIdOperacao\);/);
 });
 
