@@ -204,6 +204,20 @@ test("anotações e flashcards do leitor usam os repositórios seguros já exist
     assert.match(auth, /atualizarNotaGrifo: atualizarNotaGrifoJuridico/);
 });
 
+test("respostas atrasadas do leitor não atravessam sessões nem trocam a matéria do flashcard", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /let geracaoSessaoHub = 0;/);
+    assert.match(html, /function capturarSessaoHubAtual\(\)[\s\S]*?geracao: geracaoSessaoHub[\s\S]*?usuarioId:[\s\S]*?workspaceId:/);
+    assert.match(html, /function sessaoHubPermaneceAtual\(sessao\)[\s\S]*?sessao\.geracao === geracaoSessaoHub[\s\S]*?sessao\.usuarioId ===[\s\S]*?sessao\.workspaceId ===/);
+    assert.match(html, /window\.iniciarHub = async[\s\S]*?geracaoSessaoHub \+= 1;/);
+    assert.match(html, /window\.encerrarHub = \(\) => \{[\s\S]*?geracaoSessaoHub \+= 1;/);
+    assert.match(html, /async function criarGrifoLeitor[\s\S]*?const sessao = capturarSessaoHubAtual\(\)[\s\S]*?if \(!sessaoHubPermaneceAtual\(sessao\)\) return null;/);
+    assert.match(html, /const dispositivoIdOperacao = dispositivoLeitorAtual\.id;[\s\S]*?salvarFavorito\(materiaIdOperacao, dispositivoIdOperacao, adicionar\)/);
+    assert.match(html, /async function criarFlashcardSincronizado[\s\S]*?const materiaIdOperacao = materiaAbertaId;[\s\S]*?\.criar\(materiaIdOperacao, card\)[\s\S]*?atualizarMateria\(materiaIdOperacao,/);
+    assert.match(html, /const materiaContinuaAberta = String\(materiaAbertaId\) === String\(materiaIdOperacao\);/);
+});
+
 test("favoritos, retomada e histórico jurídico permanecem privados por usuário", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
