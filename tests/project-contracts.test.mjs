@@ -146,6 +146,16 @@ test("a exclusão de usuários exige prévia recente e protege espaços comparti
     assert.doesNotMatch(migration, /target_email|email_address/i);
 });
 
+test("a preparação da exclusão não confunde o usuário solicitado com a coluna da aprovação", () => {
+    const migration = readProjectFile("supabase/migrations/202608300001_fix_prepare_user_deletion.sql");
+
+    assert.match(migration, /prepare_user_deletion\.target_user_id/g);
+    assert.match(migration, /on conflict on constraint user_deletion_approvals_pkey/i);
+    assert.doesNotMatch(migration, /on conflict\s*\(\s*target_user_id\s*\)/i);
+    assert.match(migration, /revoke all on function public\.prepare_user_deletion\(uuid, text\)[\s\S]*?from public, anon, authenticated/i);
+    assert.match(migration, /grant execute on function public\.prepare_user_deletion\(uuid, text\) to service_role/i);
+});
+
 test("a administração de usuários mantém privilégios fora do navegador", () => {
     const migration = readProjectFile("supabase/migrations/202608290007_admin_foundation.sql");
     const edgeFunction = readProjectFile("supabase/functions/admin-users/index.ts");
