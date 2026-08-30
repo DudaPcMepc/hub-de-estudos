@@ -1644,19 +1644,7 @@ function salvar(chave, valor) {
     catch (erro) { alert(erro.message); throw erro; }
 }
 
-const MATERIAS_PADRAO = [
-    { id: 1, nome: "Direito Constitucional", desc: "Princípios, direitos fundamentais, organização do Estado.", cor: "primary", notas: "" },
-    { id: 2, nome: "Direito Penal", desc: "Teoria do crime, penas, crimes em espécie.", cor: "danger", notas: "" },
-    { id: 3, nome: "Direito Administrativo", desc: "Atos administrativos, princípios da administração pública.", cor: "info", notas: "" },
-    { id: 4, nome: "Ética no Serviço Público", desc: "Código de conduta, moralidade administrativa.", cor: "success", notas: "" },
-    { id: 5, nome: "Processo Penal", desc: "Inquérito, prisões, flagrante.", cor: "dark", notas: "" },
-    { id: 6, nome: "Estatuto das GCMs", desc: "Lei 13.022/2014.", cor: "warning", notas: "" },
-    { id: 7, nome: "Legislação Extravagante", desc: "Maria da Penha, ECA, drogas, etc.", cor: "secondary", notas: "" },
-    { id: 8, nome: "Trânsito", desc: "CTB, infrações, sinalização.", cor: "warning", notas: "" },
-    { id: 9, nome: "Português", desc: "Gramática, interpretação de texto.", cor: "primary", notas: "" }
-];
-
-function obterMaterias() { return carregar(LS.materias, MATERIAS_PADRAO); }
+function obterMaterias() { return carregar(LS.materias, []); }
 function obterTarefas() { return carregar(LS.tarefas, []); }
 function obterEdital() { return carregar(LS.edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] }); }
 function obterErros() { return carregar(LS.erros, []); }
@@ -1871,26 +1859,19 @@ function preencherCatalogoMaterias() {
 
 function sincronizarListaDeMaterias(materiasRemotas) {
     if (!Array.isArray(materiasRemotas)) throw new Error("A lista de matérias do Supabase é inválida.");
-    const locais = materiasNormalizadas();
-    const usados = new Set();
-    const sincronizadas = materiasRemotas.map(remota => {
-        const local = locais.find(materia => String(materia.id) === String(remota.id));
-        if (local) usados.add(String(local.id));
-        return normalizarMateria({
-            ...(local || { notas: [], topicos: [], cards: [], links: [] }),
-            id: local ? local.id : remota.id,
+    const sincronizadas = materiasRemotas.map(remota => normalizarMateria({
+            id: remota.id,
             nome: remota.nome,
             desc: remota.desc,
             cor: remota.cor,
             prioridade: remota.prioridade,
-            catalogoId: remota.catalogoId || ""
-        });
-    });
-    const somenteLocais = locais.filter(materia => !usados.has(String(materia.id)));
-    salvarMaterias([...sincronizadas, ...somenteLocais]);
-    if (somenteLocais.length) {
-        console.warn(`${somenteLocais.length} matéria(s) local(is) foram preservadas para conferência antes da sincronização.`);
-    }
+            catalogoId: remota.catalogoId || "",
+            notas: [],
+            topicos: [],
+            cards: [],
+            links: []
+        }));
+    salvarMaterias(sincronizadas);
 }
 
 function sincronizarListaDeTopicos(topicosRemotos) {
@@ -1898,22 +1879,12 @@ function sincronizarListaDeTopicos(topicosRemotos) {
     const materias = materiasNormalizadas();
     materias.forEach(materia => {
         const remotosDaMateria = topicosRemotos.filter(topico => String(topico.materiaId) === String(materia.id));
-        const usados = new Set();
-        const sincronizados = remotosDaMateria.map(remoto => {
-            const local = materia.topicos.find(topico => String(topico.id) === String(remoto.id));
-            if (local) usados.add(String(local.id));
-            return {
-                id: local ? local.id : remoto.id,
+        materia.topicos = remotosDaMateria.map(remoto => ({
+                id: remoto.id,
                 titulo: remoto.titulo,
                 status: remoto.status,
                 revisoes: remoto.revisoes
-            };
-        });
-        const somenteLocais = materia.topicos.filter(topico => !usados.has(String(topico.id)));
-        materia.topicos = [...sincronizados, ...somenteLocais];
-        if (somenteLocais.length) {
-            console.warn(`${somenteLocais.length} tópico(s) local(is) foram preservados para conferência antes da sincronização.`);
-        }
+            }));
     });
     salvarMaterias(materias);
 }
@@ -1923,25 +1894,15 @@ function sincronizarListaDeNotas(notasRemotas) {
     const materias = materiasNormalizadas();
     materias.forEach(materia => {
         const remotasDaMateria = notasRemotas.filter(nota => String(nota.materiaId) === String(materia.id));
-        const usadas = new Set();
-        const sincronizadas = remotasDaMateria.map(remota => {
-            const local = materia.notas.find(nota => String(nota.id) === String(remota.id));
-            if (local) usadas.add(String(local.id));
-            return {
-                id: local ? local.id : remota.id,
+        materia.notas = remotasDaMateria.map(remota => ({
+                id: remota.id,
                 titulo: remota.titulo,
                 conteudo: remota.conteudo,
                 tags: remota.tags,
                 fixada: remota.fixada,
-                criadaEm: remota.criadaEm || local?.criadaEm || hojeISO(),
-                atualizadaEm: remota.atualizadaEm || local?.atualizadaEm || hojeISO()
-            };
-        });
-        const somenteLocais = materia.notas.filter(nota => !usadas.has(String(nota.id)));
-        materia.notas = [...sincronizadas, ...somenteLocais];
-        if (somenteLocais.length) {
-            console.warn(`${somenteLocais.length} nota(s) local(is) foram preservadas para conferência antes da sincronização.`);
-        }
+                criadaEm: remota.criadaEm || hojeISO(),
+                atualizadaEm: remota.atualizadaEm || hojeISO()
+            }));
     });
     salvarMaterias(materias);
 }
@@ -1951,25 +1912,15 @@ function sincronizarListaDeFlashcards(flashcardsRemotos) {
     const materias = materiasNormalizadas();
     materias.forEach(materia => {
         const remotosDaMateria = flashcardsRemotos.filter(card => String(card.materiaId) === String(materia.id));
-        const usados = new Set();
-        const sincronizados = remotosDaMateria.map(remoto => {
-            const local = materia.cards.find(card => String(card.id) === String(remoto.id));
-            if (local) usados.add(String(local.id));
-            return {
-                id: local ? local.id : remoto.id,
+        materia.cards = remotosDaMateria.map(remoto => ({
+                id: remoto.id,
                 frente: remoto.frente,
                 verso: remoto.verso,
                 caixa: remoto.caixa,
                 proxima: remoto.proxima,
                 acertos: remoto.acertos,
                 erros: remoto.erros
-            };
-        });
-        const somenteLocais = materia.cards.filter(card => !usados.has(String(card.id)));
-        materia.cards = [...sincronizados, ...somenteLocais];
-        if (somenteLocais.length) {
-            console.warn(`${somenteLocais.length} flashcard(s) local(is) foram preservados para conferência antes da sincronização.`);
-        }
+            }));
     });
     salvarMaterias(materias);
 }
@@ -1979,73 +1930,43 @@ function sincronizarListaDeLinks(linksRemotos) {
     const materias = materiasNormalizadas();
     materias.forEach(materia => {
         const remotosDaMateria = linksRemotos.filter(link => String(link.materiaId) === String(materia.id));
-        const usados = new Set();
-        const sincronizados = remotosDaMateria.map(remoto => {
-            const local = materia.links.find(link => String(link.id) === String(remoto.id));
-            if (local) usados.add(String(local.id));
-            return {
-                id: local ? local.id : remoto.id,
+        materia.links = remotosDaMateria.map(remoto => ({
+                id: remoto.id,
                 titulo: remoto.titulo,
                 url: remoto.url
-            };
-        });
-        const somenteLocais = materia.links.filter(link => !usados.has(String(link.id)));
-        materia.links = [...sincronizados, ...somenteLocais];
-        if (somenteLocais.length) {
-            console.warn(`${somenteLocais.length} material(is) local(is) foram preservados para conferência antes da sincronização.`);
-        }
+            }));
     });
     salvarMaterias(materias);
 }
 
 function sincronizarListaDeTarefas(tarefasRemotas) {
     if (!Array.isArray(tarefasRemotas)) throw new Error("A lista do cronograma no Supabase é inválida.");
-    const locais = obterTarefas();
-    const usados = new Set();
-    const sincronizadas = tarefasRemotas.map(remota => {
-        const local = locais.find(tarefa => String(tarefa.id) === String(remota.id));
-        if (local) usados.add(String(local.id));
-        return {
-            id: local ? local.id : remota.id,
+    const sincronizadas = tarefasRemotas.map(remota => ({
+            id: remota.id,
             materiaId: remota.materiaId,
             topico: remota.topico,
             data: remota.data,
             status: remota.status,
-            responsavelId: remota.responsavelId || local?.responsavelId || null
-        };
-    });
-    const somenteLocais = locais.filter(tarefa => !usados.has(String(tarefa.id)));
-    salvar(LS.tarefas, [...sincronizadas, ...somenteLocais]);
-    if (somenteLocais.length) {
-        console.warn(`${somenteLocais.length} sessão(ões) local(is) foram preservadas para conferência antes da sincronização.`);
-    }
+            responsavelId: remota.responsavelId || null
+        }));
+    salvar(LS.tarefas, sincronizadas);
 }
 
 function sincronizarListaDeErros(errosRemotos) {
     if (!Array.isArray(errosRemotos)) throw new Error("A lista do caderno de erros no Supabase é inválida.");
-    const locais = obterErros();
-    const usados = new Set();
-    const sincronizados = errosRemotos.map(remoto => {
-        const local = locais.find(erro => String(erro.id) === String(remoto.id));
-        if (local) usados.add(String(local.id));
-        return {
-            id: local ? local.id : remoto.id,
+    const sincronizados = errosRemotos.map(remoto => ({
+            id: remoto.id,
             materiaId: remoto.materiaId,
             tema: remoto.tema,
             obs: remoto.obs,
             data: remoto.data
-        };
-    });
-    const somenteLocais = locais.filter(erro => !usados.has(String(erro.id)));
-    salvar(LS.erros, [...sincronizados, ...somenteLocais]);
-    if (somenteLocais.length) {
-        console.warn(`${somenteLocais.length} registro(s) local(is) do caderno de erros foram preservados para conferência.`);
-    }
+        }));
+    salvar(LS.erros, sincronizados);
 }
 
 function sincronizarDesempenho(desempenhoRemoto) {
     if (!Array.isArray(desempenhoRemoto)) throw new Error("O histórico de desempenho do Supabase é inválido.");
-    const desempenho = { ...obterDesempenho() };
+    const desempenho = {};
     desempenhoRemoto.forEach(registro => {
         const total = Math.max(0, Number(registro.total) || 0);
         desempenho[String(registro.materiaId)] = {
@@ -2058,13 +1979,8 @@ function sincronizarDesempenho(desempenhoRemoto) {
 
 function sincronizarEdital(editalRemoto) {
     if (!editalRemoto || !Array.isArray(editalRemoto.materias)) throw new Error("O edital do Supabase é inválido.");
-    const local = obterEdital();
-    const usados = new Set();
-    const materias = editalRemoto.materias.map(remota => {
-        const itemLocal = local.materias.find(item => String(item.id) === String(remota.id));
-        if (itemLocal) usados.add(String(itemLocal.id));
-        return {
-            id: itemLocal ? itemLocal.id : remota.id,
+    const materias = editalRemoto.materias.map(remota => ({
+            id: remota.id,
             materiaId: remota.materiaId,
             questoes: remota.questoes,
             peso: remota.peso,
@@ -2072,21 +1988,16 @@ function sincronizarEdital(editalRemoto) {
                 id: topico.id,
                 titulo: topico.titulo || "",
                 concluido: topico.concluido === true
-            })) : (itemLocal?.topicos || [])
-        };
-    });
-    const somenteLocais = local.materias.filter(item => !usados.has(String(item.id)));
-    const configuracao = editalRemoto.configuracaoExiste ? editalRemoto : local;
+            })) : []
+        }));
+    const configuracao = editalRemoto.configuracaoExiste ? editalRemoto : {};
     salvar(LS.edital, {
         nomeConcurso: configuracao.nomeConcurso || "",
         banca: configuracao.banca || "",
         vagas: configuracao.vagas || "",
         dataProva: configuracao.dataProva || "",
-        materias: [...materias, ...somenteLocais]
+        materias
     });
-    if (somenteLocais.length || (!editalRemoto.configuracaoExiste && Object.values(local).some(valor => Array.isArray(valor) ? valor.length : Boolean(valor)))) {
-        console.warn("Dados locais do edital foram preservados para conferência antes da sincronização.");
-    }
 }
 
 function limparFiltrosDeMaterias() {
