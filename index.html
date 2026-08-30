@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#3b2923">
-<title>Hub de Estudos Pimentel | Concursos</title>
+<title>Esquema de Estudos | Concursos</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
 <style>
@@ -27,8 +27,59 @@
     }
     body { background-color: var(--pimentel-creme); color: var(--pimentel-texto); }
     .navbar.bg-dark { background: linear-gradient(100deg, #2f201b 0%, var(--pimentel-cafe) 58%, #54362c 100%) !important; border-bottom: 3px solid var(--pimentel-vermelho); }
-    .navbar-brand { letter-spacing: .01em; }
-    .brand-subtitle { color: #e9c9b7; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+    .navbar-brand { letter-spacing: .01em; min-width: 0; }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+    .brand-title { font-size: 1.05rem; }
+    .brand-subtitle { color: #e9c9b7; font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; margin-top: .22rem; }
+    .brand-code-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .08em;
+        flex-shrink: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-weight: 800;
+        letter-spacing: -.08em;
+        line-height: 1;
+    }
+    .brand-code-logo .code-angle { color: var(--pimentel-vermelho); }
+    .brand-code-logo .brand-pepper {
+        transform: rotate(-9deg) scale(1.08);
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        filter: saturate(1.35) drop-shadow(0 .08em .08em rgba(146, 39, 31, .18));
+    }
+    .brand-code-logo .brand-coffee {
+        position: relative;
+        display: inline-flex;
+        align-items: flex-end;
+        padding-top: .38em;
+        transform: translateY(.08em);
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        filter: saturate(1.18) drop-shadow(0 .08em .08em rgba(59, 41, 35, .16));
+    }
+    .brand-code-logo .brand-coffee::before,
+    .brand-code-logo .brand-coffee::after {
+        content: "";
+        position: absolute;
+        top: -.18em;
+        width: .2em;
+        height: .48em;
+        border-left: .09em solid rgba(96, 70, 59, .72);
+        border-radius: 50%;
+    }
+    .brand-code-logo .brand-coffee::before { left: .32em; transform: rotate(12deg); }
+    .brand-code-logo .brand-coffee::after { left: .65em; top: -.12em; transform: rotate(-10deg); opacity: .72; }
+    .brand-code-logo-nav {
+        min-width: 66px;
+        padding: .42rem .5rem;
+        color: var(--pimentel-creme);
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(233, 201, 183, .28);
+        border-radius: .7rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+        font-size: .88rem;
+    }
+    .brand-code-logo-nav .code-angle { color: #ef9a7d; }
     .card { border-radius: .9rem; }
     .shadow-sm { box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09) !important; }
     .btn-primary {
@@ -108,20 +159,27 @@
     }
     .auth-card { width: min(100% - 2rem, 430px); background: rgba(255, 253, 249, .97); border-top: 5px solid var(--pimentel-vermelho) !important; }
     .brand-emblem {
-        width: 72px;
-        height: 72px;
+        width: 116px;
+        height: 68px;
         margin: 0 auto 1rem;
         display: grid;
         place-items: center;
         position: relative;
         color: var(--pimentel-cafe);
-        background: #f4e2d4;
-        border: 1px solid rgba(184, 50, 42, .2);
-        border-radius: 50%;
-        font-size: 2rem;
+        background: linear-gradient(145deg, #fff8ef 0%, #f0d9c7 100%);
+        border: 1px solid rgba(184, 50, 42, .24);
+        border-radius: 1.2rem;
+        box-shadow: 0 .55rem 1.4rem rgba(59, 41, 35, .1), inset 0 1px 0 rgba(255, 255, 255, .8);
+        font-size: 1.45rem;
     }
-    .brand-emblem .brand-spark { position: absolute; right: -2px; top: -5px; color: var(--pimentel-vermelho); font-size: 1.2rem; }
     .auth-tagline { color: var(--pimentel-cafe-claro); }
+    @media (max-width: 575.98px) {
+        .navbar .container-fluid { align-items: flex-start; }
+        .navbar-brand { max-width: 100%; }
+        .brand-code-logo-nav { min-width: 58px; padding-inline: .4rem; font-size: .78rem; }
+        .brand-title { font-size: .98rem; }
+        .brand-subtitle { font-size: .56rem; letter-spacing: .08em; }
+    }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
@@ -132,8 +190,8 @@
 <main id="authLoadingShell" class="auth-shell d-flex align-items-center justify-content-center py-5" aria-live="polite">
     <div class="card auth-card border-0 shadow-lg">
         <div class="card-body p-4 p-md-5 text-center">
-            <div class="brand-emblem" aria-hidden="true"><i class="bi-cup-hot-fill"></i><span class="brand-spark"><i class="bi-fire"></i></span></div>
-            <h1 class="h4 fw-bold mb-2">Hub de Estudos Pimentel</h1>
+            <div class="brand-emblem"><span class="brand-code-logo" role="img" aria-label="Pimenta colorida e café quente entre sinais de código"><span class="code-angle" aria-hidden="true">&lt;</span><span class="brand-pepper" aria-hidden="true">🌶️</span><span class="brand-coffee" aria-hidden="true">☕️</span><span class="code-angle" aria-hidden="true">/&gt;</span></span></div>
+            <h1 class="h4 fw-bold mb-2">Esquema de Estudos</h1>
             <div class="spinner-border text-primary my-3" role="status"><span class="visually-hidden">Carregando</span></div>
             <p class="auth-tagline mb-0">Carregando seu espaço de estudos...</p>
         </div>
@@ -144,8 +202,8 @@
     <div class="card auth-card border-0 shadow-lg">
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <div class="brand-emblem" aria-hidden="true"><i class="bi-cup-hot-fill"></i><span class="brand-spark"><i class="bi-fire"></i></span></div>
-                <h1 class="h4 fw-bold mb-1">Hub de Estudos Pimentel</h1>
+                <div class="brand-emblem"><span class="brand-code-logo" role="img" aria-label="Pimenta colorida e café quente entre sinais de código"><span class="code-angle" aria-hidden="true">&lt;</span><span class="brand-pepper" aria-hidden="true">🌶️</span><span class="brand-coffee" aria-hidden="true">☕️</span><span class="code-angle" aria-hidden="true">/&gt;</span></span></div>
+                <h1 class="h4 fw-bold mb-1">Esquema de Estudos</h1>
                 <p class="auth-tagline small mb-1">Café, foco e constância.</p>
                 <p class="text-muted small mb-0">Entre com a conta que recebeu o convite.</p>
             </div>
@@ -237,8 +295,8 @@
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container-fluid px-4">
         <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
-            <i class="bi-cup-hot-fill text-warning"></i>
-            <span>Hub Pimentel <span class="brand-subtitle ms-1">Estudos para Concursos</span></span>
+            <span class="brand-code-logo brand-code-logo-nav" role="img" aria-label="Pimenta colorida e café quente entre sinais de código"><span class="code-angle" aria-hidden="true">&lt;</span><span class="brand-pepper" aria-hidden="true">🌶️</span><span class="brand-coffee" aria-hidden="true">☕️</span><span class="code-angle" aria-hidden="true">/&gt;</span></span>
+            <span class="brand-copy"><span class="brand-title">Esquema de Estudos</span><span class="brand-subtitle">Concursos com foco e constância</span></span>
         </span>
         <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <span class="text-light small me-1" id="usuarioAtual"></span>
@@ -3362,7 +3420,7 @@ function garantirReferenciaMateria(materiaId, idsMaterias, campo) {
 
 function validarPayloadBackup(payload) {
     objetoBackup(payload, "Backup");
-    if (!["hub-estudos-gcm", "hub-estudos-concursos"].includes(payload.app)) throw new Error("Este arquivo não pertence ao Hub de Estudos Pimentel.");
+    if (!["hub-estudos-gcm", "hub-estudos-concursos"].includes(payload.app)) throw new Error("Este arquivo não pertence ao Esquema de Estudos.");
     const versao = numeroBackup(payload.versao, "Versão", 1, VERSAO_BACKUP, 1);
     if (versao > VERSAO_BACKUP) throw new Error("Backup criado por uma versão mais recente do aplicativo.");
     const dados = objetoBackup(payload.dados, "Dados");

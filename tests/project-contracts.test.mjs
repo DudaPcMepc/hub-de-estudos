@@ -41,6 +41,19 @@ test("o frontend não armazena nem envia diretamente a chave Gemini", () => {
     assert.match(auth, /supabase\.functions\.invoke\(["']generate-quiz["']/);
 });
 
+test("a identidade visual usa Esquema de Estudos e a assinatura de pimenta com café", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /<title>Esquema de Estudos \| Concursos<\/title>/);
+    assert.match(html, /class="brand-code-logo/);
+    assert.match(html, /class="brand-pepper"[^>]*>🌶️<\/span>/);
+    assert.match(html, /class="brand-coffee"[^>]*>☕️<\/span>/);
+    assert.match(html, /\.brand-code-logo \.brand-coffee::before/);
+    assert.match(html, /\.brand-code-logo \.brand-coffee::after/);
+    assert.match(html, /<span class="brand-title">Esquema de Estudos<\/span>/);
+    assert.doesNotMatch(html, />Hub Pimentel</);
+});
+
 test("a Edge Function exige usuário autenticado e segredo no servidor", () => {
     const edgeFunction = readProjectFile("supabase/functions/generate-quiz/index.ts");
     const config = readProjectFile("supabase/config.toml");
