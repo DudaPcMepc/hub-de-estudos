@@ -55,6 +55,7 @@ Evoluir cada matéria para um hub modular sem substituir Tópicos, Notas, Flashc
 - O Código Penal é importado do texto compilado oficial da Presidência da República, consultado em 30/08/2026.
 - A importação preserva Parte, Livro, Título, Capítulo, Seção e Subseção no índice do leitor.
 - Artigos acrescidos com sufixos compostos, como `359-M-A`, recebem identificadores próprios e não substituem outros dispositivos.
+- Epígrafes como “Anterioridade da Lei” e “Lei penal no tempo” pertencem ao artigo seguinte e aparecem junto ao seu título, sem contaminar o conteúdo do artigo anterior.
 - Artigos-base revogados e ausentes da consolidação oficial são dispensados de forma explícita na validação; artigos essenciais e o art. 361 continuam obrigatórios.
 - O documento é compartilhado e somente leitura, vinculado ao catálogo de Direito Penal. Grifos e notas permanecem isolados por usuário e espaço.
 

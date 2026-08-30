@@ -312,6 +312,19 @@ test("o importador jurídico reconhece a hierarquia penal e artigos com sufixos 
     assert.deepEqual(dispositivos[0].caminho, ["CÓDIGO PENAL", "PARTE ESPECIAL", "TÍTULO I — DOS CRIMES"]);
 });
 
+test("o importador associa a epígrafe ao artigo correto sem contaminar o artigo anterior", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>PARTE GERAL</p><p>TÍTULO I</p><p>DA APLICAÇÃO DA LEI PENAL</p>
+        <p>Anterioridade da Lei</p><p>Art. 1º Texto do primeiro artigo.</p>
+        <p>Lei penal no tempo</p><p>Art. 2º Texto do segundo artigo.</p>
+    `, { raiz: "CÓDIGO PENAL" });
+
+    assert.equal(dispositivos[0].titulo, "Anterioridade da Lei");
+    assert.equal(dispositivos[1].titulo, "Lei penal no tempo");
+    assert.doesNotMatch(dispositivos[0].conteudo, /Lei penal no tempo/);
+    assert.equal(dispositivos[1].conteudo, "Texto do segundo artigo.");
+});
+
 test("o Código Penal integral usa fonte oficial e é vinculado somente ao catálogo de Direito Penal", () => {
     const migration = readProjectFile("supabase/migrations/202608300007_complete_penal_code.sql");
     const chavesImportadas = [...migration.matchAll(/"chave":"art-/g)];
@@ -326,6 +339,23 @@ test("o Código Penal integral usa fonte oficial e é vinculado somente ao catá
     assert.match(migration, /10000000-0000-4000-8000-000000000002/);
     assert.match(migration, /update public\.legal_documents[\s\S]*?current_version_id/);
     assert.doesNotMatch(migration, /user_legal_highlights/);
+});
+
+test("a correção do Código Penal cria nova versão e preserva todos os dados pessoais de leitura", () => {
+    const migration = readProjectFile("supabase/migrations/202608300008_correct_penal_article_headings.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 429);
+    assert.match(migration, /epígrafes revisadas/);
+    assert.match(migration, /"titulo":"Anterioridade da Lei"/);
+    assert.match(migration, /"titulo":"Lei penal no tempo"/);
+    assert.doesNotMatch(migration.match(/"chave":"art-1"[\s\S]*?"chave":"art-2"/)?.[0] || "", /Lei penal no tempo/);
+    assert.match(migration, /update public\.user_legal_highlights as registro/);
+    assert.match(migration, /update public\.user_legal_bookmarks as registro/);
+    assert.match(migration, /update public\.user_legal_reading_history as registro/);
+    assert.match(migration, /novo\.provision_key = antigo\.provision_key/g);
+    assert.match(migration, /set current_version_id = '21000000-0000-4000-8000-000000000005'/);
+    assert.match(html, /epigrafe \? `\$\{dispositivo\.rotulo\} — \$\{epigrafe\}` : dispositivo\.rotulo/);
 });
 
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {

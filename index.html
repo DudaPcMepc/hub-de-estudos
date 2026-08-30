@@ -2521,7 +2521,9 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     const grifos = materia ? grifosDoDispositivo(materia.id, dispositivo.id) : [];
     const grifosVisiveis = filtroCorGrifoAtual === "all" ? grifos : grifos.filter(grifo => grifo.cor === filtroCorGrifoAtual);
     document.getElementById("wsLeitorCaminho").textContent = dispositivo.caminho.join(" · ");
-    document.getElementById("wsLeitorDocumento").textContent = dispositivo.rotulo;
+    const tituloEstruturalAtual = dispositivo.caminho.at(-1) || "";
+    const epigrafe = dispositivo.titulo && dispositivo.titulo !== tituloEstruturalAtual ? dispositivo.titulo : "";
+    document.getElementById("wsLeitorDocumento").textContent = epigrafe ? `${dispositivo.rotulo} — ${epigrafe}` : dispositivo.rotulo;
     const textoLeitor = document.getElementById("wsLeitorTexto");
     textoLeitor.classList.toggle("is-highlight-filtered", filtroCorGrifoAtual !== "all");
     textoLeitor.innerHTML = textoJuridicoComGrifos(dispositivo.conteudo, grifos, filtroCorGrifoAtual);

@@ -61,13 +61,32 @@ function chaveArtigo(numero) {
     return `art-${numero.toLowerCase()}`;
 }
 
+const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3}(?:-[A-Z])*)\s*(?:º|\.)?\s*/iu;
+
+function notaEditorialIsolada(texto) {
+    return /^(?:\([^)]*\)\s*)+$/u.test(texto);
+}
+
+function pareceEpigrafeDeArtigo(blocos, indice) {
+    const bloco = blocos[indice];
+    if (!bloco || bloco.length > 180 || tituloEstrutural(bloco) || PADRAO_ARTIGO.test(bloco) || notaEditorialIsolada(bloco)) return false;
+    if (/^(?:Parágrafo|§|Pena\b|[IVXLCDM]+\s*[-–—]|[a-z]\)|Revogad[oa]\b)/iu.test(bloco)) return false;
+    for (let proximo = indice + 1; proximo < blocos.length; proximo += 1) {
+        if (notaEditorialIsolada(blocos[proximo])) continue;
+        return PADRAO_ARTIGO.test(blocos[proximo]);
+    }
+    return false;
+}
+
 export function extrairDispositivos(html, { raiz = "" } = {}) {
     const niveis = ["PARTE", "LIVRO", "TÍTULO", "CAPÍTULO", "SEÇÃO", "SUBSEÇÃO"];
     const hierarquia = new Map();
     const dispositivos = [];
     let estruturaPendente = null;
     let estruturaComplementavel = null;
+    let epigrafePendente = "";
     let atual = null;
+    const blocos = blocosDoHtml(html);
 
     const concluir = () => {
         if (!atual) return;
@@ -77,7 +96,8 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
         atual = null;
     };
 
-    for (const bloco of blocosDoHtml(html)) {
+    for (let indiceBloco = 0; indiceBloco < blocos.length; indiceBloco += 1) {
+        const bloco = blocos[indiceBloco];
         const estrutura = tituloEstrutural(bloco);
         if (estrutura) {
             concluir();
@@ -106,7 +126,13 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
             continue;
         }
 
-        const artigo = bloco.match(/^Art\.\s*(\d{1,3}(?:-[A-Z])*)\s*(?:º|\.)?\s*/iu);
+        if (epigrafePendente && notaEditorialIsolada(bloco)) continue;
+        if (pareceEpigrafeDeArtigo(blocos, indiceBloco)) {
+            epigrafePendente = bloco.replace(/\s*(?:\([^)]*\)\s*)+$/u, "").trim();
+            continue;
+        }
+
+        const artigo = bloco.match(PADRAO_ARTIGO);
         if (artigo) {
             concluir();
             estruturaComplementavel = null;
@@ -116,10 +142,11 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
                 chave: chaveArtigo(numero),
                 sequencia: dispositivos.length + 1,
                 caminho,
-                titulo: caminho.at(-1) || raiz,
+                titulo: epigrafePendente || caminho.at(-1) || raiz,
                 rotulo: `Art. ${numero}${Number(numero) <= 9 ? "º" : "."}`,
                 paragrafos: [bloco.slice(artigo[0].length).trim()].filter(Boolean)
             };
+            epigrafePendente = "";
             continue;
         }
         if (atual) atual.paragrafos.push(bloco);
