@@ -94,6 +94,12 @@ function dataIso(valor, campo, obrigatoria = false) {
     return resultado;
 }
 
+function instanteIso(valor, campo) {
+    const resultado = String(valor ?? "").trim();
+    if (!resultado || Number.isNaN(Date.parse(resultado))) throw erroRepositorio(`${campo} inválida.`);
+    return resultado;
+}
+
 function numeroLimitado(valor, campo, minimo, maximo, inteiro = false) {
     const numero = Number(valor);
     if (!Number.isFinite(numero) || numero < minimo || numero > maximo || (inteiro && !Number.isInteger(numero))) {
@@ -320,7 +326,7 @@ export async function carregarBibliotecaJuridica() {
 export async function carregarGrifosJuridicos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("user_legal_highlights")
-        .select("id, subject_id, provision_id, selected_text, prefix_text, suffix_text, color, note, created_at")
+        .select("id, subject_id, provision_id, selected_text, prefix_text, suffix_text, color, note, created_at, updated_at")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .order("created_at", { ascending: true });
@@ -335,7 +341,8 @@ export async function carregarGrifosJuridicos() {
         sufixo: item.suffix_text || "",
         cor: CORES_GRIFO.has(item.color) ? item.color : "yellow",
         nota: item.note || "",
-        criadoEm: item.created_at
+        criadoEm: item.created_at,
+        atualizadoEm: item.updated_at
     }));
 }
 
@@ -399,20 +406,15 @@ export async function salvarFavoritoJuridico(idMateriaLocal, provisionId, favori
     return null;
 }
 
-export async function registrarLeituraJuridica(idMateriaLocal, provisionId, visitasAtuais = 0) {
+export async function registrarLeituraJuridica(idMateriaLocal, provisionId) {
     const contexto = exigirContexto();
     const subjectId = resolverId("subject", idMateriaLocal);
     const dispositivoId = exigirUuidNovo(provisionId, "Artigo selecionado");
-    const agora = new Date().toISOString();
-    const resposta = await supabase.from("user_legal_reading_history").upsert({
-        workspace_id: contexto.workspaceId,
-        subject_id: subjectId,
-        user_id: contexto.userId,
-        provision_id: dispositivoId,
-        visit_count: Math.min(1000000, Math.max(1, Number(visitasAtuais) + 1)),
-        last_read_at: agora
-    }, { onConflict: "user_id,subject_id,provision_id" })
-        .select("provision_id, visit_count, first_read_at, last_read_at")
+    const resposta = await supabase.rpc("increment_legal_reading_history", {
+        p_workspace_id: contexto.workspaceId,
+        p_subject_id: subjectId,
+        p_provision_id: dispositivoId
+    })
         .single();
     const salvo = verificarRegistro(resposta, "Não foi possível registrar sua leitura.");
     return {
@@ -438,23 +440,26 @@ export async function criarGrifoJuridico(idMateriaLocal, grifo) {
         suffix_text: texto(grifo.sufixo, 300, "Contexto posterior"),
         color: CORES_GRIFO.has(grifo.cor) ? grifo.cor : "yellow",
         note: texto(grifo.nota, 5000, "Nota do grifo")
-    }).select("id, created_at").single();
+    }).select("id, created_at, updated_at").single();
     const salvo = verificarRegistro(resposta, "Não foi possível salvar o grifo.");
-    return { ...grifo, id: salvo.id, materiaId: idMateriaLocal, criadoEm: salvo.created_at };
+    return { ...grifo, id: salvo.id, materiaId: idMateriaLocal, criadoEm: salvo.created_at, atualizadoEm: salvo.updated_at };
 }
 
-export async function atualizarNotaGrifoJuridico(id, nota) {
+export async function atualizarNotaGrifoJuridico(id, nota, atualizadoEm) {
     const contexto = exigirContexto();
     const grifoId = exigirUuidNovo(id, "Grifo");
+    const versaoEsperada = instanteIso(atualizadoEm, "Versão da anotação");
     const resposta = await supabase.from("user_legal_highlights").update({
         note: texto(nota, 5000, "Nota do grifo")
     })
         .eq("id", grifoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
+        .eq("updated_at", versaoEsperada)
         .select("id, note, updated_at")
         .maybeSingle();
-    const salvo = verificarRegistro(resposta, "Não foi possível salvar a anotação do grifo.");
+    const salvo = verificarResposta(resposta, "Não foi possível salvar a anotação do grifo.");
+    if (!salvo) throw erroRepositorio("Esta anotação foi alterada em outra aba. Atualize a página antes de editar novamente.");
     return { id: salvo.id, nota: salvo.note || "", atualizadoEm: salvo.updated_at };
 }
 

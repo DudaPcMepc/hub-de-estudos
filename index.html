@@ -2473,9 +2473,8 @@ function renderizarAtalhosLeitura(materia) {
 async function registrarLeituraAtual(materia, dispositivo) {
     if (!window.HUB_CLOUD_LEGAL) return;
     const sessao = capturarSessaoHubAtual();
-    const existente = historicoLeituraJuridica.find(item => String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id);
     try {
-        const salvo = await window.HUB_CLOUD_LEGAL.registrarLeitura(materia.id, dispositivo.id, existente?.visitas || 0);
+        const salvo = await window.HUB_CLOUD_LEGAL.registrarLeitura(materia.id, dispositivo.id);
         if (!sessaoHubPermaneceAtual(sessao)) return;
         historicoLeituraJuridica = historicoLeituraJuridica.filter(item => !(String(item.materiaId) === String(materia.id) && item.dispositivoId === dispositivo.id));
         historicoLeituraJuridica.unshift(salvo);
@@ -2967,10 +2966,12 @@ document.getElementById("formAcaoLeitor").addEventListener("submit", async event
         if (acaoLeitorAtual.tipo === "note") {
             if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
             if (acaoLeitorAtual.grifoId) {
-                const salvo = await window.HUB_CLOUD_LEGAL.atualizarNotaGrifo(acaoLeitorAtual.grifoId, conteudo);
+                const grifo = grifosJuridicos.find(item => item.id === acaoLeitorAtual.grifoId);
+                if (!grifo) throw new Error("O grifo selecionado não está mais disponível.");
+                const salvo = await window.HUB_CLOUD_LEGAL.atualizarNotaGrifo(grifo.id, conteudo, grifo.atualizadoEm);
                 if (!sessaoHubPermaneceAtual(sessao)) return;
-                const grifo = grifosJuridicos.find(item => item.id === salvo.id);
-                if (grifo) grifo.nota = salvo.nota;
+                grifo.nota = salvo.nota;
+                grifo.atualizadoEm = salvo.atualizadoEm;
             } else {
                 const salvo = await criarGrifoLeitor(materia, acaoLeitorAtual.selecao, conteudo);
                 if (!salvo || !sessaoHubPermaneceAtual(sessao)) return;
@@ -2987,7 +2988,9 @@ document.getElementById("formAcaoLeitor").addEventListener("submit", async event
     } catch (erro) {
         console.error("Falha na ação do leitor jurídico", erro);
         status.textContent = acaoLeitorAtual?.tipo === "note"
-            ? "Não foi possível salvar a anotação. Tente novamente."
+            ? (String(erro?.message || "").includes("alterada em outra aba")
+                ? "Esta anotação mudou em outra aba. Atualize a página antes de editar novamente."
+                : "Não foi possível salvar a anotação. Tente novamente.")
             : "Não foi possível criar o flashcard. Tente novamente.";
     } finally {
         botao.disabled = false;

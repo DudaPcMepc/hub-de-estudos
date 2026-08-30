@@ -246,6 +246,26 @@ test("favoritos, retomada e histórico jurídico permanecem privados por usuári
     assert.match(migration, /grant select, insert, update on table public\.user_legal_reading_history to authenticated/i);
 });
 
+test("anotações concorrentes são recusadas e o histórico incrementa no banco", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const migration = readProjectFile("supabase/migrations/202608300009_legal_reader_concurrency.sql");
+
+    assert.match(repository, /user_legal_highlights"\)\s*\.select\("[^"]*updated_at"\)/);
+    assert.match(repository, /export async function atualizarNotaGrifoJuridico\(id, nota, atualizadoEm\)/);
+    assert.match(repository, /\.eq\("updated_at", versaoEsperada\)/);
+    assert.match(repository, /Esta anotação foi alterada em outra aba/);
+    assert.match(html, /atualizarNotaGrifo\(grifo\.id, conteudo, grifo\.atualizadoEm\)/);
+    assert.match(html, /grifo\.atualizadoEm = salvo\.atualizadoEm/);
+    assert.match(repository, /supabase\.rpc\("increment_legal_reading_history"/);
+    assert.doesNotMatch(repository, /visit_count: Math\.min\(1000000, Math\.max\(1, Number\(visitasAtuais\) \+ 1\)\)/);
+    assert.match(migration, /security invoker/i);
+    assert.match(migration, /\(select auth\.uid\(\)\)/i);
+    assert.match(migration, /visit_count = least\(1000000, history\.visit_count \+ 1\)/i);
+    assert.match(migration, /revoke all on function public\.increment_legal_reading_history\(uuid, uuid, uuid\)[\s\S]*?from public, anon, authenticated/i);
+    assert.match(migration, /grant execute on function public\.increment_legal_reading_history\(uuid, uuid, uuid\)[\s\S]*?to authenticated/i);
+});
+
 test("a sessão autenticada não mistura registros locais sem vínculo com outro usuário", () => {
     const html = readProjectFile("index.html");
 
