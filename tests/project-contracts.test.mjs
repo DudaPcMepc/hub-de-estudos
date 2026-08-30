@@ -164,7 +164,14 @@ test("o leitor usa navegação fixa, modo foco e grifos com função didática",
     const repository = readProjectFile("src/cloud-core-repository.js");
     const migration = readProjectFile("supabase/migrations/202608300005_legal_highlight_semantics.sql");
 
-    assert.match(html, /\.legal-reader-toolbar \{ position: sticky; top: 0;/);
+    assert.match(html, /\.legal-reader-prototype \{[\s\S]*?height: clamp\(440px, 78vh, 820px\);[\s\S]*?display: flex;[\s\S]*?flex-direction: column;/);
+    assert.match(html, /\.legal-reader-toolbar \{ position: relative;[\s\S]*?flex-shrink: 0;/);
+    assert.match(html, /\.legal-reader-layout \{ min-height: 0;[\s\S]*?flex: 1;[\s\S]*?overflow: hidden;/);
+    assert.match(html, /\.legal-reader-paper \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
+    assert.match(html, /\.legal-reader-index \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
+    assert.match(html, /\.legal-reader-source \{ flex-shrink: 0;/);
+    assert.match(html, /grid-template-rows: minmax\(120px, 32%\) minmax\(0, 1fr\)/);
+    assert.match(html, /if \(artigoMudou\) textoLeitor\.closest\("\.legal-reader-paper"\)\?\.scrollTo\(\{ top: 0, behavior: "auto" \}\)/);
     assert.match(html, /button\.is-active::before/);
     assert.match(html, /box-decoration-break: clone/);
     assert.match(html, /mark\.highlight-red/);

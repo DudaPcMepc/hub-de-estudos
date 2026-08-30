@@ -612,6 +612,9 @@
     .legal-reading-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
     .legal-reading-chip { max-width: 100%; color: var(--pimentel-cafe-claro); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: 999px; font-size: .65rem; }
     .legal-reader-prototype {
+        height: clamp(440px, 78vh, 820px);
+        display: flex;
+        flex-direction: column;
         margin-top: 1rem;
         overflow: hidden;
         background: #fffdf9;
@@ -619,23 +622,23 @@
         border-radius: 1rem;
         box-shadow: 0 .45rem 1rem rgba(59, 41, 35, .06);
     }
-    .legal-reader-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; background: rgba(244, 226, 212, .42); border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .legal-reader-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 1rem; padding: .85rem 1rem; background: rgba(244, 226, 212, .42); border-bottom: 1px solid rgba(59, 41, 35, .08); }
     .legal-reader-title { color: var(--pimentel-cafe); }
-    .legal-reader-toolbar { position: sticky; top: 0; z-index: 12; display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; padding: .7rem 1rem; background: rgba(255, 253, 249, .97); border-bottom: 1px solid rgba(59, 41, 35, .08); box-shadow: 0 .25rem .65rem rgba(59, 41, 35, .045); backdrop-filter: blur(8px); }
+    .legal-reader-toolbar { position: relative; z-index: 12; display: flex; flex-wrap: wrap; align-items: center; flex-shrink: 0; gap: .45rem; padding: .7rem 1rem; background: rgba(255, 253, 249, .97); border-bottom: 1px solid rgba(59, 41, 35, .08); box-shadow: 0 .25rem .65rem rgba(59, 41, 35, .045); backdrop-filter: blur(8px); }
     .legal-reader-toolbar .btn:disabled { opacity: .58; }
     .legal-toolbar-divider { width: 1px; height: 1.6rem; margin-inline: .1rem; background: rgba(59, 41, 35, .12); }
     .legal-highlight-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .35rem .8rem; padding-top: .25rem; color: var(--pimentel-cafe-claro); font-size: .64rem; }
     .legal-highlight-legend span { display: inline-flex; align-items: center; gap: .3rem; }
     .legal-highlight-dot { width: .55rem; height: .55rem; border-radius: 50%; }
-    .legal-reader-action-panel { padding: .85rem 1rem; background: rgba(244, 226, 212, .3); border-bottom: 1px solid rgba(59, 41, 35, .09); }
+    .legal-reader-action-panel { max-height: 42%; overflow-y: auto; flex-shrink: 0; padding: .85rem 1rem; background: rgba(244, 226, 212, .3); border-bottom: 1px solid rgba(59, 41, 35, .09); }
     .legal-reader-action-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .65rem; }
     .legal-selection-preview { max-height: 5.2rem; overflow-y: auto; margin-bottom: .65rem; padding: .55rem .65rem; color: var(--pimentel-cafe-claro); background: rgba(255, 253, 249, .86); border-left: 3px solid var(--pimentel-vermelho); border-radius: .35rem; font-size: .7rem; line-height: 1.45; }
     .legal-reader-action-grid { display: grid; grid-template-columns: minmax(180px, .75fr) minmax(280px, 1.5fr) auto; align-items: end; gap: .6rem; }
     .legal-reader-action-grid.is-note { grid-template-columns: minmax(280px, 1fr) auto; }
     .legal-reader-action-grid label { color: var(--pimentel-cafe-claro); font-size: .68rem; font-weight: 700; }
     .legal-reader-action-grid textarea { min-height: 4.6rem; resize: vertical; }
-    .legal-reader-layout { display: grid; grid-template-columns: minmax(170px, .55fr) minmax(0, 1.8fr); min-height: 280px; }
-    .legal-reader-index { max-height: 68vh; overflow-y: auto; padding: 1rem; background: rgba(91, 67, 58, .035); border-right: 1px solid rgba(59, 41, 35, .08); }
+    .legal-reader-layout { min-height: 0; display: grid; grid-template-columns: minmax(170px, .55fr) minmax(0, 1.8fr); flex: 1; overflow: hidden; }
+    .legal-reader-index { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; background: rgba(91, 67, 58, .035); border-right: 1px solid rgba(59, 41, 35, .08); scrollbar-gutter: stable; }
     .legal-reader-index span, .legal-reader-index button { display: block; margin-bottom: .4rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
     .legal-reader-index button { position: relative; padding-left: .8rem; border: 0; }
     .legal-reader-index button:hover, .legal-reader-index button.is-active { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); font-weight: 700; }
@@ -644,7 +647,7 @@
     .legal-index-group { margin-top: .7rem; }
     .legal-index-group-title { position: sticky; top: -.05rem; z-index: 1; padding: .35rem .25rem; color: var(--pimentel-cafe); background: #fbf8f5; font-size: .67rem; font-weight: 800; line-height: 1.25; text-transform: uppercase; }
     .legal-index-subtitle { margin: .4rem .25rem .25rem; color: var(--pimentel-cafe-claro); font-size: .64rem; font-weight: 700; line-height: 1.25; }
-    .legal-reader-paper { min-width: 0; padding: 1.25rem 1.4rem; color: var(--pimentel-cafe); line-height: 1.7; }
+    .legal-reader-paper { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1.25rem 1.4rem; color: var(--pimentel-cafe); line-height: 1.7; scrollbar-gutter: stable; }
     .legal-reader-paper-text { white-space: pre-line; font-size: .88rem; }
     .legal-reader-paper mark { padding: .02em .08em; color: inherit; border-radius: .16em; line-height: inherit; box-decoration-break: clone; -webkit-box-decoration-break: clone; background-clip: padding-box; }
     .legal-reader-paper mark.highlight-yellow, .legal-highlight-dot.highlight-yellow { background: rgba(255, 193, 7, .3); }
@@ -654,7 +657,7 @@
     .legal-reader-paper mark.highlight-pink, .legal-highlight-dot.highlight-pink { background: rgba(214, 51, 132, .16); }
     .legal-reader-paper-text.is-highlight-filtered .legal-filter-context { opacity: .16; transition: opacity .15s ease; }
     .legal-reader-paper-text.is-highlight-filtered:hover .legal-filter-context { opacity: .32; }
-    .legal-reader-source { padding: .7rem 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-top: 1px solid rgba(59, 41, 35, .08); font-size: .7rem; }
+    .legal-reader-source { flex-shrink: 0; padding: .7rem 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-top: 1px solid rgba(59, 41, 35, .08); font-size: .7rem; }
     .legal-reader-search { width: min(250px, 100%); }
     .legal-highlight-list { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
     .legal-highlight-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: rgba(255, 193, 7, .08); border: 1px solid rgba(59, 41, 35, .08); border-radius: .65rem; font-size: .72rem; }
@@ -730,9 +733,14 @@
         .error-list-toolbar { align-items: stretch; flex-direction: column; }
         .error-list-filter { width: 100%; }
         .library-hero { align-items: flex-start; }
+        .legal-reader-prototype { height: clamp(480px, 82dvh, 720px); }
         .legal-reader-header { align-items: flex-start; flex-direction: column; }
-        .legal-reader-layout { grid-template-columns: 1fr; }
-        .legal-reader-index { max-height: 260px; border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+        .legal-reader-toolbar { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; }
+        .legal-reader-toolbar > * { flex-shrink: 0; }
+        .legal-highlight-legend { width: auto; flex-wrap: nowrap; }
+        .legal-reader-action-panel { max-height: 55%; }
+        .legal-reader-layout { grid-template-columns: 1fr; grid-template-rows: minmax(120px, 32%) minmax(0, 1fr); }
+        .legal-reader-index { border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
         .legal-reader-action-grid, .legal-reader-action-grid.is-note { grid-template-columns: 1fr; }
     }
     @media (max-width: 991.98px) {
@@ -2515,6 +2523,7 @@ function renderizarIndiceLeitor(filtro = "") {
 
 function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } = {}) {
     if (!documentoLeitorAtual || !dispositivo) return;
+    const artigoMudou = dispositivoLeitorAtual?.id !== dispositivo.id;
     if (acaoLeitorAtual?.dispositivoId && acaoLeitorAtual.dispositivoId !== dispositivo.id) fecharPainelAcaoLeitor();
     dispositivoLeitorAtual = dispositivo;
     const materia = materiaPorId(materiaAbertaId);
@@ -2527,6 +2536,7 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     const textoLeitor = document.getElementById("wsLeitorTexto");
     textoLeitor.classList.toggle("is-highlight-filtered", filtroCorGrifoAtual !== "all");
     textoLeitor.innerHTML = textoJuridicoComGrifos(dispositivo.conteudo, grifos, filtroCorGrifoAtual);
+    if (artigoMudou) textoLeitor.closest(".legal-reader-paper")?.scrollTo({ top: 0, behavior: "auto" });
     const lista = document.getElementById("wsListaGrifosArtigo");
     lista.innerHTML = grifosVisiveis.length ? `<small class="fw-semibold">Meus grifos neste artigo</small>` + grifosVisiveis.map(grifo => `
         <div class="legal-highlight-item">
