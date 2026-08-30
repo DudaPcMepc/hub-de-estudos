@@ -166,7 +166,7 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.doesNotMatch(html, /Visualizar protótipo/);
     assert.match(architecture, /O vínculo com o catálogo comum é opcional/);
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
-    assert.match(architecture, /Fase 3 preparada/);
+    assert.match(architecture, /Fase 4 concluída e fundação da Fase 5 preparada localmente/);
     assert.match(architecture, /ativar, ocultar e ordenar widgets por usuário/);
 });
 
@@ -475,6 +475,41 @@ test("a biblioteca carrega somente versões atuais e pagina cada documento jurí
     assert.match(repository, /\.in\("id", versoesAtuaisIds\)/);
     assert.match(repository, /Promise\.all\(versoesAtuaisIds\.map\(carregarDispositivosJuridicosPorVersao\)\)/);
     assert.doesNotMatch(repository, /supabase\.from\("legal_provisions"\)[\s\S]{0,220}\.order\("sequence"[^\n]+\)(?![\s\S]{0,120}\.range)/);
+});
+
+test("o Meu Vade Mecum é pessoal e substitui sua lista de normas de forma atômica", () => {
+    const migration = readProjectFile("supabase/migrations/202608300010_personal_vade_collections.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+
+    assert.match(migration, /create table public\.user_vade_collections/i);
+    assert.match(migration, /create table public\.user_vade_collection_documents/i);
+    assert.match(migration, /foreign key \(collection_id, workspace_id, user_id\)[\s\S]*?references public\.user_vade_collections\(id, workspace_id, user_id\) on delete cascade/i);
+    assert.match(migration, /alter table public\.user_vade_collections force row level security/i);
+    assert.match(migration, /alter table public\.user_vade_collection_documents force row level security/i);
+    assert.match(migration, /user_vade_collections_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(migration, /user_vade_collections_insert_self[\s\S]*?with check[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /create or replace function public\.replace_user_vade_documents/i);
+    assert.match(migration, /security definer[\s\S]*?set search_path = ''/i);
+    assert.match(migration, /current_user_id uuid := \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /private\.is_workspace_member\(collection\.workspace_id\)[\s\S]*?for update/i);
+    assert.match(migration, /requested_count > 100/i);
+    assert.match(migration, /count\(distinct requested_document_id\)/i);
+    assert.match(migration, /document\.active = true/i);
+    assert.match(migration, /delete from public\.user_vade_collection_documents[\s\S]*?insert into public\.user_vade_collection_documents/i);
+    assert.match(migration, /grant select on table public\.user_vade_collection_documents to authenticated/i);
+    assert.doesNotMatch(migration, /grant (?:insert|update|delete|all)[^;]*user_vade_collection_documents[^;]*authenticated/i);
+    assert.match(migration, /grant execute on function public\.replace_user_vade_documents\(uuid, uuid\[\]\) to authenticated/i);
+
+    assert.match(repository, /export async function carregarColecoesVade/);
+    assert.match(repository, /export async function criarColecaoVade/);
+    assert.match(repository, /export async function atualizarColecaoVade/);
+    assert.match(repository, /export async function salvarDocumentosColecaoVade/);
+    assert.match(repository, /export async function excluirColecaoVade/);
+    assert.match(repository, /\.rpc\("replace_user_vade_documents"/);
+    assert.match(repository, /user_vade_collections"\)\.update\([\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)[\s\S]*?\.eq\("updated_at", versaoEsperada\)/);
+    assert.match(repository, /user_vade_collections"\)\.delete\(\)[\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)/);
+    assert.match(auth, /window\.HUB_CLOUD_VADE = Object\.freeze/);
 });
 
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {

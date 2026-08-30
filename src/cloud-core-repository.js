@@ -323,6 +323,121 @@ export async function carregarBibliotecaJuridica() {
     }).filter(documento => documento.versao);
 }
 
+export async function carregarColecoesVade() {
+    const contexto = obterContexto();
+    const [colecoesResposta, documentosResposta] = await Promise.all([
+        supabase.from("user_vade_collections")
+            .select("id, name, description, position, created_at, updated_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("position", { ascending: true })
+            .order("created_at", { ascending: true }),
+        supabase.from("user_vade_collection_documents")
+            .select("collection_id, document_id, position, added_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("collection_id", { ascending: true })
+            .order("position", { ascending: true })
+    ]);
+    const colecoes = verificarResposta(colecoesResposta, "Não foi possível carregar seus cadernos jurídicos.") || [];
+    const documentos = verificarResposta(documentosResposta, "Não foi possível carregar as normas dos seus cadernos.") || [];
+    return colecoes.map(colecao => ({
+        id: colecao.id,
+        nome: colecao.name,
+        descricao: colecao.description || "",
+        posicao: Number(colecao.position) || 0,
+        criadoEm: colecao.created_at,
+        atualizadoEm: colecao.updated_at,
+        documentos: documentos.filter(item => item.collection_id === colecao.id).map(item => ({
+            documentoId: item.document_id,
+            posicao: Number(item.position) || 0,
+            adicionadoEm: item.added_at
+        }))
+    }));
+}
+
+export async function criarColecaoVade(colecao) {
+    const contexto = exigirContexto();
+    const id = exigirUuidNovo(colecao?.id, "Vade Mecum");
+    const resposta = await supabase.from("user_vade_collections").insert({
+        id,
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        name: texto(colecao?.nome, 120, "Nome do Vade Mecum", true).trim(),
+        description: texto(colecao?.descricao, 1000, "Descrição do Vade Mecum"),
+        position: numeroLimitado(colecao?.posicao ?? 0, "Posição do Vade Mecum", 0, 1000, true)
+    }).select("id, name, description, position, created_at, updated_at").single();
+    const salvo = verificarRegistro(resposta, "Não foi possível criar o Vade Mecum.");
+    return {
+        id: salvo.id,
+        nome: salvo.name,
+        descricao: salvo.description || "",
+        posicao: Number(salvo.position) || 0,
+        criadoEm: salvo.created_at,
+        atualizadoEm: salvo.updated_at,
+        documentos: []
+    };
+}
+
+export async function atualizarColecaoVade(id, alteracoes, atualizadoEm) {
+    const contexto = exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Vade Mecum");
+    const versaoEsperada = instanteIso(atualizadoEm, "Versão do Vade Mecum");
+    const valores = {};
+    if (Object.hasOwn(alteracoes, "nome")) valores.name = texto(alteracoes.nome, 120, "Nome do Vade Mecum", true).trim();
+    if (Object.hasOwn(alteracoes, "descricao")) valores.description = texto(alteracoes.descricao, 1000, "Descrição do Vade Mecum");
+    if (Object.hasOwn(alteracoes, "posicao")) valores.position = numeroLimitado(alteracoes.posicao, "Posição do Vade Mecum", 0, 1000, true);
+    if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada para o Vade Mecum.");
+    const resposta = await supabase.from("user_vade_collections").update(valores)
+        .eq("id", colecaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("updated_at", versaoEsperada)
+        .select("id, name, description, position, created_at, updated_at")
+        .maybeSingle();
+    const salvo = verificarResposta(resposta, "Não foi possível atualizar o Vade Mecum.");
+    if (!salvo) throw erroRepositorio("Este Vade Mecum foi alterado em outra aba. Atualize a página antes de editar novamente.");
+    return {
+        id: salvo.id,
+        nome: salvo.name,
+        descricao: salvo.description || "",
+        posicao: Number(salvo.position) || 0,
+        criadoEm: salvo.created_at,
+        atualizadoEm: salvo.updated_at
+    };
+}
+
+export async function salvarDocumentosColecaoVade(id, documentosIds) {
+    exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Vade Mecum");
+    if (!Array.isArray(documentosIds) || documentosIds.length > 100) {
+        throw erroRepositorio("A lista de normas do Vade Mecum é inválida.");
+    }
+    const ids = documentosIds.map(documentoId => exigirUuidNovo(documentoId, "Norma jurídica"));
+    if (new Set(ids).size !== ids.length) throw erroRepositorio("A lista do Vade Mecum contém normas repetidas.");
+    const resposta = await supabase.rpc("replace_user_vade_documents", {
+        p_collection_id: colecaoId,
+        p_document_ids: ids
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível organizar as normas do Vade Mecum.") || [];
+    if (salvos.length !== ids.length) throw erroRepositorio("O Supabase não confirmou todas as normas do Vade Mecum.");
+    return salvos.map(item => ({
+        documentoId: item.saved_document_id,
+        posicao: Number(item.saved_position) || 0
+    }));
+}
+
+export async function excluirColecaoVade(id) {
+    const contexto = exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Vade Mecum");
+    verificarRegistro(await supabase.from("user_vade_collections").delete()
+        .eq("id", colecaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível excluir o Vade Mecum.");
+}
+
 export async function carregarGrifosJuridicos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("user_legal_highlights")
