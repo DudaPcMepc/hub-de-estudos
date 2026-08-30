@@ -225,6 +225,30 @@ test("favoritos, retomada e histórico jurídico permanecem privados por usuári
     assert.match(migration, /grant select, insert, update on table public\.user_legal_reading_history to authenticated/i);
 });
 
+test("a sessão autenticada não mistura registros locais sem vínculo com outro usuário", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /function obterMaterias\(\) \{ return carregar\(LS\.materias, \[\]\); \}/);
+    assert.match(html, /function sincronizarListaDeMaterias\(materiasRemotas\)[\s\S]*?salvarMaterias\(sincronizadas\);/);
+    assert.match(html, /function sincronizarListaDeTarefas\(tarefasRemotas\)[\s\S]*?salvar\(LS\.tarefas, sincronizadas\);/);
+    assert.match(html, /function sincronizarListaDeErros\(errosRemotos\)[\s\S]*?salvar\(LS\.erros, sincronizados\);/);
+    assert.match(html, /function sincronizarDesempenho\(desempenhoRemoto\)[\s\S]*?const desempenho = \{\};/);
+    assert.doesNotMatch(html, /const MATERIAS_PADRAO/);
+    assert.doesNotMatch(html, /somenteLocais/);
+    assert.match(html, /Nenhuma matéria ainda\. Clique em "Nova Matéria"\./);
+});
+
+test("o grifo recorta seleções iniciadas no título para manter apenas o texto da lei", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /const rangeOriginal = selecao\.getRangeAt\(0\);/);
+    assert.match(html, /rangeOriginal\.intersectsNode\(container\)/);
+    assert.match(html, /const range = rangeOriginal\.cloneRange\(\);/);
+    assert.match(html, /!container\.contains\(range\.startContainer\)[\s\S]*?range\.setStart\(container, 0\)/);
+    assert.match(html, /!container\.contains\(range\.endContainer\)[\s\S]*?range\.setEnd\(container, container\.childNodes\.length\)/);
+    assert.match(html, /const textoBruto = range\.toString\(\);/);
+});
+
 test("o leitor constitucional separa texto oficial versionado de grifos privados", () => {
     const migration = readProjectFile("supabase/migrations/202608300003_legal_reader_foundation.sql");
     const repository = readProjectFile("src/cloud-core-repository.js");
