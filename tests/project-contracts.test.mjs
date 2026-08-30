@@ -145,3 +145,20 @@ test("a exclusão de usuários exige prévia recente e protege espaços comparti
     assert.match(migration, /grant execute on function public\.prepare_user_deletion\(uuid, text\) to service_role/i);
     assert.doesNotMatch(migration, /target_email|email_address/i);
 });
+
+test("a administração de usuários mantém privilégios fora do navegador", () => {
+    const migration = readProjectFile("supabase/migrations/202608290007_admin_foundation.sql");
+    const edgeFunction = readProjectFile("supabase/functions/admin-users/index.ts");
+    const frontend = readProjectFile("src/admin.js");
+    const config = readProjectFile("supabase/config.toml");
+
+    assert.match(migration, /create table private\.platform_admins/i);
+    assert.match(migration, /revoke all on table private\.platform_admins from public, anon, authenticated/i);
+    assert.match(migration, /grant execute on function public\.is_platform_admin\(uuid\) to service_role/i);
+    assert.match(edgeFunction, /withSupabase\(\{ auth: ["']user["'] \}/);
+    assert.match(edgeFunction, /is_platform_admin/);
+    assert.match(edgeFunction, /auth\.admin\.inviteUserByEmail/);
+    assert.match(edgeFunction, /auth\.admin\.listUsers/);
+    assert.doesNotMatch(frontend, /service_role|sb_secret_/i);
+    assert.match(config, /\[functions\.admin-users\][\s\S]*?verify_jwt\s*=\s*true/);
+});

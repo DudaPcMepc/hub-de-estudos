@@ -266,6 +266,7 @@
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-edital" type="button"><i class="bi-file-earmark-spreadsheet-fill me-1"></i>Edital &amp; Estratégia</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-fire me-1"></i>Simulados (IA)</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-erros" type="button"><i class="bi-journal-x me-1"></i>Caderno de Erros</button></li>
+        <li class="nav-item d-none" id="abaAdministracaoItem"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-administracao" type="button"><i class="bi-shield-lock-fill me-1"></i>Administração</button></li>
     </ul>
 
     <div class="tab-content">
@@ -497,6 +498,48 @@
                 <select class="form-select form-select-sm" id="filtroErroMateria" style="width:auto;"><option value="">Todas as matérias</option></select>
             </div>
             <div id="listaErros"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ADMINISTRAÇÃO DE USUÁRIOS -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-administracao">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="fw-bold"><i class="bi-person-plus-fill text-primary me-2"></i>Convidar usuário</h5>
+                            <p class="text-muted small">O cadastro público permanece fechado. A pessoa receberá um convite seguro por e-mail.</p>
+                            <div id="mensagemAdministracao" class="alert d-none" role="status"></div>
+                            <form id="formConviteUsuario">
+                                <label class="form-label" for="conviteUsuarioEmail">E-mail da pessoa</label>
+                                <input class="form-control mb-3" id="conviteUsuarioEmail" type="email" maxlength="254" autocomplete="off" required>
+                                <button class="btn btn-primary w-100 rounded-pill" id="btnConvidarUsuario" type="submit"><i class="bi-send-fill me-1"></i>Enviar convite</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1"><i class="bi-people-fill text-primary me-2"></i>Usuários</h5>
+                                    <p class="text-muted small mb-0">Contas confirmadas e convites pendentes.</p>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" id="btnAtualizarUsuarios" type="button"><i class="bi-arrow-clockwise me-1"></i>Atualizar</button>
+                            </div>
+                            <p class="text-muted text-center py-4 mb-0" id="usuariosAdministracaoVazio">Nenhuma conta encontrada.</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead><tr><th>E-mail</th><th>Situação</th><th>Criada em</th><th>Último acesso</th></tr></thead>
+                                    <tbody id="corpoUsuariosAdministracao"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
