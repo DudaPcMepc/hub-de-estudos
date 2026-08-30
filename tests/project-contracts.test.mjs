@@ -238,6 +238,17 @@ test("a sessão autenticada não mistura registros locais sem vínculo com outro
     assert.match(html, /Nenhuma matéria ainda\. Clique em "Nova Matéria"\./);
 });
 
+test("o grifo recorta seleções iniciadas no título para manter apenas o texto da lei", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /const rangeOriginal = selecao\.getRangeAt\(0\);/);
+    assert.match(html, /rangeOriginal\.intersectsNode\(container\)/);
+    assert.match(html, /const range = rangeOriginal\.cloneRange\(\);/);
+    assert.match(html, /!container\.contains\(range\.startContainer\)[\s\S]*?range\.setStart\(container, 0\)/);
+    assert.match(html, /!container\.contains\(range\.endContainer\)[\s\S]*?range\.setEnd\(container, container\.childNodes\.length\)/);
+    assert.match(html, /const textoBruto = range\.toString\(\);/);
+});
+
 test("o leitor constitucional separa texto oficial versionado de grifos privados", () => {
     const migration = readProjectFile("supabase/migrations/202608300003_legal_reader_foundation.sql");
     const repository = readProjectFile("src/cloud-core-repository.js");

@@ -2595,9 +2595,12 @@ function obterSelecaoAtualLeitor(limite = 2000) {
     const container = document.getElementById("wsLeitorTexto");
     const selecao = window.getSelection();
     if (!dispositivoLeitorAtual || !selecao?.rangeCount) return null;
-    const range = selecao.getRangeAt(0);
-    if (!container.contains(range.commonAncestorContainer)) return null;
-    const textoBruto = selecao.toString();
+    const rangeOriginal = selecao.getRangeAt(0);
+    if (typeof rangeOriginal.intersectsNode === "function" && !rangeOriginal.intersectsNode(container)) return null;
+    const range = rangeOriginal.cloneRange();
+    if (!container.contains(range.startContainer)) range.setStart(container, 0);
+    if (!container.contains(range.endContainer)) range.setEnd(container, container.childNodes.length);
+    const textoBruto = range.toString();
     const textoSelecionado = textoBruto.trim();
     if (!textoSelecionado || textoSelecionado.length > limite) return null;
     const antes = document.createRange();
