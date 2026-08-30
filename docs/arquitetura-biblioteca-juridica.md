@@ -50,6 +50,15 @@ Evoluir cada matéria para um hub modular sem substituir Tópicos, Notas, Flashc
 - `user_vade_collections`: cadernos pessoais e ordem das normas.
 - Todas as tabelas pessoais usam RLS por `user_id` e participação no espaço quando aplicável.
 
+## Importação integral do Código Penal
+
+- O Código Penal é importado do texto compilado oficial da Presidência da República, consultado em 30/08/2026.
+- A importação preserva Parte, Livro, Título, Capítulo, Seção e Subseção no índice do leitor.
+- Artigos acrescidos com sufixos compostos, como `359-M-A`, recebem identificadores próprios e não substituem outros dispositivos.
+- Epígrafes como “Anterioridade da Lei” e “Lei penal no tempo” pertencem ao artigo seguinte e aparecem junto ao seu título, sem contaminar o conteúdo do artigo anterior.
+- Artigos-base revogados e ausentes da consolidação oficial são dispensados de forma explícita na validação; artigos essenciais e o art. 361 continuam obrigatórios.
+- O documento é compartilhado e somente leitura, vinculado ao catálogo de Direito Penal. Grifos e notas permanecem isolados por usuário e espaço.
+
 O grifo deve guardar o texto selecionado e seu contexto, não apenas posições numéricas. Após uma atualização da norma, o sistema tenta reposicionar o trecho e marca para conferência quando houver ambiguidade.
 
 ### 5. Documentos privados
@@ -81,16 +90,16 @@ O leitor jurídico terá índice, pesquisa, favoritos, grifos, notas, cópia com
 
 1. Protótipo visual local e validação da experiência.
 2. Catálogo de matérias e configuração individual de widgets.
-3. Leitor oficial com Constituição Federal e Código Penal. **Em andamento:** primeiro módulo constitucional entregue.
+3. Leitor oficial com Constituição Federal e Código Penal. **Preparado:** textos integrais e importadores reproduzíveis.
 4. Grifos, anotações, favoritos, citações e criação de flashcards.
 5. Meu Vade Mecum e coleções temáticas.
 6. Documentos privados com Storage e controles de segurança.
 7. Comunidade, importação, moderação, votos e denúncias.
 
-## Estado atual: Fase 2 iniciada
+## Estado atual: Fase 3 preparada
 
 O catálogo e as preferências individuais de widgets já possuem tabelas protegidas no Supabase. O vínculo da matéria ao catálogo continua opcional, e matérias ainda não classificadas recebem sugestões compatíveis pelo nome.
 
-A interface já permite ativar, ocultar e ordenar widgets por usuário. O primeiro módulo real da Constituição Federal contém o Título I, artigos 1º a 4º, estruturado a partir do texto oficial da Câmara dos Deputados atualizado até a Emenda Constitucional nº 139/2026.
+A interface já permite ativar, ocultar e ordenar widgets por usuário. A Constituição Federal e o ADCT estão disponíveis integralmente a partir das fontes oficiais da Câmara dos Deputados. A integração integral do Código Penal está preparada a partir do texto compilado oficial da Presidência da República.
 
-O leitor informa a fonte, a versão e o escopo importado, permite pesquisa entre os dispositivos disponíveis, cópia com citação e grifos privados. O texto oficial é compartilhado e somente leitura; os grifos ficam separados por usuário, matéria e espaço. Os demais artigos, documentos privados, notas de margem e criação de flashcards continuam nas fases seguintes.
+O leitor informa a fonte, a versão e o escopo importado, permite pesquisa entre os dispositivos disponíveis, cópia com citação e grifos privados. O texto oficial é compartilhado e somente leitura; os grifos ficam separados por usuário, matéria e espaço. Documentos privados, notas de margem e criação de flashcards continuam nas fases seguintes.

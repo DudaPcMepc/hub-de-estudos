@@ -8,6 +8,13 @@ const ENTIDADES = new Map(Object.entries({
     otilde: "õ", rdquo: "”", rsquo: "’", sect: "§", uacute: "ú", uuml: "ü"
 }));
 
+const WINDOWS_1252 = new Map(Object.entries({
+    "128": "€", "130": "‚", "131": "ƒ", "132": "„", "133": "…", "134": "†", "135": "‡",
+    "136": "ˆ", "137": "‰", "138": "Š", "139": "‹", "140": "Œ", "142": "Ž", "145": "‘",
+    "146": "’", "147": "“", "148": "”", "149": "•", "150": "–", "151": "—", "152": "˜",
+    "153": "™", "154": "š", "155": "›", "156": "œ", "158": "ž", "159": "Ÿ"
+}));
+
 function decodificarEntidades(texto) {
     return texto
         .replace(/&#(\d+);/g, (_, numero) => String.fromCodePoint(Number(numero)))
@@ -16,44 +23,70 @@ function decodificarEntidades(texto) {
             const valor = ENTIDADES.get(nome.toLowerCase());
             if (!valor) return original;
             return /^[A-Z]/.test(nome) ? valor.toLocaleUpperCase("pt-BR") : valor;
-        });
+        })
+        .replace(/[\u0080-\u009f]/g, caractere => WINDOWS_1252.get(String(caractere.codePointAt(0))) || caractere);
 }
 
-function textoDoHtml(html) {
-    return decodificarEntidades(html
-        .replace(/<br\s*\/?>/gi, "\n")
+function textosDoHtml(html) {
+    const separadorSemantico = "\u0000";
+    const texto = decodificarEntidades(html
+        .replace(/<br\s*\/?>/gi, separadorSemantico)
         .replace(/<[^>]+>/g, " "))
-        .split(/\r?\n/)
-        .map(linha => linha.replace(/\s+/g, " ").trim())
-        .filter(Boolean)
-        .join(" ")
-        .normalize("NFC")
-        .trim();
+        .normalize("NFC");
+    return texto
+        .split(separadorSemantico)
+        .map(trecho => trecho.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
 }
 
 export function blocosDoHtml(html) {
     const limpo = html.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
     return [...limpo.matchAll(/<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/gi)]
-        .map(resultado => textoDoHtml(resultado[2]))
-        .filter(Boolean);
+        .flatMap(resultado => textosDoHtml(resultado[2]));
 }
 
 function tituloEstrutural(texto) {
-    const resultado = texto.match(/^(TÍTULO|CAPÍTULO|SEÇÃO|SUBSEÇÃO)\s+([IVXLCDM]+|ÚNICO)(?:\s*[-–—:]?\s*(.*))?$/iu);
+    const resultado = texto.match(/^(PARTE|LIVRO|TÍTULO|CAPÍTULO|SEÇÃO|SUBSEÇÃO)\s+([IVXLCDM]+|ÚNICO|GERAL|ESPECIAL)(?:\s*[-–—:]?\s*(.*))?$/iu);
     if (!resultado) return null;
-    return { nivel: resultado[1].toUpperCase(), marcador: `${resultado[1].toUpperCase()} ${resultado[2].toUpperCase()}`, descricao: resultado[3]?.trim() || "" };
+    const marcadorOrdinal = resultado[2].toUpperCase();
+    return {
+        nivel: resultado[1].toUpperCase(),
+        marcador: `${resultado[1].toUpperCase()} ${marcadorOrdinal}`,
+        descricao: resultado[3]?.trim() || "",
+        aguardaDescricao: !resultado[3]?.trim() && !["GERAL", "ESPECIAL"].includes(marcadorOrdinal)
+    };
 }
 
 function chaveArtigo(numero) {
     return `art-${numero.toLowerCase()}`;
 }
 
+const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3}(?:-[A-Z])*)\s*(?:º|\.)?\s*/iu;
+
+function notaEditorialIsolada(texto) {
+    return /^(?:\([^)]*\)\s*)+$/u.test(texto);
+}
+
+function pareceEpigrafeDeArtigo(blocos, indice) {
+    const bloco = blocos[indice];
+    if (!bloco || bloco.length > 180 || tituloEstrutural(bloco) || PADRAO_ARTIGO.test(bloco) || notaEditorialIsolada(bloco)) return false;
+    if (/^(?:Parágrafo|§|Pena\b|[IVXLCDM]+\s*[-–—]|[a-z]\)|Revogad[oa]\b)/iu.test(bloco)) return false;
+    for (let proximo = indice + 1; proximo < blocos.length; proximo += 1) {
+        if (notaEditorialIsolada(blocos[proximo])) continue;
+        return PADRAO_ARTIGO.test(blocos[proximo]);
+    }
+    return false;
+}
+
 export function extrairDispositivos(html, { raiz = "" } = {}) {
-    const niveis = ["TÍTULO", "CAPÍTULO", "SEÇÃO", "SUBSEÇÃO"];
+    const niveis = ["PARTE", "LIVRO", "TÍTULO", "CAPÍTULO", "SEÇÃO", "SUBSEÇÃO"];
     const hierarquia = new Map();
     const dispositivos = [];
     let estruturaPendente = null;
+    let estruturaComplementavel = null;
+    let epigrafePendente = "";
     let atual = null;
+    const blocos = blocosDoHtml(html);
 
     const concluir = () => {
         if (!atual) return;
@@ -63,40 +96,57 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
         atual = null;
     };
 
-    for (const bloco of blocosDoHtml(html)) {
+    for (let indiceBloco = 0; indiceBloco < blocos.length; indiceBloco += 1) {
+        const bloco = blocos[indiceBloco];
         const estrutura = tituloEstrutural(bloco);
         if (estrutura) {
             concluir();
+            estruturaComplementavel = null;
             const indice = niveis.indexOf(estrutura.nivel);
             niveis.slice(indice).forEach(nivel => hierarquia.delete(nivel));
             hierarquia.set(estrutura.nivel, estrutura.descricao ? `${estrutura.marcador} — ${estrutura.descricao}` : estrutura.marcador);
-            estruturaPendente = estrutura.descricao ? null : estrutura.nivel;
+            estruturaPendente = estrutura.aguardaDescricao ? estrutura.nivel : null;
             continue;
         }
+        if (estruturaPendente && /^(?:\([^)]*\)\s*)+$/u.test(bloco)) continue;
         if (estruturaPendente && bloco.length <= 180 && !/^ART\./i.test(bloco)) {
             hierarquia.set(estruturaPendente, `${hierarquia.get(estruturaPendente)} — ${bloco.toLocaleUpperCase("pt-BR")}`);
+            estruturaComplementavel = estruturaPendente;
             estruturaPendente = null;
             continue;
         }
+        if (estruturaComplementavel && bloco.length <= 180 && bloco === bloco.toLocaleUpperCase("pt-BR") && !/^ART\./i.test(bloco)) {
+            hierarquia.set(estruturaComplementavel, `${hierarquia.get(estruturaComplementavel)} ${bloco}`);
+            continue;
+        }
+        estruturaComplementavel = null;
         if (/^ATO DAS DISPOSIÇÕES CONSTITUCIONAIS TRANSITÓRIAS$/iu.test(bloco)) {
             concluir();
             hierarquia.set("RAIZ", bloco);
             continue;
         }
 
-        const artigo = bloco.match(/^Art\.\s*(\d{1,3}(?:-[A-Z])?)\s*(?:º|\.)?\s*/iu);
+        if (epigrafePendente && notaEditorialIsolada(bloco)) continue;
+        if (pareceEpigrafeDeArtigo(blocos, indiceBloco)) {
+            epigrafePendente = bloco.replace(/\s*(?:\([^)]*\)\s*)+$/u, "").trim();
+            continue;
+        }
+
+        const artigo = bloco.match(PADRAO_ARTIGO);
         if (artigo) {
             concluir();
+            estruturaComplementavel = null;
             const numero = artigo[1].toUpperCase();
             const caminho = [raiz, ...niveis.map(nivel => hierarquia.get(nivel))].filter(Boolean);
             atual = {
                 chave: chaveArtigo(numero),
                 sequencia: dispositivos.length + 1,
                 caminho,
-                titulo: caminho.at(-1) || raiz,
+                titulo: epigrafePendente || caminho.at(-1) || raiz,
                 rotulo: `Art. ${numero}${Number(numero) <= 9 ? "º" : "."}`,
                 paragrafos: [bloco.slice(artigo[0].length).trim()].filter(Boolean)
             };
+            epigrafePendente = "";
             continue;
         }
         if (atual) atual.paragrafos.push(bloco);
@@ -105,14 +155,22 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
     return dispositivos;
 }
 
-function validar(nome, dispositivos, { ultimoObrigatorio, minimo }) {
+export function validarDispositivos(nome, dispositivos, {
+    ultimoObrigatorio,
+    minimo,
+    artigosObrigatorios = [],
+    artigosBaseDispensados = []
+}) {
     const chaves = dispositivos.map(item => item.chave);
     const duplicadas = chaves.filter((chave, indice) => chaves.indexOf(chave) !== indice);
     const numeros = new Set(chaves.map(chave => Number(chave.match(/^art-(\d+)/)?.[1])).filter(Number.isFinite));
-    const ausentes = Array.from({ length: ultimoObrigatorio }, (_, indice) => indice + 1).filter(numero => !numeros.has(numero));
+    const dispensados = new Set(artigosBaseDispensados);
+    const ausentes = Array.from({ length: ultimoObrigatorio }, (_, indice) => indice + 1)
+        .filter(numero => !numeros.has(numero) && !dispensados.has(numero));
+    const chavesAusentes = artigosObrigatorios.filter(chave => !chaves.includes(chave));
     const vazios = dispositivos.filter(item => item.conteudo.length < 3).map(item => item.chave);
-    if (dispositivos.length < minimo || duplicadas.length || ausentes.length || vazios.length) {
-        throw new Error(`${nome} reprovado: ${dispositivos.length} dispositivos; duplicados=${duplicadas.join(",") || "nenhum"}; ausentes=${ausentes.join(",") || "nenhum"}; vazios=${vazios.join(",") || "nenhum"}.`);
+    if (dispositivos.length < minimo || duplicadas.length || ausentes.length || chavesAusentes.length || vazios.length) {
+        throw new Error(`${nome} reprovado: ${dispositivos.length} dispositivos; duplicados=${duplicadas.join(",") || "nenhum"}; ausentes=${ausentes.join(",") || "nenhum"}; chaves obrigatórias ausentes=${chavesAusentes.join(",") || "nenhuma"}; vazios=${vazios.join(",") || "nenhum"}.`);
     }
     return { nome, quantidade: dispositivos.length, primeiro: chaves[0], ultimo: chaves.at(-1), maiorConteudo: Math.max(...dispositivos.map(item => item.conteudo.length)) };
 }
@@ -122,6 +180,8 @@ function literalJson(valor) {
     if (texto.includes("$dados$")) throw new Error("O conteúdo conflita com o delimitador SQL.");
     return `$dados$${texto}$dados$`;
 }
+
+export { literalJson as literalJsonSql };
 
 function gerarMigration(constituicao, adct) {
     const urlConstituicao = "https://www2.camara.leg.br/atividade-legislativa/legislacao/constituicao1988/arquivos/ConstituicaoTextoAtualizado_EC%20139.html";
@@ -144,8 +204,8 @@ async function principal() {
     const constituicao = extrairDispositivos(htmlConstituicao);
     const adct = extrairDispositivos(htmlAdct, { raiz: "ATO DAS DISPOSIÇÕES CONSTITUCIONAIS TRANSITÓRIAS" });
     const relatorio = [
-        validar("Constituição", constituicao, { ultimoObrigatorio: 250, minimo: 250 }),
-        validar("ADCT", adct, { ultimoObrigatorio: 138, minimo: 138 })
+        validarDispositivos("Constituição", constituicao, { ultimoObrigatorio: 250, minimo: 250 }),
+        validarDispositivos("ADCT", adct, { ultimoObrigatorio: 138, minimo: 138 })
     ];
     await writeFile(resolve(argumentos.out), gerarMigration(constituicao, adct), "utf8");
     console.log(JSON.stringify({ relatorio, destino: resolve(argumentos.out) }, null, 2));

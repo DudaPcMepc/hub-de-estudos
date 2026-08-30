@@ -249,26 +249,44 @@ export async function salvarLayoutWidgets(idMateriaLocal, layout) {
     }));
 }
 
+const TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS = 1000;
+
+async function carregarDispositivosJuridicosPorVersao(versaoId) {
+    const dispositivos = [];
+    for (let inicio = 0; ; inicio += TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS) {
+        const resposta = await supabase.from("legal_provisions")
+            .select("id, version_id, provision_key, sequence, heading_path, heading, label, content")
+            .eq("version_id", versaoId)
+            .order("sequence", { ascending: true })
+            .range(inicio, inicio + TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS - 1);
+        const pagina = verificarResposta(resposta, "Não foi possível carregar os artigos dos documentos jurídicos.") || [];
+        dispositivos.push(...pagina);
+        if (pagina.length < TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS) break;
+    }
+    return dispositivos;
+}
+
 export async function carregarBibliotecaJuridica() {
     obterContexto();
-    const [documentosResposta, versoesResposta, dispositivosResposta, vinculosResposta] = await Promise.all([
+    const [documentosResposta, vinculosResposta] = await Promise.all([
         supabase.from("legal_documents")
             .select("id, slug, title, short_title, issuing_body, current_version_id")
             .eq("active", true)
             .order("title", { ascending: true }),
-        supabase.from("legal_document_versions")
-            .select("id, document_id, version_label, content_scope, official_source_url, official_source_label, source_checked_on"),
-        supabase.from("legal_provisions")
-            .select("id, version_id, provision_key, sequence, heading_path, heading, label, content")
-            .order("sequence", { ascending: true }),
         supabase.from("catalog_subject_documents")
             .select("catalog_subject_id, document_id, position")
             .order("position", { ascending: true })
     ]);
     const documentos = verificarResposta(documentosResposta, "Não foi possível carregar os documentos jurídicos.") || [];
-    const versoes = verificarResposta(versoesResposta, "Não foi possível carregar as versões dos documentos jurídicos.") || [];
-    const dispositivos = verificarResposta(dispositivosResposta, "Não foi possível carregar os artigos dos documentos jurídicos.") || [];
     const vinculos = verificarResposta(vinculosResposta, "Não foi possível carregar as sugestões jurídicas das matérias.") || [];
+    const versoesAtuaisIds = [...new Set(documentos.map(item => item.current_version_id).filter(Boolean))];
+    const versoesResposta = versoesAtuaisIds.length
+        ? await supabase.from("legal_document_versions")
+            .select("id, document_id, version_label, content_scope, official_source_url, official_source_label, source_checked_on")
+            .in("id", versoesAtuaisIds)
+        : { data: [], error: null };
+    const versoes = verificarResposta(versoesResposta, "Não foi possível carregar as versões dos documentos jurídicos.") || [];
+    const dispositivos = (await Promise.all(versoesAtuaisIds.map(carregarDispositivosJuridicosPorVersao))).flat();
     return documentos.map(documento => {
         const versao = versoes.find(item => item.id === documento.current_version_id);
         return {

@@ -155,7 +155,7 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.doesNotMatch(html, /Visualizar protótipo/);
     assert.match(architecture, /O vínculo com o catálogo comum é opcional/);
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
-    assert.match(architecture, /Fase 2 iniciada/);
+    assert.match(architecture, /Fase 3 preparada/);
     assert.match(architecture, /ativar, ocultar e ordenar widgets por usuário/);
 });
 
@@ -164,7 +164,14 @@ test("o leitor usa navegação fixa, modo foco e grifos com função didática",
     const repository = readProjectFile("src/cloud-core-repository.js");
     const migration = readProjectFile("supabase/migrations/202608300005_legal_highlight_semantics.sql");
 
-    assert.match(html, /\.legal-reader-toolbar \{ position: sticky; top: 0;/);
+    assert.match(html, /\.legal-reader-prototype \{[\s\S]*?height: clamp\(440px, 78vh, 820px\);[\s\S]*?display: flex;[\s\S]*?flex-direction: column;/);
+    assert.match(html, /\.legal-reader-toolbar \{ position: relative;[\s\S]*?flex-shrink: 0;/);
+    assert.match(html, /\.legal-reader-layout \{ min-height: 0;[\s\S]*?flex: 1;[\s\S]*?overflow: hidden;/);
+    assert.match(html, /\.legal-reader-paper \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
+    assert.match(html, /\.legal-reader-index \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
+    assert.match(html, /\.legal-reader-source \{ flex-shrink: 0;/);
+    assert.match(html, /grid-template-rows: minmax\(120px, 32%\) minmax\(0, 1fr\)/);
+    assert.match(html, /if \(artigoMudou\) textoLeitor\.closest\("\.legal-reader-paper"\)\?\.scrollTo\(\{ top: 0, behavior: "auto" \}\)/);
     assert.match(html, /button\.is-active::before/);
     assert.match(html, /box-decoration-break: clone/);
     assert.match(html, /mark\.highlight-red/);
@@ -290,13 +297,84 @@ test("o importador jurídico reconhece hierarquia, artigos acrescidos e entidade
     const dispositivos = extrairDispositivos(`
         <p>T&Iacute;TULO I</p><p>DOS PRINC&Iacute;PIOS FUNDAMENTAIS</p>
         <p>Art. 1&ordm; Texto inicial.</p><p>Par&aacute;grafo &uacute;nico. Continuação.</p>
-        <p>Art. 1-A. Artigo acrescido.</p>
+        <p>Art. 1-A. Pena \u0096 artigo acrescido.</p>
     `);
 
     assert.equal(dispositivos.length, 2);
     assert.deepEqual(dispositivos.map(item => item.chave), ["art-1", "art-1-a"]);
     assert.deepEqual(dispositivos[0].caminho, ["TÍTULO I — DOS PRINCÍPIOS FUNDAMENTAIS"]);
     assert.match(dispositivos[0].conteudo, /Parágrafo único/);
+    assert.match(dispositivos[1].conteudo, /Pena – artigo acrescido/);
+});
+
+test("o importador jurídico reconhece a hierarquia penal e artigos com sufixos compostos", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>PARTE ESPECIAL</p>
+        <p>TÍTULO I</p><p>(Incluído pela Lei nº 14.197, de 2021)</p><p>DOS CRIMES</p>
+        <p>Art. 359-M-A. Regra de concurso.</p>
+        <p>Art. 359-M-B. Regra de redução.</p>
+    `, { raiz: "CÓDIGO PENAL" });
+
+    assert.deepEqual(dispositivos.map(item => item.chave), ["art-359-m-a", "art-359-m-b"]);
+    assert.deepEqual(dispositivos[0].caminho, ["CÓDIGO PENAL", "PARTE ESPECIAL", "TÍTULO I — DOS CRIMES"]);
+});
+
+test("o importador associa a epígrafe ao artigo correto sem contaminar o artigo anterior", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>PARTE GERAL</p><p>TÍTULO I</p><p>DA APLICAÇÃO DA LEI PENAL</p>
+        <p>Anterioridade da Lei</p><p>Art. 1º Texto do primeiro artigo.</p>
+        <p>Lei penal no tempo</p><p>Art. 2º Texto do segundo artigo.</p>
+    `, { raiz: "CÓDIGO PENAL" });
+
+    assert.equal(dispositivos[0].titulo, "Anterioridade da Lei");
+    assert.equal(dispositivos[1].titulo, "Lei penal no tempo");
+    assert.doesNotMatch(dispositivos[0].conteudo, /Lei penal no tempo/);
+    assert.equal(dispositivos[1].conteudo, "Texto do segundo artigo.");
+});
+
+test("o Código Penal integral usa fonte oficial e é vinculado somente ao catálogo de Direito Penal", () => {
+    const migration = readProjectFile("supabase/migrations/202608300007_complete_penal_code.sql");
+    const chavesImportadas = [...migration.matchAll(/"chave":"art-/g)];
+
+    assert.equal(chavesImportadas.length, 429);
+    assert.match(migration, /https:\/\/www\.planalto\.gov\.br\/ccivil_03\/decreto-lei\/del2848compilado\.htm/);
+    assert.match(migration, /Texto compilado consultado em 30\/08\/2026/);
+    assert.match(migration, /"chave":"art-121-b"/);
+    assert.match(migration, /"chave":"art-359-m-a"/);
+    assert.match(migration, /"chave":"art-359-m-b"/);
+    assert.match(migration, /"chave":"art-361"/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000002/);
+    assert.match(migration, /update public\.legal_documents[\s\S]*?current_version_id/);
+    assert.doesNotMatch(migration, /user_legal_highlights/);
+});
+
+test("a correção do Código Penal cria nova versão e preserva todos os dados pessoais de leitura", () => {
+    const migration = readProjectFile("supabase/migrations/202608300008_correct_penal_article_headings.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 429);
+    assert.match(migration, /epígrafes revisadas/);
+    assert.match(migration, /"titulo":"Anterioridade da Lei"/);
+    assert.match(migration, /"titulo":"Lei penal no tempo"/);
+    assert.doesNotMatch(migration.match(/"chave":"art-1"[\s\S]*?"chave":"art-2"/)?.[0] || "", /Lei penal no tempo/);
+    assert.match(migration, /update public\.user_legal_highlights as registro/);
+    assert.match(migration, /update public\.user_legal_bookmarks as registro/);
+    assert.match(migration, /update public\.user_legal_reading_history as registro/);
+    assert.match(migration, /novo\.provision_key = antigo\.provision_key/g);
+    assert.match(migration, /set current_version_id = '21000000-0000-4000-8000-000000000005'/);
+    assert.match(html, /epigrafe \? `\$\{dispositivo\.rotulo\} — \$\{epigrafe\}` : dispositivo\.rotulo/);
+});
+
+test("a biblioteca carrega somente versões atuais e pagina cada documento jurídico", () => {
+    const repository = readProjectFile("src/cloud-core-repository.js");
+
+    assert.match(repository, /const TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS = 1000/);
+    assert.match(repository, /async function carregarDispositivosJuridicosPorVersao\(versaoId\)/);
+    assert.match(repository, /\.eq\("version_id", versaoId\)/);
+    assert.match(repository, /\.range\(inicio, inicio \+ TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS - 1\)/);
+    assert.match(repository, /\.in\("id", versoesAtuaisIds\)/);
+    assert.match(repository, /Promise\.all\(versoesAtuaisIds\.map\(carregarDispositivosJuridicosPorVersao\)\)/);
+    assert.doesNotMatch(repository, /supabase\.from\("legal_provisions"\)[\s\S]{0,220}\.order\("sequence"[^\n]+\)(?![\s\S]{0,120}\.range)/);
 });
 
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {
