@@ -602,6 +602,29 @@
     .library-widget-status { min-height: 1.2rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
     .library-widget.is-future { background: rgba(255, 253, 249, .62); border-style: dashed; }
     .library-widget.is-future .library-widget-icon { color: rgba(91, 67, 58, .62); background: rgba(91, 67, 58, .07); }
+    .personal-vade-panel { margin-top: 1rem; padding: 1rem; background: rgba(255, 253, 249, .96); border: 1px solid rgba(59, 41, 35, .12); border-radius: 1rem; box-shadow: 0 .4rem 1rem rgba(59, 41, 35, .055); }
+    .personal-vade-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
+    .personal-vade-header h6, .personal-vade-card h6 { color: var(--pimentel-cafe); }
+    .personal-vade-header p { color: var(--pimentel-cafe-claro); font-size: .74rem; }
+    .personal-vade-form { margin-bottom: 1rem; padding: .85rem; background: rgba(244, 226, 212, .28); border: 1px solid rgba(59, 41, 35, .08); border-radius: .8rem; }
+    .personal-vade-status { min-height: 1.25rem; margin-bottom: .55rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
+    .personal-vade-status.is-success { color: #526047; }
+    .personal-vade-status.is-error { color: var(--pimentel-vermelho-escuro); }
+    .personal-vade-empty { padding: 2.2rem 1rem; text-align: center; color: var(--pimentel-cafe-claro); border: 1px dashed rgba(59, 41, 35, .16); border-radius: .85rem; }
+    .personal-vade-empty i { display: block; margin-bottom: .55rem; color: rgba(184, 50, 42, .42); font-size: 2rem; }
+    .personal-vade-list { display: grid; gap: .8rem; }
+    .personal-vade-card { overflow: hidden; background: #fff; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
+    .personal-vade-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; padding: .85rem; }
+    .personal-vade-description { color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    .personal-vade-documents { display: grid; gap: .45rem; padding: .75rem .85rem; background: rgba(244, 226, 212, .2); border-top: 1px solid rgba(59, 41, 35, .07); }
+    .personal-vade-document { display: flex; align-items: center; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .08); border-radius: .65rem; }
+    .personal-vade-document-copy { min-width: 0; }
+    .personal-vade-document-copy strong, .personal-vade-document-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .personal-vade-document-copy strong { color: var(--pimentel-cafe); font-size: .76rem; }
+    .personal-vade-document-copy small { color: var(--pimentel-cafe-claro); font-size: .64rem; }
+    .personal-vade-organizer { padding: .85rem; border-top: 1px solid rgba(59, 41, 35, .08); }
+    .personal-vade-available { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document { align-items: flex-start; flex-wrap: wrap; } }
     .legal-reading-overview { margin-bottom: 1rem; padding: .8rem; background: rgba(255, 253, 249, .8); border: 1px solid rgba(59, 41, 35, .09); border-radius: .9rem; }
     .legal-reading-overview-grid { display: grid; grid-template-columns: minmax(210px, 1.2fr) repeat(2, minmax(170px, 1fr)); gap: .65rem; }
     .legal-reading-shortcut { min-width: 0; padding: .7rem .8rem; text-align: left; background: rgba(244, 226, 212, .24); border: 1px solid rgba(59, 41, 35, .08); border-radius: .7rem; }
@@ -1413,6 +1436,22 @@
                         <div class="library-widget-status mt-2" id="wsStatusWidgets" role="status"></div>
                     </section>
                     <div class="row g-3" id="wsWidgetsBiblioteca"></div>
+                    <section class="personal-vade-panel d-none" id="wsVadePanel" aria-labelledby="wsVadeTitulo">
+                        <header class="personal-vade-header">
+                            <div><h6 class="fw-bold mb-1" id="wsVadeTitulo"><i class="bi-journals me-1"></i>Meu Vade Mecum</h6><p class="mb-0">Monte cadernos privados com as normas oficiais disponíveis na Biblioteca.</p></div>
+                            <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-primary" id="btnNovoVade"><i class="bi-plus-lg me-1"></i>Novo caderno</button><button type="button" class="btn btn-sm btn-outline-secondary" id="btnFecharVade" aria-label="Fechar Meu Vade Mecum"><i class="bi-x-lg"></i></button></div>
+                        </header>
+                        <div class="personal-vade-status" id="wsVadeStatus" role="status" aria-live="polite"></div>
+                        <form class="personal-vade-form d-none" id="formVade">
+                            <div class="row g-2">
+                                <div class="col-md-4"><label class="form-label small" for="vadeNome">Nome do caderno</label><input class="form-control form-control-sm" id="vadeNome" maxlength="120" placeholder="Ex: Vade Mecum GCM" required></div>
+                                <div class="col-md-6"><label class="form-label small" for="vadeDescricao">Descrição (opcional)</label><input class="form-control form-control-sm" id="vadeDescricao" maxlength="1000" placeholder="Ex: Normas principais do meu edital"></div>
+                                <div class="col-md-2 d-grid align-self-end"><button class="btn btn-sm btn-primary" id="btnSalvarVade" type="submit"><i class="bi-cloud-check me-1"></i><span>Salvar</span></button></div>
+                            </div>
+                            <button class="btn btn-sm btn-link text-secondary px-0 mt-1" id="btnCancelarVade" type="button">Cancelar</button>
+                        </form>
+                        <div id="wsVadeLista"></div>
+                    </section>
                     <section class="legal-reader-prototype d-none" id="wsLeitorPrototipo" aria-labelledby="wsLeitorTitulo">
                         <header class="legal-reader-header">
                             <div>
@@ -2281,6 +2320,7 @@ let cardEmEdicaoId = null;
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
 let documentosJuridicos = [];
+let colecoesVade = [];
 let grifosJuridicos = [];
 let favoritosJuridicos = [];
 let historicoLeituraJuridica = [];
@@ -2292,6 +2332,10 @@ let dispositivoLeitorAtual = null;
 let filtroCorGrifoAtual = "all";
 let modoFocoLeitorAtivo = false;
 let acaoLeitorAtual = null;
+let colecaoVadeEmEdicaoId = null;
+let colecaoVadeOrganizandoId = null;
+let rascunhoDocumentosVade = [];
+let operacaoVadeEmAndamento = false;
 
 function capturarSessaoHubAtual() {
     const contexto = window.HUB_SESSION_CONTEXT;
@@ -2328,6 +2372,11 @@ function exigirNuvemFlashcards() {
 function exigirNuvemLinks() {
     if (!window.HUB_CLOUD_LINKS) throw new Error("A conexão de materiais com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_LINKS;
+}
+
+function exigirNuvemVade() {
+    if (!window.HUB_CLOUD_VADE) throw new Error("A conexão do Meu Vade Mecum com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_VADE;
 }
 
 function chaveMateriaCatalogo(nome) {
@@ -2830,6 +2879,165 @@ function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
     document.getElementById("wsLeitorPrototipo").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function mostrarStatusVade(tipo = "", mensagem = "") {
+    const status = document.getElementById("wsVadeStatus");
+    status.className = `personal-vade-status${tipo ? ` is-${tipo}` : ""}`;
+    status.textContent = mensagem;
+}
+
+function documentoVadePorId(id) {
+    return documentosJuridicos.find(documento => documento.id === id) || null;
+}
+
+function iconeDocumentoVade(documento) {
+    if (documento?.slug?.includes("penal")) return "bi-shield-lock";
+    if (documento?.slug?.includes("disposicoes-constitucionais")) return "bi-hourglass-split";
+    return "bi-bank";
+}
+
+function fecharFormularioVade() {
+    colecaoVadeEmEdicaoId = null;
+    document.getElementById("formVade").reset();
+    document.getElementById("formVade").classList.add("d-none");
+    document.getElementById("btnSalvarVade").querySelector("span").textContent = "Salvar";
+    document.getElementById("btnPrimeiroVade")?.classList.remove("d-none");
+}
+
+function abrirFormularioVade(colecao = null) {
+    colecaoVadeEmEdicaoId = colecao?.id || null;
+    document.getElementById("vadeNome").value = colecao?.nome || "";
+    document.getElementById("vadeDescricao").value = colecao?.descricao || "";
+    document.getElementById("btnSalvarVade").querySelector("span").textContent = colecao ? "Salvar nome" : "Criar caderno";
+    document.getElementById("formVade").classList.remove("d-none");
+    document.getElementById("btnPrimeiroVade")?.classList.add("d-none");
+    document.getElementById("vadeNome").focus({ preventScroll: true });
+}
+
+function renderizarVade() {
+    const lista = document.getElementById("wsVadeLista");
+    if (!colecoesVade.length) {
+        lista.innerHTML = `<div class="personal-vade-empty"><i class="bi-journal-plus" aria-hidden="true"></i><strong class="d-block mb-1">Seu Vade Mecum começa aqui</strong><small class="d-block mb-3">Crie um caderno e escolha as normas que quer consultar em um só lugar.</small><button type="button" class="btn btn-sm btn-outline-primary" id="btnPrimeiroVade"><i class="bi-plus-lg me-1"></i>Criar primeiro caderno</button></div>`;
+        document.getElementById("btnPrimeiroVade").addEventListener("click", () => abrirFormularioVade());
+        return;
+    }
+    lista.className = "personal-vade-list";
+    lista.innerHTML = colecoesVade.map(colecao => {
+        const organizando = colecao.id === colecaoVadeOrganizandoId;
+        const idsDocumentos = organizando
+            ? rascunhoDocumentosVade
+            : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
+        const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
+        const disponiveis = documentosJuridicos.filter(documento => !idsDocumentos.includes(documento.id));
+        return `<article class="personal-vade-card" data-vade-id="${esc(colecao.id)}">
+            <div class="personal-vade-card-head">
+                <div class="min-w-0"><h6 class="fw-bold mb-1"><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h6><p class="personal-vade-description mb-0">${esc(colecao.descricao || "Caderno jurídico pessoal")}</p></div>
+                <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-organizar-vade"><i class="bi-list-check me-1"></i>${organizando ? "Fechar organização" : "Organizar"}</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-vade" aria-label="Renomear ${esc(colecao.nome)}"><i class="bi-pencil"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-excluir-vade" aria-label="Excluir ${esc(colecao.nome)}"><i class="bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="personal-vade-documents">
+                ${documentos.length ? documentos.map((documento, indice) => `<div class="personal-vade-document">
+                    <div class="personal-vade-document-copy"><strong><i class="${iconeDocumentoVade(documento)} me-1"></i>${esc(documento.tituloCurto)}</strong><small>${esc(documento.versao.fonteNome)}</small></div>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        ${organizando ? `<button type="button" class="btn btn-sm btn-outline-secondary btn-mover-documento-vade" data-index="${indice}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-documento-vade" data-index="${indice}" data-direcao="1" ${indice === documentos.length - 1 ? "disabled" : ""} aria-label="Mover para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-documento-vade" data-document-id="${esc(documento.id)}" aria-label="Remover ${esc(documento.tituloCurto)}"><i class="bi-x-lg"></i></button>` : ""}
+                        <button type="button" class="btn btn-sm btn-primary btn-abrir-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-book me-1"></i>Abrir</button>
+                    </div>
+                </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-journal-x me-1"></i>Nenhuma norma adicionada.</div>`}
+            </div>
+            ${organizando ? `<div class="personal-vade-organizer"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}
+        </article>`;
+    }).join("");
+
+    lista.querySelectorAll("[data-vade-id]").forEach(card => {
+        const colecao = colecoesVade.find(item => item.id === card.dataset.vadeId);
+        card.querySelector(".btn-renomear-vade").addEventListener("click", () => abrirFormularioVade(colecao));
+        card.querySelector(".btn-excluir-vade").addEventListener("click", () => excluirVade(colecao));
+        card.querySelector(".btn-organizar-vade").addEventListener("click", () => {
+            if (colecaoVadeOrganizandoId === colecao.id) {
+                colecaoVadeOrganizandoId = null;
+                rascunhoDocumentosVade = [];
+            } else {
+                colecaoVadeOrganizandoId = colecao.id;
+                rascunhoDocumentosVade = [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
+            }
+            renderizarVade();
+        });
+        card.querySelectorAll(".btn-abrir-documento-vade").forEach(botao => botao.addEventListener("click", () => {
+            const documento = documentoVadePorId(botao.dataset.documentId);
+            const materia = materiaPorId(materiaAbertaId);
+            if (documento && materia) abrirLeitorJuridico(documento, materia);
+        }));
+        card.querySelectorAll(".btn-adicionar-documento-vade").forEach(botao => botao.addEventListener("click", () => {
+            if (!rascunhoDocumentosVade.includes(botao.dataset.documentId)) rascunhoDocumentosVade.push(botao.dataset.documentId);
+            renderizarVade();
+        }));
+        card.querySelectorAll(".btn-remover-documento-vade").forEach(botao => botao.addEventListener("click", () => {
+            rascunhoDocumentosVade = rascunhoDocumentosVade.filter(id => id !== botao.dataset.documentId);
+            renderizarVade();
+        }));
+        card.querySelectorAll(".btn-mover-documento-vade").forEach(botao => botao.addEventListener("click", () => {
+            const origem = Number(botao.dataset.index);
+            const destino = origem + Number(botao.dataset.direcao);
+            if (destino < 0 || destino >= rascunhoDocumentosVade.length) return;
+            [rascunhoDocumentosVade[origem], rascunhoDocumentosVade[destino]] = [rascunhoDocumentosVade[destino], rascunhoDocumentosVade[origem]];
+            renderizarVade();
+        }));
+        card.querySelector(".btn-salvar-documentos-vade")?.addEventListener("click", () => salvarDocumentosVade(colecao));
+    });
+}
+
+function abrirPainelVade() {
+    document.getElementById("wsLeitorPrototipo").classList.add("d-none");
+    document.getElementById("wsVadePanel").classList.remove("d-none");
+    mostrarStatusVade();
+    renderizarVade();
+    document.getElementById("wsVadePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function salvarDocumentosVade(colecao) {
+    if (operacaoVadeEmAndamento) return;
+    operacaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    mostrarStatusVade("pending", "Salvando a organização no Supabase...");
+    try {
+        const salvos = await exigirNuvemVade().salvarDocumentos(colecao.id, rascunhoDocumentosVade);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, documentos: salvos } : item);
+        colecaoVadeOrganizandoId = null;
+        rascunhoDocumentosVade = [];
+        renderizarVade();
+        mostrarStatusVade("success", "Organização confirmada no Supabase.");
+    } catch (erro) {
+        console.error("Falha ao organizar o Vade Mecum", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível salvar a organização.");
+    } finally {
+        operacaoVadeEmAndamento = false;
+    }
+}
+
+async function excluirVade(colecao) {
+    if (operacaoVadeEmAndamento || !confirm(`Excluir o caderno “${colecao.nome}”? Seus grifos e anotações nos artigos não serão apagados.`)) return;
+    operacaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    mostrarStatusVade("pending", "Excluindo o caderno no Supabase...");
+    try {
+        await exigirNuvemVade().excluir(colecao.id);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.filter(item => item.id !== colecao.id);
+        if (colecaoVadeEmEdicaoId === colecao.id) fecharFormularioVade();
+        if (colecaoVadeOrganizandoId === colecao.id) colecaoVadeOrganizandoId = null;
+        renderizarVade();
+        mostrarStatusVade("success", "Caderno excluído. Seus estudos nos artigos foram preservados.");
+    } catch (erro) {
+        console.error("Falha ao excluir o Vade Mecum", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível excluir o caderno.");
+    } finally {
+        operacaoVadeEmAndamento = false;
+    }
+}
+
 let rascunhoWidgets = null;
 
 function renderizarConfiguradorWidgets(materia) {
@@ -2871,6 +3079,7 @@ function renderizarBibliotecaMateria(materia) {
     document.getElementById("wsBibliotecaIcone").className = catalogo?.icone || "bi-book-half";
     const leitor = document.getElementById("wsLeitorPrototipo");
     leitor.classList.add("d-none");
+    document.getElementById("wsVadePanel").classList.add("d-none");
     document.getElementById("wsConfigWidgets").classList.add("d-none");
     document.getElementById("wsStatusWidgets").textContent = "";
     rascunhoWidgets = null;
@@ -2895,6 +3104,10 @@ function renderizarBibliotecaMateria(materia) {
     container.querySelectorAll(".btn-abrir-recurso-demo").forEach(botao => botao.addEventListener("click", () => {
         const recurso = recursos.find(item => item.chaveVisual === botao.dataset.resourceKey);
         if (!recurso) return;
+        if (recurso.tipo === "personal_vade") {
+            abrirPainelVade();
+            return;
+        }
         const documento = recurso.documentos?.find(item => item.id === botao.dataset.documentId) || recurso.documento;
         if (documento) {
             abrirLeitorJuridico(documento, materia);
@@ -2921,6 +3134,53 @@ document.getElementById("btnOrganizarWidgets").addEventListener("click", () => {
     const abrir = painel.classList.contains("d-none");
     painel.classList.toggle("d-none", !abrir);
     if (abrir) renderizarConfiguradorWidgets(materia);
+});
+
+document.getElementById("btnNovoVade").addEventListener("click", () => abrirFormularioVade());
+document.getElementById("btnFecharVade").addEventListener("click", () => {
+    fecharFormularioVade();
+    colecaoVadeOrganizandoId = null;
+    rascunhoDocumentosVade = [];
+    document.getElementById("wsVadePanel").classList.add("d-none");
+});
+document.getElementById("btnCancelarVade").addEventListener("click", fecharFormularioVade);
+
+document.getElementById("formVade").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (operacaoVadeEmAndamento) return;
+    const nome = document.getElementById("vadeNome").value.trim();
+    const descricao = document.getElementById("vadeDescricao").value.trim();
+    const existente = colecoesVade.find(item => item.id === colecaoVadeEmEdicaoId) || null;
+    operacaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    const botao = document.getElementById("btnSalvarVade");
+    botao.disabled = true;
+    mostrarStatusVade("pending", existente ? "Salvando as alterações no Supabase..." : "Criando o caderno no Supabase...");
+    try {
+        if (existente) {
+            const salvo = await exigirNuvemVade().atualizar(existente.id, { nome, descricao }, existente.atualizadoEm);
+            if (!sessaoHubPermaneceAtual(sessao)) return;
+            colecoesVade = colecoesVade.map(item => item.id === existente.id ? { ...item, ...salvo } : item);
+            fecharFormularioVade();
+            renderizarVade();
+            mostrarStatusVade("success", "Alterações confirmadas no Supabase.");
+        } else {
+            const salvo = await exigirNuvemVade().criar({ id: novoId(), nome, descricao, posicao: colecoesVade.length });
+            if (!sessaoHubPermaneceAtual(sessao)) return;
+            colecoesVade.push(salvo);
+            fecharFormularioVade();
+            colecaoVadeOrganizandoId = salvo.id;
+            rascunhoDocumentosVade = [];
+            renderizarVade();
+            mostrarStatusVade("success", "Caderno criado. Agora escolha as normas e salve a organização.");
+        }
+    } catch (erro) {
+        console.error("Falha ao salvar o Vade Mecum", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível salvar o caderno.");
+    } finally {
+        operacaoVadeEmAndamento = false;
+        botao.disabled = false;
+    }
 });
 
 document.getElementById("btnSalvarWidgets").addEventListener("click", async () => {
@@ -5171,13 +5431,14 @@ window.obterDadosParaPreviaMigracao = () => {
         }
     };
 };
-window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
     geracaoSessaoHub += 1;
     definirUsuarioAtual(contexto.userId);
-    if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
+    if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, colecoesVadeRemotas, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
     catalogoMaterias = catalogoRemoto;
     documentosJuridicos = documentosJuridicosRemotos;
+    colecoesVade = colecoesVadeRemotas;
     grifosJuridicos = grifosJuridicosRemotos;
     favoritosJuridicos = estadoLeituraJuridicaRemoto.favoritos;
     historicoLeituraJuridica = estadoLeituraJuridicaRemoto.historico;
@@ -5230,9 +5491,14 @@ window.encerrarHub = () => {
     widgetsPorMateria = new Map();
     rascunhoWidgets = null;
     documentosJuridicos = [];
+    colecoesVade = [];
     grifosJuridicos = [];
     favoritosJuridicos = [];
     historicoLeituraJuridica = [];
+    colecaoVadeEmEdicaoId = null;
+    colecaoVadeOrganizandoId = null;
+    rascunhoDocumentosVade = [];
+    operacaoVadeEmAndamento = false;
     documentoLeitorAtual = null;
     dispositivoLeitorAtual = null;
     preencherCatalogoMaterias();

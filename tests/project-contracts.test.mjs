@@ -512,6 +512,25 @@ test("o Meu Vade Mecum é pessoal e substitui sua lista de normas de forma atôm
     assert.match(auth, /window\.HUB_CLOUD_VADE = Object\.freeze/);
 });
 
+test("a interface do Meu Vade Mecum carrega coleções pessoais e confirma operações remotas", () => {
+    const html = readProjectFile("index.html");
+    const auth = readProjectFile("src/auth.js");
+    const docs = readProjectFile("docs/arquitetura-biblioteca-juridica.md");
+
+    assert.match(auth, /carregarColecoesVade\(\)/);
+    assert.match(auth, /colecoesVadeRemotas/);
+    assert.match(html, /id="wsVadePanel"/);
+    assert.match(html, /function renderizarVade\(\)/);
+    assert.match(html, /exigirNuvemVade\(\)\.salvarDocumentos/);
+    assert.match(html, /exigirNuvemVade\(\)\.atualizar/);
+    assert.match(html, /exigirNuvemVade\(\)\.excluir/);
+    assert.match(html, /Organização confirmada no Supabase/);
+    assert.match(html, /Seus grifos e anotações nos artigos não serão apagados/);
+    assert.match(html, /if \(!sessaoHubPermaneceAtual\(sessao\)\) return/);
+    assert.match(docs, /foi aplicada e validada no Supabase/);
+    assert.match(docs, /Documentos privados e comunidade permanecem reservados/);
+});
+
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {
     const migration = readProjectFile("supabase/migrations/202608300002_subject_catalog_widgets.sql");
 

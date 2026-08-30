@@ -30,7 +30,7 @@ O checklist do edital também é pessoal e fica separado dos tópicos compartilh
 
 O Caderno de Erros é pessoal e sincronizado com o Supabase. Registros manuais, erros de revisão de flashcards e respostas incorretas em simulados usam a mesma gravação protegida; a interface não afirma que um item foi salvo quando o banco não confirma a operação. A exclusão exige confirmação e também é validada remotamente. O ciclo manual de criação, recarga e exclusão foi testado sem deixar registros temporários.
 
-A Fase 4 da Biblioteca Jurídica está concluída localmente e publicada: Constituição, ADCT e Código Penal possuem pesquisa, grifos e anotações pessoais, favoritos, retomada de leitura, citações e criação de flashcards. A fundação do Meu Vade Mecum (Fase 5) está sendo preparada em migration separada e não deve ser habilitada na interface antes da revisão e aplicação controlada no Supabase.
+A Fase 4 da Biblioteca Jurídica está concluída e publicada: Constituição, ADCT e Código Penal possuem pesquisa, grifos e anotações pessoais, favoritos, retomada de leitura, citações e criação de flashcards. A fundação segura do Meu Vade Mecum (Fase 5) também já foi aplicada e validada no Supabase; a interface permite organizar cadernos pessoais com as normas oficiais disponíveis. PDFs privados e Comunidade continuam reservados para etapas posteriores.
 
 O histórico de desempenho também é pessoal. Cada resposta de simulado incrementa acertos e total de forma atômica no banco, evitando perda de pontuação quando há mais de uma sessão aberta. Os resultados são recarregados na entrada e alimentam os indicadores e o gráfico por matéria. A migration `202608290003` foi aplicada e o carregamento autenticado do estado vazio foi validado sem alterar pontuações.
 

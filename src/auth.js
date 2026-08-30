@@ -412,14 +412,15 @@ async function ativarSessao(session) {
             const editalRemoto = await carregarEditalRemoto();
             const errosRemotos = await carregarErrosRemotos();
             const desempenhoRemoto = await carregarDesempenhoRemoto();
-            const [catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto] = await Promise.all([
+            const [catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto] = await Promise.all([
                 carregarCatalogoMaterias(),
                 carregarWidgetsMaterias(),
                 carregarBibliotecaJuridica(),
+                carregarColecoesVade(),
                 carregarGrifosJuridicos(),
                 carregarEstadoLeituraJuridica()
             ]);
-            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto);
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto);
             iniciarPreviaMigracao(contexto);
             await iniciarAdministracao();
             usuarioAtivoId = session.user.id;
