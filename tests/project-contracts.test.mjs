@@ -162,3 +162,22 @@ test("a administração de usuários mantém privilégios fora do navegador", ()
     assert.doesNotMatch(frontend, /service_role|sb_secret_/i);
     assert.match(config, /\[functions\.admin-users\][\s\S]*?verify_jwt\s*=\s*true/);
 });
+
+test("a exclusão administrativa exige prévia, confirmação e protege administradores", () => {
+    const edgeFunction = readProjectFile("supabase/functions/admin-users/index.ts");
+    const frontend = readProjectFile("src/admin.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(edgeFunction, /action === ["']preview-delete["']/);
+    assert.match(edgeFunction, /targetUserId === userId/);
+    assert.match(edgeFunction, /targetIsAdmin === true/);
+    assert.match(edgeFunction, /preview_user_deletion/);
+    assert.match(edgeFunction, /prepare_user_deletion/);
+    assert.match(edgeFunction, /auth\.admin\.deleteUser/);
+    assert.ok(edgeFunction.indexOf("prepare_user_deletion") < edgeFunction.indexOf("auth.admin.deleteUser"));
+    assert.match(edgeFunction, /expectedConfirmation\s*=\s*`EXCLUIR \$\{target\.email\}`/);
+    assert.match(frontend, /confirmation !== currentDeletion\.confirmation/);
+    assert.match(frontend, /preview-delete/);
+    assert.match(html, /id=["']modalExcluirUsuario["']/);
+    assert.match(html, /id=["']confirmacaoExclusaoUsuario["']/);
+});

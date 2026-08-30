@@ -22,7 +22,7 @@ O Hub cria um espaço pessoal para cada conta. Por isso, a remoção de um usuá
 5. Em até 15 minutos, excluir a conta pelo painel do Supabase.
 6. Conferir o registro de auditoria.
 
-Enquanto a exclusão segura ainda não estiver disponível no painel do Hub, as etapas de prévia e preparação devem ser executadas somente pelo SQL Editor do Supabase ou por uma Edge Function protegida. Nunca execute o processo para a própria conta administradora sem um segundo administrador e um backup verificado.
+O painel administrativo executa a prévia antes de habilitar a confirmação. A Edge Function confere novamente o usuário e os privilégios, prepara a exclusão e só então solicita a remoção da conta. O gatilho do banco rejeita a operação se os dados tiverem mudado. Contas administradoras são bloqueadas nesse fluxo, inclusive a própria conta conectada.
 
 ## Ativação inicial do painel
 
@@ -38,4 +38,4 @@ on conflict (user_id) do nothing;
 3. Publique a Edge Function `admin-users`.
 4. Saia e entre novamente no Hub. A aba **Administração** aparecerá apenas para a conta autorizada.
 
-O painel inicial permite listar contas e enviar convites. A exclusão continuará no fluxo protegido de prévia e confirmação até que a segunda etapa da interface administrativa seja implementada.
+O painel permite listar contas, enviar convites e revisar uma exclusão antes de confirmar. A frase exigida usa o e-mail da conta selecionada, enquanto a função protegida converte internamente a confirmação para o UUID esperado pelo banco. Nenhuma chave privilegiada ou UUID de confirmação precisa ser digitado no navegador.

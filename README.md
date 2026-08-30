@@ -68,7 +68,7 @@ Antes da primeira publicação, cadastre `VITE_SUPABASE_URL` como variável do r
 
 A remoção de contas usa um fluxo administrativo em duas fases: prévia e preparação com validade de 15 minutos. A exclusão é bloqueada se os dados mudarem ou se a conta possuir um espaço compartilhado. O procedimento completo e suas proteções estão em `docs/administracao-de-usuarios.md`.
 
-A base do painel administrativo usa uma lista privada de administradores e a Edge Function autenticada `admin-users`. A chave privilegiada permanece somente no servidor. Contas comuns não veem a aba de administração e não podem listar usuários nem enviar convites. A primeira conta administradora deve ser ativada manualmente pelo SQL Editor, seguindo o procedimento documentado; nenhuma conta é promovida automaticamente por e-mail.
+A base do painel administrativo usa uma lista privada de administradores e a Edge Function autenticada `admin-users`. A chave privilegiada permanece somente no servidor. Contas comuns não veem a aba de administração e não podem listar usuários, enviar convites ou solicitar exclusões. A exclusão pelo painel exige prévia, confirmação exata e nova conferência do banco; contas administradoras permanecem bloqueadas. A primeira conta administradora deve ser ativada manualmente pelo SQL Editor, seguindo o procedimento documentado; nenhuma conta é promovida automaticamente por e-mail.
 
 A Supabase CLI está instalada como dependência de desenvolvimento e o projeto local está vinculado ao projeto remoto `zmlodrbvceavvtqgslsz`. O arquivo `supabase/config.toml` replica as decisões locais de segurança: acesso por convite, confirmação de e-mail, senhas fortes, produção no GitHub Pages, desenvolvimento em `localhost` e modelo de recuperação por código.
 
