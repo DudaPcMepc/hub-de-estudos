@@ -630,13 +630,19 @@
     .legal-highlight-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .35rem .8rem; padding-top: .25rem; color: var(--pimentel-cafe-claro); font-size: .64rem; }
     .legal-highlight-legend span { display: inline-flex; align-items: center; gap: .3rem; }
     .legal-highlight-dot { width: .55rem; height: .55rem; border-radius: 50%; }
-    .legal-reader-action-panel { max-height: 42%; overflow-y: auto; flex-shrink: 0; padding: .85rem 1rem; background: rgba(244, 226, 212, .3); border-bottom: 1px solid rgba(59, 41, 35, .09); }
-    .legal-reader-action-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .65rem; }
+    .legal-reader-action-panel { max-height: 82%; overflow-y: auto; flex-shrink: 0; padding: 1rem 1.15rem 1.1rem; background: rgba(244, 226, 212, .3); border-bottom: 1px solid rgba(59, 41, 35, .09); }
+    .legal-reader-action-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
     .legal-selection-preview { max-height: 5.2rem; overflow-y: auto; margin-bottom: .65rem; padding: .55rem .65rem; color: var(--pimentel-cafe-claro); background: rgba(255, 253, 249, .86); border-left: 3px solid var(--pimentel-vermelho); border-radius: .35rem; font-size: .7rem; line-height: 1.45; }
-    .legal-reader-action-grid { display: grid; grid-template-columns: minmax(170px, .7fr) minmax(180px, .8fr) minmax(280px, 1.5fr) auto; align-items: end; gap: .6rem; }
-    .legal-reader-action-grid.is-note { grid-template-columns: minmax(280px, 1fr) auto; }
+    .legal-flashcard-reference { margin-bottom: .8rem; padding: .55rem .7rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .055); border: 1px solid rgba(59, 41, 35, .08); border-radius: .55rem; font-size: .67rem; line-height: 1.45; white-space: pre-line; }
+    .legal-flashcard-reference strong { display: block; margin-bottom: .15rem; color: var(--pimentel-cafe); font-size: .65rem; text-transform: uppercase; letter-spacing: .04em; }
+    .legal-flashcard-reference span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .legal-reader-action-grid { display: grid; grid-template-columns: minmax(190px, .65fr) minmax(0, 1.35fr); align-items: start; gap: .8rem; }
+    .legal-reader-action-grid.is-note { grid-template-columns: 1fr; }
     .legal-reader-action-grid label { color: var(--pimentel-cafe-claro); font-size: .68rem; font-weight: 700; }
-    .legal-reader-action-grid textarea { min-height: 4.6rem; resize: vertical; }
+    .legal-reader-answer-field, .legal-reader-action-footer { grid-column: 1 / -1; }
+    .legal-reader-action-grid textarea { min-height: 7.5rem; resize: vertical; line-height: 1.5; }
+    .legal-reader-action-grid.is-note textarea { min-height: 5.5rem; }
+    .legal-reader-action-footer { display: flex; justify-content: flex-end; align-items: center; gap: .55rem; padding-top: .15rem; }
     .legal-reader-layout { min-height: 0; display: grid; grid-template-columns: minmax(170px, .55fr) minmax(0, 1.8fr); flex: 1; overflow: hidden; }
     .legal-reader-index { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; background: rgba(91, 67, 58, .035); border-right: 1px solid rgba(59, 41, 35, .08); scrollbar-gutter: stable; }
     .legal-reader-index span, .legal-reader-index button { display: block; margin-bottom: .4rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
@@ -742,7 +748,7 @@
         .legal-reader-toolbar { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; }
         .legal-reader-toolbar > * { flex-shrink: 0; }
         .legal-highlight-legend { width: auto; flex-wrap: nowrap; }
-        .legal-reader-action-panel { max-height: 55%; }
+        .legal-reader-action-panel { max-height: 78%; }
         .legal-reader-layout { grid-template-columns: 1fr; grid-template-rows: minmax(120px, 32%) minmax(0, 1fr); }
         .legal-reader-index { border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
         .legal-reader-action-grid, .legal-reader-action-grid.is-note { grid-template-columns: 1fr; }
@@ -1452,12 +1458,13 @@
                                 <button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnCancelarAcaoLeitor" aria-label="Fechar formulário"><i class="bi-x-lg"></i></button>
                             </header>
                             <div class="legal-selection-preview" id="wsPreviaSelecaoLeitor"></div>
+                            <div class="legal-flashcard-reference d-none" id="wsReferenciaCardLeitor" role="note" aria-label="Referência que será incluída no flashcard"><strong>Referência automática</strong><span></span></div>
                             <form id="formAcaoLeitor">
                                 <div class="legal-reader-action-grid" id="wsCamposAcaoLeitor">
                                     <div id="wsCampoMateriaCardLeitor"><label class="form-label mb-1" for="wsMateriaCardLeitor">Salvar na matéria</label><select class="form-select form-select-sm" id="wsMateriaCardLeitor"></select></div>
                                     <div id="wsCampoPerguntaLeitor"><label class="form-label mb-1" for="wsPerguntaCardLeitor">Pergunta</label><input class="form-control form-control-sm" id="wsPerguntaCardLeitor" maxlength="5000"></div>
-                                    <div><label class="form-label mb-1" for="wsConteudoAcaoLeitor" id="wsLabelConteudoAcaoLeitor">Conteúdo</label><textarea class="form-control form-control-sm" id="wsConteudoAcaoLeitor" maxlength="10000" required></textarea></div>
-                                    <button type="submit" class="btn btn-sm btn-primary" id="btnSalvarAcaoLeitor"><i class="bi-cloud-check me-1"></i>Salvar</button>
+                                    <div class="legal-reader-answer-field"><label class="form-label mb-1" for="wsConteudoAcaoLeitor" id="wsLabelConteudoAcaoLeitor">Conteúdo</label><textarea class="form-control form-control-sm" id="wsConteudoAcaoLeitor" maxlength="10000" required></textarea></div>
+                                    <div class="legal-reader-action-footer"><button type="button" class="btn btn-sm btn-outline-secondary" id="btnCancelarAcaoLeitorRodape">Cancelar</button><button type="submit" class="btn btn-sm btn-primary px-3" id="btnSalvarAcaoLeitor"><i class="bi-cloud-check me-1"></i><span id="textoBtnSalvarAcaoLeitor">Salvar</span></button></div>
                                 </div>
                             </form>
                         </section>
@@ -2719,22 +2726,29 @@ function prepararMateriasDestinoFlashcard(materiaIdPadrao) {
     seletor.value = String(materiaIdPadrao || materiaAbertaId || "");
 }
 
-function prepararPainelAcaoLeitor({ tipo, titulo, ajuda, previa, conteudo, pergunta = "", grifoId = null, selecao = null }) {
-    acaoLeitorAtual = { tipo, grifoId, selecao, dispositivoId: dispositivoLeitorAtual?.id || null };
+function prepararPainelAcaoLeitor({ tipo, titulo, ajuda, previa, conteudo, pergunta = "", referencia = "", grifoId = null, selecao = null }) {
+    acaoLeitorAtual = { tipo, grifoId, selecao, referencia, dispositivoId: dispositivoLeitorAtual?.id || null };
     document.getElementById("wsAcaoLeitorTitulo").textContent = titulo;
     document.getElementById("wsAcaoLeitorAjuda").textContent = ajuda;
     document.getElementById("wsPreviaSelecaoLeitor").textContent = previa;
     document.getElementById("wsPerguntaCardLeitor").value = pergunta;
     const area = document.getElementById("wsConteudoAcaoLeitor");
     area.value = conteudo;
-    area.maxLength = tipo === "note" ? 5000 : 10000;
+    area.maxLength = tipo === "note" ? 5000 : Math.max(1, 10000 - referencia.length - 2);
     document.getElementById("wsLabelConteudoAcaoLeitor").textContent = tipo === "note" ? "Minha anotação" : "Resposta";
     document.getElementById("wsCampoPerguntaLeitor").classList.toggle("d-none", tipo === "note");
     document.getElementById("wsCampoMateriaCardLeitor").classList.toggle("d-none", tipo === "note");
     document.getElementById("wsCamposAcaoLeitor").classList.toggle("is-note", tipo === "note");
+    const faixaReferencia = document.getElementById("wsReferenciaCardLeitor");
+    faixaReferencia.classList.toggle("d-none", tipo === "note");
+    faixaReferencia.querySelector("span").textContent = referencia;
+    document.getElementById("textoBtnSalvarAcaoLeitor").textContent = tipo === "note" ? "Salvar anotação" : "Criar flashcard";
     if (tipo === "flashcard") prepararMateriasDestinoFlashcard(materiaAbertaId);
-    document.getElementById("wsPainelAcaoLeitor").classList.remove("d-none");
-    area.focus();
+    const painelAcao = document.getElementById("wsPainelAcaoLeitor");
+    painelAcao.classList.remove("d-none");
+    painelAcao.scrollTop = 0;
+    painelAcao.scrollIntoView({ block: "nearest", behavior: "auto" });
+    area.focus({ preventScroll: true });
 }
 
 function abrirPainelAnotacaoLeitor(grifo = null) {
@@ -2763,7 +2777,6 @@ function abrirPainelFlashcardLeitor() {
     const selecao = obterSelecaoAtualLeitor(limiteBase);
     const conteudoIntegral = dispositivoLeitorAtual.conteudo;
     const respostaBase = selecao?.texto || conteudoIntegral.slice(0, limiteBase);
-    const resposta = `${respostaBase}\n\n${rodape}`;
     const truncado = !selecao && conteudoIntegral.length > respostaBase.length;
     prepararPainelAcaoLeitor({
         tipo: "flashcard",
@@ -2771,10 +2784,11 @@ function abrirPainelFlashcardLeitor() {
         ajuda: truncado ? "O artigo é extenso; a resposta foi limitada e pode ser editada antes de salvar." : "Revise a pergunta e a resposta antes de salvar no conjunto da matéria.",
         previa: selecao?.texto || `${dispositivoLeitorAtual.rotulo} completo como base`,
         pergunta: `O que dispõe o ${dispositivoLeitorAtual.rotulo} da ${documentoLeitorAtual.tituloCurto}?`,
-        conteudo: resposta,
+        conteudo: respostaBase,
+        referencia: rodape,
         selecao
     });
-    document.getElementById("wsPerguntaCardLeitor").focus();
+    document.getElementById("wsPerguntaCardLeitor").focus({ preventScroll: true });
 }
 
 async function criarGrifoLeitor(materia, selecao, nota = "") {
@@ -3017,19 +3031,23 @@ document.getElementById("modalMateria").addEventListener("hidden.bs.modal", () =
 document.getElementById("btnAnotarTrecho").addEventListener("click", () => abrirPainelAnotacaoLeitor());
 document.getElementById("btnCriarCardArtigo").addEventListener("click", abrirPainelFlashcardLeitor);
 document.getElementById("btnCancelarAcaoLeitor").addEventListener("click", fecharPainelAcaoLeitor);
+document.getElementById("btnCancelarAcaoLeitorRodape").addEventListener("click", fecharPainelAcaoLeitor);
 
 document.getElementById("formAcaoLeitor").addEventListener("submit", async evento => {
     evento.preventDefault();
     if (!acaoLeitorAtual || !dispositivoLeitorAtual) return;
     const materia = materiaPorId(materiaAbertaId);
-    const conteudo = document.getElementById("wsConteudoAcaoLeitor").value.trim();
+    const conteudoDigitado = document.getElementById("wsConteudoAcaoLeitor").value.trim();
+    const conteudo = acaoLeitorAtual.tipo === "flashcard" && acaoLeitorAtual.referencia
+        ? `${conteudoDigitado}\n\n${acaoLeitorAtual.referencia}`
+        : conteudoDigitado;
     const pergunta = document.getElementById("wsPerguntaCardLeitor").value.trim();
     const materiaDestinoId = document.getElementById("wsMateriaCardLeitor").value;
     const materiaDestino = materiaPorId(materiaDestinoId);
     const botao = document.getElementById("btnSalvarAcaoLeitor");
     const status = document.getElementById("wsLeitorOrientacao");
     const sessao = capturarSessaoHubAtual();
-    if (!materia || !conteudo || (acaoLeitorAtual.tipo === "flashcard" && (!pergunta || !materiaDestino))) {
+    if (!materia || !conteudoDigitado || (acaoLeitorAtual.tipo === "flashcard" && (!pergunta || !materiaDestino))) {
         status.textContent = "Preencha os campos do formulário antes de salvar.";
         return;
     }

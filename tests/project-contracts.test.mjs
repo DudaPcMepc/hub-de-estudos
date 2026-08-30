@@ -250,12 +250,18 @@ test("anotações e flashcards do leitor usam os repositórios seguros já exist
     assert.doesNotMatch(html, /id="btnCriarCardArtigo"[^>]*disabled/);
     assert.match(html, /id="wsPainelAcaoLeitor"/);
     assert.match(html, /id="wsMateriaCardLeitor"/);
+    assert.match(html, /id="wsReferenciaCardLeitor"[^>]*aria-label="Referência que será incluída no flashcard"/);
+    assert.match(html, /class="legal-reader-answer-field"/);
+    assert.match(html, /class="legal-reader-action-footer"/);
+    assert.match(html, /id="btnCancelarAcaoLeitorRodape"/);
+    assert.match(html, /id="textoBtnSalvarAcaoLeitor"/);
     assert.match(html, /prepararMateriasDestinoFlashcard[\s\S]*?materiasNormalizadas\(\)\.map/);
     assert.match(html, /function obterSelecaoAtualLeitor\(limite = 2000\)/);
     assert.match(html, /function abrirPainelAnotacaoLeitor\(grifo = null\)/);
     assert.match(html, /const rodape = `Referência: \$\{referencia\}/);
     assert.match(html, /Fonte oficial: \$\{fonte\}/);
     assert.match(html, /const limiteBase = Math\.max\(1, 10000 - rodape\.length - 2\)/);
+    assert.match(html, /conteudoDigitado[\s\S]*?acaoLeitorAtual\.referencia[\s\S]*?`\$\{conteudoDigitado\}\\n\\n\$\{acaoLeitorAtual\.referencia\}`/);
     assert.match(html, /materiaDestino\.cards\.some/);
     assert.match(html, /criarFlashcardSincronizado\(pergunta, conteudo, \{ preservarLeitor: true, materiaId: materiaDestinoId, propagarErro: true \}\)/);
     assert.match(html, /if \(propagarErro\) throw erro;/);
