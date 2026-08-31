@@ -132,6 +132,8 @@
 .mind-map-save-status.is-saving { color: #9a6a15; }
 .mind-map-save-status.is-error { color: var(--pimentel-vermelho-escuro); }
 .mind-map-toolbar {
+    position: relative;
+    z-index: 15;
     display: flex;
     align-items: center;
     gap: .45rem;
@@ -142,6 +144,8 @@
 }
 .mind-map-tool-group { display: flex; align-items: center; gap: .25rem; padding-right: .45rem; border-right: 1px solid rgba(59, 41, 35, .09); }
 .mind-map-tool-group:last-child { border-right: 0; }
+.mind-map-mobile-panel-header { display: none; }
+.mind-map-mobile-extra { display: contents; }
 .mind-map-tool {
     min-width: 2.15rem;
     min-height: 2.15rem;
@@ -157,6 +161,7 @@
     font-size: .72rem;
     white-space: nowrap;
 }
+.mind-map-toolbar .mind-map-mobile-more { display: none; }
 .mind-map-tool:hover:not(:disabled), .mind-map-tool.active { color: #fff; background: var(--pimentel-vermelho-escuro); }
 .mind-map-tool:disabled { opacity: .35; }
 .mind-map-tool-danger:hover:not(:disabled) { background: #a52b25; }
@@ -229,8 +234,30 @@
     .mind-map-editor { height: calc(100dvh - 165px); min-height: 500px; margin: -1rem -.8rem -1.5rem; }
     .mind-map-editor-header { padding: .45rem .55rem; }
     .mind-map-save-status { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
-    .mind-map-toolbar { padding: .4rem .45rem; }
+    .mind-map-toolbar { justify-content: space-between; padding: .4rem .45rem; overflow: visible; }
+    .mind-map-primary-tools { flex: 1; justify-content: space-around; padding-right: 0; border-right: 0; }
+    .mind-map-toolbar .mind-map-mobile-more { display: inline-flex; flex: 0 0 auto; }
+    .mind-map-mobile-extra {
+        position: absolute;
+        display: none;
+        top: calc(100% + .35rem);
+        right: .45rem;
+        left: .45rem;
+        z-index: 35;
+        max-height: min(54vh, 420px);
+        padding: .7rem;
+        overflow-y: auto;
+        background: rgba(255, 253, 249, .98);
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: .9rem;
+        box-shadow: 0 1rem 2.2rem rgba(41, 33, 30, .2);
+    }
+    .mind-map-mobile-extra.is-open { display: flex; flex-direction: column; gap: .55rem; }
+    .mind-map-mobile-panel-header { display: flex; align-items: center; justify-content: space-between; color: var(--pimentel-cafe); font-size: .82rem; }
+    .mind-map-mobile-extra .mind-map-tool-group { width: 100%; flex-wrap: wrap; padding: 0 0 .55rem; border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .mind-map-mobile-extra .mind-map-tool-group:last-child { padding-bottom: 0; border-bottom: 0; }
     .mind-map-tool span { display: none; }
+    .mind-map-mobile-extra .mind-map-tool span { display: inline; }
     .mind-map-line-style { width: 112px; }
     .mind-map-hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mind-map-minimap { width: 120px; height: 74px; }

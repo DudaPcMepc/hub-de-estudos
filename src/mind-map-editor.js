@@ -43,6 +43,9 @@ export function criarEditorMapasMentais(repositorio) {
         titulo: document.getElementById("mindMapTitleInput"),
         status: document.getElementById("mindMapSaveStatus"),
         ferramentas: [...document.querySelectorAll("[data-mind-tool]")],
+        mobileMore: document.getElementById("btnMindMobileTools"),
+        mobileExtra: document.getElementById("mindMapMobileExtra"),
+        mobileClose: document.getElementById("btnMindMobileToolsClose"),
         cor: document.getElementById("mindMapColor"),
         estiloLinha: document.getElementById("mindMapLineStyle"),
         undo: document.getElementById("btnMindUndo"),
@@ -112,6 +115,11 @@ export function criarEditorMapasMentais(repositorio) {
     function definirStatusBiblioteca(texto, erro = false) {
         dom.statusBiblioteca.textContent = texto;
         dom.statusBiblioteca.className = `mind-map-status ${erro ? "is-error" : ""}`.trim();
+    }
+
+    function definirPainelMobile(aberto) {
+        dom.mobileExtra.classList.toggle("is-open", Boolean(aberto));
+        dom.mobileMore.setAttribute("aria-expanded", String(Boolean(aberto)));
     }
 
     function fecharEditorTexto(valor = null) {
@@ -206,6 +214,7 @@ export function criarEditorMapasMentais(repositorio) {
     }
 
     function selecionarFerramenta(nova) {
+        if (nova !== "eraser") definirPainelMobile(false);
         ferramenta = nova;
         origemConexaoId = null;
         dom.stage.dataset.tool = nova;
@@ -644,6 +653,7 @@ export function criarEditorMapasMentais(repositorio) {
 
     function aoPointerDown(evento) {
         if (!mapa || evento.button !== 0) return;
+        definirPainelMobile(false);
         const alvo = evento.target.closest?.("[data-mind-id]");
         const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
         const ponto = coordenada(evento);
@@ -924,6 +934,7 @@ export function criarEditorMapasMentais(repositorio) {
         if (!mapa || !dom.editor.contains(document.activeElement)) return;
         const digitando = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
         if (digitando) return;
+        if (evento.key === "Escape" && dom.mobileExtra.classList.contains("is-open")) { evento.preventDefault(); definirPainelMobile(false); return; }
         if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "z") { evento.preventDefault(); evento.shiftKey ? refazer() : desfazer(); }
         else if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "y") { evento.preventDefault(); refazer(); }
         else if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "d") { evento.preventDefault(); duplicarSelecionado(); }
@@ -933,6 +944,12 @@ export function criarEditorMapasMentais(repositorio) {
     }
 
     dom.ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.mindTool)));
+    dom.mobileMore.addEventListener("click", () => definirPainelMobile(!dom.mobileExtra.classList.contains("is-open")));
+    dom.mobileClose.addEventListener("click", () => definirPainelMobile(false));
+    dom.mobileExtra.addEventListener("click", evento => {
+        const botao = evento.target.closest("button");
+        if (botao && botao.dataset.mindTool !== "eraser") definirPainelMobile(false);
+    });
     dom.novo.addEventListener("click", () => { void novoMapa(); });
     dom.voltar.addEventListener("click", () => { void voltarBiblioteca(); });
     dom.excluirMapa.addEventListener("click", () => { void excluirMapaAtual(); });
@@ -999,6 +1016,7 @@ export function criarEditorMapasMentais(repositorio) {
         async salvarPendente() { return salvarAgora(); },
         temPendente() { return sujo || Boolean(salvamento); },
         encerrar() {
+            definirPainelMobile(false);
             carregamentoToken += 1;
             clearTimeout(timerSalvar);
             materiaId = null;

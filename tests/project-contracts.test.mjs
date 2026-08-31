@@ -98,6 +98,7 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     const html = readProjectFile("index.html");
     const auth = readProjectFile("src/auth.js");
     const editor = readProjectFile("src/mind-map-editor.js");
+    const mindMapCss = readProjectFile("src/mind-map.css");
     const repository = readProjectFile("src/cloud-core-repository.js");
     const migration = readProjectFile("supabase/migrations/202608310001_personal_mind_maps.sql");
 
@@ -109,6 +110,8 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     assert.match(html, /data-mind-tool="eraser"/);
     assert.match(html, /id="mindMapEraserSize"[^>]*min="10"[^>]*max="72"/);
     assert.match(html, /id="btnMindLock"/);
+    assert.match(html, /id="btnMindMobileTools"[^>]*aria-controls="mindMapMobileExtra"/);
+    assert.match(html, /id="mindMapMobileExtra"/);
     assert.match(editor, /export function criarEditorMapasMentais/);
     assert.match(editor, /function registrarHistorico\(\)/);
     assert.match(editor, /tipo: "pending-move"/);
@@ -116,6 +119,10 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     assert.match(editor, /if \(distancia < 5\) return/);
     assert.match(editor, /item\.payload\.locked = !item\.payload\.locked/);
     assert.match(editor, /function apagarTracos\(ponto, raio\)/);
+    assert.match(editor, /function definirPainelMobile\(aberto\)/);
+    assert.match(editor, /dom\.mobileMore\.setAttribute\("aria-expanded"/);
+    assert.match(mindMapCss, /\.mind-map-mobile-extra\.is-open \{ display: flex/);
+    assert.match(mindMapCss, /\.mind-map-primary-tools \{ flex: 1/);
     assert.match(editor, /setTimeout\(\(\) => \{ void salvarAgora\(\); \}, 900\)/);
     assert.match(editor, /repositorio\.salvarConteudo\(mapa\.id/);
     assert.match(repository, /export async function carregarMapasMentais/);
