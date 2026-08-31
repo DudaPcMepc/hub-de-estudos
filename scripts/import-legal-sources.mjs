@@ -61,7 +61,7 @@ function chaveArtigo(numero) {
     return `art-${numero.toLowerCase()}`;
 }
 
-const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3}(?:-[A-Z])*)\s*(?:º|\.)?\s*/iu;
+const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3})\s*(?:º|o)?\s*(?:-\s*([A-Z](?:-[A-Z])*))?\s*\.?\s*/iu;
 
 function notaEditorialIsolada(texto) {
     return /^(?:\([^)]*\)\s*)+$/u.test(texto);
@@ -136,7 +136,7 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
         if (artigo) {
             concluir();
             estruturaComplementavel = null;
-            const numero = artigo[1].toUpperCase();
+            const numero = `${artigo[1]}${artigo[2] ? `-${artigo[2]}` : ""}`.toUpperCase();
             const caminho = [raiz, ...niveis.map(nivel => hierarquia.get(nivel))].filter(Boolean);
             atual = {
                 chave: chaveArtigo(numero),

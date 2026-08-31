@@ -244,7 +244,10 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /Abrir Vade Mecum/);
     assert.doesNotMatch(html, /Visualizar protótipo/);
     assert.match(html, /id="wsCatalogoVade"/);
-    assert.match(html, /id="btnAbrirCatalogoVade"/);
+    assert.match(html, /id="wsInicioBiblioteca"/);
+    assert.match(html, /id="btnVoltarCatalogoBiblioteca"/);
+    assert.doesNotMatch(html, /id="btnAbrirInicioBiblioteca"/);
+    assert.doesNotMatch(html, /id="btnAbrirCatalogoVade"/);
     assert.match(html, /const CATALOGO_VADE_DIGITAL = Object\.freeze/);
     assert.equal((html.match(/categoriaNome:/g) || []).length, 12);
     assert.match(html, /Estatuto Geral das Guardas Municipais/);
@@ -257,10 +260,18 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /\.vade-catalog-toolbar \{[^}]*gap: 12px;/);
     assert.match(html, /class="badge rounded-pill vade-law-source"/);
     assert.match(html, /class="btn btn-sm vade-law-pending-action" disabled/);
-    assert.match(html, /id="btnAbrirVadeDireto"/);
+    assert.doesNotMatch(html, /id="btnAbrirVadeDireto"/);
     assert.match(html, /id="btnMostrarRecursosBiblioteca"/);
+    assert.match(html, /Configurar recursos da biblioteca/);
+    assert.match(html, /\["materia", "Para esta matéria"\]/);
+    assert.match(html, /\["disponiveis", "Disponíveis agora"\]/);
+    assert.match(html, /function itemCatalogoRelacionadoMateria\(item, materia\)/);
+    assert.match(html, /class="vade-pending-group"/);
+    assert.match(html, /function renderizarInicioBiblioteca\(materia\)/);
+    assert.match(html, /id="wsRecomendadosBiblioteca"/);
+    assert.match(html, /id="wsResumoCadernos"/);
     assert.match(html, /<i class="bi-play-fill me-1"><\/i>Retomar/);
-    assert.match(html, /Clique na estrela ao ler um artigo para salvá-lo aqui/);
+    assert.match(html, /Favorite artigos para encontrá-los aqui/);
     assert.match(architecture, /O vínculo com o catálogo comum é opcional/);
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
     assert.match(architecture, /Fase 4 concluída e fundação da Fase 5 preparada localmente/);
@@ -406,7 +417,7 @@ test("favoritos, retomada e histórico jurídico permanecem privados por usuári
     assert.match(html, /id="btnFavoritarArtigo"/);
     assert.match(html, /id="wsAtalhosLeitura"/);
     assert.match(html, /Continuar de onde parei/);
-    assert.match(html, /Artigos recentes/);
+    assert.match(html, />Recentes</);
     assert.match(html, /btn-grifo-erro/);
     assert.match(html, /registrarErro\(materia\.id,/);
     assert.match(repository, /export async function carregarEstadoLeituraJuridica/);
@@ -532,6 +543,18 @@ test("o importador jurídico reconhece a hierarquia penal e artigos com sufixos 
     assert.deepEqual(dispositivos[0].caminho, ["CÓDIGO PENAL", "PARTE ESPECIAL", "TÍTULO I — DOS CRIMES"]);
 });
 
+test("o importador preserva artigos processuais acrescidos após o ordinal", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>TÍTULO I</p><p>DISPOSIÇÕES PRELIMINARES</p>
+        <p>Art. 3º A regra geral.</p>
+        <p>Art. 3º-A. A estrutura acusatória.</p>
+        <p>Art. 3º-B. O juiz das garantias.</p>
+    `, { raiz: "CÓDIGO DE PROCESSO PENAL" });
+
+    assert.deepEqual(dispositivos.map(item => item.chave), ["art-3", "art-3-a", "art-3-b"]);
+    assert.equal(dispositivos[1].conteudo, "A estrutura acusatória.");
+});
+
 test("o importador associa a epígrafe ao artigo correto sem contaminar o artigo anterior", () => {
     const dispositivos = extrairDispositivos(`
         <p>PARTE GERAL</p><p>TÍTULO I</p><p>DA APLICAÇÃO DA LEI PENAL</p>
@@ -576,6 +599,26 @@ test("a correção do Código Penal cria nova versão e preserva todos os dados 
     assert.match(migration, /novo\.provision_key = antigo\.provision_key/g);
     assert.match(migration, /set current_version_id = '21000000-0000-4000-8000-000000000005'/);
     assert.match(html, /epigrafe \? `\$\{dispositivo\.rotulo\} — \$\{epigrafe\}` : dispositivo\.rotulo/);
+});
+
+test("o núcleo processual mantém CPP e Prisão Temporária completos e separados", () => {
+    const html = readProjectFile("index.html");
+    const migration = readProjectFile("supabase/migrations/202608310002_complete_criminal_procedure_core.sql");
+    const chavesImportadas = [...migration.matchAll(/"chave":"art-/g)];
+
+    assert.ok(chavesImportadas.length >= 852, `esperados ao menos 852 dispositivos, encontrados ${chavesImportadas.length}`);
+    assert.match(migration, /codigo-processo-penal-decreto-lei-3689-1941/);
+    assert.match(migration, /prisao-temporaria-lei-7960-1989/);
+    assert.match(migration, /del3689compilado\.htm/);
+    assert.match(migration, /leis\/l7960\.htm/);
+    assert.match(migration, /"chave":"art-3-a"/);
+    assert.match(migration, /"chave":"art-811"/);
+    assert.match(migration, /Texto integral da Lei nº 7\.960\/1989 — arts\. 1º a 7º/);
+    assert.equal((migration.match(/10000000-0000-4000-8000-000000000003/g) || []).length, 2);
+    assert.doesNotMatch(migration, /10000000-0000-4000-8000-000000000002/);
+    assert.doesNotMatch(migration, /10000000-0000-4000-8000-000000000005/);
+    assert.match(html, /\["cpp", "prisao-temporaria"\]\.includes\(item\.id\)/);
+    assert.match(html, /if \(chave\.includes\("penal"\)\) return item\.id === "cp"/);
 });
 
 test("a biblioteca carrega somente versões atuais e pagina cada documento jurídico", () => {
