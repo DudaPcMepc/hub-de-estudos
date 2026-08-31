@@ -537,9 +537,25 @@
         background: #fff;
         border-bottom: 1px solid rgba(59, 41, 35, .1);
     }
-    .subject-workspace-header .flex-grow-1 { min-width: 0; }
+    .subject-workspace-title { min-width: 0; display: grid; gap: .38rem; }
     .subject-workspace-header h1,
-    .subject-workspace-header #wsSubtitulo { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .subject-workspace-header #wsSubtitulo { overflow: hidden; }
+    .subject-workspace-metrics { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .subject-workspace-metric {
+        display: inline-flex;
+        align-items: center;
+        gap: .28rem;
+        padding: .24rem .5rem;
+        color: var(--pimentel-cafe-claro);
+        background: rgba(91, 67, 58, .065);
+        border-radius: 999px;
+        font-size: .66rem;
+        font-weight: 650;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .subject-workspace-metric:first-child { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); }
+    .subject-workspace-export { align-self: center; color: var(--pimentel-cafe-claro); border-color: rgba(59, 41, 35, .14); }
     .subject-workspace-back {
         width: 2.45rem;
         height: 2.45rem;
@@ -621,7 +637,7 @@
         gap: 1rem;
         margin-block: .35rem 1rem;
         padding: .35rem 0 .85rem;
-        border-bottom: 1px solid rgba(59, 41, 35, .1);
+        border-bottom: 1px solid rgba(59, 41, 35, .08);
     }
     .library-hero-icon {
         width: 3.25rem;
@@ -637,8 +653,29 @@
     }
     .library-hero h6 { color: var(--pimentel-cafe); }
     .library-hero p { color: var(--pimentel-cafe-claro); font-size: .78rem; }
-    .library-view-nav .btn { border-radius: 999px; }
-    .library-view-nav .btn.is-active { color: #fff; background: var(--pimentel-vermelho); border-color: var(--pimentel-vermelho); }
+    .library-view-nav .library-settings-button { width: 2rem; padding-inline: 0; }
+    .library-subview-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
+    .library-back-button { display: inline-flex; align-items: center; gap: .35rem; padding-inline: 0; color: var(--pimentel-cafe-claro); text-decoration: none; }
+    .library-back-button:hover { color: var(--pimentel-vermelho-escuro); }
+    .library-home { display: grid; gap: .85rem; }
+    .library-home-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(230px, .75fr); gap: .85rem; }
+    .library-home-section { min-width: 0; padding: .9rem; background: rgba(255, 253, 249, .8); border: 1px solid rgba(59, 41, 35, .09); border-radius: .9rem; }
+    .library-home-section-header { display: flex; align-items: center; justify-content: space-between; gap: .7rem; margin-bottom: .7rem; }
+    .library-home-section-header h6 { color: var(--pimentel-cafe); font-size: .82rem; }
+    .library-recommended-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+    .library-recommended-card { min-width: 0; display: flex; align-items: center; gap: .65rem; padding: .7rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .08); border-radius: .75rem; }
+    .library-recommended-icon { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .075); border-radius: .6rem; }
+    .library-recommended-copy { min-width: 0; flex: 1; }
+    .library-recommended-copy strong, .library-recommended-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .library-recommended-copy strong { color: var(--pimentel-cafe); font-size: .73rem; }
+    .library-recommended-copy small { color: var(--pimentel-cafe-claro); font-size: .62rem; }
+    .library-notebook-preview { display: grid; gap: .65rem; }
+    .library-notebook-count { display: flex; align-items: center; gap: .65rem; color: var(--pimentel-cafe-claro); }
+    .library-notebook-count i { color: var(--pimentel-vermelho-escuro); font-size: 1.55rem; }
+    .library-notebook-count strong { display: block; color: var(--pimentel-cafe); font-size: 1.1rem; }
+    .library-notebook-latest { padding: .55rem .65rem; color: var(--pimentel-cafe-claro); background: rgba(244, 226, 212, .25); border-radius: .65rem; font-size: .7rem; line-height: 1.5; }
+    .library-notebook-action { color: #fff; background: var(--pimentel-vermelho); border-color: var(--pimentel-vermelho); }
+    .library-notebook-action:hover { color: #fff; background: var(--pimentel-vermelho-escuro); border-color: var(--pimentel-vermelho-escuro); }
     .library-widget {
         height: 100%;
         display: flex;
@@ -713,7 +750,13 @@
     .vade-catalog-filters { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .4rem; }
     .vade-catalog-filter.is-active { color: #fff; background: var(--pimentel-vermelho); border-color: var(--pimentel-vermelho); }
     .vade-catalog-summary { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; padding: .65rem .75rem; color: var(--pimentel-cafe-claro); background: rgba(244, 226, 212, .3); border-radius: .7rem; font-size: .7rem; }
-    .vade-catalog-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+    .vade-catalog-grid { display: grid; gap: .9rem; }
+    .vade-catalog-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+    .vade-catalog-section-title { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .55rem; color: var(--pimentel-cafe); font-size: .72rem; }
+    .vade-pending-group { padding-top: .15rem; border-top: 1px solid rgba(59, 41, 35, .07); }
+    .vade-pending-group summary { display: flex; align-items: center; justify-content: space-between; gap: .7rem; padding: .55rem .1rem; color: var(--pimentel-cafe-claro); cursor: pointer; list-style: none; font-size: .72rem; font-weight: 700; }
+    .vade-pending-group summary::-webkit-details-marker { display: none; }
+    .vade-pending-group[open] summary { color: var(--pimentel-vermelho-escuro); }
     .vade-law-card { min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
     .vade-law-card.is-pending { background: rgba(255, 253, 249, .68); border-style: dashed; }
     .vade-law-body { display: flex; align-items: flex-start; flex: 1; gap: .7rem; padding: .85rem; }
@@ -731,19 +774,23 @@
     .vade-law-pending-action:disabled { color: rgba(91, 67, 58, .58); background: rgba(91, 67, 58, .07); border-color: rgba(59, 41, 35, .1); opacity: .62; box-shadow: none; }
     .vade-catalog-empty { grid-column: 1 / -1; padding: 2rem 1rem; text-align: center; color: var(--pimentel-cafe-claro); border: 1px dashed rgba(59, 41, 35, .14); border-radius: .85rem; }
     .vade-catalog-note { margin: .85rem 0 0; color: rgba(91, 67, 58, .72); font-size: .64rem; line-height: 1.45; }
-    @media (max-width: 991.98px) { .vade-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 575.98px) { .vade-catalog-summary { align-items: stretch; flex-direction: column; } .vade-catalog-grid { grid-template-columns: 1fr; } }
-    .legal-reading-overview { margin-bottom: 1rem; padding: .8rem; background: rgba(255, 253, 249, .8); border: 1px solid rgba(59, 41, 35, .09); border-radius: .9rem; }
-    .legal-reading-overview-grid { display: grid; grid-template-columns: minmax(210px, 1.2fr) repeat(2, minmax(170px, 1fr)); gap: .65rem; }
-    .legal-reading-shortcut { min-width: 0; padding: .7rem .8rem; text-align: left; background: rgba(244, 226, 212, .24); border: 1px solid rgba(59, 41, 35, .08); border-radius: .7rem; }
+    @media (max-width: 991.98px) { .library-home-grid { grid-template-columns: 1fr; } .vade-catalog-items { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 575.98px) { .library-recommended-grid { grid-template-columns: 1fr; } .vade-catalog-summary { align-items: stretch; flex-direction: column; } .vade-catalog-items { grid-template-columns: 1fr; } }
+    .legal-reading-overview { padding: .75rem; background: rgba(255, 253, 249, .8); border: 1px solid rgba(59, 41, 35, .08); border-radius: .9rem; }
+    .legal-reading-overview-grid { display: grid; grid-template-columns: minmax(250px, 1.05fr) minmax(0, .95fr); gap: .65rem; }
+    .legal-reading-secondary { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+    .legal-reading-shortcut { min-width: 0; padding: .75rem .85rem; text-align: left; background: rgba(244, 226, 212, .2); border: 1px solid rgba(59, 41, 35, .07); border-radius: .7rem; }
     .legal-reading-shortcut:hover { border-color: rgba(184, 50, 42, .28); background: rgba(184, 50, 42, .055); }
     .legal-reading-shortcut strong, .legal-reading-shortcut small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .legal-reading-shortcut strong { color: var(--pimentel-cafe); font-size: .76rem; }
-    .legal-reading-shortcut small { margin-top: .18rem; color: var(--pimentel-cafe-claro); font-size: .65rem; }
-    .legal-reading-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
-    .legal-reading-chip { max-width: 100%; color: var(--pimentel-cafe-claro); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: 999px; font-size: .65rem; }
-    .legal-reading-resume { display: flex; align-items: flex-end; justify-content: space-between; gap: .65rem; margin-top: .65rem; }
-    .legal-reading-resume small { min-width: 0; }
+    .legal-reading-shortcut strong { color: var(--pimentel-cafe); font-size: .78rem; }
+    .legal-reading-shortcut small { margin-top: .18rem; color: var(--pimentel-cafe-claro); font-size: .68rem; }
+    .legal-reading-list { display: grid; gap: .32rem; margin-top: .55rem; }
+    .legal-reading-chip { width: 100%; max-width: 100%; padding: .35rem .48rem; overflow: hidden; color: var(--pimentel-cafe-claro); background: #fffdf9; border: 0; border-radius: .45rem; font-size: .69rem; line-height: 1.35; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+    .legal-reading-chip:hover { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .055); }
+    .legal-reading-resume { display: flex; align-items: center; gap: .7rem; margin-top: .55rem; }
+    .legal-reading-resume-copy { min-width: 0; flex: 1; }
+    .legal-reading-resume-title { display: block; overflow: hidden; color: var(--pimentel-cafe); font-size: .74rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .legal-reading-resume-meta { display: block; margin-top: .18rem; color: rgba(91, 67, 58, .72); font-size: .62rem; }
     .legal-reading-empty { display: flex; align-items: flex-start; gap: .45rem; margin-top: .55rem; color: var(--pimentel-cafe-claro); font-size: .64rem; line-height: 1.4; }
     .legal-reading-empty i { flex-shrink: 0; color: rgba(91, 67, 58, .48); font-size: 1rem; }
     .legal-reader-prototype {
@@ -859,7 +906,7 @@
     #modalMateria.legal-focus-mode .legal-reader-paper { overflow-y: auto; padding: 2.2rem max(1.25rem, calc((100vw - 850px) / 2)); font-family: Georgia, "Times New Roman", serif; font-size: 1.03rem; line-height: 1.85; }
     #modalMateria.legal-focus-mode .legal-reader-paper-text { font-size: 1rem; }
     #modalMateria.legal-focus-mode #btnModoFoco { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); }
-    @media (max-width: 800px) { .legal-reading-overview-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .legal-reading-overview-grid, .legal-reading-secondary { grid-template-columns: 1fr; } }
     .tag-nota { font-size: .68rem; }
     .auth-shell {
         min-height: 100vh;
@@ -1444,9 +1491,9 @@
         <header class="subject-workspace-header">
             <button class="subject-workspace-back" id="btnVoltarMaterias" type="button" aria-label="Voltar para minhas matérias" title="Voltar para minhas matérias"><i class="bi-arrow-left"></i></button>
             <span class="badge-cor bg-secondary me-2" id="wsCorMateria"><i class="bi-journal-bookmark-fill"></i></span>
-            <div class="flex-grow-1">
+            <div class="subject-workspace-title flex-grow-1">
                 <h1 class="h5 fw-bold mb-0" id="wsNomeMateria">Matéria</h1>
-                <span class="small text-muted" id="wsSubtitulo"></span>
+                <div class="subject-workspace-metrics" id="wsSubtitulo" aria-label="Resumo da matéria"></div>
             </div>
             <button class="btn btn-sm btn-outline-secondary subject-workspace-export" id="btnExportarMateria" title="Baixar tudo desta matéria em .md"><i class="bi-download me-1"></i><span>Exportar</span></button>
         </header>
@@ -1676,14 +1723,25 @@
                             <h6 class="fw-bold mb-1" id="wsBibliotecaTitulo">Biblioteca da matéria</h6>
                             <p class="mb-0" id="wsBibliotecaDescricao"></p>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 flex-shrink-0 library-view-nav" aria-label="Áreas da biblioteca">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAbrirCatalogoVade"><i class="bi-bookshelf me-1"></i>Catálogo</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAbrirVadeDireto"><i class="bi-journals me-1"></i>Meus cadernos</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnMostrarRecursosBiblioteca"><i class="bi-grid me-1"></i>Recursos</button>
+                        <div class="d-flex flex-shrink-0 library-view-nav">
+                            <button type="button" class="btn btn-sm btn-outline-secondary library-settings-button" id="btnMostrarRecursosBiblioteca" aria-label="Configurar recursos da biblioteca" title="Configurar recursos"><i class="bi-gear"></i></button>
                         </div>
                     </div>
-                    <section class="legal-reading-overview" id="wsAtalhosLeitura" aria-label="Atalhos pessoais de leitura"></section>
-                    <section class="vade-catalog-panel" id="wsCatalogoVade" aria-labelledby="wsBibliotecaTitulo">
+                    <section class="library-home" id="wsInicioBiblioteca" aria-label="Início da biblioteca">
+                        <section class="legal-reading-overview" id="wsAtalhosLeitura" aria-label="Atalhos pessoais de leitura"></section>
+                        <div class="library-home-grid">
+                            <section class="library-home-section" aria-labelledby="wsRecomendadosTitulo">
+                                <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsRecomendadosTitulo"><i class="bi-stars me-1"></i>Para esta matéria</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerTodoCatalogo">Ver catálogo</button></header>
+                                <div class="library-recommended-grid" id="wsRecomendadosBiblioteca"></div>
+                            </section>
+                            <section class="library-home-section" aria-labelledby="wsCadernosResumoTitulo">
+                                <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsCadernosResumoTitulo"><i class="bi-journals me-1"></i>Meus cadernos</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerCadernosBiblioteca">Abrir</button></header>
+                                <div class="library-notebook-preview" id="wsResumoCadernos"></div>
+                            </section>
+                        </div>
+                    </section>
+                    <section class="vade-catalog-panel d-none" id="wsCatalogoVade" aria-labelledby="wsBibliotecaTitulo">
+                        <div class="library-subview-header"><button type="button" class="btn btn-sm btn-link library-back-button" id="btnVoltarCatalogoBiblioteca"><i class="bi-arrow-left"></i>Voltar à Biblioteca</button><strong class="small">Catálogo jurídico</strong></div>
                         <div class="vade-catalog-toolbar">
                             <label class="vade-catalog-search" for="buscaCatalogoVade"><i class="bi-search" aria-hidden="true"></i><input type="search" class="form-control form-control-sm" id="buscaCatalogoVade" placeholder="Buscar norma, número ou área"></label>
                             <div class="vade-catalog-filters" id="filtrosCatalogoVade" aria-label="Filtrar normas por área"></div>
@@ -1695,7 +1753,7 @@
                     <section class="personal-vade-panel d-none" id="wsVadePanel" aria-labelledby="wsVadeTitulo">
                         <header class="personal-vade-header">
                             <div><h6 class="fw-bold mb-1" id="wsVadeTitulo"><i class="bi-journals me-1"></i>Meu Vade Mecum</h6><p class="mb-0">Monte cadernos privados com as normas oficiais disponíveis na Biblioteca.</p></div>
-                            <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-primary" id="btnNovoVade"><i class="bi-plus-lg me-1"></i>Novo caderno</button><button type="button" class="btn btn-sm btn-outline-secondary" id="btnFecharVade" aria-label="Fechar Meu Vade Mecum"><i class="bi-x-lg"></i></button></div>
+                            <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-primary" id="btnNovoVade"><i class="bi-plus-lg me-1"></i>Novo caderno</button><button type="button" class="btn btn-sm btn-link library-back-button" id="btnFecharVade"><i class="bi-arrow-left"></i>Biblioteca</button></div>
                         </header>
                         <div class="personal-vade-status" id="wsVadeStatus" role="status" aria-live="polite"></div>
                         <form class="personal-vade-form d-none" id="formVade">
@@ -1710,7 +1768,7 @@
                     </section>
                     <section class="d-none" id="wsRecursosMateria" aria-labelledby="wsRecursosTitulo">
                         <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                            <div><h6 class="fw-bold mb-1" id="wsRecursosTitulo">Recursos da matéria</h6><small class="text-muted">Escolha quais ferramentas deseja manter nesta biblioteca.</small></div>
+                            <div><button type="button" class="btn btn-sm btn-link library-back-button mb-1" id="btnVoltarRecursosBiblioteca"><i class="bi-arrow-left"></i>Voltar à Biblioteca</button><h6 class="fw-bold mb-1" id="wsRecursosTitulo">Recursos da matéria</h6><small class="text-muted">Escolha quais ferramentas deseja manter nesta biblioteca.</small></div>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="btnOrganizarWidgets"><i class="bi-sliders me-1"></i>Organizar</button>
                         </div>
                         <section class="library-widget-settings d-none" id="wsConfigWidgets" aria-label="Organização dos widgets">
@@ -2601,6 +2659,7 @@ let cardEmEdicaoId = null;
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
 let documentosJuridicos = [];
+let carregamentosDocumentosJuridicos = new Map();
 let colecoesVade = [];
 let grifosJuridicos = [];
 let favoritosJuridicos = [];
@@ -2616,7 +2675,7 @@ let acaoLeitorAtual = null;
 let selecaoContextualLeitor = null;
 let indiceLeitorRecolhido = false;
 let temporizadorSelecaoLeitor = null;
-let filtroCatalogoVade = "todos";
+let filtroCatalogoVade = "materia";
 
 const CATALOGO_VADE_DIGITAL = Object.freeze([
     { id: "cf", titulo: "Constituição Federal", referencia: "Constituição da República Federativa do Brasil de 1988", categoria: "constitucional", categoriaNome: "Constitucional", icone: "bi-bank", slugs: ["constituicao-federal-1988"] },
@@ -2784,6 +2843,42 @@ function localizarDispositivoJuridico(dispositivoId) {
     return null;
 }
 
+function referenciaDispositivoJuridico(dispositivoId) {
+    const carregado = localizarDispositivoJuridico(dispositivoId);
+    if (carregado) return carregado;
+    const estado = [...favoritosJuridicos, ...historicoLeituraJuridica].find(item => item.dispositivoId === dispositivoId);
+    if (!estado?.versaoId) return null;
+    const documento = documentosJuridicos.find(item => item.versao?.id === estado.versaoId);
+    return documento ? { documento, dispositivo: null, rotulo: estado.rotulo || "Artigo" } : null;
+}
+
+async function garantirDocumentoJuridicoCarregado(documento) {
+    if (documento?.versao?.carregada) return documento;
+    if (!documento?.versao?.id || !window.HUB_CLOUD_LEGAL?.listarDispositivos) {
+        throw new Error("A conexão para carregar o texto legal ainda não está pronta.");
+    }
+    const versaoId = documento.versao.id;
+    const carregamentosDaSessao = carregamentosDocumentosJuridicos;
+    if (!carregamentosDaSessao.has(versaoId)) {
+        let carregamentoAtual;
+        carregamentoAtual = window.HUB_CLOUD_LEGAL.listarDispositivos(versaoId)
+            .then(dispositivos => {
+                if (!Array.isArray(dispositivos)) throw new Error("O texto legal recebido é inválido.");
+                documento.versao.dispositivos = dispositivos;
+                documento.versao.carregada = true;
+                return documento;
+            })
+            .finally(() => {
+                if (carregamentosDocumentosJuridicos === carregamentosDaSessao
+                    && carregamentosDaSessao.get(versaoId) === carregamentoAtual) {
+                    carregamentosDaSessao.delete(versaoId);
+                }
+            });
+        carregamentosDaSessao.set(versaoId, carregamentoAtual);
+    }
+    return carregamentosDaSessao.get(versaoId);
+}
+
 function favoritoDoDispositivo(materiaId, dispositivoId) {
     return favoritosJuridicos.some(item => String(item.materiaId) === String(materiaId) && item.dispositivoId === dispositivoId);
 }
@@ -2794,38 +2889,47 @@ function historicoDaMateria(materiaId) {
         .sort((a, b) => String(b.ultimaLeituraEm).localeCompare(String(a.ultimaLeituraEm)));
 }
 
-function abrirAtalhoLeitura(dispositivoId, materia) {
-    const localizado = localizarDispositivoJuridico(dispositivoId);
+async function abrirAtalhoLeitura(dispositivoId, materia) {
+    const localizado = referenciaDispositivoJuridico(dispositivoId);
     if (!localizado) return;
-    abrirLeitorJuridico(localizado.documento, materia, localizado.dispositivo.id);
+    await abrirLeitorJuridico(localizado.documento, materia, dispositivoId);
+}
+
+function formatarDataHistoricoLeitura(valor) {
+    const data = new Date(valor);
+    if (!valor || Number.isNaN(data.getTime())) return "recentemente";
+    return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(data);
 }
 
 function renderizarAtalhosLeitura(materia) {
     const painel = document.getElementById("wsAtalhosLeitura");
-    const historico = historicoDaMateria(materia.id).filter(item => localizarDispositivoJuridico(item.dispositivoId));
+    const historico = historicoDaMateria(materia.id).filter(item => referenciaDispositivoJuridico(item.dispositivoId));
     const favoritos = favoritosJuridicos
-        .filter(item => String(item.materiaId) === String(materia.id) && localizarDispositivoJuridico(item.dispositivoId))
+        .filter(item => String(item.materiaId) === String(materia.id) && referenciaDispositivoJuridico(item.dispositivoId))
         .sort((a, b) => String(b.criadoEm).localeCompare(String(a.criadoEm)));
     const descricao = item => {
-        const localizado = localizarDispositivoJuridico(item.dispositivoId);
-        return localizado ? `${localizado.documento.tituloCurto} · ${localizado.dispositivo.rotulo}` : "Artigo";
+        const localizado = referenciaDispositivoJuridico(item.dispositivoId);
+        return localizado ? `${localizado.documento.tituloCurto} · ${localizado.dispositivo?.rotulo || localizado.rotulo || item.rotulo || "Artigo"}` : "Artigo";
     };
     const ultimo = historico[0];
+    const dataUltimaLeitura = ultimo ? formatarDataHistoricoLeitura(ultimo.ultimaLeituraEm) : "";
     painel.innerHTML = `<div class="legal-reading-overview-grid">
-        <div class="legal-reading-shortcut">
+        <div class="legal-reading-shortcut is-resume">
             <strong><i class="bi-play-circle me-1"></i>Continuar de onde parei</strong>
-            <div class="legal-reading-resume"><small>${ultimo ? esc(descricao(ultimo)) : "Sua última leitura aparecerá aqui."}</small>${ultimo ? `<button type="button" class="btn btn-sm btn-primary" data-reading-id="${esc(ultimo.dispositivoId)}"><i class="bi-play-fill me-1"></i>Retomar</button>` : `<span class="badge rounded-pill text-bg-light">Sem leitura</span>`}</div>
+            <div class="legal-reading-resume"><div class="legal-reading-resume-copy">${ultimo ? `<span class="legal-reading-resume-title">${esc(descricao(ultimo))}</span><span class="legal-reading-resume-meta"><i class="bi-clock me-1"></i>Última leitura em ${esc(dataUltimaLeitura)}</span>` : `<span class="legal-reading-resume-meta">Sua última leitura aparecerá aqui.</span>`}</div>${ultimo ? `<button type="button" class="btn btn-sm btn-primary" data-reading-id="${esc(ultimo.dispositivoId)}"><i class="bi-play-fill me-1"></i>Retomar</button>` : `<span class="badge rounded-pill text-bg-light">Sem leitura</span>`}</div>
         </div>
-        <div class="legal-reading-shortcut">
-            <strong><i class="bi-bookmark-heart me-1"></i>Favoritos (${favoritos.length})</strong>
-            <div class="legal-reading-list">${favoritos.length ? favoritos.slice(0, 5).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<div class="legal-reading-empty"><i class="bi-star" aria-hidden="true"></i><span>Clique na estrela ao ler um artigo para salvá-lo aqui.</span></div>`}</div>
-        </div>
-        <div class="legal-reading-shortcut">
-            <strong><i class="bi-clock-history me-1"></i>Artigos recentes</strong>
-            <div class="legal-reading-list">${historico.length ? historico.slice(0, 5).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<div class="legal-reading-empty"><i class="bi-clock" aria-hidden="true"></i><span>Os artigos que você abrir aparecerão aqui.</span></div>`}</div>
+        <div class="legal-reading-secondary">
+            <div class="legal-reading-shortcut">
+                <strong><i class="bi-bookmark-heart me-1"></i>Favoritos (${favoritos.length})</strong>
+                <div class="legal-reading-list">${favoritos.length ? favoritos.slice(0, 3).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<div class="legal-reading-empty"><i class="bi-star" aria-hidden="true"></i><span>Favorite artigos para encontrá-los aqui.</span></div>`}</div>
+            </div>
+            <div class="legal-reading-shortcut">
+                <strong><i class="bi-clock-history me-1"></i>Recentes</strong>
+                <div class="legal-reading-list">${historico.length ? historico.slice(0, 3).map(item => `<button type="button" class="btn btn-sm legal-reading-chip" data-reading-id="${esc(item.dispositivoId)}">${esc(descricao(item))}</button>`).join("") : `<div class="legal-reading-empty"><i class="bi-clock" aria-hidden="true"></i><span>Suas leituras recentes aparecerão aqui.</span></div>`}</div>
+            </div>
         </div>
     </div>`;
-    painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => abrirAtalhoLeitura(botao.dataset.readingId, materia)));
+    painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => { void abrirAtalhoLeitura(botao.dataset.readingId, materia); }));
 }
 
 function mostrarStatusHistoricoLeitura(tipo = "", mensagem = "", geracao = geracaoRegistroLeitura) {
@@ -3211,9 +3315,34 @@ function chaveBuscaCatalogoVade(valor) {
     return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
+function itemCatalogoRelacionadoMateria(item, materia) {
+    if (!materia) return false;
+    const documento = documentoDoCatalogoVade(item);
+    const relacionados = documentosJuridicosDaMateria(materia);
+    if (documento && relacionados.some(relacionado => relacionado.id === documento.id)) return true;
+    const catalogo = catalogoDaMateria(materia);
+    const chave = chaveBuscaCatalogoVade(`${catalogo?.slug || ""} ${materia.nome || ""}`);
+    if (chave.includes("constitucional")) return item.categoria === "constitucional";
+    if (chave.includes("processo penal") || chave.includes("processo-penal")) return ["cpp", "prisao-temporaria"].includes(item.id);
+    if (chave.includes("penal")) return item.id === "cp";
+    if (chave.includes("guarda") || chave.includes("gcm")) return item.id === "guardas" || item.categoria === "seguranca";
+    if (chave.includes("transito") || chave.includes("ctb")) return item.categoria === "transito";
+    if (chave.includes("legislacao") || chave.includes("extravagante")) return item.categoria === "especial";
+    return false;
+}
+
+function abrirDocumentoCatalogo(catalogoId) {
+    const item = CATALOGO_VADE_DIGITAL.find(catalogo => catalogo.id === catalogoId);
+    const documento = item ? documentoDoCatalogoVade(item) : null;
+    const materia = materiaPorId(materiaAbertaId);
+    if (documento && materia) abrirLeitorJuridico(documento, materia);
+}
+
 function renderizarCatalogoVade() {
     const busca = chaveBuscaCatalogoVade(document.getElementById("buscaCatalogoVade").value);
     const categorias = [
+        ["materia", "Para esta matéria"],
+        ["disponiveis", "Disponíveis agora"],
         ["todos", "Todas"],
         ["constitucional", "Constitucional"],
         ["penal", "Penal"],
@@ -3228,15 +3357,20 @@ function renderizarCatalogoVade() {
         renderizarCatalogoVade();
     }));
 
+    const materia = materiaPorId(materiaAbertaId);
     const itens = CATALOGO_VADE_DIGITAL.filter(item => {
-        const correspondeCategoria = filtroCatalogoVade === "todos" || item.categoria === filtroCatalogoVade;
+        const documento = documentoDoCatalogoVade(item);
+        const correspondeCategoria = filtroCatalogoVade === "todos"
+            || (filtroCatalogoVade === "materia" && itemCatalogoRelacionadoMateria(item, materia))
+            || (filtroCatalogoVade === "disponiveis" && Boolean(documento))
+            || item.categoria === filtroCatalogoVade;
         const chave = chaveBuscaCatalogoVade(`${item.titulo} ${item.referencia} ${item.categoriaNome}`);
         return correspondeCategoria && (!busca || chave.includes(busca));
     });
     const disponiveis = CATALOGO_VADE_DIGITAL.filter(documentoDoCatalogoVade).length;
     document.getElementById("resumoCatalogoVade").innerHTML = `<strong>${disponiveis} de ${CATALOGO_VADE_DIGITAL.length}</strong> normas disponíveis para leitura · ${itens.length} exibida(s)`;
     const lista = document.getElementById("listaCatalogoVade");
-    lista.innerHTML = itens.length ? itens.map(item => {
+    const card = item => {
         const documento = documentoDoCatalogoVade(item);
         const disponivel = Boolean(documento);
         return `<article class="vade-law-card ${disponivel ? "" : "is-pending"}">
@@ -3246,40 +3380,74 @@ function renderizarCatalogoVade() {
             </div>
             <div class="vade-law-actions">${disponivel ? `<button type="button" class="btn btn-sm btn-primary btn-abrir-lei-catalogo" data-catalog-id="${item.id}"><i class="bi-book me-1"></i>Abrir</button>` : `<button type="button" class="btn btn-sm vade-law-pending-action" disabled><i class="bi-clock me-1"></i>Em breve</button>`}</div>
         </article>`;
-    }).join("") : `<div class="vade-catalog-empty"><i class="bi-search d-block fs-3 mb-2" aria-hidden="true"></i><strong class="d-block mb-1">Nenhuma norma encontrada</strong><small>Tente outro termo ou selecione uma área diferente.</small></div>`;
+    };
+    const liberadas = itens.filter(documentoDoCatalogoVade);
+    const pendentes = itens.filter(item => !documentoDoCatalogoVade(item));
+    lista.innerHTML = itens.length ? `${liberadas.length ? `<section><div class="vade-catalog-section-title"><strong><i class="bi-check2-circle me-1"></i>Disponíveis para leitura</strong><span>${liberadas.length}</span></div><div class="vade-catalog-items">${liberadas.map(card).join("")}</div></section>` : ""}${pendentes.length ? `<details class="vade-pending-group"><summary><span><i class="bi-hourglass-split me-1"></i>Em preparação</span><span>${pendentes.length} norma(s) <i class="bi-chevron-down ms-1"></i></span></summary><div class="vade-catalog-items mt-2">${pendentes.map(card).join("")}</div></details>` : ""}` : `<div class="vade-catalog-empty"><i class="bi-search d-block fs-3 mb-2" aria-hidden="true"></i><strong class="d-block mb-1">Nenhuma norma encontrada</strong><small>Tente outro termo ou selecione outro filtro.</small></div>`;
     lista.querySelectorAll(".btn-abrir-lei-catalogo").forEach(botao => botao.addEventListener("click", () => {
-        const item = CATALOGO_VADE_DIGITAL.find(catalogo => catalogo.id === botao.dataset.catalogId);
-        const documento = item ? documentoDoCatalogoVade(item) : null;
-        const materia = materiaPorId(materiaAbertaId);
-        if (documento && materia) {
-            document.getElementById("wsCatalogoVade").classList.add("d-none");
-            abrirLeitorJuridico(documento, materia);
-        }
+        abrirDocumentoCatalogo(botao.dataset.catalogId);
     }));
 }
 
 function selecionarVisaoBiblioteca(tipo) {
     const visoes = {
-        catalogo: ["wsCatalogoVade", "btnAbrirCatalogoVade"],
-        cadernos: ["wsVadePanel", "btnAbrirVadeDireto"],
+        inicio: ["wsInicioBiblioteca", null],
+        catalogo: ["wsCatalogoVade", null],
+        cadernos: ["wsVadePanel", null],
         recursos: ["wsRecursosMateria", "btnMostrarRecursosBiblioteca"]
     };
     Object.entries(visoes).forEach(([chave, [painelId, botaoId]]) => {
         document.getElementById(painelId).classList.toggle("d-none", chave !== tipo);
-        document.getElementById(botaoId).classList.toggle("is-active", chave === tipo);
+        if (botaoId) document.getElementById(botaoId).classList.toggle("is-active", chave === tipo);
     });
     document.getElementById("wsLeitorPrototipo").classList.add("d-none");
 }
 
+function renderizarInicioBiblioteca(materia) {
+    renderizarAtalhosLeitura(materia);
+    const relacionados = CATALOGO_VADE_DIGITAL.filter(item => itemCatalogoRelacionadoMateria(item, materia) && documentoDoCatalogoVade(item));
+    const recomendados = (relacionados.length ? relacionados : CATALOGO_VADE_DIGITAL.filter(documentoDoCatalogoVade)).slice(0, 4);
+    const container = document.getElementById("wsRecomendadosBiblioteca");
+    container.innerHTML = recomendados.length ? recomendados.map(item => {
+        const documento = documentoDoCatalogoVade(item);
+        return `<article class="library-recommended-card"><span class="library-recommended-icon"><i class="${item.icone}" aria-hidden="true"></i></span><div class="library-recommended-copy"><strong>${esc(item.titulo)}</strong><small>${esc(documento.versao.fonteNome)}</small></div><button type="button" class="btn btn-sm btn-primary btn-abrir-recomendado" data-catalog-id="${esc(item.id)}" aria-label="Abrir ${esc(item.titulo)}"><i class="bi-book"></i></button></article>`;
+    }).join("") : `<div class="legal-reading-empty"><i class="bi-book" aria-hidden="true"></i><span>As normas recomendadas aparecerão aqui assim que forem disponibilizadas.</span></div>`;
+    container.querySelectorAll(".btn-abrir-recomendado").forEach(botao => botao.addEventListener("click", () => abrirDocumentoCatalogo(botao.dataset.catalogId)));
+
+    const totalDocumentos = colecoesVade.reduce((total, colecao) => total + (colecao.documentos?.length || 0), 0);
+    const primeiro = [...colecoesVade].sort((a, b) => Number(a.posicao || 0) - Number(b.posicao || 0))[0] || null;
+    document.getElementById("wsResumoCadernos").innerHTML = `<div class="library-notebook-count"><i class="bi-journal-bookmark-fill" aria-hidden="true"></i><div><strong>${colecoesVade.length}</strong><small>${colecoesVade.length === 1 ? "caderno privado" : "cadernos privados"} · ${totalDocumentos} norma(s)</small></div></div>${primeiro ? `<div class="library-notebook-latest"><strong class="d-block mb-1">${esc(primeiro.nome)}</strong><span>${esc(primeiro.descricao || "Caderno jurídico pessoal")}</span></div>` : `<div class="library-notebook-latest">Crie um caderno para reunir as normas importantes do seu edital.</div>`}<button type="button" class="btn btn-sm w-100 library-notebook-action" id="btnAcaoResumoCadernos"><i class="bi-${primeiro ? "journals" : "plus-lg"} me-1"></i>${primeiro ? "Ver meus cadernos" : "Criar primeiro caderno"}</button>`;
+    document.getElementById("btnAcaoResumoCadernos").addEventListener("click", () => { abrirPainelVade(); if (!primeiro) abrirFormularioVade(); });
+}
+
+function abrirInicioBiblioteca(rolar = true) {
+    const materia = materiaPorId(materiaAbertaId);
+    if (!materia) return;
+    renderizarInicioBiblioteca(materia);
+    selecionarVisaoBiblioteca("inicio");
+    if (rolar) document.getElementById("wsInicioBiblioteca").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function abrirCatalogoVade(rolar = true) {
     selecionarVisaoBiblioteca("catalogo");
-    filtroCatalogoVade = "todos";
+    filtroCatalogoVade = "materia";
     document.getElementById("buscaCatalogoVade").value = "";
     renderizarCatalogoVade();
     if (rolar) document.getElementById("wsCatalogoVade").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+async function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOrigem = String(materia?.id || "");
+    try {
+        await garantirDocumentoJuridicoCarregado(documento);
+    } catch (erro) {
+        if (!sessaoHubPermaneceAtual(sessao) || String(materiaAbertaId || "") !== materiaIdOrigem) return;
+        console.error("Falha ao carregar o documento jurídico", erro);
+        window.alert("Não foi possível carregar esta lei agora. Verifique sua conexão e tente novamente.");
+        return;
+    }
+    if (!sessaoHubPermaneceAtual(sessao) || String(materiaAbertaId || "") !== materiaIdOrigem) return;
     fecharPainelAcaoLeitor();
     fecharMenuSelecaoLeitor();
     indiceLeitorRecolhido = window.matchMedia("(max-width: 575.98px)").matches;
@@ -3289,8 +3457,8 @@ function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
     botaoIndice.setAttribute("aria-label", indiceLeitorRecolhido ? "Mostrar sumário" : "Recolher sumário");
     botaoIndice.title = indiceLeitorRecolhido ? "Mostrar sumário" : "Recolher sumário";
     botaoIndice.querySelector("i").className = "bi-layout-sidebar";
-    ["wsCatalogoVade", "wsVadePanel", "wsRecursosMateria"].forEach(id => document.getElementById(id).classList.add("d-none"));
-    ["btnAbrirCatalogoVade", "btnAbrirVadeDireto", "btnMostrarRecursosBiblioteca"].forEach(id => document.getElementById(id).classList.remove("is-active"));
+    ["wsInicioBiblioteca", "wsCatalogoVade", "wsVadePanel", "wsRecursosMateria"].forEach(id => document.getElementById(id).classList.add("d-none"));
+    document.getElementById("btnMostrarRecursosBiblioteca").classList.remove("is-active");
     documentoLeitorAtual = documento;
     dispositivoLeitorAtual = documento.versao.dispositivos.find(item => item.id === dispositivoInicialId) || documento.versao.dispositivos[0] || null;
     document.getElementById("wsLeitorEstado").textContent = "TEXTO OFICIAL ESTRUTURADO";
@@ -3518,7 +3686,6 @@ function renderizarBibliotecaMateria(materia) {
     document.getElementById("wsConfigWidgets").classList.add("d-none");
     document.getElementById("wsStatusWidgets").textContent = "";
     rascunhoWidgets = null;
-    renderizarAtalhosLeitura(materia);
     const container = document.getElementById("wsWidgetsBiblioteca");
     container.innerHTML = recursos.length ? recursos.map(recurso => `
         <div class="col-lg-4 col-md-6">
@@ -3560,7 +3727,7 @@ function renderizarBibliotecaMateria(materia) {
         leitor.scrollIntoView({ behavior: "smooth", block: "start" });
     }));
     document.getElementById("btnAtivarPrimeiroWidget")?.addEventListener("click", () => document.getElementById("btnOrganizarWidgets").click());
-    abrirCatalogoVade(false);
+    abrirInicioBiblioteca(false);
 }
 
 document.getElementById("btnOrganizarWidgets").addEventListener("click", () => {
@@ -3572,16 +3739,18 @@ document.getElementById("btnOrganizarWidgets").addEventListener("click", () => {
     if (abrir) renderizarConfiguradorWidgets(materia);
 });
 
-document.getElementById("btnAbrirCatalogoVade").addEventListener("click", abrirCatalogoVade);
-document.getElementById("btnAbrirVadeDireto").addEventListener("click", abrirPainelVade);
 document.getElementById("btnMostrarRecursosBiblioteca").addEventListener("click", abrirRecursosBiblioteca);
+document.getElementById("btnVerTodoCatalogo").addEventListener("click", abrirCatalogoVade);
+document.getElementById("btnVerCadernosBiblioteca").addEventListener("click", abrirPainelVade);
+document.getElementById("btnVoltarCatalogoBiblioteca").addEventListener("click", abrirInicioBiblioteca);
+document.getElementById("btnVoltarRecursosBiblioteca").addEventListener("click", abrirInicioBiblioteca);
 document.getElementById("buscaCatalogoVade").addEventListener("input", renderizarCatalogoVade);
 document.getElementById("btnNovoVade").addEventListener("click", () => abrirFormularioVade());
 document.getElementById("btnFecharVade").addEventListener("click", () => {
     fecharFormularioVade();
     colecaoVadeOrganizandoId = null;
     rascunhoDocumentosVade = [];
-    abrirCatalogoVade(false);
+    abrirInicioBiblioteca(false);
 });
 document.getElementById("btnCancelarVade").addEventListener("click", fecharFormularioVade);
 
@@ -3694,8 +3863,7 @@ function renderizarWorkspace() {
     const p = progressoMateria(m);
     document.getElementById("wsNomeMateria").textContent = m.nome;
     document.getElementById("wsCorMateria").className = "badge-cor bg-" + m.cor + " me-2";
-    document.getElementById("wsSubtitulo").textContent =
-        `${p}% dominado · ${m.topicos.length} tópicos · ${m.notas.length} notas · ${m.cards.length} flashcards · prioridade ${PRIORIDADES[m.prioridade] || "Média"}`;
+    renderizarMetricasMateria(m, p);
     const barra = document.getElementById("wsBarraProgresso");
     barra.style.width = p + "%";
     barra.className = "progress-bar bg-" + m.cor;
@@ -3709,10 +3877,21 @@ function renderizarWorkspace() {
     window.HUB_MIND_MAPS_UI?.definirMateria(m.id, m.nome);
 }
 
+function renderizarMetricasMateria(materia, progresso = progressoMateria(materia)) {
+    const metricas = [
+        ["pie-chart-fill", `${progresso}% dominado`],
+        ["list-check", `${materia.topicos.length} tópicos`],
+        ["journal-text", `${materia.notas.length} notas`],
+        ["card-heading", `${materia.cards.length} flashcards`],
+        ["flag", `Prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`]
+    ];
+    document.getElementById("wsSubtitulo").innerHTML = metricas.map(([icone, texto]) => `<span class="subject-workspace-metric"><i class="bi-${icone}" aria-hidden="true"></i>${esc(texto)}</span>`).join("");
+}
+
 document.getElementById("btnFecharLeitorPrototipo").addEventListener("click", () => {
     definirModoFocoLeitor(false);
     fecharPainelAcaoLeitor();
-    abrirCatalogoVade(false);
+    abrirInicioBiblioteca(false);
 });
 
 document.getElementById("wsBuscaArtigo").addEventListener("input", e => renderizarIndiceLeitor(e.target.value));
@@ -4376,8 +4555,7 @@ async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = fal
             const materia = materiaPorId(materiaIdOperacao);
             const progresso = progressoMateria(materia);
             renderizarCards(materia);
-            document.getElementById("wsSubtitulo").textContent =
-                `${progresso}% dominado · ${materia.topicos.length} tópicos · ${materia.notas.length} notas · ${materia.cards.length} flashcards · prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`;
+            renderizarMetricasMateria(materia, progresso);
         } else if (!preservarLeitor && materiaContinuaAberta) {
             renderizarWorkspace();
         }
@@ -5919,6 +6097,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
     catalogoMaterias = catalogoRemoto;
     documentosJuridicos = documentosJuridicosRemotos;
+    carregamentosDocumentosJuridicos = new Map();
     colecoesVade = colecoesVadeRemotas;
     grifosJuridicos = grifosJuridicosRemotos;
     favoritosJuridicos = estadoLeituraJuridicaRemoto.favoritos;
@@ -5975,6 +6154,7 @@ window.encerrarHub = () => {
     widgetsPorMateria = new Map();
     rascunhoWidgets = null;
     documentosJuridicos = [];
+    carregamentosDocumentosJuridicos = new Map();
     colecoesVade = [];
     grifosJuridicos = [];
     favoritosJuridicos = [];

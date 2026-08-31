@@ -257,7 +257,8 @@ export async function salvarLayoutWidgets(idMateriaLocal, layout) {
 
 const TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS = 1000;
 
-async function carregarDispositivosJuridicosPorVersao(versaoId) {
+export async function carregarDispositivosJuridicosPorVersao(versaoId) {
+    obterContexto();
     const dispositivos = [];
     for (let inicio = 0; ; inicio += TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS) {
         const resposta = await supabase.from("legal_provisions")
@@ -269,7 +270,15 @@ async function carregarDispositivosJuridicosPorVersao(versaoId) {
         dispositivos.push(...pagina);
         if (pagina.length < TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS) break;
     }
-    return dispositivos;
+    return dispositivos.map(item => ({
+        id: item.id,
+        chave: item.provision_key,
+        sequencia: Number(item.sequence),
+        caminho: Array.isArray(item.heading_path) ? item.heading_path : [],
+        titulo: item.heading || "",
+        rotulo: item.label,
+        conteudo: item.content
+    }));
 }
 
 export async function carregarBibliotecaJuridica() {
@@ -292,7 +301,6 @@ export async function carregarBibliotecaJuridica() {
             .in("id", versoesAtuaisIds)
         : { data: [], error: null };
     const versoes = verificarResposta(versoesResposta, "Não foi possível carregar as versões dos documentos jurídicos.") || [];
-    const dispositivos = (await Promise.all(versoesAtuaisIds.map(carregarDispositivosJuridicosPorVersao))).flat();
     return documentos.map(documento => {
         const versao = versoes.find(item => item.id === documento.current_version_id);
         return {
@@ -309,15 +317,8 @@ export async function carregarBibliotecaJuridica() {
                 fonteUrl: versao.official_source_url,
                 fonteNome: versao.official_source_label,
                 conferidaEm: versao.source_checked_on,
-                dispositivos: dispositivos.filter(item => item.version_id === versao.id).map(item => ({
-                    id: item.id,
-                    chave: item.provision_key,
-                    sequencia: Number(item.sequence),
-                    caminho: Array.isArray(item.heading_path) ? item.heading_path : [],
-                    titulo: item.heading || "",
-                    rotulo: item.label,
-                    conteudo: item.content
-                }))
+                carregada: false,
+                dispositivos: []
             } : null
         };
     }).filter(documento => documento.versao);
@@ -635,17 +636,27 @@ export async function carregarEstadoLeituraJuridica() {
     ]);
     const favoritos = verificarResposta(favoritosResposta, "Não foi possível carregar seus artigos favoritos.") || [];
     const historico = verificarResposta(historicoResposta, "Não foi possível carregar seu histórico de leitura.") || [];
+    const idsDispositivos = [...new Set([...favoritos, ...historico].map(item => item.provision_id).filter(Boolean))];
+    const referenciasResposta = idsDispositivos.length
+        ? await supabase.from("legal_provisions").select("id, version_id, label").in("id", idsDispositivos)
+        : { data: [], error: null };
+    const referencias = verificarResposta(referenciasResposta, "Não foi possível identificar seus artigos salvos.") || [];
+    const referenciasPorId = new Map(referencias.map(item => [item.id, item]));
     const materiasLegadas = idsLocaisPorRemotos.get("subject");
     const materiaLocal = id => materiasLegadas?.get(id) || id;
     return {
         favoritos: favoritos.map(item => ({
             materiaId: materiaLocal(item.subject_id),
             dispositivoId: item.provision_id,
+            versaoId: referenciasPorId.get(item.provision_id)?.version_id || null,
+            rotulo: referenciasPorId.get(item.provision_id)?.label || "Artigo salvo",
             criadoEm: item.created_at
         })),
         historico: historico.map(item => ({
             materiaId: materiaLocal(item.subject_id),
             dispositivoId: item.provision_id,
+            versaoId: referenciasPorId.get(item.provision_id)?.version_id || null,
+            rotulo: referenciasPorId.get(item.provision_id)?.label || "Artigo recente",
             visitas: Number(item.visit_count) || 1,
             primeiraLeituraEm: item.first_read_at,
             ultimaLeituraEm: item.last_read_at
