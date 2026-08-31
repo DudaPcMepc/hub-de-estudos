@@ -823,7 +823,10 @@
     .legal-toolbar-popover-card { position: absolute; top: calc(100% + .45rem); right: 0; z-index: 25; min-width: 230px; padding: .75rem; color: var(--pimentel-cafe-claro); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .12); border-radius: .75rem; box-shadow: 0 .65rem 1.4rem rgba(59, 41, 35, .14); font-size: .68rem; }
     .legal-toolbar-popover:not([open]):not(:hover):not(:focus-within) .legal-toolbar-popover-card { display: none; }
     .legal-highlight-legend { display: grid; gap: .45rem; }
-    .legal-highlight-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+    .legal-highlight-choice { width: 100%; display: flex; align-items: center; gap: .5rem; padding: .38rem .45rem; color: var(--pimentel-cafe-claro); background: transparent; border: 0; border-radius: .45rem; text-align: left; }
+    .legal-highlight-choice:hover, .legal-highlight-choice:focus-visible { color: var(--pimentel-cafe); background: rgba(91, 67, 58, .06); }
+    .legal-highlight-choice[aria-pressed="true"] { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); font-weight: 700; }
+    .legal-highlight-choice[aria-pressed="true"]::after { content: "✓"; margin-left: auto; }
     .legal-version-card { display: grid; gap: .35rem; min-width: min(320px, 78vw); }
     .legal-version-card strong { color: var(--pimentel-cafe); }
     .legal-version-card a { color: var(--pimentel-vermelho-escuro); font-weight: 700; }
@@ -866,10 +869,16 @@
     .legal-selection-menu .btn:hover, .legal-selection-menu .btn:focus-visible { color: #fff; background: rgba(255, 255, 255, .12); }
     .legal-selection-menu .btn-context-highlight { color: #ffe18b; }
     .legal-reader-paper mark { padding: .02em .08em; color: inherit; border-radius: .16em; line-height: inherit; box-decoration-break: clone; -webkit-box-decoration-break: clone; background-clip: padding-box; }
+    .legal-reader-paper mark[data-highlight-id], .legal-reader-paper mark[data-highlight-ids] { cursor: pointer; }
+    .legal-reader-paper mark[data-highlight-id]:hover, .legal-reader-paper mark[data-highlight-id]:focus, .legal-reader-paper mark[data-highlight-ids]:hover, .legal-reader-paper mark[data-highlight-ids]:focus { outline: 2px solid rgba(184, 50, 42, .28); outline-offset: 2px; }
     .legal-reader-paper mark.highlight-yellow, .legal-highlight-dot.highlight-yellow { background: rgba(255, 193, 7, .3); }
     .legal-reader-paper mark.highlight-red, .legal-highlight-dot.highlight-red { background: rgba(184, 50, 42, .2); }
     .legal-reader-paper mark.highlight-green, .legal-highlight-dot.highlight-green { background: rgba(100, 116, 90, .24); }
     .legal-reader-paper mark.highlight-blue, .legal-highlight-dot.highlight-blue { background: rgba(13, 110, 253, .17); }
+    .legal-highlight-color-button.highlight-yellow { background: rgba(255, 193, 7, .62); }
+    .legal-highlight-color-button.highlight-red { background: rgba(184, 50, 42, .48); }
+    .legal-highlight-color-button.highlight-green { background: rgba(100, 116, 90, .55); }
+    .legal-highlight-color-button.highlight-blue { background: rgba(13, 110, 253, .42); }
     .legal-reader-paper mark.highlight-pink, .legal-highlight-dot.highlight-pink { background: rgba(214, 51, 132, .16); }
     .legal-reader-paper mark.highlight-overlap { background-color: transparent; }
     .legal-reader-paper-text.is-highlight-filtered .legal-filter-context { opacity: .16; transition: opacity .15s ease; }
@@ -879,6 +888,13 @@
     .legal-reading-sync.is-error { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .07); border-color: rgba(184, 50, 42, .18); }
     .legal-highlight-list { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
     .legal-highlight-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: rgba(255, 193, 7, .08); border: 1px solid rgba(59, 41, 35, .08); border-radius: .65rem; font-size: .72rem; }
+    .legal-highlight-context-menu { position: absolute; z-index: 35; width: min(280px, calc(100% - 1.5rem)); padding: .6rem; color: var(--pimentel-cafe); background: #fffdf9; border: 1px solid rgba(59, 41, 35, .12); border-radius: .75rem; box-shadow: 0 .75rem 1.6rem rgba(41, 33, 30, .2); transform: translate(-50%, .45rem); }
+    .legal-highlight-context-menu.is-above { transform: translate(-50%, calc(-100% - .45rem)); }
+    .legal-highlight-context-menu-header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .45rem; }
+    .legal-highlight-context-colors { display: flex; align-items: center; gap: .35rem; margin-bottom: .5rem; }
+    .legal-highlight-color-button { width: 1.65rem; height: 1.65rem; padding: 0; border: 2px solid #fffdf9; border-radius: 50%; box-shadow: 0 0 0 1px rgba(59, 41, 35, .18); }
+    .legal-highlight-color-button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--pimentel-vermelho-escuro); }
+    .legal-highlight-context-actions { display: flex; justify-content: flex-end; gap: .35rem; padding-top: .45rem; border-top: 1px solid rgba(59, 41, 35, .08); }
     #btnFavoritarArtigo[aria-pressed="true"] { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); }
     .legal-reader-paper .prototype-law-line { height: .55rem; margin-bottom: .65rem; background: rgba(91, 67, 58, .09); border-radius: 999px; }
     .legal-reader-paper .prototype-law-line:nth-child(2) { width: 92%; }
@@ -1804,11 +1820,11 @@
                                 <button type="button" class="legal-icon-button" id="btnFavoritarArtigo" aria-pressed="false" aria-label="Favoritar artigo" title="Favoritar artigo"><i class="bi-bookmark"></i><span class="visually-hidden">Favoritar</span></button>
                                 <details class="legal-toolbar-popover">
                                     <summary class="legal-icon-button" aria-label="Cores de marcação" title="Cores de marcação"><i class="bi-palette"></i></summary>
-                                    <div class="legal-toolbar-popover-card legal-highlight-legend" aria-label="Significado das cores">
-                                        <span><i class="legal-highlight-dot highlight-yellow"></i>Regra ou conceito</span>
-                                        <span><i class="legal-highlight-dot highlight-red"></i>Exceção ou prazo</span>
-                                        <span><i class="legal-highlight-dot highlight-green"></i>Competência</span>
-                                        <span><i class="legal-highlight-dot highlight-blue"></i>Punição ou sanção</span>
+                                    <div class="legal-toolbar-popover-card legal-highlight-legend" aria-label="Escolher cor da marcação">
+                                        <button type="button" class="legal-highlight-choice" data-highlight-color="yellow" aria-pressed="true"><i class="legal-highlight-dot highlight-yellow"></i>Regra ou conceito</button>
+                                        <button type="button" class="legal-highlight-choice" data-highlight-color="red" aria-pressed="false"><i class="legal-highlight-dot highlight-red"></i>Exceção ou prazo</button>
+                                        <button type="button" class="legal-highlight-choice" data-highlight-color="green" aria-pressed="false"><i class="legal-highlight-dot highlight-green"></i>Competência</button>
+                                        <button type="button" class="legal-highlight-choice" data-highlight-color="blue" aria-pressed="false"><i class="legal-highlight-dot highlight-blue"></i>Punição ou sanção</button>
                                     </div>
                                 </details>
                                 <details class="legal-toolbar-popover legal-version-popover">
@@ -1857,6 +1873,18 @@
                                 <button type="button" class="btn btn-sm" id="btnAnotarTrecho" title="Anotar seleção"><i class="bi-chat-left-text"></i><span>Anotar</span></button>
                                 <button type="button" class="btn btn-sm" id="btnCopiarArtigo" title="Copiar seleção com citação"><i class="bi-clipboard"></i><span>Copiar</span></button>
                                 <button type="button" class="btn btn-sm" id="btnCriarCardArtigo" title="Criar flashcard da seleção"><i class="bi-card-heading"></i><span>Flashcard</span></button>
+                            </div>
+                            <div class="legal-highlight-context-menu d-none" id="wsMenuGrifoExistente" role="dialog" aria-label="Opções do grifo">
+                                <div class="legal-highlight-context-menu-header"><strong class="small">Editar grifo</strong><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnFecharMenuGrifo" aria-label="Fechar opções"><i class="bi-x-lg"></i></button></div>
+                                <select class="form-select form-select-sm mb-2 d-none" id="wsEscolherGrifoSobreposto" aria-label="Escolher grifo sobreposto"></select>
+                                <div class="legal-highlight-context-colors" aria-label="Alterar cor do grifo">
+                                    <button type="button" class="legal-highlight-color-button highlight-yellow" data-existing-highlight-color="yellow" aria-label="Regra ou conceito"></button>
+                                    <button type="button" class="legal-highlight-color-button highlight-red" data-existing-highlight-color="red" aria-label="Exceção ou prazo"></button>
+                                    <button type="button" class="legal-highlight-color-button highlight-green" data-existing-highlight-color="green" aria-label="Competência"></button>
+                                    <button type="button" class="legal-highlight-color-button highlight-blue" data-existing-highlight-color="blue" aria-label="Punição ou sanção"></button>
+                                </div>
+                                <div class="small text-muted text-truncate mb-2" id="wsResumoGrifoExistente"></div>
+                                <div class="legal-highlight-context-actions"><button type="button" class="btn btn-sm btn-outline-secondary" id="btnAnotarGrifoExistente"><i class="bi-pencil-square me-1"></i>Anotar</button><button type="button" class="btn btn-sm btn-outline-danger" id="btnExcluirGrifoExistente"><i class="bi-trash me-1"></i>Remover</button></div>
                             </div>
                         </div>
                     </section>
@@ -2670,9 +2698,14 @@ let temporizadorStatusHistoricoLeitura = null;
 let documentoLeitorAtual = null;
 let dispositivoLeitorAtual = null;
 let filtroCorGrifoAtual = "all";
+let corGrifoSelecionada = "yellow";
 let modoFocoLeitorAtivo = false;
 let acaoLeitorAtual = null;
 let selecaoContextualLeitor = null;
+let grifoContextualLeitorId = null;
+let grifosContextuaisLeitorIds = [];
+let alvoMenuGrifoExistente = null;
+let geracaoAlteracaoCorGrifo = 0;
 let indiceLeitorRecolhido = false;
 let temporizadorSelecaoLeitor = null;
 let filtroCatalogoVade = "materia";
@@ -2991,7 +3024,7 @@ function textoJuridicoComGrifos(textoOriginal, grifos, corFiltro = "all") {
         if (inicio < 0) inicio = textoOriginal.indexOf(grifo.texto);
         const fim = inicio + grifo.texto.length;
         if (inicio >= 0 && fim > inicio) {
-            intervalos.push({ inicio, fim, cor: grifo.cor });
+            intervalos.push({ inicio, fim, cor: grifo.cor, id: grifo.id || "" });
         }
     });
     const limites = [...new Set(intervalos.flatMap(item => [item.inicio, item.fim]))].sort((a, b) => a - b);
@@ -2999,23 +3032,28 @@ function textoJuridicoComGrifos(textoOriginal, grifos, corFiltro = "all") {
     for (let indice = 0; indice < limites.length - 1; indice += 1) {
         const inicio = limites[indice];
         const fim = limites[indice + 1];
-        const cores = ordemCores.filter(cor => intervalos.some(item => item.cor === cor && inicio < item.fim && fim > item.inicio));
+        const ativos = intervalos.filter(item => inicio < item.fim && fim > item.inicio);
+        const cores = ordemCores.filter(cor => ativos.some(item => item.cor === cor));
+        const ids = [...new Set(ativos.map(item => item.id).filter(Boolean))];
         if (!cores.length) continue;
         const anterior = segmentos.at(-1);
-        if (anterior?.fim === inicio && anterior.cores.join("|") === cores.join("|")) anterior.fim = fim;
-        else segmentos.push({ inicio, fim, cores });
+        if (anterior?.fim === inicio && anterior.cores.join("|") === cores.join("|") && anterior.ids.join("|") === ids.join("|")) anterior.fim = fim;
+        else segmentos.push({ inicio, fim, cores, ids });
     }
     let cursor = 0;
     let html = "";
     const trechoContexto = trecho => corFiltro === "all" ? esc(trecho) : `<span class="legal-filter-context">${esc(trecho)}</span>`;
     segmentos.forEach(item => {
         html += trechoContexto(textoOriginal.slice(cursor, item.inicio));
+        const identidade = item.ids.length === 1
+            ? ` data-highlight-id="${esc(item.ids[0])}" tabindex="0"`
+            : (item.ids.length > 1 ? ` data-highlight-ids="${esc(item.ids.join("|"))}" tabindex="0"` : "");
         if (item.cores.length === 1) {
-            html += `<mark class="highlight-${esc(item.cores[0])}">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+            html += `<mark class="highlight-${esc(item.cores[0])}"${identidade}>${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
         } else {
             const faixas = item.cores.map((cor, indice) => `${coresCss[cor]} ${indice * 6}px ${(indice + 1) * 6}px`).join(", ");
             const descricao = item.cores.map(cor => nomesCores[cor]).join(" + ");
-            html += `<mark class="highlight-overlap" title="Grifos sobrepostos: ${esc(descricao)}" style="background-image:repeating-linear-gradient(135deg, ${faixas});background-size:${item.cores.length * 6}px ${item.cores.length * 6}px">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
+            html += `<mark class="highlight-overlap"${identidade} title="Grifos sobrepostos: ${esc(descricao)}" style="background-image:repeating-linear-gradient(135deg, ${faixas});background-size:${item.cores.length * 6}px ${item.cores.length * 6}px">${esc(textoOriginal.slice(item.inicio, item.fim))}</mark>`;
         }
         cursor = item.fim;
     });
@@ -3055,6 +3093,7 @@ function renderizarIndiceLeitor(filtro = "") {
 function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } = {}) {
     if (!documentoLeitorAtual || !dispositivo) return;
     fecharMenuSelecaoLeitor();
+    fecharMenuGrifoExistente();
     const artigoMudou = dispositivoLeitorAtual?.id !== dispositivo.id;
     if (acaoLeitorAtual?.dispositivoId && acaoLeitorAtual.dispositivoId !== dispositivo.id) fecharPainelAcaoLeitor();
     dispositivoLeitorAtual = dispositivo;
@@ -3068,6 +3107,20 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     const textoLeitor = document.getElementById("wsLeitorTexto");
     textoLeitor.classList.toggle("is-highlight-filtered", filtroCorGrifoAtual !== "all");
     textoLeitor.innerHTML = textoJuridicoComGrifos(dispositivo.conteudo, grifos, filtroCorGrifoAtual);
+    textoLeitor.querySelectorAll("mark[data-highlight-id], mark[data-highlight-ids]").forEach(marca => {
+        const abrir = () => {
+            const ids = marca.dataset.highlightId ? [marca.dataset.highlightId] : String(marca.dataset.highlightIds || "").split("|").filter(Boolean);
+            const sobrepostos = ids.map(id => grifosJuridicos.find(item => item.id === id)).filter(Boolean);
+            abrirMenuGrifoExistente(sobrepostos[0], marca, sobrepostos);
+        };
+        marca.addEventListener("click", abrir);
+        marca.addEventListener("keydown", evento => {
+            if (["Enter", " "].includes(evento.key)) {
+                evento.preventDefault();
+                abrir();
+            }
+        });
+    });
     if (artigoMudou) textoLeitor.closest(".legal-reader-paper")?.scrollTo({ top: 0, behavior: "auto" });
     const lista = document.getElementById("wsListaGrifosArtigo");
     lista.innerHTML = grifosVisiveis.length ? `<small class="fw-semibold">Meus grifos neste artigo</small>` + grifosVisiveis.map(grifo => `
@@ -3097,15 +3150,16 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     }));
     lista.querySelectorAll(".btn-excluir-grifo").forEach(botao => botao.addEventListener("click", async () => {
         const sessao = capturarSessaoHubAtual();
+        const materiaIdOperacao = materiaAbertaId;
+        const dispositivoIdOperacao = dispositivoLeitorAtual?.id;
         botao.disabled = true;
         try {
-            if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
-            await window.HUB_CLOUD_LEGAL.excluirGrifo(botao.dataset.id);
-            if (!sessaoHubPermaneceAtual(sessao)) return;
-            grifosJuridicos = grifosJuridicos.filter(item => item.id !== botao.dataset.id);
-            renderizarDispositivoLeitor(dispositivoLeitorAtual);
+            await excluirGrifoLeitor(botao.dataset.id);
         } catch (erro) {
             console.error("Falha ao excluir grifo", erro);
+            if (!sessaoHubPermaneceAtual(sessao)
+                || String(materiaAbertaId) !== String(materiaIdOperacao)
+                || dispositivoLeitorAtual?.id !== dispositivoIdOperacao) return;
             document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível excluir o grifo. Tente novamente.";
             botao.disabled = false;
         }
@@ -3170,6 +3224,77 @@ function obterSelecaoAtualLeitor(limite = 2000) {
 function fecharMenuSelecaoLeitor(limpar = true) {
     document.getElementById("wsMenuSelecaoLeitor").classList.add("d-none");
     if (limpar) selecaoContextualLeitor = null;
+}
+
+function selecionarCorGrifoLeitor(cor, { anunciar = false } = {}) {
+    if (!["yellow", "red", "green", "blue"].includes(cor)) return;
+    corGrifoSelecionada = cor;
+    document.getElementById("wsCorGrifo").value = cor;
+    document.querySelectorAll("[data-highlight-color]").forEach(botao => {
+        botao.setAttribute("aria-pressed", String(botao.dataset.highlightColor === cor));
+    });
+    if (anunciar) document.getElementById("wsLeitorOrientacao").textContent = "Cor escolhida. Agora selecione um trecho e clique em Grifar.";
+}
+
+function fecharMenuGrifoExistente() {
+    grifoContextualLeitorId = null;
+    grifosContextuaisLeitorIds = [];
+    alvoMenuGrifoExistente = null;
+    const menu = document.getElementById("wsMenuGrifoExistente");
+    menu.classList.add("d-none");
+    menu.classList.remove("is-above");
+}
+
+function abrirMenuGrifoExistente(grifo, alvo, grifosSobrepostos = [grifo]) {
+    if (!grifo || !alvo) return;
+    fecharMenuSelecaoLeitor();
+    grifoContextualLeitorId = grifo.id;
+    grifosContextuaisLeitorIds = grifosSobrepostos.map(item => item.id);
+    alvoMenuGrifoExistente = alvo;
+    const menu = document.getElementById("wsMenuGrifoExistente");
+    const seletor = document.getElementById("wsEscolherGrifoSobreposto");
+    const nomesCores = { yellow: "Regra", red: "Exceção/prazo", green: "Competência", blue: "Sanção", pink: "Legado" };
+    seletor.classList.toggle("d-none", grifosSobrepostos.length < 2);
+    seletor.innerHTML = grifosSobrepostos.map(item => `<option value="${esc(item.id)}">${esc(nomesCores[item.cor] || "Grifo")} · ${esc(item.texto.slice(0, 55))}</option>`).join("");
+    seletor.value = grifo.id;
+    document.getElementById("wsResumoGrifoExistente").textContent = `“${grifo.texto}”`;
+    menu.querySelectorAll("[data-existing-highlight-color]").forEach(botao => {
+        botao.setAttribute("aria-pressed", String(botao.dataset.existingHighlightColor === grifo.cor));
+    });
+    menu.classList.remove("d-none");
+    const layout = document.querySelector(".legal-reader-layout");
+    const layoutRect = layout.getBoundingClientRect();
+    const alvoRect = alvo.getBoundingClientRect();
+    requestAnimationFrame(() => {
+        const metade = menu.offsetWidth / 2;
+        const centro = alvoRect.left + (alvoRect.width / 2) - layoutRect.left;
+        const topoAbaixo = alvoRect.bottom - layoutRect.top;
+        const espacoAbaixo = layoutRect.height - topoAbaixo;
+        const abrirAcima = espacoAbaixo < menu.offsetHeight + 12 && alvoRect.top - layoutRect.top > menu.offsetHeight + 12;
+        menu.classList.toggle("is-above", abrirAcima);
+        menu.style.left = `${Math.min(Math.max(centro, metade + 8), layoutRect.width - metade - 8)}px`;
+        menu.style.top = `${Math.max(8, abrirAcima ? alvoRect.top - layoutRect.top : topoAbaixo)}px`;
+    });
+}
+
+async function excluirGrifoLeitor(grifoId) {
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOperacao = materiaAbertaId;
+    const dispositivoIdOperacao = dispositivoLeitorAtual?.id;
+    const grifoContextualOperacao = grifoContextualLeitorId;
+    if (!window.HUB_CLOUD_LEGAL) throw new Error("A conexão do leitor jurídico ainda não está pronta.");
+    await window.HUB_CLOUD_LEGAL.excluirGrifo(grifoId);
+    if (!sessaoHubPermaneceAtual(sessao)) return false;
+    grifosJuridicos = grifosJuridicos.filter(item => item.id !== grifoId);
+    const contextoVisualPermaneceAtual = String(materiaAbertaId) === String(materiaIdOperacao)
+        && dispositivoLeitorAtual?.id === dispositivoIdOperacao
+        && grifoContextualLeitorId === grifoContextualOperacao
+        && (!grifoContextualLeitorId || grifoContextualLeitorId === grifoId);
+    if (!contextoVisualPermaneceAtual) return false;
+    fecharMenuGrifoExistente();
+    renderizarDispositivoLeitor(dispositivoLeitorAtual);
+    document.getElementById("wsLeitorOrientacao").textContent = "Grifo removido. O texto da lei foi preservado.";
+    return true;
 }
 
 function selecaoParaAcaoLeitor(limite = 2000) {
@@ -3901,6 +4026,82 @@ document.getElementById("wsFiltroGrifo").addEventListener("change", e => {
     if (dispositivoLeitorAtual) renderizarDispositivoLeitor(dispositivoLeitorAtual);
 });
 
+document.querySelectorAll("[data-highlight-color]").forEach(botao => botao.addEventListener("click", () => {
+    selecionarCorGrifoLeitor(botao.dataset.highlightColor, { anunciar: true });
+    botao.closest("details")?.removeAttribute("open");
+}));
+
+document.getElementById("wsCorGrifo").addEventListener("change", evento => selecionarCorGrifoLeitor(evento.target.value));
+
+document.getElementById("btnFecharMenuGrifo").addEventListener("click", fecharMenuGrifoExistente);
+document.getElementById("wsEscolherGrifoSobreposto").addEventListener("change", evento => {
+    const grifo = grifosJuridicos.find(item => item.id === evento.target.value);
+    const sobrepostos = grifosContextuaisLeitorIds.map(id => grifosJuridicos.find(item => item.id === id)).filter(Boolean);
+    if (grifo && alvoMenuGrifoExistente) abrirMenuGrifoExistente(grifo, alvoMenuGrifoExistente, sobrepostos);
+});
+document.getElementById("btnAnotarGrifoExistente").addEventListener("click", () => {
+    const grifo = grifosJuridicos.find(item => item.id === grifoContextualLeitorId);
+    if (!grifo) return;
+    fecharMenuGrifoExistente();
+    abrirPainelAnotacaoLeitor(grifo);
+});
+document.getElementById("btnExcluirGrifoExistente").addEventListener("click", async evento => {
+    const grifo = grifosJuridicos.find(item => item.id === grifoContextualLeitorId);
+    if (!grifo || (grifo.nota && !window.confirm("Este grifo possui uma anotação. Deseja remover os dois?"))) return;
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOperacao = materiaAbertaId;
+    const dispositivoIdOperacao = dispositivoLeitorAtual?.id;
+    const grifoIdOperacao = grifo.id;
+    evento.currentTarget.disabled = true;
+    try {
+        await excluirGrifoLeitor(grifo.id);
+    } catch (erro) {
+        console.error("Falha ao excluir grifo", erro);
+        if (!sessaoHubPermaneceAtual(sessao)
+            || String(materiaAbertaId) !== String(materiaIdOperacao)
+            || dispositivoLeitorAtual?.id !== dispositivoIdOperacao
+            || grifoContextualLeitorId !== grifoIdOperacao) return;
+        document.getElementById("wsLeitorOrientacao").textContent = "Não foi possível remover o grifo. Tente novamente.";
+    } finally {
+        evento.currentTarget.disabled = false;
+    }
+});
+document.querySelectorAll("[data-existing-highlight-color]").forEach(botao => botao.addEventListener("click", async () => {
+    const grifo = grifosJuridicos.find(item => item.id === grifoContextualLeitorId);
+    const novaCor = botao.dataset.existingHighlightColor;
+    if (!grifo || grifo.cor === novaCor) return;
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOperacao = materiaAbertaId;
+    const dispositivoIdOperacao = dispositivoLeitorAtual?.id;
+    const grifoIdOperacao = grifo.id;
+    const geracaoOperacao = ++geracaoAlteracaoCorGrifo;
+    const operacaoContinuaVisivel = () => sessaoHubPermaneceAtual(sessao)
+        && String(materiaAbertaId) === String(materiaIdOperacao)
+        && dispositivoLeitorAtual?.id === dispositivoIdOperacao
+        && grifoContextualLeitorId === grifoIdOperacao
+        && geracaoAlteracaoCorGrifo === geracaoOperacao
+        && grifosJuridicos.some(item => item.id === grifoIdOperacao);
+    botao.disabled = true;
+    try {
+        const salvo = await window.HUB_CLOUD_LEGAL.atualizarCorGrifo(grifo.id, novaCor, grifo.atualizadoEm);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        grifo.cor = salvo.cor;
+        grifo.atualizadoEm = salvo.atualizadoEm;
+        if (!operacaoContinuaVisivel()) return;
+        selecionarCorGrifoLeitor(salvo.cor);
+        renderizarDispositivoLeitor(dispositivoLeitorAtual);
+        document.getElementById("wsLeitorOrientacao").textContent = "Cor do grifo atualizada.";
+    } catch (erro) {
+        console.error("Falha ao alterar a cor do grifo", erro);
+        if (!operacaoContinuaVisivel()) return;
+        document.getElementById("wsLeitorOrientacao").textContent = String(erro?.message || "").includes("alterado em outra aba")
+            ? "Este grifo mudou em outra aba. Atualize a página antes de tentar novamente."
+            : "Não foi possível alterar a cor do grifo.";
+    } finally {
+        botao.disabled = false;
+    }
+}));
+
 document.querySelector(".legal-reader-paper").addEventListener("pointerup", evento => {
     if (evento.pointerType === "mouse" && evento.button !== 0) return;
     agendarAtualizacaoMenuSelecaoLeitor(true);
@@ -3909,7 +4110,11 @@ document.querySelector(".legal-reader-paper").addEventListener("keyup", evento =
     if (["Shift", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(evento.key)) agendarAtualizacaoMenuSelecaoLeitor(true);
 });
 document.addEventListener("selectionchange", agendarAtualizacaoMenuSelecaoLeitor);
-document.querySelector(".legal-reader-paper").addEventListener("scroll", () => fecharMenuSelecaoLeitor(), { passive: true });
+document.querySelector(".legal-reader-paper").addEventListener("scroll", () => { fecharMenuSelecaoLeitor(); fecharMenuGrifoExistente(); }, { passive: true });
+document.addEventListener("pointerdown", evento => {
+    const menu = document.getElementById("wsMenuGrifoExistente");
+    if (!menu.classList.contains("d-none") && !menu.contains(evento.target) && !evento.target.closest("mark[data-highlight-id], mark[data-highlight-ids]")) fecharMenuGrifoExistente();
+});
 
 document.getElementById("btnAlternarIndice").addEventListener("click", () => {
     indiceLeitorRecolhido = !indiceLeitorRecolhido;

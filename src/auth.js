@@ -44,6 +44,7 @@ import {
     criarGrifoJuridico,
     criarColecaoVade,
     criarMapaMental,
+    atualizarCorGrifoJuridico,
     atualizarNotaGrifoJuridico,
     criarTopico,
     criarTopicos,
@@ -90,6 +91,7 @@ window.HUB_CLOUD_WIDGETS = Object.freeze({
 });
 
 window.HUB_CLOUD_LEGAL = Object.freeze({
+    atualizarCorGrifo: atualizarCorGrifoJuridico,
     atualizarNotaGrifo: atualizarNotaGrifoJuridico,
     carregarEstado: carregarEstadoLeituraJuridica,
     criarGrifo: criarGrifoJuridico,

@@ -747,6 +747,23 @@ export async function atualizarNotaGrifoJuridico(id, nota, atualizadoEm) {
     return { id: salvo.id, nota: salvo.note || "", atualizadoEm: salvo.updated_at };
 }
 
+export async function atualizarCorGrifoJuridico(id, cor, atualizadoEm) {
+    const contexto = exigirContexto();
+    const grifoId = exigirUuidNovo(id, "Grifo");
+    const versaoEsperada = instanteIso(atualizadoEm, "Versão do grifo");
+    if (!CORES_GRIFO.has(cor) || cor === "pink") throw erroRepositorio("Escolha uma cor de grifo válida.");
+    const resposta = await supabase.from("user_legal_highlights").update({ color: cor })
+        .eq("id", grifoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("updated_at", versaoEsperada)
+        .select("id, color, updated_at")
+        .maybeSingle();
+    const salvo = verificarResposta(resposta, "Não foi possível alterar a cor do grifo.");
+    if (!salvo) throw erroRepositorio("Este grifo foi alterado em outra aba. Atualize a página antes de editar novamente.");
+    return { id: salvo.id, cor: salvo.color, atualizadoEm: salvo.updated_at };
+}
+
 export async function excluirGrifoJuridico(id) {
     const contexto = exigirContexto();
     const grifoId = exigirUuidNovo(id, "Grifo");
