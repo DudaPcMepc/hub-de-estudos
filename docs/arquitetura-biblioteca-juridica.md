@@ -80,7 +80,7 @@ O grifo deve guardar o texto selecionado e seu contexto, não apenas posições 
 A janela da matéria mantém as abas atuais e recebe a aba **Biblioteca**. Nela aparecem:
 
 - normas sugeridas pela matéria;
-- Meu Vade Mecum;
+- Cadernos jurídicos;
 - documentos particulares autorizados;
 - comunidade, somente em etapa futura.
 
@@ -92,7 +92,7 @@ O leitor jurídico terá índice, pesquisa, favoritos, grifos, notas, cópia com
 2. Catálogo de matérias e configuração individual de widgets.
 3. Leitor oficial com Constituição Federal e Código Penal. **Preparado:** textos integrais e importadores reproduzíveis.
 4. Grifos, anotações, favoritos, citações e criação de flashcards.
-5. Meu Vade Mecum e coleções temáticas.
+5. Cadernos jurídicos e coleções temáticas.
 6. Documentos privados com Storage e controles de segurança.
 7. Comunidade, importação, moderação, votos e denúncias.
 
@@ -106,4 +106,4 @@ O leitor informa a fonte, a versão e o escopo importado, permite pesquisa entre
 
 A fundação local da Fase 5 acrescenta cadernos pessoais de Vade Mecum e uma lista ordenada de normas oficiais. Cada caderno pertence simultaneamente ao usuário e ao espaço de estudos. A lista de normas só pode ser substituída por uma função transacional que valida a sessão, a participação no espaço, o limite de 100 itens, duplicidades e a disponibilidade dos documentos antes de gravar. O navegador recebe acesso direto de leitura aos itens, mas não recebe permissão direta para inseri-los, alterá-los ou excluí-los.
 
-A migration `202608300010_personal_vade_collections.sql` foi aplicada e validada no Supabase. A interface inicial do Meu Vade Mecum permite criar, renomear e excluir cadernos privados, escolher e ordenar normas oficiais e abrir cada documento no leitor jurídico existente. Todas as gravações aguardam confirmação do Supabase antes de atualizar a interface. Documentos privados e comunidade permanecem reservados às fases posteriores.
+A migration `202608300010_personal_vade_collections.sql` foi aplicada e validada no Supabase. A interface inicial dos Cadernos jurídicos permite criar, renomear e excluir coleções privadas, escolher e ordenar normas oficiais e abrir cada documento no leitor jurídico existente. A migration `202608310005_legal_notebook_articles.sql` acrescenta artigos específicos: o leitor permite salvar ou remover o artigo atual em qualquer caderno, e a listagem abre o dispositivo diretamente na norma correspondente. A função transacional valida usuário, espaço, caderno e versão oficial atual; o navegador recebe apenas leitura direta da tabela de itens. Todas as gravações aguardam confirmação do Supabase antes de atualizar a interface. Documentos privados e comunidade permanecem reservados às fases posteriores.
