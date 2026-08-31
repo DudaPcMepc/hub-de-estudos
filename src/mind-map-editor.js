@@ -56,8 +56,6 @@ export function criarEditorMapasMentais(repositorio) {
         redo: document.getElementById("btnMindRedo"),
         duplicar: document.getElementById("btnMindDuplicate"),
         frente: document.getElementById("btnMindFront"),
-        fixar: document.getElementById("btnMindLock"),
-        fixarLabel: document.getElementById("mindMapLockLabel"),
         excluir: document.getElementById("btnMindDelete"),
         zoomMenos: document.getElementById("btnMindZoomOut"),
         zoomMais: document.getElementById("btnMindZoomIn"),
@@ -96,6 +94,7 @@ export function criarEditorMapasMentais(repositorio) {
     let viewport = { x: 0, y: 0, zoom: 1 };
     let ferramenta = "select";
     let selecionadoId = null;
+    let menuAcoesId = null;
     let origemConexaoId = null;
     let gesto = null;
     let historico = [];
@@ -182,6 +181,7 @@ export function criarEditorMapasMentais(repositorio) {
         elementos = copiar(estado.elementos);
         viewport = copiar(estado.viewport);
         selecionadoId = null;
+        menuAcoesId = null;
         origemConexaoId = null;
         renderizar();
         marcarAlterado();
@@ -206,14 +206,6 @@ export function criarEditorMapasMentais(repositorio) {
         dom.excluir.disabled = !item;
         dom.frente.disabled = !item || item.type === "edge";
         dom.duplicar.disabled = !item || item.type === "edge";
-        const podeFixar = item && ["node", "shape"].includes(item.type);
-        const fixado = Boolean(podeFixar && item.payload.locked);
-        dom.fixar.disabled = !podeFixar;
-        dom.fixar.classList.toggle("active", fixado);
-        dom.fixar.setAttribute("aria-pressed", String(fixado));
-        dom.fixar.title = fixado ? "Desfixar posição" : "Fixar posição";
-        dom.fixar.querySelector("i").className = fixado ? "bi-lock" : "bi-unlock";
-        dom.fixarLabel.textContent = fixado ? "Desfixar" : "Fixar";
         dom.zoomLabel.textContent = `${Math.round(viewport.zoom * 100)}%`;
     }
 
@@ -230,8 +222,7 @@ export function criarEditorMapasMentais(repositorio) {
         dom.borrachaControle.classList.toggle("d-none", nova !== "eraser");
         if (nova !== "eraser") dom.borrachaCursor.setAttribute("visibility", "hidden");
         const dicas = {
-            select: "Clique para selecionar. Arraste o elemento para mover ou uma alça de canto para redimensionar.",
-            pan: "Arraste qualquer área vazia para mover a tela.",
+            select: "Clique para selecionar. Segure e arraste para mover; ao soltar, a posição é salva.",
             node: "Clique na tela para criar um novo conceito.",
             rect: "Clique na tela para criar um retângulo livre.",
             ellipse: "Clique na tela para criar uma forma circular.",
@@ -253,7 +244,7 @@ export function criarEditorMapasMentais(repositorio) {
 
     function aplicarRedimensionamento(estado, ponto) {
         const item = elementoPorId(estado.id);
-        if (!item || item.payload.locked || !["node", "shape"].includes(item.type)) return;
+        if (!item || !["node", "shape"].includes(item.type)) return;
         const deltaX = ponto.x - estado.inicioX;
         const deltaY = ponto.y - estado.inicioY;
         let largura = estado.largura;
@@ -301,13 +292,25 @@ export function criarEditorMapasMentais(repositorio) {
     }
 
     function renderizarAlcas(item, grupo) {
-        if (ferramenta !== "select" || item.id !== selecionadoId || item.payload.locked) return;
+        if (ferramenta !== "select" || item.id !== selecionadoId) return;
         const largura = Number(item.payload.width || 170);
         const altura = Number(item.payload.height || 80);
+        grupo.appendChild(svgEl("rect", {
+            class: "mind-map-selection-frame",
+            x: -6,
+            y: -6,
+            width: largura + 12,
+            height: altura + 12,
+            rx: 12
+        }));
         [
             ["nw", 0, 0, "Redimensionar pelo canto superior esquerdo"],
+            ["n", largura / 2, 0, "Redimensionar pela borda superior"],
             ["ne", largura, 0, "Redimensionar pelo canto superior direito"],
+            ["e", largura, altura / 2, "Redimensionar pela borda direita"],
             ["sw", 0, altura, "Redimensionar pelo canto inferior esquerdo"],
+            ["s", largura / 2, altura, "Redimensionar pela borda inferior"],
+            ["w", 0, altura / 2, "Redimensionar pela borda esquerda"],
             ["se", largura, altura, "Redimensionar pelo canto inferior direito"]
         ].forEach(([posicao, x, y, rotulo]) => {
             const alca = svgEl("g", {
@@ -318,17 +321,71 @@ export function criarEditorMapasMentais(repositorio) {
                 "data-mind-id": item.id,
                 "data-mind-resize": posicao
             });
-            alca.appendChild(svgEl("circle", { class: "mind-map-resize-hit", cx: 0, cy: 0, r: 15 }));
-            alca.appendChild(svgEl("circle", { class: "mind-map-resize-handle", cx: 0, cy: 0, r: 7 }));
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-hit", cx: 0, cy: 0, r: 16 }));
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-handle", cx: 0, cy: 0, r: 9 }));
             grupo.appendChild(alca);
         });
+        const menu = svgEl("g", {
+            class: "mind-map-actions-control",
+            transform: `translate(${largura + 20} ${altura + 20})`,
+            role: "button",
+            tabindex: 0,
+            "aria-label": menuAcoesId === item.id ? "Fechar opções do elemento" : "Abrir opções do elemento",
+            "aria-expanded": String(menuAcoesId === item.id),
+            "data-mind-id": item.id,
+            "data-mind-action": "toggle-menu"
+        });
+        menu.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 15 }));
+        const iconeMenu = svgEl("text", { x: 0, y: 3, "text-anchor": "middle", "aria-hidden": "true" });
+        iconeMenu.textContent = "•••";
+        menu.appendChild(iconeMenu);
+        grupo.appendChild(menu);
+        if (menuAcoesId !== item.id) return;
+
+        const painel = svgEl("g", {
+            class: "mind-map-actions-menu",
+            transform: `translate(${Math.max(0, largura - 154)} ${altura + 42})`,
+            role: "menu",
+            "aria-label": "Opções do elemento"
+        });
+        painel.appendChild(svgEl("rect", { class: "mind-map-actions-menu-bg", x: 0, y: 0, width: 176, height: 116, rx: 12 }));
+
+        const editar = svgEl("g", { class: "mind-map-actions-item", role: "menuitem", tabindex: 0, "aria-label": "Editar texto", "data-mind-id": item.id, "data-mind-action": "edit" });
+        editar.appendChild(svgEl("rect", { x: 7, y: 7, width: 162, height: 30, rx: 8 }));
+        const textoEditar = svgEl("text", { x: 18, y: 27, "aria-hidden": "true" });
+        textoEditar.textContent = "✎  Editar texto";
+        editar.appendChild(textoEditar);
+        painel.appendChild(editar);
+
+        const rotuloCor = svgEl("text", { class: "mind-map-actions-label", x: 14, y: 55, "aria-hidden": "true" });
+        rotuloCor.textContent = "Cor";
+        painel.appendChild(rotuloCor);
+        ["#fff3cd", "#f6b7b2", "#bfe3c0", "#bcd8f5", "#d8c5ef"].forEach((cor, indice) => {
+            const opcao = svgEl("g", { class: "mind-map-color-option", role: "menuitem", tabindex: 0, "aria-label": `Usar cor ${indice + 1}`, transform: `translate(${48 + indice * 23} 51)`, "data-mind-id": item.id, "data-mind-color": cor });
+            opcao.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 8, fill: cor }));
+            painel.appendChild(opcao);
+        });
+        const maisCores = svgEl("g", { class: "mind-map-more-colors", role: "menuitem", tabindex: 0, "aria-label": "Escolher outra cor", transform: "translate(163 51)", "data-mind-id": item.id, "data-mind-action": "custom-color" });
+        maisCores.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 8 }));
+        const iconeCor = svgEl("text", { x: 0, y: 4, "text-anchor": "middle", "aria-hidden": "true" });
+        iconeCor.textContent = "+";
+        maisCores.appendChild(iconeCor);
+        painel.appendChild(maisCores);
+
+        const excluir = svgEl("g", { class: "mind-map-actions-item is-danger", role: "menuitem", tabindex: 0, "aria-label": "Excluir elemento", "data-mind-id": item.id, "data-mind-action": "delete" });
+        excluir.appendChild(svgEl("rect", { x: 7, y: 72, width: 162, height: 35, rx: 8 }));
+        const textoExcluir = svgEl("text", { x: 18, y: 95, "aria-hidden": "true" });
+        textoExcluir.textContent = "⌫  Excluir elemento";
+        excluir.appendChild(textoExcluir);
+        painel.appendChild(excluir);
+        grupo.appendChild(painel);
     }
 
     function renderizarElemento(item) {
         if (!["node", "shape"].includes(item.type)) return;
         const p = item.payload;
         const grupo = svgEl("g", {
-            class: `mind-map-element ${item.id === selecionadoId ? "selected" : ""} ${item.id === origemConexaoId ? "mind-map-connection-source" : ""} ${p.locked ? "is-locked" : ""}`,
+            class: `mind-map-element ${item.id === selecionadoId ? "selected" : ""} ${item.id === origemConexaoId ? "mind-map-connection-source" : ""}`,
             transform: `translate(${Number(p.x) || 0} ${Number(p.y) || 0})`,
             "data-mind-id": item.id
         });
@@ -356,14 +413,6 @@ export function criarEditorMapasMentais(repositorio) {
         }
         criarTextoSvg(item, grupo);
         renderizarAlcas(item, grupo);
-        if (p.locked) {
-            const badge = svgEl("g", { class: "mind-map-lock-badge", transform: `translate(${Number(p.width || 170) - 9} 9)` });
-            badge.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 11 }));
-            const cadeado = svgEl("text", { x: 0, y: 4, "text-anchor": "middle", "aria-label": "Elemento fixado" });
-            cadeado.textContent = "🔒";
-            badge.appendChild(cadeado);
-            grupo.appendChild(badge);
-        }
         dom.elementos.appendChild(grupo);
     }
 
@@ -585,15 +634,6 @@ export function criarEditorMapasMentais(repositorio) {
         renderizar();
     }
 
-    function alternarFixacao() {
-        const item = elementoPorId(selecionadoId);
-        if (!item || !["node", "shape"].includes(item.type)) return;
-        registrarHistorico();
-        item.payload.locked = !item.payload.locked;
-        marcarAlterado();
-        renderizar();
-    }
-
     function registrarEstado(estado) {
         historico.push(estado);
         if (historico.length > LIMITE_HISTORICO) historico.shift();
@@ -653,14 +693,20 @@ export function criarEditorMapasMentais(repositorio) {
     function aplicarCor() {
         const item = elementoPorId(selecionadoId);
         if (!item) return;
+        aplicarCorAoItem(item, dom.cor.value);
+    }
+
+    function aplicarCorAoItem(item, cor, salvarImediatamente = false) {
         registrarHistorico();
         if (["node", "shape"].includes(item.type)) {
-            item.payload.fill = dom.cor.value;
-            item.payload.stroke = dom.cor.value;
-            item.payload.textColor = corDoTexto(dom.cor.value);
-        } else item.payload.color = dom.cor.value;
+            item.payload.fill = cor;
+            item.payload.stroke = cor;
+            item.payload.textColor = corDoTexto(cor);
+        } else item.payload.color = cor;
+        dom.cor.value = cor;
         marcarAlterado();
         renderizar();
+        if (salvarImediatamente) void salvarAgora();
     }
 
     function aplicarEstiloLinha() {
@@ -710,12 +756,19 @@ export function criarEditorMapasMentais(repositorio) {
     function aoPointerDown(evento) {
         if (!mapa || evento.button !== 0) return;
         definirPainelMobile(false);
+        const controleAcao = evento.target.closest?.("[data-mind-action], [data-mind-color]");
         const alcaRedimensionamento = evento.target.closest?.("[data-mind-resize]");
         const alvo = evento.target.closest?.("[data-mind-id]");
         const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
         const ponto = coordenada(evento);
+        if (ferramenta === "select" && controleAcao && item) {
+            evento.preventDefault();
+            selecionadoId = item.id;
+            acionarControleElemento(controleAcao, item);
+            return;
+        }
         dom.stage.focus({ preventScroll: true });
-        if (ferramenta === "select" && alcaRedimensionamento && item && !item.payload.locked && ["node", "shape"].includes(item.type)) {
+        if (ferramenta === "select" && alcaRedimensionamento && item && ["node", "shape"].includes(item.type)) {
             evento.preventDefault();
             selecionadoId = item.id;
             gesto = {
@@ -732,14 +785,14 @@ export function criarEditorMapasMentais(repositorio) {
                 altura: Number(item.payload.height || 80),
                 alterou: false
             };
-            dom.stage.setPointerCapture(evento.pointerId);
+            dom.canvas.setPointerCapture(evento.pointerId);
             renderizar();
             return;
         }
         if (ferramenta === "eraser") {
             evento.preventDefault();
             gesto = { tipo: "erase", alterou: false };
-            dom.stage.setPointerCapture(evento.pointerId);
+            dom.canvas.setPointerCapture(evento.pointerId);
             atualizarCursorBorracha(ponto);
             apagarComHistorico(ponto);
             return;
@@ -753,27 +806,31 @@ export function criarEditorMapasMentais(repositorio) {
             elementos.push(traco);
             selecionadoId = traco.id;
             gesto = { tipo: "draw", id: traco.id };
-            dom.stage.setPointerCapture(evento.pointerId);
-            return;
-        }
-        if (ferramenta === "pan" && !item) {
-            evento.preventDefault();
-            gesto = { tipo: "pan", inicioX: evento.clientX, inicioY: evento.clientY, x: viewport.x, y: viewport.y };
-            dom.stage.classList.add("is-dragging");
-            dom.stage.setPointerCapture(evento.pointerId);
-            selecionadoId = null;
-            renderizar();
+            dom.canvas.setPointerCapture(evento.pointerId);
             return;
         }
         if (!item && ferramenta === "select") {
+            evento.preventDefault();
             selecionadoId = null;
+            menuAcoesId = null;
+            gesto = {
+                tipo: "pending-pan",
+                inicioClienteX: evento.clientX,
+                inicioClienteY: evento.clientY,
+                x: viewport.x,
+                y: viewport.y,
+                alterou: false
+            };
+            dom.canvas.setPointerCapture(evento.pointerId);
             renderizar();
             return;
         }
         if (item && ferramenta === "select") {
             evento.preventDefault();
+            const jaSelecionado = selecionadoId === item.id;
             selecionadoId = item.id;
-            if (["node", "shape"].includes(item.type) && !item.payload.locked) {
+            menuAcoesId = null;
+            if (jaSelecionado && ["node", "shape"].includes(item.type)) {
                 gesto = {
                     tipo: "pending-move",
                     id: item.id,
@@ -785,7 +842,7 @@ export function criarEditorMapasMentais(repositorio) {
                     y: Number(item.payload.y),
                     alterou: false
                 };
-                dom.stage.setPointerCapture(evento.pointerId);
+            dom.canvas.setPointerCapture(evento.pointerId);
             }
             renderizar();
         }
@@ -797,9 +854,19 @@ export function criarEditorMapasMentais(repositorio) {
             if (ferramenta === "eraser") atualizarCursorBorracha(pontoAtual);
             return;
         }
-        if (gesto.tipo === "pan") {
-            viewport.x = gesto.x + evento.clientX - gesto.inicioX;
-            viewport.y = gesto.y + evento.clientY - gesto.inicioY;
+        if (gesto.tipo === "pending-pan") {
+            const distancia = Math.hypot(evento.clientX - gesto.inicioClienteX, evento.clientY - gesto.inicioClienteY);
+            if (distancia < 6) return;
+            gesto.tipo = "pan";
+            gesto.alterou = true;
+            dom.stage.classList.add("is-dragging");
+            viewport.x = gesto.x + evento.clientX - gesto.inicioClienteX;
+            viewport.y = gesto.y + evento.clientY - gesto.inicioClienteY;
+            renderizar();
+        } else if (gesto.tipo === "pan") {
+            viewport.x = gesto.x + evento.clientX - gesto.inicioClienteX;
+            viewport.y = gesto.y + evento.clientY - gesto.inicioClienteY;
+            gesto.alterou = true;
             renderizar();
         } else if (gesto.tipo === "pending-resize") {
             const distancia = Math.hypot(evento.clientX - gesto.inicioClienteX, evento.clientY - gesto.inicioClienteY);
@@ -811,18 +878,18 @@ export function criarEditorMapasMentais(repositorio) {
             aplicarRedimensionamento(gesto, pontoAtual);
         } else if (gesto.tipo === "pending-move") {
             const distancia = Math.hypot(evento.clientX - gesto.inicioClienteX, evento.clientY - gesto.inicioClienteY);
-            if (distancia < 5) return;
+            if (distancia < 8) return;
             registrarHistorico();
             gesto.tipo = "move";
             const item = elementoPorId(gesto.id);
-            if (!item || item.payload.locked) return;
+            if (!item) return;
             item.payload.x = Math.round(gesto.x + pontoAtual.x - gesto.inicioX);
             item.payload.y = Math.round(gesto.y + pontoAtual.y - gesto.inicioY);
             gesto.alterou = true;
             renderizar();
         } else if (gesto.tipo === "move") {
             const item = elementoPorId(gesto.id);
-            if (!item || item.payload.locked) return;
+            if (!item) return;
             item.payload.x = Math.round(gesto.x + pontoAtual.x - gesto.inicioX);
             item.payload.y = Math.round(gesto.y + pontoAtual.y - gesto.inicioY);
             gesto.alterou = true;
@@ -841,13 +908,14 @@ export function criarEditorMapasMentais(repositorio) {
         }
     }
 
-    function aoPointerUp(evento) {
+    async function aoPointerUp(evento) {
         if (!gesto) return;
         const terminou = gesto;
+        const salvarPosicaoAgora = ["move", "resize"].includes(terminou.tipo) && terminou.alterou;
         gesto = null;
         dom.stage.classList.remove("is-dragging");
-        if (dom.stage.hasPointerCapture(evento.pointerId)) dom.stage.releasePointerCapture(evento.pointerId);
-        if (terminou.tipo === "pan") marcarAlterado();
+        if (dom.canvas.hasPointerCapture(evento.pointerId)) dom.canvas.releasePointerCapture(evento.pointerId);
+        if (terminou.tipo === "pan" && terminou.alterou) marcarAlterado();
         if (terminou.tipo === "move" && terminou.alterou) marcarAlterado();
         if (terminou.tipo === "resize" && terminou.alterou) marcarAlterado();
         if (terminou.tipo === "erase" && terminou.alterou) marcarAlterado();
@@ -858,12 +926,10 @@ export function criarEditorMapasMentais(repositorio) {
             selecionarFerramenta("select");
         }
         renderizar();
+        if (salvarPosicaoAgora) await salvarAgora();
     }
 
-    async function editarTexto(evento) {
-        if (evento.target.closest?.("[data-mind-resize]")) return;
-        const alvo = evento.target.closest?.(".mind-map-element");
-        const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
+    async function editarTextoItem(item) {
         if (!item || !["node", "shape"].includes(item.type)) return;
         const novo = await solicitarTexto({ titulo: "Editar texto", ajuda: "Atualize o conteúdo deste elemento.", valor: item.payload.text || "", confirmar: "Salvar" });
         if (novo == null || novo.trim() === item.payload.text) return;
@@ -871,6 +937,37 @@ export function criarEditorMapasMentais(repositorio) {
         item.payload.text = novo.trim() || "Sem título";
         marcarAlterado();
         renderizar();
+        await salvarAgora();
+    }
+
+    async function editarTextoSelecionado() {
+        await editarTextoItem(elementoPorId(selecionadoId));
+    }
+
+    function acionarControleElemento(controle, item) {
+        const acao = controle.dataset.mindAction;
+        if (controle.dataset.mindColor) {
+            aplicarCorAoItem(item, controle.dataset.mindColor, true);
+            return;
+        }
+        if (acao === "toggle-menu") {
+            menuAcoesId = menuAcoesId === item.id ? null : item.id;
+            renderizar();
+            return;
+        }
+        if (acao === "edit") { menuAcoesId = null; void editarTextoItem(item); }
+        else if (acao === "delete") { menuAcoesId = null; excluirSelecionado(); }
+        else if (acao === "custom-color") { dom.cor.value = item.payload.fill || item.payload.color || dom.cor.value; dom.cor.click(); }
+    }
+
+    async function editarTexto(evento) {
+        if (evento.target.closest?.("[data-mind-resize]")) return;
+        const alvo = evento.target.closest?.(".mind-map-element");
+        const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
+        if (!item || !["node", "shape"].includes(item.type)) return;
+        selecionadoId = item.id;
+        renderizar();
+        await editarTextoItem(item);
     }
 
     function criarCardMapa(item) {
@@ -1022,16 +1119,27 @@ export function criarEditorMapasMentais(repositorio) {
         if (!mapa || !dom.editor.contains(document.activeElement)) return;
         const digitando = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
         if (digitando) return;
+        const controleFocado = document.activeElement?.closest?.("[data-mind-action], [data-mind-color]");
+        if (controleFocado && ["Enter", " "].includes(evento.key)) {
+            evento.preventDefault();
+            const item = elementoPorId(controleFocado.dataset.mindId);
+            if (!item) return;
+            selecionadoId = item.id;
+            acionarControleElemento(controleFocado, item);
+            return;
+        }
         if (evento.key === "Escape" && dom.mobileExtra.classList.contains("is-open")) { evento.preventDefault(); definirPainelMobile(false); return; }
         if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "z") { evento.preventDefault(); evento.shiftKey ? refazer() : desfazer(); }
         else if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "y") { evento.preventDefault(); refazer(); }
         else if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "d") { evento.preventDefault(); duplicarSelecionado(); }
-        else if (evento.key.toLowerCase() === "l") { evento.preventDefault(); alternarFixacao(); }
-        else if (evento.key === "Escape") { selecionadoId = null; origemConexaoId = null; renderizar(); }
+        else if (["Enter", "F2"].includes(evento.key) && selecionadoId) { evento.preventDefault(); void editarTextoSelecionado(); }
+        else if (evento.key === "Escape" && ferramenta !== "select") { evento.preventDefault(); selecionarFerramenta("select"); }
+        else if (evento.key === "Escape" && menuAcoesId) { evento.preventDefault(); menuAcoesId = null; renderizar(); }
+        else if (evento.key === "Escape") { selecionadoId = null; menuAcoesId = null; origemConexaoId = null; renderizar(); }
         else if (["Delete", "Backspace"].includes(evento.key)) { evento.preventDefault(); excluirSelecionado(); }
     }
 
-    dom.ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.mindTool)));
+    dom.ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(ferramenta === botao.dataset.mindTool ? "select" : botao.dataset.mindTool)));
     dom.mobileMore.addEventListener("click", () => definirPainelMobile(!dom.mobileExtra.classList.contains("is-open")));
     dom.mobileClose.addEventListener("click", () => definirPainelMobile(false));
     dom.mobileExtra.addEventListener("click", evento => {
@@ -1046,7 +1154,6 @@ export function criarEditorMapasMentais(repositorio) {
     dom.redo.addEventListener("click", refazer);
     dom.duplicar.addEventListener("click", duplicarSelecionado);
     dom.frente.addEventListener("click", trazerParaFrente);
-    dom.fixar.addEventListener("click", alternarFixacao);
     dom.excluir.addEventListener("click", excluirSelecionado);
     dom.cor.addEventListener("change", aplicarCor);
     dom.estiloLinha.addEventListener("change", aplicarEstiloLinha);
