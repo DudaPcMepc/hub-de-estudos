@@ -78,6 +78,69 @@ test("as matérias usam hierarquia visual previsível e resumo em formato de pai
     assert.match(html, /class="btn btn-sm navbar-support-btn" id="btnExportar"/);
 });
 
+test("cada matéria abre em uma página ampla com caderno expansível", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /class="subject-workspace-page d-none" id="modalMateria"/);
+    assert.doesNotMatch(html, /class="modal fade" id="modalMateria"/);
+    assert.match(html, /id="btnVoltarMaterias"/);
+    assert.match(html, /class="subject-workspace-layout"/);
+    assert.match(html, /class="subject-workspace-sidebar"/);
+    assert.match(html, /class="subject-workspace-content"/);
+    assert.match(html, />Caderno<\/button>/);
+    assert.match(html, /\.editor-nota \{ min-height: calc\(100dvh - 300px\); max-height: none;/);
+    assert.match(html, /function mostrarWorkspaceMateria\(\)/);
+    assert.match(html, /async function fecharMateria\(\)/);
+    assert.doesNotMatch(html, /bootstrap\.Modal\.getOrCreateInstance\(document\.getElementById\("modalMateria"\)\)/);
+});
+
+test("os mapas mentais possuem editor livre e salvamento privado por usuário", () => {
+    const html = readProjectFile("index.html");
+    const auth = readProjectFile("src/auth.js");
+    const editor = readProjectFile("src/mind-map-editor.js");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const migration = readProjectFile("supabase/migrations/202608310001_personal_mind_maps.sql");
+
+    assert.match(html, /id="wsTabMapas"[^>]*data-bs-target="#ws-mapas"/);
+    assert.match(html, /id="mindMapStage"/);
+    assert.match(html, /data-mind-tool="node"/);
+    assert.match(html, /data-mind-tool="edge"/);
+    assert.match(html, /data-mind-tool="draw"/);
+    assert.match(html, /data-mind-tool="eraser"/);
+    assert.match(html, /id="mindMapEraserSize"[^>]*min="10"[^>]*max="72"/);
+    assert.match(html, /id="btnMindLock"/);
+    assert.match(editor, /export function criarEditorMapasMentais/);
+    assert.match(editor, /function registrarHistorico\(\)/);
+    assert.match(editor, /tipo: "pending-move"/);
+    assert.match(editor, /const distancia = Math\.hypot/);
+    assert.match(editor, /if \(distancia < 5\) return/);
+    assert.match(editor, /item\.payload\.locked = !item\.payload\.locked/);
+    assert.match(editor, /function apagarTracos\(ponto, raio\)/);
+    assert.match(editor, /setTimeout\(\(\) => \{ void salvarAgora\(\); \}, 900\)/);
+    assert.match(editor, /repositorio\.salvarConteudo\(mapa\.id/);
+    assert.match(repository, /export async function carregarMapasMentais/);
+    assert.match(repository, /export async function salvarConteudoMapaMental/);
+    assert.match(repository, /\.rpc\("replace_user_mind_map_elements"/);
+    assert.match(auth, /window\.HUB_CLOUD_MIND_MAPS = Object\.freeze/);
+    assert.match(auth, /window\.HUB_MIND_MAPS_UI = criarEditorMapasMentais/);
+
+    assert.match(migration, /create table public\.user_mind_maps/i);
+    assert.match(migration, /create table public\.user_mind_map_elements/i);
+    assert.match(migration, /foreign key \(subject_id, workspace_id\)[\s\S]*?references public\.subjects\(id, workspace_id\) on delete cascade/i);
+    assert.match(migration, /foreign key \(map_id, workspace_id, user_id\)[\s\S]*?references public\.user_mind_maps\(id, workspace_id, user_id\) on delete cascade/i);
+    assert.match(migration, /alter table public\.user_mind_maps force row level security/i);
+    assert.match(migration, /alter table public\.user_mind_map_elements force row level security/i);
+    assert.match(migration, /user_mind_maps_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /user_mind_map_elements_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /create or replace function public\.replace_user_mind_map_elements/i);
+    assert.match(migration, /element_count > 500/i);
+    assert.match(migration, /limite seguro de 2 MB/i);
+    assert.match(migration, /p_expected_version/i);
+    assert.match(migration, /revoke all on table public\.user_mind_map_elements from public, anon, authenticated/i);
+    assert.match(migration, /grant select on table public\.user_mind_map_elements to authenticated/i);
+    assert.doesNotMatch(migration, /grant (?:insert|update|delete|all)[^;]*user_mind_map_elements[^;]*authenticated/i);
+});
+
 test("o cronograma usa formulário responsivo, semana em cartões e estados vazios acolhedores", () => {
     const html = readProjectFile("index.html");
 
@@ -161,9 +224,28 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /id="wsLeitorPrototipo"/);
     assert.match(html, /id="btnGrifarTrecho"/);
     assert.match(html, /id="btnCopiarArtigo"/);
-    assert.match(html, /Criar flashcard<\/button>/);
+    assert.match(html, /id="wsMenuSelecaoLeitor"[^>]*role="toolbar"/);
+    assert.match(html, /id="btnCriarCardArtigo"[^>]*>[\s\S]*?<span>Flashcard<\/span>/);
     assert.match(html, /Abrir Vade Mecum/);
     assert.doesNotMatch(html, /Visualizar protótipo/);
+    assert.match(html, /id="wsCatalogoVade"/);
+    assert.match(html, /id="btnAbrirCatalogoVade"/);
+    assert.match(html, /const CATALOGO_VADE_DIGITAL = Object\.freeze/);
+    assert.equal((html.match(/categoriaNome:/g) || []).length, 12);
+    assert.match(html, /Estatuto Geral das Guardas Municipais/);
+    assert.match(html, /Uma norma só é liberada para leitura depois da conferência do texto integral e da versão oficial/);
+    assert.match(html, /function documentoDoCatalogoVade\(item\)/);
+    assert.match(html, /documentosJuridicos\.find\(documento => item\.slugs\.includes\(documento\.slug\)\)/);
+    assert.match(html, /Importação oficial pendente/);
+    assert.match(html, /id="wsCatalogoVade" aria-labelledby="wsBibliotecaTitulo"/);
+    assert.match(html, /\.vade-catalog-panel \{ margin: \.25rem 0 1rem; padding: 0;/);
+    assert.match(html, /\.vade-catalog-toolbar \{[^}]*gap: 12px;/);
+    assert.match(html, /class="badge rounded-pill vade-law-source"/);
+    assert.match(html, /class="btn btn-sm vade-law-pending-action" disabled/);
+    assert.match(html, /id="btnAbrirVadeDireto"/);
+    assert.match(html, /id="btnMostrarRecursosBiblioteca"/);
+    assert.match(html, /<i class="bi-play-fill me-1"><\/i>Retomar/);
+    assert.match(html, /Clique na estrela ao ler um artigo para salvá-lo aqui/);
     assert.match(architecture, /O vínculo com o catálogo comum é opcional/);
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
     assert.match(architecture, /Fase 4 concluída e fundação da Fase 5 preparada localmente/);
@@ -176,12 +258,16 @@ test("o leitor usa navegação fixa, modo foco e grifos com função didática",
     const migration = readProjectFile("supabase/migrations/202608300005_legal_highlight_semantics.sql");
 
     assert.match(html, /\.legal-reader-prototype \{[\s\S]*?height: clamp\(440px, 78vh, 820px\);[\s\S]*?display: flex;[\s\S]*?flex-direction: column;/);
-    assert.match(html, /\.legal-reader-toolbar \{ position: relative;[\s\S]*?flex-shrink: 0;/);
+    assert.match(html, /\.legal-reader-header \{ position: relative;[\s\S]*?display: flex;[\s\S]*?backdrop-filter: blur\(10px\)/);
+    assert.match(html, /\.legal-reader-toolbar \{ min-width: 0; display: flex; flex: 1;/);
+    assert.match(html, /\.legal-icon-button[\s\S]*?background: transparent; border: 0;/);
     assert.match(html, /\.legal-reader-layout \{ min-height: 0;[\s\S]*?flex: 1;[\s\S]*?overflow: hidden;/);
     assert.match(html, /\.legal-reader-paper \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
     assert.match(html, /\.legal-reader-index \{[\s\S]*?overflow-y: auto;[\s\S]*?overscroll-behavior: contain/);
-    assert.match(html, /\.legal-reader-source \{ flex-shrink: 0;/);
-    assert.match(html, /grid-template-rows: minmax\(120px, 32%\) minmax\(0, 1fr\)/);
+    assert.match(html, /class="legal-toolbar-popover legal-version-popover"/);
+    assert.match(html, /<strong id="wsLeitorVersao"><\/strong>/);
+    assert.match(html, /\.legal-reader-sidebar \{[\s\S]*?background: #faf7f3/);
+    assert.match(html, /\.legal-reader-sidebar \{ position: absolute;[\s\S]*?width: min\(82%, 280px\)/);
     assert.match(html, /if \(artigoMudou\) textoLeitor\.closest\("\.legal-reader-paper"\)\?\.scrollTo\(\{ top: 0, behavior: "auto" \}\)/);
     assert.match(html, /button\.is-active::before/);
     assert.match(html, /box-decoration-break: clone/);
@@ -190,7 +276,19 @@ test("o leitor usa navegação fixa, modo foco e grifos com função didática",
     assert.match(html, /Só exceções\/prazos/);
     assert.match(html, /id="btnModoFoco"/);
     assert.match(html, /function definirModoFocoLeitor\(ativo\)/);
-    assert.match(html, /legal-focus-mode \.legal-reader-index \{ display: none/);
+    assert.match(html, /legal-focus-mode \.legal-reader-sidebar \{ display: none/);
+    assert.match(html, /id="btnAlternarIndice" aria-expanded="true"/);
+    assert.match(html, /\.legal-reader-layout\.is-index-collapsed/);
+    assert.match(html, /function atualizarMenuSelecaoLeitor\(\)/);
+    assert.match(html, /function agendarAtualizacaoMenuSelecaoLeitor\(fecharSeVazio = false\)/);
+    assert.match(html, /document\.addEventListener\("selectionchange", agendarAtualizacaoMenuSelecaoLeitor\)/);
+    assert.match(html, /evento\.pointerType === "mouse" && evento\.button !== 0/);
+    assert.match(html, /if \(fecharSeVazio\) fecharMenuSelecaoLeitor\(\)/);
+    assert.match(html, /function selecaoParaAcaoLeitor\(limite = 2000\)/);
+    assert.match(html, /\.legal-reader-paper-content \{ width: min\(100%, 720px\); margin-inline: auto; \}/);
+    assert.match(html, /class="legal-reader-back" id="btnFecharLeitorPrototipo"/);
+    assert.match(html, /class="legal-reader-sidebar" aria-label="Sumário do documento"/);
+    assert.match(html, /Cores de marcação/);
     assert.match(html, /legal-filter-context/);
     assert.match(repository, /new Set\(\["yellow", "red", "green", "blue", "pink"\]\)/);
     assert.match(migration, /check \(color in \('yellow', 'red', 'green', 'blue', 'pink'\)\)/);

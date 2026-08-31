@@ -438,6 +438,164 @@ export async function excluirColecaoVade(id) {
         .maybeSingle(), "Não foi possível excluir o Vade Mecum.");
 }
 
+export async function carregarMapasMentais(materiaIdLocal) {
+    const contexto = obterContexto();
+    const subjectId = resolverId("subject", materiaIdLocal);
+    const resposta = await supabase.from("user_mind_maps")
+        .select("id, name, description, viewport, version, created_at, updated_at")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("subject_id", subjectId)
+        .order("updated_at", { ascending: false });
+    const mapas = verificarResposta(resposta, "Não foi possível carregar seus mapas mentais.") || [];
+    return mapas.map(mapa => ({
+        id: mapa.id,
+        nome: mapa.name,
+        descricao: mapa.description || "",
+        viewport: mapa.viewport || { x: 0, y: 0, zoom: 1 },
+        versao: Number(mapa.version) || 1,
+        criadoEm: mapa.created_at,
+        atualizadoEm: mapa.updated_at
+    }));
+}
+
+export async function carregarMapaMental(id) {
+    const contexto = obterContexto();
+    const mapaId = exigirUuidNovo(id, "Mapa mental");
+    const [mapaResposta, elementosResposta] = await Promise.all([
+        supabase.from("user_mind_maps")
+            .select("id, name, description, viewport, version, created_at, updated_at")
+            .eq("id", mapaId)
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .single(),
+        supabase.from("user_mind_map_elements")
+            .select("id, element_type, payload, z_index, created_at, updated_at")
+            .eq("map_id", mapaId)
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("z_index", { ascending: true })
+            .order("created_at", { ascending: true })
+    ]);
+    const mapa = verificarRegistro(mapaResposta, "Não foi possível abrir o mapa mental.");
+    const elementos = verificarResposta(elementosResposta, "Não foi possível carregar os elementos do mapa mental.") || [];
+    return {
+        id: mapa.id,
+        nome: mapa.name,
+        descricao: mapa.description || "",
+        viewport: mapa.viewport || { x: 0, y: 0, zoom: 1 },
+        versao: Number(mapa.version) || 1,
+        criadoEm: mapa.created_at,
+        atualizadoEm: mapa.updated_at,
+        elementos: elementos.map(elemento => ({
+            id: elemento.id,
+            type: elemento.element_type,
+            payload: elemento.payload && typeof elemento.payload === "object" && !Array.isArray(elemento.payload) ? elemento.payload : {},
+            zIndex: Number(elemento.z_index) || 0
+        }))
+    };
+}
+
+export async function criarMapaMental(materiaIdLocal, mapa) {
+    const contexto = exigirContexto();
+    const id = exigirUuidNovo(mapa?.id, "Mapa mental");
+    const resposta = await supabase.from("user_mind_maps").insert({
+        id,
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        subject_id: resolverId("subject", materiaIdLocal),
+        name: texto(mapa?.nome, 120, "Nome do mapa", true).trim(),
+        description: texto(mapa?.descricao, 1000, "Descrição do mapa"),
+        viewport: { x: 0, y: 0, zoom: 1 }
+    }).select("id, name, description, viewport, version, created_at, updated_at").single();
+    const salvo = verificarRegistro(resposta, "Não foi possível criar o mapa mental.");
+    return {
+        id: salvo.id,
+        nome: salvo.name,
+        descricao: salvo.description || "",
+        viewport: salvo.viewport || { x: 0, y: 0, zoom: 1 },
+        versao: Number(salvo.version) || 1,
+        criadoEm: salvo.created_at,
+        atualizadoEm: salvo.updated_at,
+        elementos: []
+    };
+}
+
+export async function atualizarMapaMental(id, alteracoes, versaoEsperada) {
+    const contexto = exigirContexto();
+    const mapaId = exigirUuidNovo(id, "Mapa mental");
+    const versao = numeroLimitado(versaoEsperada, "Versão do mapa", 1, Number.MAX_SAFE_INTEGER, true);
+    const valores = {};
+    if (Object.hasOwn(alteracoes, "nome")) valores.name = texto(alteracoes.nome, 120, "Nome do mapa", true).trim();
+    if (Object.hasOwn(alteracoes, "descricao")) valores.description = texto(alteracoes.descricao, 1000, "Descrição do mapa");
+    if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada para o mapa mental.");
+    const resposta = await supabase.from("user_mind_maps").update(valores)
+        .eq("id", mapaId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("version", versao)
+        .select("id, name, description, viewport, version, created_at, updated_at")
+        .maybeSingle();
+    const salvo = verificarResposta(resposta, "Não foi possível atualizar o mapa mental.");
+    if (!salvo) throw erroRepositorio("Este mapa foi alterado em outra aba. Atualize antes de continuar.");
+    return {
+        id: salvo.id,
+        nome: salvo.name,
+        descricao: salvo.description || "",
+        viewport: salvo.viewport || { x: 0, y: 0, zoom: 1 },
+        versao: Number(salvo.version) || versao + 1,
+        criadoEm: salvo.created_at,
+        atualizadoEm: salvo.updated_at
+    };
+}
+
+export async function salvarConteudoMapaMental(id, elementos, viewport, versaoEsperada) {
+    exigirContexto();
+    const mapaId = exigirUuidNovo(id, "Mapa mental");
+    const versao = numeroLimitado(versaoEsperada, "Versão do mapa", 1, Number.MAX_SAFE_INTEGER, true);
+    if (!Array.isArray(elementos) || elementos.length > 500) throw erroRepositorio("O mapa possui uma quantidade inválida de elementos.");
+    const tipos = new Set(["node", "edge", "shape", "stroke"]);
+    const ids = new Set();
+    const seguros = elementos.map((elemento, indice) => {
+        const elementoId = exigirUuidNovo(elemento?.id, "Elemento do mapa");
+        if (ids.has(elementoId)) throw erroRepositorio("O mapa possui elementos repetidos.");
+        ids.add(elementoId);
+        if (!tipos.has(elemento?.type)) throw erroRepositorio("O mapa possui um tipo de elemento inválido.");
+        if (!elemento.payload || typeof elemento.payload !== "object" || Array.isArray(elemento.payload)) throw erroRepositorio("O mapa possui conteúdo inválido.");
+        if (JSON.stringify(elemento.payload).length > 100000) throw erroRepositorio("Um elemento do mapa ultrapassou o limite seguro.");
+        return {
+            id: elementoId,
+            type: elemento.type,
+            payload: elemento.payload,
+            zIndex: numeroLimitado(elemento.zIndex ?? indice, "Camada do elemento", 0, 5000, true)
+        };
+    });
+    if (!viewport || typeof viewport !== "object" || Array.isArray(viewport)) throw erroRepositorio("A visualização do mapa é inválida.");
+    const resposta = await supabase.rpc("replace_user_mind_map_elements", {
+        p_map_id: mapaId,
+        p_expected_version: versao,
+        p_elements: seguros,
+        p_viewport: viewport
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível salvar o conteúdo do mapa mental.") || [];
+    if (salvos.length !== 1) throw erroRepositorio("O Supabase não confirmou o salvamento do mapa mental.");
+    return {
+        versao: Number(salvos[0].saved_version) || versao + 1,
+        atualizadoEm: salvos[0].saved_updated_at
+    };
+}
+
+export async function excluirMapaMental(id) {
+    const contexto = exigirContexto();
+    const mapaId = exigirUuidNovo(id, "Mapa mental");
+    verificarRegistro(await supabase.from("user_mind_maps").delete()
+        .eq("id", mapaId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível excluir o mapa mental.");
+}
+
 export async function carregarGrifosJuridicos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("user_legal_highlights")

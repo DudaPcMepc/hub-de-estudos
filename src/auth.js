@@ -2,6 +2,7 @@ import { erroConfiguracaoSupabase, supabase, tipoDoLinkDeAutenticacao } from "./
 import { encerrarAdministracao, iniciarAdministracao } from "./admin.js";
 import { encerrarPreviaMigracao, iniciarPreviaMigracao } from "./migration-preview.js";
 import { restaurarBackupRemoto } from "./migration-import.js";
+import { criarEditorMapasMentais } from "./mind-map-editor.js";
 import {
     atualizarMateria,
     atualizarNota,
@@ -17,6 +18,8 @@ import {
     carregarCatalogoMaterias,
     carregarBibliotecaJuridica,
     carregarColecoesVade,
+    carregarMapaMental,
+    carregarMapasMentais,
     carregarMateriasRemotas,
     carregarNotasRemotas,
     carregarFlashcardsRemotos,
@@ -39,6 +42,7 @@ import {
     criarErro,
     criarGrifoJuridico,
     criarColecaoVade,
+    criarMapaMental,
     atualizarNotaGrifoJuridico,
     criarTopico,
     criarTopicos,
@@ -53,6 +57,7 @@ import {
     excluirErro,
     excluirGrifoJuridico,
     excluirColecaoVade,
+    excluirMapaMental,
     registrarLeituraJuridica,
     salvarFavoritoJuridico,
     excluirTopico,
@@ -60,6 +65,8 @@ import {
     registrarRespostaDesempenho,
     salvarConfiguracaoEdital,
     atualizarColecaoVade,
+    atualizarMapaMental,
+    salvarConteudoMapaMental,
     salvarDocumentosColecaoVade,
     salvarLayoutWidgets
 } from "./cloud-core-repository.js";
@@ -99,6 +106,17 @@ window.HUB_CLOUD_VADE = Object.freeze({
     listar: carregarColecoesVade,
     salvarDocumentos: salvarDocumentosColecaoVade
 });
+
+window.HUB_CLOUD_MIND_MAPS = Object.freeze({
+    atualizar: atualizarMapaMental,
+    carregar: carregarMapaMental,
+    criar: criarMapaMental,
+    excluir: excluirMapaMental,
+    listar: carregarMapasMentais,
+    salvarConteudo: salvarConteudoMapaMental
+});
+
+window.HUB_MIND_MAPS_UI = criarEditorMapasMentais(window.HUB_CLOUD_MIND_MAPS);
 
 window.HUB_CLOUD_TOPICS = Object.freeze({
     atualizar: atualizarTopico,
