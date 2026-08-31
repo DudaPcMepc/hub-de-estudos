@@ -75,6 +75,27 @@ insert into public.catalog_subject_documents (catalog_subject_id, document_id, p
 values ('${PROCESS_SUBJECT_ID}', '${configuracao.documentId}', ${configuracao.posicao});`;
 }
 
+function sqlCorrecaoDocumento(configuracao, dispositivos) {
+    return `update public.legal_document_versions
+set version_label = '${configuracao.versao}',
+    content_scope = '${configuracao.escopo}',
+    official_source_url = '${configuracao.url}',
+    official_source_label = '${configuracao.fonte}',
+    source_checked_on = '2026-08-31'
+where id = '${configuracao.versionId}';
+
+update public.legal_provisions as dispositivo
+set sequence = item.sequencia,
+    heading_path = item.caminho,
+    heading = item.titulo,
+    label = item.rotulo,
+    content = item.conteudo
+from jsonb_to_recordset(${literalJsonSql(dispositivos)}::jsonb)
+    as item(chave text, sequencia integer, caminho text[], titulo text, rotulo text, conteudo text)
+where dispositivo.version_id = '${configuracao.versionId}'
+  and dispositivo.provision_key = item.chave;`;
+}
+
 export function gerarMigrationNucleoProcessual(cpp, prisaoTemporaria) {
     return `-- Gerado por scripts/import-criminal-procedure-core.mjs a partir de fontes oficiais do Planalto.
 -- Mantém CPP e Prisão Temporária separados, embora ambos pertençam ao catálogo de Processo Penal.
@@ -85,6 +106,20 @@ begin;
 ${sqlDocumento(DOCUMENTOS.cpp, cpp)}
 
 ${sqlDocumento(DOCUMENTOS.prisao, prisaoTemporaria)}
+
+commit;
+`;
+}
+
+export function gerarMigrationCorrecaoNucleoProcessual(cpp, prisaoTemporaria) {
+    return `-- Corrige o conteúdo processual já importado sem trocar os IDs dos dispositivos.
+-- Assim, grifos, favoritos e histórico dos usuários permanecem preservados.
+
+begin;
+
+${sqlCorrecaoDocumento(DOCUMENTOS.cpp, cpp)}
+
+${sqlCorrecaoDocumento(DOCUMENTOS.prisao, prisaoTemporaria)}
 
 commit;
 `;
@@ -120,7 +155,14 @@ async function principal() {
     ];
 
     await writeFile(resolve(argumentos.out), gerarMigrationNucleoProcessual(cpp, prisaoTemporaria), "utf8");
-    console.log(JSON.stringify({ relatorio, destino: resolve(argumentos.out) }, null, 2));
+    if (argumentos["patch-out"]) {
+        await writeFile(resolve(argumentos["patch-out"]), gerarMigrationCorrecaoNucleoProcessual(cpp, prisaoTemporaria), "utf8");
+    }
+    console.log(JSON.stringify({
+        relatorio,
+        destino: resolve(argumentos.out),
+        correcao: argumentos["patch-out"] ? resolve(argumentos["patch-out"]) : null
+    }, null, 2));
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname.replace(/^\/(.:)/, "$1"))) {

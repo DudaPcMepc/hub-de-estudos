@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 const ENTIDADES = new Map(Object.entries({
     aacute: "á", acirc: "â", agrave: "à", amp: "&", atilde: "ã",
     ccedil: "ç", eacute: "é", ecirc: "ê", iacute: "í", ldquo: "“",
-    nbsp: " ", oacute: "ó", ocirc: "ô", ordf: "ª", ordm: "º",
+    nbsp: " ", oacute: "ó", ocirc: "ô", ordf: "ª", ordm: "º", quot: '"',
     otilde: "õ", rdquo: "”", rsquo: "’", sect: "§", uacute: "ú", uuml: "ü"
 }));
 
@@ -30,6 +30,7 @@ function decodificarEntidades(texto) {
 function textosDoHtml(html) {
     const separadorSemantico = "\u0000";
     const texto = decodificarEntidades(html
+        .replace(/<(strike|s|del)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
         .replace(/<br\s*\/?>/gi, separadorSemantico)
         .replace(/<[^>]+>/g, " "))
         .normalize("NFC");
@@ -40,7 +41,9 @@ function textosDoHtml(html) {
 }
 
 export function blocosDoHtml(html) {
-    const limpo = html.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+    const limpo = html
+        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
+        .replace(/<(strike|s|del)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
     return [...limpo.matchAll(/<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/gi)]
         .flatMap(resultado => textosDoHtml(resultado[2]));
 }
@@ -61,10 +64,14 @@ function chaveArtigo(numero) {
     return `art-${numero.toLowerCase()}`;
 }
 
-const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3})\s*(?:º|o)?\s*(?:-\s*([A-Z](?:-[A-Z])*))?\s*\.?\s*/iu;
+const PADRAO_ARTIGO = /^Art\.\s*(\d{1,3})\s*(?:º|°|o)?\s*(?:-\s*([A-Z](?:-[A-Z])*))?\s*\.?\s*/iu;
 
 function notaEditorialIsolada(texto) {
     return /^(?:\([^)]*\)\s*)+$/u.test(texto);
+}
+
+function rodapeOficial(texto) {
+    return /^(?:(?:Brasília|Rio de Janeiro),\s*(?:em\s*)?\d{1,2}\s+de\s+|Este texto não substitui o publicado|Download para anexo$|\*$)/iu.test(texto);
 }
 
 function pareceEpigrafeDeArtigo(blocos, indice) {
@@ -98,6 +105,10 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
 
     for (let indiceBloco = 0; indiceBloco < blocos.length; indiceBloco += 1) {
         const bloco = blocos[indiceBloco];
+        if (atual && rodapeOficial(bloco)) {
+            concluir();
+            break;
+        }
         const estrutura = tituloEstrutural(bloco);
         if (estrutura) {
             concluir();
@@ -143,7 +154,9 @@ export function extrairDispositivos(html, { raiz = "" } = {}) {
                 sequencia: dispositivos.length + 1,
                 caminho,
                 titulo: epigrafePendente || caminho.at(-1) || raiz,
-                rotulo: `Art. ${numero}${Number(numero) <= 9 ? "º" : "."}`,
+                rotulo: artigo[2]
+                    ? `Art. ${artigo[1]}º-${artigo[2].toUpperCase()}`
+                    : `Art. ${artigo[1]}${Number(artigo[1]) <= 9 ? "º" : "."}`,
                 paragrafos: [bloco.slice(artigo[0].length).trim()].filter(Boolean)
             };
             epigrafePendente = "";

@@ -2659,6 +2659,7 @@ let cardEmEdicaoId = null;
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
 let documentosJuridicos = [];
+let carregamentosDocumentosJuridicos = new Map();
 let colecoesVade = [];
 let grifosJuridicos = [];
 let favoritosJuridicos = [];
@@ -2842,6 +2843,42 @@ function localizarDispositivoJuridico(dispositivoId) {
     return null;
 }
 
+function referenciaDispositivoJuridico(dispositivoId) {
+    const carregado = localizarDispositivoJuridico(dispositivoId);
+    if (carregado) return carregado;
+    const estado = [...favoritosJuridicos, ...historicoLeituraJuridica].find(item => item.dispositivoId === dispositivoId);
+    if (!estado?.versaoId) return null;
+    const documento = documentosJuridicos.find(item => item.versao?.id === estado.versaoId);
+    return documento ? { documento, dispositivo: null, rotulo: estado.rotulo || "Artigo" } : null;
+}
+
+async function garantirDocumentoJuridicoCarregado(documento) {
+    if (documento?.versao?.carregada) return documento;
+    if (!documento?.versao?.id || !window.HUB_CLOUD_LEGAL?.listarDispositivos) {
+        throw new Error("A conexão para carregar o texto legal ainda não está pronta.");
+    }
+    const versaoId = documento.versao.id;
+    const carregamentosDaSessao = carregamentosDocumentosJuridicos;
+    if (!carregamentosDaSessao.has(versaoId)) {
+        let carregamentoAtual;
+        carregamentoAtual = window.HUB_CLOUD_LEGAL.listarDispositivos(versaoId)
+            .then(dispositivos => {
+                if (!Array.isArray(dispositivos)) throw new Error("O texto legal recebido é inválido.");
+                documento.versao.dispositivos = dispositivos;
+                documento.versao.carregada = true;
+                return documento;
+            })
+            .finally(() => {
+                if (carregamentosDocumentosJuridicos === carregamentosDaSessao
+                    && carregamentosDaSessao.get(versaoId) === carregamentoAtual) {
+                    carregamentosDaSessao.delete(versaoId);
+                }
+            });
+        carregamentosDaSessao.set(versaoId, carregamentoAtual);
+    }
+    return carregamentosDaSessao.get(versaoId);
+}
+
 function favoritoDoDispositivo(materiaId, dispositivoId) {
     return favoritosJuridicos.some(item => String(item.materiaId) === String(materiaId) && item.dispositivoId === dispositivoId);
 }
@@ -2852,10 +2889,10 @@ function historicoDaMateria(materiaId) {
         .sort((a, b) => String(b.ultimaLeituraEm).localeCompare(String(a.ultimaLeituraEm)));
 }
 
-function abrirAtalhoLeitura(dispositivoId, materia) {
-    const localizado = localizarDispositivoJuridico(dispositivoId);
+async function abrirAtalhoLeitura(dispositivoId, materia) {
+    const localizado = referenciaDispositivoJuridico(dispositivoId);
     if (!localizado) return;
-    abrirLeitorJuridico(localizado.documento, materia, localizado.dispositivo.id);
+    await abrirLeitorJuridico(localizado.documento, materia, dispositivoId);
 }
 
 function formatarDataHistoricoLeitura(valor) {
@@ -2866,13 +2903,13 @@ function formatarDataHistoricoLeitura(valor) {
 
 function renderizarAtalhosLeitura(materia) {
     const painel = document.getElementById("wsAtalhosLeitura");
-    const historico = historicoDaMateria(materia.id).filter(item => localizarDispositivoJuridico(item.dispositivoId));
+    const historico = historicoDaMateria(materia.id).filter(item => referenciaDispositivoJuridico(item.dispositivoId));
     const favoritos = favoritosJuridicos
-        .filter(item => String(item.materiaId) === String(materia.id) && localizarDispositivoJuridico(item.dispositivoId))
+        .filter(item => String(item.materiaId) === String(materia.id) && referenciaDispositivoJuridico(item.dispositivoId))
         .sort((a, b) => String(b.criadoEm).localeCompare(String(a.criadoEm)));
     const descricao = item => {
-        const localizado = localizarDispositivoJuridico(item.dispositivoId);
-        return localizado ? `${localizado.documento.tituloCurto} · ${localizado.dispositivo.rotulo}` : "Artigo";
+        const localizado = referenciaDispositivoJuridico(item.dispositivoId);
+        return localizado ? `${localizado.documento.tituloCurto} · ${localizado.dispositivo?.rotulo || localizado.rotulo || item.rotulo || "Artigo"}` : "Artigo";
     };
     const ultimo = historico[0];
     const dataUltimaLeitura = ultimo ? formatarDataHistoricoLeitura(ultimo.ultimaLeituraEm) : "";
@@ -2892,7 +2929,7 @@ function renderizarAtalhosLeitura(materia) {
             </div>
         </div>
     </div>`;
-    painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => abrirAtalhoLeitura(botao.dataset.readingId, materia)));
+    painel.querySelectorAll("[data-reading-id]").forEach(botao => botao.addEventListener("click", () => { void abrirAtalhoLeitura(botao.dataset.readingId, materia); }));
 }
 
 function mostrarStatusHistoricoLeitura(tipo = "", mensagem = "", geracao = geracaoRegistroLeitura) {
@@ -3399,7 +3436,18 @@ function abrirCatalogoVade(rolar = true) {
     if (rolar) document.getElementById("wsCatalogoVade").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+async function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+    const sessao = capturarSessaoHubAtual();
+    const materiaIdOrigem = String(materia?.id || "");
+    try {
+        await garantirDocumentoJuridicoCarregado(documento);
+    } catch (erro) {
+        if (!sessaoHubPermaneceAtual(sessao) || String(materiaAbertaId || "") !== materiaIdOrigem) return;
+        console.error("Falha ao carregar o documento jurídico", erro);
+        window.alert("Não foi possível carregar esta lei agora. Verifique sua conexão e tente novamente.");
+        return;
+    }
+    if (!sessaoHubPermaneceAtual(sessao) || String(materiaAbertaId || "") !== materiaIdOrigem) return;
     fecharPainelAcaoLeitor();
     fecharMenuSelecaoLeitor();
     indiceLeitorRecolhido = window.matchMedia("(max-width: 575.98px)").matches;
@@ -6049,6 +6097,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
     catalogoMaterias = catalogoRemoto;
     documentosJuridicos = documentosJuridicosRemotos;
+    carregamentosDocumentosJuridicos = new Map();
     colecoesVade = colecoesVadeRemotas;
     grifosJuridicos = grifosJuridicosRemotos;
     favoritosJuridicos = estadoLeituraJuridicaRemoto.favoritos;
@@ -6105,6 +6154,7 @@ window.encerrarHub = () => {
     widgetsPorMateria = new Map();
     rascunhoWidgets = null;
     documentosJuridicos = [];
+    carregamentosDocumentosJuridicos = new Map();
     colecoesVade = [];
     grifosJuridicos = [];
     favoritosJuridicos = [];

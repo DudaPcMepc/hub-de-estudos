@@ -553,6 +553,36 @@ test("o importador preserva artigos processuais acrescidos após o ordinal", () 
 
     assert.deepEqual(dispositivos.map(item => item.chave), ["art-3", "art-3-a", "art-3-b"]);
     assert.equal(dispositivos[1].conteudo, "A estrutura acusatória.");
+    assert.equal(dispositivos[1].rotulo, "Art. 3º-A");
+});
+
+test("o importador jurídico remove redações riscadas e normaliza entidades e ordinais", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>Art. 1° Regra &quot;vigente&quot;.</p>
+        <p><strike>§ 1° Redação revogada.</strike></p>
+        <p>§ 1º Redação atual.</p>
+        <p>Art. 2°-A. Artigo acrescido.</p>
+    `);
+
+    assert.equal(dispositivos.length, 2);
+    assert.equal(dispositivos[0].rotulo, "Art. 1º");
+    assert.match(dispositivos[0].conteudo, /Regra "vigente"/);
+    assert.doesNotMatch(dispositivos[0].conteudo, /revogada/);
+    assert.equal(dispositivos[1].rotulo, "Art. 2º-A");
+    assert.equal(dispositivos[1].conteudo, "Artigo acrescido.");
+});
+
+test("o importador jurídico não incorpora o rodapé oficial ao último artigo", () => {
+    const dispositivos = extrairDispositivos(`
+        <p>Art. 7º Revogam-se as disposições em contrário.</p>
+        <p>Brasília, 21 de dezembro de 1989; 168º da Independência.</p>
+        <p>JOSÉ SARNEY</p>
+        <p>Este texto não substitui o publicado no DOU.</p>
+        <p>Download para anexo</p><p>*</p>
+    `);
+
+    assert.equal(dispositivos.length, 1);
+    assert.equal(dispositivos[0].conteudo, "Revogam-se as disposições em contrário.");
 });
 
 test("o importador associa a epígrafe ao artigo correto sem contaminar o artigo anterior", () => {
@@ -614,6 +644,12 @@ test("o núcleo processual mantém CPP e Prisão Temporária completos e separad
     assert.match(migration, /"chave":"art-3-a"/);
     assert.match(migration, /"chave":"art-811"/);
     assert.match(migration, /Texto integral da Lei nº 7\.960\/1989 — arts\. 1º a 7º/);
+    assert.doesNotMatch(migration, /&quot;/);
+    assert.doesNotMatch(migration, /"conteudo":"°/);
+    assert.doesNotMatch(migration, /Decorrido o prazo de cinco dias de detenção/);
+    assert.doesNotMatch(migration, /Download para anexo/);
+    assert.doesNotMatch(migration, /"conteudo":"[^"\\]*(?:\\.[^"\\]*)*\\n\\n\*"/);
+    assert.match(migration, /"rotulo":"Art\. 3º-A"/);
     assert.equal((migration.match(/10000000-0000-4000-8000-000000000003/g) || []).length, 2);
     assert.doesNotMatch(migration, /10000000-0000-4000-8000-000000000002/);
     assert.doesNotMatch(migration, /10000000-0000-4000-8000-000000000005/);
@@ -621,16 +657,41 @@ test("o núcleo processual mantém CPP e Prisão Temporária completos e separad
     assert.match(html, /if \(chave\.includes\("penal"\)\) return item\.id === "cp"/);
 });
 
-test("a biblioteca carrega somente versões atuais e pagina cada documento jurídico", () => {
+test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
     const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const html = readProjectFile("index.html");
 
     assert.match(repository, /const TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS = 1000/);
-    assert.match(repository, /async function carregarDispositivosJuridicosPorVersao\(versaoId\)/);
+    assert.match(repository, /export async function carregarDispositivosJuridicosPorVersao\(versaoId\)/);
     assert.match(repository, /\.eq\("version_id", versaoId\)/);
     assert.match(repository, /\.range\(inicio, inicio \+ TAMANHO_PAGINA_DISPOSITIVOS_JURIDICOS - 1\)/);
     assert.match(repository, /\.in\("id", versoesAtuaisIds\)/);
-    assert.match(repository, /Promise\.all\(versoesAtuaisIds\.map\(carregarDispositivosJuridicosPorVersao\)\)/);
+    assert.doesNotMatch(repository, /Promise\.all\(versoesAtuaisIds\.map\(carregarDispositivosJuridicosPorVersao\)\)/);
+    assert.match(repository, /carregada: false,[\s\S]*?dispositivos: \[\]/);
+    assert.match(auth, /listarDispositivos: carregarDispositivosJuridicosPorVersao/);
+    assert.match(html, /async function garantirDocumentoJuridicoCarregado\(documento\)/);
+    assert.match(html, /await garantirDocumentoJuridicoCarregado\(documento\)/);
+    assert.match(html, /const carregamentosDaSessao = carregamentosDocumentosJuridicos;/);
+    assert.match(html, /carregamentosDocumentosJuridicos === carregamentosDaSessao[\s\S]*?carregamentosDaSessao\.get\(versaoId\) === carregamentoAtual/);
+    assert.match(html, /const sessao = capturarSessaoHubAtual\(\);[\s\S]*?await garantirDocumentoJuridicoCarregado\(documento\);[\s\S]*?if \(!sessaoHubPermaneceAtual\(sessao\) \|\| String\(materiaAbertaId \|\| ""\) !== materiaIdOrigem\) return;/);
+    assert.match(html, /catch \(erro\) \{\s*if \(!sessaoHubPermaneceAtual\(sessao\) \|\| String\(materiaAbertaId \|\| ""\) !== materiaIdOrigem\) return;[\s\S]*?window\.alert/);
     assert.doesNotMatch(repository, /supabase\.from\("legal_provisions"\)[\s\S]{0,220}\.order\("sequence"[^\n]+\)(?![\s\S]{0,120}\.range)/);
+});
+
+test("a correção processual preserva os IDs associados aos dados pessoais", () => {
+    const migration = readProjectFile("supabase/migrations/202608310003_correct_criminal_procedure_content.sql");
+    const footerFix = readProjectFile("supabase/migrations/202608310004_remove_legal_source_footers.sql");
+
+    assert.match(migration, /update public\.legal_provisions as dispositivo/i);
+    assert.match(migration, /where dispositivo\.version_id = '21000000-0000-4000-8000-000000000006'/);
+    assert.match(migration, /where dispositivo\.version_id = '21000000-0000-4000-8000-000000000007'/);
+    assert.doesNotMatch(migration, /delete from public\.legal_provisions/i);
+    assert.doesNotMatch(migration, /&quot;/);
+    assert.doesNotMatch(migration, /Decorrido o prazo de cinco dias de detenção/);
+    assert.match(footerFix, /version_id = '21000000-0000-4000-8000-000000000006'[\s\S]*?provision_key = 'art-811'/);
+    assert.match(footerFix, /version_id = '21000000-0000-4000-8000-000000000007'[\s\S]*?provision_key = 'art-7'/);
+    assert.doesNotMatch(footerFix, /delete from public\.legal_provisions/i);
 });
 
 test("o Meu Vade Mecum é pessoal e substitui sua lista de normas de forma atômica", () => {
