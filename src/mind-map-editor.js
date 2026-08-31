@@ -2,6 +2,10 @@ import "./mind-map.css";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const LIMITE_HISTORICO = 60;
+const LARGURA_MINIMA = 120;
+const ALTURA_MINIMA = 64;
+const LARGURA_MAXIMA = 520;
+const ALTURA_MAXIMA = 360;
 const CORES_TEXTO_CLARO = new Set(["#3b2923", "#5b433a", "#64745a", "#92271f", "#b8322a", "#2167d5"]);
 
 const copiar = (valor) => JSON.parse(JSON.stringify(valor));
@@ -226,7 +230,7 @@ export function criarEditorMapasMentais(repositorio) {
         dom.borrachaControle.classList.toggle("d-none", nova !== "eraser");
         if (nova !== "eraser") dom.borrachaCursor.setAttribute("visibility", "hidden");
         const dicas = {
-            select: "Clique para selecionar. Segure e arraste para mover elementos que não estejam fixados.",
+            select: "Clique para selecionar. Arraste o elemento para mover ou uma alça de canto para redimensionar.",
             pan: "Arraste qualquer área vazia para mover a tela.",
             node: "Clique na tela para criar um novo conceito.",
             rect: "Clique na tela para criar um retângulo livre.",
@@ -245,6 +249,33 @@ export function criarEditorMapasMentais(repositorio) {
             x: (evento.clientX - caixa.left - viewport.x) / viewport.zoom,
             y: (evento.clientY - caixa.top - viewport.y) / viewport.zoom
         };
+    }
+
+    function aplicarRedimensionamento(estado, ponto) {
+        const item = elementoPorId(estado.id);
+        if (!item || item.payload.locked || !["node", "shape"].includes(item.type)) return;
+        const deltaX = ponto.x - estado.inicioX;
+        const deltaY = ponto.y - estado.inicioY;
+        let largura = estado.largura;
+        let altura = estado.altura;
+        let x = estado.x;
+        let y = estado.y;
+        if (estado.posicao.includes("e")) largura = limitar(estado.largura + deltaX, LARGURA_MINIMA, LARGURA_MAXIMA);
+        if (estado.posicao.includes("s")) altura = limitar(estado.altura + deltaY, ALTURA_MINIMA, ALTURA_MAXIMA);
+        if (estado.posicao.includes("w")) {
+            largura = limitar(estado.largura - deltaX, LARGURA_MINIMA, LARGURA_MAXIMA);
+            x = estado.x + estado.largura - largura;
+        }
+        if (estado.posicao.includes("n")) {
+            altura = limitar(estado.altura - deltaY, ALTURA_MINIMA, ALTURA_MAXIMA);
+            y = estado.y + estado.altura - altura;
+        }
+        item.payload.x = Math.round(x);
+        item.payload.y = Math.round(y);
+        item.payload.width = Math.round(largura);
+        item.payload.height = Math.round(altura);
+        estado.alterou = estado.alterou || item.payload.x !== estado.x || item.payload.y !== estado.y || item.payload.width !== estado.largura || item.payload.height !== estado.altura;
+        renderizar();
     }
 
     function centro(item) {
@@ -267,6 +298,30 @@ export function criarEditorMapasMentais(repositorio) {
             texto.appendChild(tspan);
         });
         grupo.appendChild(texto);
+    }
+
+    function renderizarAlcas(item, grupo) {
+        if (ferramenta !== "select" || item.id !== selecionadoId || item.payload.locked) return;
+        const largura = Number(item.payload.width || 170);
+        const altura = Number(item.payload.height || 80);
+        [
+            ["nw", 0, 0, "Redimensionar pelo canto superior esquerdo"],
+            ["ne", largura, 0, "Redimensionar pelo canto superior direito"],
+            ["sw", 0, altura, "Redimensionar pelo canto inferior esquerdo"],
+            ["se", largura, altura, "Redimensionar pelo canto inferior direito"]
+        ].forEach(([posicao, x, y, rotulo]) => {
+            const alca = svgEl("g", {
+                class: "mind-map-resize-control",
+                transform: `translate(${x} ${y})`,
+                tabindex: -1,
+                "aria-label": rotulo,
+                "data-mind-id": item.id,
+                "data-mind-resize": posicao
+            });
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-hit", cx: 0, cy: 0, r: 15 }));
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-handle", cx: 0, cy: 0, r: 7 }));
+            grupo.appendChild(alca);
+        });
     }
 
     function renderizarElemento(item) {
@@ -300,6 +355,7 @@ export function criarEditorMapasMentais(repositorio) {
             }));
         }
         criarTextoSvg(item, grupo);
+        renderizarAlcas(item, grupo);
         if (p.locked) {
             const badge = svgEl("g", { class: "mind-map-lock-badge", transform: `translate(${Number(p.width || 170) - 9} 9)` });
             badge.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 11 }));
@@ -654,10 +710,32 @@ export function criarEditorMapasMentais(repositorio) {
     function aoPointerDown(evento) {
         if (!mapa || evento.button !== 0) return;
         definirPainelMobile(false);
+        const alcaRedimensionamento = evento.target.closest?.("[data-mind-resize]");
         const alvo = evento.target.closest?.("[data-mind-id]");
         const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
         const ponto = coordenada(evento);
         dom.stage.focus({ preventScroll: true });
+        if (ferramenta === "select" && alcaRedimensionamento && item && !item.payload.locked && ["node", "shape"].includes(item.type)) {
+            evento.preventDefault();
+            selecionadoId = item.id;
+            gesto = {
+                tipo: "pending-resize",
+                id: item.id,
+                posicao: alcaRedimensionamento.dataset.mindResize,
+                inicioX: ponto.x,
+                inicioY: ponto.y,
+                inicioClienteX: evento.clientX,
+                inicioClienteY: evento.clientY,
+                x: Number(item.payload.x),
+                y: Number(item.payload.y),
+                largura: Number(item.payload.width || 170),
+                altura: Number(item.payload.height || 80),
+                alterou: false
+            };
+            dom.stage.setPointerCapture(evento.pointerId);
+            renderizar();
+            return;
+        }
         if (ferramenta === "eraser") {
             evento.preventDefault();
             gesto = { tipo: "erase", alterou: false };
@@ -723,6 +801,14 @@ export function criarEditorMapasMentais(repositorio) {
             viewport.x = gesto.x + evento.clientX - gesto.inicioX;
             viewport.y = gesto.y + evento.clientY - gesto.inicioY;
             renderizar();
+        } else if (gesto.tipo === "pending-resize") {
+            const distancia = Math.hypot(evento.clientX - gesto.inicioClienteX, evento.clientY - gesto.inicioClienteY);
+            if (distancia < 4) return;
+            registrarHistorico();
+            gesto.tipo = "resize";
+            aplicarRedimensionamento(gesto, pontoAtual);
+        } else if (gesto.tipo === "resize") {
+            aplicarRedimensionamento(gesto, pontoAtual);
         } else if (gesto.tipo === "pending-move") {
             const distancia = Math.hypot(evento.clientX - gesto.inicioClienteX, evento.clientY - gesto.inicioClienteY);
             if (distancia < 5) return;
@@ -763,6 +849,7 @@ export function criarEditorMapasMentais(repositorio) {
         if (dom.stage.hasPointerCapture(evento.pointerId)) dom.stage.releasePointerCapture(evento.pointerId);
         if (terminou.tipo === "pan") marcarAlterado();
         if (terminou.tipo === "move" && terminou.alterou) marcarAlterado();
+        if (terminou.tipo === "resize" && terminou.alterou) marcarAlterado();
         if (terminou.tipo === "erase" && terminou.alterou) marcarAlterado();
         if (terminou.tipo === "draw") {
             const traco = elementoPorId(terminou.id);
@@ -774,6 +861,7 @@ export function criarEditorMapasMentais(repositorio) {
     }
 
     async function editarTexto(evento) {
+        if (evento.target.closest?.("[data-mind-resize]")) return;
         const alvo = evento.target.closest?.(".mind-map-element");
         const item = alvo ? elementoPorId(alvo.dataset.mindId) : null;
         if (!item || !["node", "shape"].includes(item.type)) return;
