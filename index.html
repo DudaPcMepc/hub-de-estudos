@@ -1548,37 +1548,43 @@
                             <button class="mind-map-icon-button" id="btnExcluirMapaMental" type="button" aria-label="Excluir mapa" title="Excluir mapa"><i class="bi-trash"></i></button>
                         </header>
                         <div class="mind-map-toolbar" role="toolbar" aria-label="Ferramentas do mapa mental">
-                            <div class="mind-map-tool-group" aria-label="Criação e seleção">
+                            <div class="mind-map-tool-group mind-map-primary-tools" aria-label="Ferramentas principais">
                                 <button class="mind-map-tool active" type="button" data-mind-tool="select" aria-pressed="true" title="Selecionar e mover"><i class="bi-cursor"></i><span>Selecionar</span></button>
                                 <button class="mind-map-tool" type="button" data-mind-tool="pan" aria-pressed="false" title="Mover a tela"><i class="bi-hand-index-thumb"></i><span>Mover</span></button>
                                 <button class="mind-map-tool" type="button" data-mind-tool="node" aria-pressed="false" title="Adicionar conceito"><i class="bi-card-text"></i><span>Conceito</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="rect" aria-pressed="false" title="Adicionar retângulo"><i class="bi-square"></i><span>Forma</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="ellipse" aria-pressed="false" title="Adicionar círculo"><i class="bi-circle"></i><span>Círculo</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="edge" aria-pressed="false" title="Ligar dois elementos"><i class="bi-bezier2"></i><span>Ligar</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="draw" aria-pressed="false" title="Desenho livre"><i class="bi-pencil"></i><span>Desenhar</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="eraser" aria-pressed="false" title="Apagar partes dos desenhos"><i class="bi-eraser"></i><span>Borracha</span></button>
-                            </div>
-                            <div class="mind-map-tool-group" aria-label="Aparência">
-                                <label class="mind-map-color-control" title="Cor do elemento"><span>Cor</span><input id="mindMapColor" type="color" value="#b8322a" aria-label="Cor do elemento"></label>
-                                <select class="form-select form-select-sm mind-map-line-style" id="mindMapLineStyle" aria-label="Estilo da linha" title="Estilo das conexões">
-                                    <option value="solid">Linha contínua</option>
-                                    <option value="dashed">Linha pontilhada</option>
-                                </select>
-                                <label class="mind-map-eraser-control d-none" id="mindMapEraserControl" title="Tamanho da borracha"><i class="bi-circle"></i><input id="mindMapEraserSize" type="range" min="10" max="72" step="2" value="28" aria-label="Tamanho da borracha"><output id="mindMapEraserSizeLabel" for="mindMapEraserSize">28</output></label>
-                            </div>
-                            <div class="mind-map-tool-group" aria-label="Edição">
-                                <button class="mind-map-tool" id="btnMindUndo" type="button" title="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i><span>Desfazer</span></button>
-                                <button class="mind-map-tool" id="btnMindRedo" type="button" title="Refazer" disabled><i class="bi-arrow-clockwise"></i><span>Refazer</span></button>
-                                <button class="mind-map-tool" id="btnMindDuplicate" type="button" title="Duplicar selecionado" disabled><i class="bi-copy"></i><span>Duplicar</span></button>
-                                <button class="mind-map-tool" id="btnMindFront" type="button" title="Trazer para frente" disabled><i class="bi-front"></i><span>Frente</span></button>
                                 <button class="mind-map-tool" id="btnMindLock" type="button" title="Fixar posição" aria-pressed="false" disabled><i class="bi-unlock"></i><span id="mindMapLockLabel">Fixar</span></button>
-                                <button class="mind-map-tool mind-map-tool-danger" id="btnMindDelete" type="button" title="Excluir selecionado" disabled><i class="bi-trash"></i><span>Excluir</span></button>
                             </div>
-                            <div class="mind-map-tool-group mind-map-zoom-controls" aria-label="Zoom">
-                                <button class="mind-map-tool" id="btnMindZoomOut" type="button" title="Diminuir zoom"><i class="bi-dash-lg"></i></button>
-                                <span id="mindMapZoomLabel">100%</span>
-                                <button class="mind-map-tool" id="btnMindZoomIn" type="button" title="Aumentar zoom"><i class="bi-plus-lg"></i></button>
-                                <button class="mind-map-tool" id="btnMindFit" type="button" title="Enquadrar conteúdo"><i class="bi-arrows-fullscreen"></i></button>
+                            <button class="mind-map-tool mind-map-mobile-more" id="btnMindMobileTools" type="button" aria-label="Mais ferramentas" aria-expanded="false" aria-controls="mindMapMobileExtra"><i class="bi-grid"></i><span>Mais</span></button>
+                            <div class="mind-map-mobile-extra" id="mindMapMobileExtra">
+                                <div class="mind-map-mobile-panel-header"><strong>Mais ferramentas</strong><button class="mind-map-icon-button" id="btnMindMobileToolsClose" type="button" aria-label="Fechar ferramentas"><i class="bi-x-lg"></i></button></div>
+                                <div class="mind-map-tool-group" aria-label="Criação avançada">
+                                    <button class="mind-map-tool" type="button" data-mind-tool="rect" aria-pressed="false" title="Adicionar retângulo"><i class="bi-square"></i><span>Forma</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="ellipse" aria-pressed="false" title="Adicionar círculo"><i class="bi-circle"></i><span>Círculo</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="edge" aria-pressed="false" title="Ligar dois elementos"><i class="bi-bezier2"></i><span>Ligar</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="draw" aria-pressed="false" title="Desenho livre"><i class="bi-pencil"></i><span>Desenhar</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="eraser" aria-pressed="false" title="Apagar partes dos desenhos"><i class="bi-eraser"></i><span>Borracha</span></button>
+                                </div>
+                                <div class="mind-map-tool-group" aria-label="Aparência">
+                                    <label class="mind-map-color-control" title="Cor do elemento"><span>Cor</span><input id="mindMapColor" type="color" value="#b8322a" aria-label="Cor do elemento"></label>
+                                    <select class="form-select form-select-sm mind-map-line-style" id="mindMapLineStyle" aria-label="Estilo da linha" title="Estilo das conexões">
+                                        <option value="solid">Linha contínua</option>
+                                        <option value="dashed">Linha pontilhada</option>
+                                    </select>
+                                    <label class="mind-map-eraser-control d-none" id="mindMapEraserControl" title="Tamanho da borracha"><i class="bi-circle"></i><input id="mindMapEraserSize" type="range" min="10" max="72" step="2" value="28" aria-label="Tamanho da borracha"><output id="mindMapEraserSizeLabel" for="mindMapEraserSize">28</output></label>
+                                </div>
+                                <div class="mind-map-tool-group" aria-label="Edição">
+                                    <button class="mind-map-tool" id="btnMindUndo" type="button" title="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i><span>Desfazer</span></button>
+                                    <button class="mind-map-tool" id="btnMindRedo" type="button" title="Refazer" disabled><i class="bi-arrow-clockwise"></i><span>Refazer</span></button>
+                                    <button class="mind-map-tool" id="btnMindDuplicate" type="button" title="Duplicar selecionado" disabled><i class="bi-copy"></i><span>Duplicar</span></button>
+                                    <button class="mind-map-tool" id="btnMindFront" type="button" title="Trazer para frente" disabled><i class="bi-front"></i><span>Frente</span></button>
+                                    <button class="mind-map-tool mind-map-tool-danger" id="btnMindDelete" type="button" title="Excluir selecionado" disabled><i class="bi-trash"></i><span>Excluir</span></button>
+                                </div>
+                                <div class="mind-map-tool-group mind-map-zoom-controls" aria-label="Zoom">
+                                    <button class="mind-map-tool" id="btnMindZoomOut" type="button" title="Diminuir zoom"><i class="bi-dash-lg"></i></button>
+                                    <span id="mindMapZoomLabel">100%</span>
+                                    <button class="mind-map-tool" id="btnMindZoomIn" type="button" title="Aumentar zoom"><i class="bi-plus-lg"></i></button>
+                                    <button class="mind-map-tool" id="btnMindFit" type="button" title="Enquadrar conteúdo"><i class="bi-arrows-fullscreen"></i></button>
+                                </div>
                             </div>
                         </div>
                         <div class="mind-map-hint" id="mindMapHint">Clique duas vezes em um conceito para editar o texto.</div>
