@@ -187,6 +187,10 @@
 .mind-map-element { cursor: move; }
 .mind-map-element .mind-map-node-surface { filter: drop-shadow(0 5px 8px rgba(59, 41, 35, .1)); }
 .mind-map-element.selected .mind-map-node-surface { stroke: #2167d5 !important; stroke-width: 3 !important; }
+.mind-map-resize-control[data-mind-resize="nw"], .mind-map-resize-control[data-mind-resize="se"] { cursor: nwse-resize; }
+.mind-map-resize-control[data-mind-resize="ne"], .mind-map-resize-control[data-mind-resize="sw"] { cursor: nesw-resize; }
+.mind-map-resize-hit { fill: transparent; pointer-events: all; }
+.mind-map-resize-handle { fill: #fffdf9; stroke: #2167d5; stroke-width: 2; pointer-events: none; vector-effect: non-scaling-stroke; }
 .mind-map-element.is-locked .mind-map-node-surface { stroke-dasharray: 6 4; }
 .mind-map-lock-badge circle { fill: #fffdf9; stroke: rgba(59, 41, 35, .2); stroke-width: 1; }
 .mind-map-lock-badge text { fill: #5b433a !important; font-size: 12px; font-weight: 700; }
