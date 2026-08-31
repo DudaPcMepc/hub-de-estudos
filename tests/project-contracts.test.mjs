@@ -351,6 +351,37 @@ test("grifos sobrepostos permanecem visíveis, combinam cores e respeitam o filt
     assert.equal(repetido, 'regra x <mark class="highlight-green">regra</mark>');
 });
 
+test("a paleta escolhe a cor e cada grifo pode ser alterado ou removido no próprio texto", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const renderizar = carregarRenderizadorDeGrifos();
+
+    assert.match(html, /data-highlight-color="yellow"[^>]*aria-pressed="true"/);
+    assert.match(html, /function selecionarCorGrifoLeitor\(cor/);
+    assert.match(html, /id="wsMenuGrifoExistente"/);
+    assert.match(html, /id="btnExcluirGrifoExistente"/);
+    assert.match(html, /mark\[data-highlight-id\]/);
+    assert.match(renderizar("uma regra", [{ id: "grifo-1", texto: "regra", prefixo: "uma ", sufixo: "", cor: "yellow" }]), /data-highlight-id="grifo-1" tabindex="0"/);
+    const sobreposto = renderizar("abcdefghij", [
+        { id: "grifo-1", texto: "cdef", prefixo: "ab", sufixo: "ghij", cor: "yellow" },
+        { id: "grifo-2", texto: "efgh", prefixo: "abcd", sufixo: "ij", cor: "red" }
+    ]);
+    assert.match(sobreposto, /data-highlight-ids="grifo-1\|grifo-2" tabindex="0"/);
+    assert.match(html, /id="wsEscolherGrifoSobreposto"/);
+    assert.match(html, /espacoAbaixo < menu\.offsetHeight \+ 12/);
+    assert.match(html, /menu\.classList\.toggle\("is-above", abrirAcima\)/);
+    assert.match(html, /const geracaoOperacao = \+\+geracaoAlteracaoCorGrifo/);
+    assert.match(html, /const operacaoContinuaVisivel = \(\) => sessaoHubPermaneceAtual\(sessao\)[\s\S]*?materiaIdOperacao[\s\S]*?dispositivoIdOperacao[\s\S]*?grifoContextualLeitorId === grifoIdOperacao[\s\S]*?geracaoAlteracaoCorGrifo === geracaoOperacao/);
+    assert.match(html, /if \(!operacaoContinuaVisivel\(\)\) return;\s*selecionarCorGrifoLeitor\(salvo\.cor\)/);
+    assert.match(html, /catch \(erro\) \{\s*console\.error\("Falha ao alterar a cor do grifo", erro\);\s*if \(!operacaoContinuaVisivel\(\)\) return;/);
+    assert.match(html, /async function excluirGrifoLeitor\(grifoId\)[\s\S]*?const materiaIdOperacao = materiaAbertaId;[\s\S]*?const dispositivoIdOperacao = dispositivoLeitorAtual\?\.id;[\s\S]*?const grifoContextualOperacao = grifoContextualLeitorId;[\s\S]*?grifoContextualLeitorId === grifoContextualOperacao[\s\S]*?if \(!contextoVisualPermaneceAtual\) return false;/);
+    assert.match(html, /btnExcluirGrifoExistente[\s\S]*?const grifoIdOperacao = grifo\.id;[\s\S]*?grifoContextualLeitorId !== grifoIdOperacao\) return;/);
+    assert.match(repository, /export async function atualizarCorGrifoJuridico/);
+    assert.match(repository, /user_legal_highlights"\)\.update\(\{ color: cor \}\)[\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)[\s\S]*?\.eq\("updated_at", versaoEsperada\)/);
+    assert.match(auth, /atualizarCorGrifo: atualizarCorGrifoJuridico/);
+});
+
 test("o histórico de leitura informa sincronização sem repetir automaticamente a contagem", () => {
     const html = readProjectFile("index.html");
 
