@@ -69,6 +69,7 @@ import {
     atualizarColecaoVade,
     atualizarMapaMental,
     salvarConteudoMapaMental,
+    salvarArtigoColecaoVade,
     salvarDocumentosColecaoVade,
     salvarLayoutWidgets
 } from "./cloud-core-repository.js";
@@ -108,6 +109,7 @@ window.HUB_CLOUD_VADE = Object.freeze({
     criar: criarColecaoVade,
     excluir: excluirColecaoVade,
     listar: carregarColecoesVade,
+    salvarArtigo: salvarArtigoColecaoVade,
     salvarDocumentos: salvarDocumentosColecaoVade
 });
 

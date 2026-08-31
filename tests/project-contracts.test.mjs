@@ -233,7 +233,7 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /HUB_CLOUD_WIDGETS\.salvarLayout/);
     assert.match(html, /Constituição Federal/);
     assert.match(html, /Código Penal/);
-    assert.match(html, /Meu Vade Mecum/);
+    assert.match(html, /Cadernos jurídicos/);
     assert.match(html, /Comunidade da matéria/);
     assert.match(html, /renderizarBibliotecaMateria\(m\)/);
     assert.match(html, /id="wsLeitorPrototipo"/);
@@ -241,7 +241,7 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /id="btnCopiarArtigo"/);
     assert.match(html, /id="wsMenuSelecaoLeitor"[^>]*role="toolbar"/);
     assert.match(html, /id="btnCriarCardArtigo"[^>]*>[\s\S]*?<span>Flashcard<\/span>/);
-    assert.match(html, /Abrir Vade Mecum/);
+    assert.match(html, /Abrir cadernos/);
     assert.doesNotMatch(html, /Visualizar protótipo/);
     assert.match(html, /id="wsCatalogoVade"/);
     assert.match(html, /id="wsInicioBiblioteca"/);
@@ -777,6 +777,37 @@ test("a interface do Meu Vade Mecum carrega coleções pessoais e confirma opera
     assert.match(html, /if \(!sessaoHubPermaneceAtual\(sessao\)\) return/);
     assert.match(docs, /foi aplicada e validada no Supabase/);
     assert.match(docs, /Documentos privados e comunidade permanecem reservados/);
+});
+
+test("os Cadernos jurídicos salvam artigos privados e permitem reabri-los ou removê-los", () => {
+    const html = readProjectFile("index.html");
+    const migration = readProjectFile("supabase/migrations/202608310005_legal_notebook_articles.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+
+    assert.match(migration, /create table public\.user_vade_collection_provisions/i);
+    assert.match(migration, /foreign key \(collection_id, workspace_id, user_id\)[\s\S]*?references public\.user_vade_collections\(id, workspace_id, user_id\) on delete cascade/i);
+    assert.match(migration, /alter table public\.user_vade_collection_provisions force row level security/i);
+    assert.match(migration, /user_vade_collection_provisions_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(migration, /create or replace function public\.set_user_vade_provision/i);
+    assert.match(migration, /document\.current_version_id = version\.id[\s\S]*?document\.active = true/i);
+    assert.match(migration, /grant select on table public\.user_vade_collection_provisions to authenticated/i);
+    assert.doesNotMatch(migration, /grant (?:insert|update|delete|all)[^;]*user_vade_collection_provisions[^;]*authenticated/i);
+    assert.match(migration, /grant execute on function public\.set_user_vade_provision\(uuid, uuid, boolean\) to authenticated/i);
+
+    assert.match(repository, /user_vade_collection_provisions/);
+    assert.match(repository, /export async function salvarArtigoColecaoVade/);
+    assert.match(repository, /\.rpc\("set_user_vade_provision"/);
+    assert.match(auth, /salvarArtigo: salvarArtigoColecaoVade/);
+
+    assert.match(html, />Cadernos jurídicos</);
+    assert.match(html, /id="wsCadernoArtigoPopover"/);
+    assert.match(html, /function renderizarSeletorCadernosArtigo/);
+    assert.match(html, /async function alternarArtigoNoCaderno/);
+    assert.match(html, /async function removerArtigoDoCaderno/);
+    assert.match(html, /class="[^"]*btn-abrir-artigo-vade/);
+    assert.match(html, /class="[^"]*btn-remover-artigo-vade/);
+    assert.match(html, /exigirNuvemVade\(\)\.salvarArtigo/);
 });
 
 test("a fundação do catálogo mantém vínculos opcionais e widgets isolados por usuário", () => {

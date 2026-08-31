@@ -741,6 +741,21 @@
     .personal-vade-document-copy small { color: var(--pimentel-cafe-claro); font-size: .64rem; }
     .personal-vade-organizer { padding: .85rem; border-top: 1px solid rgba(59, 41, 35, .08); }
     .personal-vade-available { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+    .personal-vade-articles { display: grid; gap: .45rem; padding: .75rem .85rem; border-top: 1px solid rgba(59, 41, 35, .07); }
+    .personal-vade-articles-title { display: flex; align-items: center; justify-content: space-between; color: var(--pimentel-cafe); font-size: .7rem; }
+    .personal-vade-article { display: flex; align-items: center; justify-content: space-between; gap: .65rem; padding: .55rem .65rem; background: rgba(244, 226, 212, .18); border-radius: .65rem; }
+    .personal-vade-article-copy { min-width: 0; }
+    .personal-vade-article-copy strong, .personal-vade-article-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .personal-vade-article-copy strong { color: var(--pimentel-cafe); font-size: .74rem; }
+    .personal-vade-article-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
+    .legal-notebook-popover-card { right: 0; left: auto; width: min(19rem, calc(100vw - 2rem)); }
+    .legal-notebook-popover-title { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
+    .legal-notebook-options { display: grid; gap: .35rem; max-height: 15rem; overflow-y: auto; }
+    .legal-notebook-option { display: flex; align-items: center; justify-content: space-between; gap: .7rem; width: 100%; padding: .5rem .55rem; color: var(--pimentel-cafe); text-align: left; background: rgba(244, 226, 212, .22); border: 0; border-radius: .55rem; }
+    .legal-notebook-option:hover, .legal-notebook-option:focus-visible { background: rgba(184, 50, 42, .09); }
+    .legal-notebook-option.is-saved { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .11); }
+    .legal-notebook-option i { flex: 0 0 auto; }
+    .legal-notebook-empty { color: var(--pimentel-cafe-claro); font-size: .68rem; line-height: 1.45; }
     @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document { align-items: flex-start; flex-wrap: wrap; } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
@@ -1751,7 +1766,7 @@
                                 <div class="library-recommended-grid" id="wsRecomendadosBiblioteca"></div>
                             </section>
                             <section class="library-home-section" aria-labelledby="wsCadernosResumoTitulo">
-                                <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsCadernosResumoTitulo"><i class="bi-journals me-1"></i>Meus cadernos</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerCadernosBiblioteca">Abrir</button></header>
+                                <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsCadernosResumoTitulo"><i class="bi-journals me-1"></i>Cadernos jurídicos</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerCadernosBiblioteca">Abrir</button></header>
                                 <div class="library-notebook-preview" id="wsResumoCadernos"></div>
                             </section>
                         </div>
@@ -1768,13 +1783,13 @@
                     </section>
                     <section class="personal-vade-panel d-none" id="wsVadePanel" aria-labelledby="wsVadeTitulo">
                         <header class="personal-vade-header">
-                            <div><h6 class="fw-bold mb-1" id="wsVadeTitulo"><i class="bi-journals me-1"></i>Meu Vade Mecum</h6><p class="mb-0">Monte cadernos privados com as normas oficiais disponíveis na Biblioteca.</p></div>
+                            <div><h6 class="fw-bold mb-1" id="wsVadeTitulo"><i class="bi-journals me-1"></i>Cadernos jurídicos</h6><p class="mb-0">Reúna artigos e normas importantes em coleções privadas para suas revisões.</p></div>
                             <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-primary" id="btnNovoVade"><i class="bi-plus-lg me-1"></i>Novo caderno</button><button type="button" class="btn btn-sm btn-link library-back-button" id="btnFecharVade"><i class="bi-arrow-left"></i>Biblioteca</button></div>
                         </header>
                         <div class="personal-vade-status" id="wsVadeStatus" role="status" aria-live="polite"></div>
                         <form class="personal-vade-form d-none" id="formVade">
                             <div class="row g-2">
-                                <div class="col-md-4"><label class="form-label small" for="vadeNome">Nome do caderno</label><input class="form-control form-control-sm" id="vadeNome" maxlength="120" placeholder="Ex: Vade Mecum GCM" required></div>
+                                <div class="col-md-4"><label class="form-label small" for="vadeNome">Nome do caderno</label><input class="form-control form-control-sm" id="vadeNome" maxlength="120" placeholder="Ex: Revisão final GCM" required></div>
                                 <div class="col-md-6"><label class="form-label small" for="vadeDescricao">Descrição (opcional)</label><input class="form-control form-control-sm" id="vadeDescricao" maxlength="1000" placeholder="Ex: Normas principais do meu edital"></div>
                                 <div class="col-md-2 d-grid align-self-end"><button class="btn btn-sm btn-primary" id="btnSalvarVade" type="submit"><i class="bi-cloud-check me-1"></i><span>Salvar</span></button></div>
                             </div>
@@ -1818,6 +1833,14 @@
                                     <option value="pink">Rosa · legado</option>
                                 </select>
                                 <button type="button" class="legal-icon-button" id="btnFavoritarArtigo" aria-pressed="false" aria-label="Favoritar artigo" title="Favoritar artigo"><i class="bi-bookmark"></i><span class="visually-hidden">Favoritar</span></button>
+                                <details class="legal-toolbar-popover" id="wsCadernoArtigoPopover">
+                                    <summary class="legal-icon-button" aria-label="Salvar artigo no caderno" title="Salvar no caderno"><i class="bi-journal-plus"></i></summary>
+                                    <div class="legal-toolbar-popover-card legal-notebook-popover-card">
+                                        <div class="legal-notebook-popover-title"><strong>Salvar no caderno</strong><small class="text-muted" id="wsCadernoArtigoResumo"></small></div>
+                                        <div class="legal-notebook-options" id="wsCadernoArtigoOpcoes"></div>
+                                        <button type="button" class="btn btn-sm btn-link px-0 mt-2" id="btnCriarCadernoDoLeitor"><i class="bi-plus-lg me-1"></i>Novo caderno jurídico</button>
+                                    </div>
+                                </details>
                                 <details class="legal-toolbar-popover">
                                     <summary class="legal-icon-button" aria-label="Cores de marcação" title="Cores de marcação"><i class="bi-palette"></i></summary>
                                     <div class="legal-toolbar-popover-card legal-highlight-legend" aria-label="Escolher cor da marcação">
@@ -2728,6 +2751,7 @@ let colecaoVadeEmEdicaoId = null;
 let colecaoVadeOrganizandoId = null;
 let rascunhoDocumentosVade = [];
 let operacaoVadeEmAndamento = false;
+let operacaoCadernoArtigoEmAndamento = false;
 
 function capturarSessaoHubAtual() {
     const contexto = window.HUB_SESSION_CONTEXT;
@@ -2767,7 +2791,7 @@ function exigirNuvemLinks() {
 }
 
 function exigirNuvemVade() {
-    if (!window.HUB_CLOUD_VADE) throw new Error("A conexão do Meu Vade Mecum com o Supabase ainda não está pronta.");
+    if (!window.HUB_CLOUD_VADE) throw new Error("A conexão dos Cadernos jurídicos com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_VADE;
 }
 
@@ -2820,7 +2844,7 @@ function definicoesWidgetsMateria(materia) {
     }
     return [
         { tipo: "legal_library", ...legal, demo: true, documento, documentos },
-        { tipo: "personal_vade", titulo: "Meu Vade Mecum", descricao: "Um caderno pessoal para reunir normas oficiais, favoritos, grifos e índices temáticos.", fonte: "Coleção privada do usuário", icone: "bi-journals", demo: true },
+        { tipo: "personal_vade", titulo: "Cadernos jurídicos", descricao: "Coleções pessoais para reunir artigos, normas oficiais e referências de revisão.", fonte: "Coleção privada do usuário", icone: "bi-journals", demo: true },
         { tipo: "private_documents", titulo: "Meus materiais", descricao: "Espaço privado para PDFs, resumos e outros documentos ligados a esta matéria.", fonte: "Conteúdo privado do usuário", icone: "bi-folder2-open", demo: true },
         { tipo: "community", titulo: "Comunidade da matéria", descricao: "Resumos, dicas e flashcards publicados voluntariamente, com importação para o espaço pessoal.", fonte: "Etapa futura com moderação", icone: "bi-people", demo: false, futuro: true }
     ];
@@ -3090,6 +3114,72 @@ function renderizarIndiceLeitor(filtro = "") {
     if (dispositivos.length && !dispositivos.some(item => item.id === dispositivoLeitorAtual?.id)) renderizarDispositivoLeitor(dispositivos[0], { registrarLeitura: true });
 }
 
+function artigoEstaNoCaderno(colecao, dispositivoId = dispositivoLeitorAtual?.id) {
+    return Boolean(dispositivoId && colecao?.artigos?.some(item => item.dispositivoId === dispositivoId));
+}
+
+function renderizarSeletorCadernosArtigo() {
+    const opcoes = document.getElementById("wsCadernoArtigoOpcoes");
+    const resumo = document.getElementById("wsCadernoArtigoResumo");
+    if (!opcoes || !resumo) return;
+    if (!dispositivoLeitorAtual || !documentoLeitorAtual) {
+        resumo.textContent = "";
+        opcoes.innerHTML = `<div class="legal-notebook-empty">Abra um artigo para poder salvá-lo.</div>`;
+        return;
+    }
+    const quantidade = colecoesVade.filter(colecao => artigoEstaNoCaderno(colecao)).length;
+    resumo.textContent = quantidade ? `${quantidade} selecionado(s)` : "Privado";
+    opcoes.innerHTML = colecoesVade.length ? colecoesVade.map(colecao => {
+        const salvo = artigoEstaNoCaderno(colecao);
+        return `<button type="button" class="legal-notebook-option ${salvo ? "is-saved" : ""}" data-notebook-id="${esc(colecao.id)}" aria-pressed="${salvo}"><span><i class="bi-${salvo ? "check-circle-fill" : "circle"} me-2"></i>${esc(colecao.nome)}</span><small>${salvo ? "Salvo" : "Adicionar"}</small></button>`;
+    }).join("") : `<div class="legal-notebook-empty"><i class="bi-journal-plus me-1"></i>Crie seu primeiro caderno jurídico para organizar este artigo.</div>`;
+    opcoes.querySelectorAll("[data-notebook-id]").forEach(botao => botao.addEventListener("click", () => alternarArtigoNoCaderno(botao.dataset.notebookId, botao)));
+}
+
+async function alternarArtigoNoCaderno(colecaoId, botao = null) {
+    if (operacaoCadernoArtigoEmAndamento || !documentoLeitorAtual || !dispositivoLeitorAtual) return;
+    const colecao = colecoesVade.find(item => item.id === colecaoId);
+    if (!colecao) return;
+    const sessao = capturarSessaoHubAtual();
+    const documentoId = documentoLeitorAtual.id;
+    const dispositivoId = dispositivoLeitorAtual.id;
+    const adicionar = !artigoEstaNoCaderno(colecao, dispositivoId);
+    operacaoCadernoArtigoEmAndamento = true;
+    if (botao) botao.disabled = true;
+    try {
+        const salvo = await exigirNuvemVade().salvarArtigo(colecao.id, dispositivoId, adicionar);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => {
+            if (item.id !== colecao.id) return item;
+            const artigosAtuais = Array.isArray(item.artigos) ? item.artigos : [];
+            if (!adicionar) return { ...item, artigos: artigosAtuais.filter(artigo => artigo.dispositivoId !== dispositivoId) };
+            const artigo = {
+                ...salvo,
+                documentoId,
+                documentoTitulo: documentoLeitorAtual.tituloCurto,
+                dispositivoId,
+                rotulo: dispositivoLeitorAtual.rotulo,
+                titulo: dispositivoLeitorAtual.titulo || ""
+            };
+            return { ...item, artigos: [...artigosAtuais.filter(atual => atual.dispositivoId !== dispositivoId), artigo] };
+        });
+        renderizarSeletorCadernosArtigo();
+        document.getElementById("wsLeitorOrientacao").textContent = adicionar
+            ? `Artigo salvo em “${colecao.nome}”.`
+            : `Artigo removido de “${colecao.nome}”.`;
+    } catch (erro) {
+        console.error("Falha ao organizar artigo no caderno jurídico", erro);
+        if (sessaoHubPermaneceAtual(sessao)
+            && documentoLeitorAtual?.id === documentoId
+            && dispositivoLeitorAtual?.id === dispositivoId) {
+            document.getElementById("wsLeitorOrientacao").textContent = erro?.message || "Não foi possível atualizar o caderno jurídico.";
+        }
+    } finally {
+        operacaoCadernoArtigoEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
 function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } = {}) {
     if (!documentoLeitorAtual || !dispositivo) return;
     fecharMenuSelecaoLeitor();
@@ -3179,6 +3269,7 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     btnFavorito.querySelector("span").textContent = favorito ? "Favoritado" : "Favoritar";
     btnFavorito.setAttribute("aria-label", favorito ? "Remover artigo dos favoritos" : "Favoritar artigo");
     btnFavorito.title = favorito ? "Remover dos favoritos" : "Favoritar artigo";
+    renderizarSeletorCadernosArtigo();
     renderizarIndiceLeitor(document.getElementById("wsBuscaArtigo").value);
     if (registrarLeitura && materia) registrarLeituraAtual(materia, dispositivo);
 }
@@ -3540,8 +3631,9 @@ function renderizarInicioBiblioteca(materia) {
     container.querySelectorAll(".btn-abrir-recomendado").forEach(botao => botao.addEventListener("click", () => abrirDocumentoCatalogo(botao.dataset.catalogId)));
 
     const totalDocumentos = colecoesVade.reduce((total, colecao) => total + (colecao.documentos?.length || 0), 0);
+    const totalArtigos = colecoesVade.reduce((total, colecao) => total + (colecao.artigos?.length || 0), 0);
     const primeiro = [...colecoesVade].sort((a, b) => Number(a.posicao || 0) - Number(b.posicao || 0))[0] || null;
-    document.getElementById("wsResumoCadernos").innerHTML = `<div class="library-notebook-count"><i class="bi-journal-bookmark-fill" aria-hidden="true"></i><div><strong>${colecoesVade.length}</strong><small>${colecoesVade.length === 1 ? "caderno privado" : "cadernos privados"} · ${totalDocumentos} norma(s)</small></div></div>${primeiro ? `<div class="library-notebook-latest"><strong class="d-block mb-1">${esc(primeiro.nome)}</strong><span>${esc(primeiro.descricao || "Caderno jurídico pessoal")}</span></div>` : `<div class="library-notebook-latest">Crie um caderno para reunir as normas importantes do seu edital.</div>`}<button type="button" class="btn btn-sm w-100 library-notebook-action" id="btnAcaoResumoCadernos"><i class="bi-${primeiro ? "journals" : "plus-lg"} me-1"></i>${primeiro ? "Ver meus cadernos" : "Criar primeiro caderno"}</button>`;
+    document.getElementById("wsResumoCadernos").innerHTML = `<div class="library-notebook-count"><i class="bi-journal-bookmark-fill" aria-hidden="true"></i><div><strong>${colecoesVade.length}</strong><small>${colecoesVade.length === 1 ? "caderno privado" : "cadernos privados"} · ${totalArtigos} artigo(s) · ${totalDocumentos} norma(s)</small></div></div>${primeiro ? `<div class="library-notebook-latest"><strong class="d-block mb-1">${esc(primeiro.nome)}</strong><span>${esc(primeiro.descricao || "Caderno jurídico pessoal")}</span></div>` : `<div class="library-notebook-latest">Crie um caderno para reunir artigos e normas importantes do seu edital.</div>`}<button type="button" class="btn btn-sm w-100 library-notebook-action" id="btnAcaoResumoCadernos"><i class="bi-${primeiro ? "journals" : "plus-lg"} me-1"></i>${primeiro ? "Ver cadernos jurídicos" : "Criar primeiro caderno"}</button>`;
     document.getElementById("btnAcaoResumoCadernos").addEventListener("click", () => { abrirPainelVade(); if (!primeiro) abrirFormularioVade(); });
 }
 
@@ -3641,7 +3733,7 @@ function abrirFormularioVade(colecao = null) {
 function renderizarVade() {
     const lista = document.getElementById("wsVadeLista");
     if (!colecoesVade.length) {
-        lista.innerHTML = `<div class="personal-vade-empty"><i class="bi-journal-plus" aria-hidden="true"></i><strong class="d-block mb-1">Seu Vade Mecum começa aqui</strong><small class="d-block mb-3">Crie um caderno e escolha as normas que quer consultar em um só lugar.</small><button type="button" class="btn btn-sm btn-outline-primary" id="btnPrimeiroVade"><i class="bi-plus-lg me-1"></i>Criar primeiro caderno</button></div>`;
+        lista.innerHTML = `<div class="personal-vade-empty"><i class="bi-journal-plus" aria-hidden="true"></i><strong class="d-block mb-1">Seus Cadernos jurídicos começam aqui</strong><small class="d-block mb-3">Crie um caderno e salve artigos diretamente durante a leitura.</small><button type="button" class="btn btn-sm btn-primary" id="btnPrimeiroVade"><i class="bi-plus-lg me-1"></i>Criar primeiro caderno</button></div>`;
         document.getElementById("btnPrimeiroVade").addEventListener("click", () => abrirFormularioVade());
         return;
     }
@@ -3652,6 +3744,7 @@ function renderizarVade() {
             ? rascunhoDocumentosVade
             : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
         const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
+        const artigos = [...(colecao.artigos || [])].sort((a, b) => a.posicao - b.posicao);
         const disponiveis = documentosJuridicos.filter(documento => !idsDocumentos.includes(documento.id));
         return `<article class="personal-vade-card" data-vade-id="${esc(colecao.id)}">
             <div class="personal-vade-card-head">
@@ -3670,6 +3763,13 @@ function renderizarVade() {
                         <button type="button" class="btn btn-sm btn-primary btn-abrir-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-book me-1"></i>Abrir</button>
                     </div>
                 </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-journal-x me-1"></i>Nenhuma norma adicionada.</div>`}
+            </div>
+            <div class="personal-vade-articles">
+                <div class="personal-vade-articles-title"><strong><i class="bi-bookmark-check me-1"></i>Artigos salvos</strong><span>${artigos.length}</span></div>
+                ${artigos.length ? artigos.map(artigo => `<div class="personal-vade-article">
+                    <div class="personal-vade-article-copy"><strong>${esc(artigo.rotulo || "Artigo")}${artigo.titulo ? ` — ${esc(artigo.titulo)}` : ""}</strong><small>${esc(artigo.documentoTitulo || "Norma jurídica")}</small></div>
+                    <div class="d-flex gap-1 flex-shrink-0"><button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button></div>
+                </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
             </div>
             ${organizando ? `<div class="personal-vade-organizer"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}
         </article>`;
@@ -3694,6 +3794,12 @@ function renderizarVade() {
             const materia = materiaPorId(materiaAbertaId);
             if (documento && materia) abrirLeitorJuridico(documento, materia);
         }));
+        card.querySelectorAll(".btn-abrir-artigo-vade").forEach(botao => botao.addEventListener("click", () => {
+            const documento = documentoVadePorId(botao.dataset.documentId);
+            const materia = materiaPorId(materiaAbertaId);
+            if (documento && materia) abrirLeitorJuridico(documento, materia, botao.dataset.provisionId);
+        }));
+        card.querySelectorAll(".btn-remover-artigo-vade").forEach(botao => botao.addEventListener("click", () => removerArtigoDoCaderno(colecao, botao.dataset.provisionId, botao)));
         card.querySelectorAll(".btn-adicionar-documento-vade").forEach(botao => botao.addEventListener("click", () => {
             if (!rascunhoDocumentosVade.includes(botao.dataset.documentId)) rascunhoDocumentosVade.push(botao.dataset.documentId);
             renderizarVade();
@@ -3723,6 +3829,29 @@ function abrirPainelVade() {
 function abrirRecursosBiblioteca() {
     selecionarVisaoBiblioteca("recursos");
     document.getElementById("wsRecursosMateria").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function removerArtigoDoCaderno(colecao, dispositivoId, botao = null) {
+    if (operacaoCadernoArtigoEmAndamento || !colecao || !dispositivoId) return;
+    operacaoCadernoArtigoEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    if (botao) botao.disabled = true;
+    mostrarStatusVade("pending", "Removendo o artigo do caderno...");
+    try {
+        await exigirNuvemVade().salvarArtigo(colecao.id, dispositivoId, false);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id
+            ? { ...item, artigos: (item.artigos || []).filter(artigo => artigo.dispositivoId !== dispositivoId) }
+            : item);
+        renderizarVade();
+        mostrarStatusVade("success", "Artigo removido. O texto oficial e seus grifos foram preservados.");
+    } catch (erro) {
+        console.error("Falha ao remover artigo do caderno jurídico", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível remover o artigo do caderno.");
+    } finally {
+        operacaoCadernoArtigoEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
 }
 
 async function salvarDocumentosVade(colecao) {
@@ -3823,7 +3952,7 @@ function renderizarBibliotecaMateria(materia) {
                     ${recurso.demo
                         ? (recurso.documentos?.length
                             ? `<button type="button" class="btn btn-sm btn-primary btn-abrir-recurso-demo" data-resource-key="${esc(recurso.chaveVisual)}" data-document-id="${esc(recurso.documento.id)}"><i class="bi-book me-1"></i>Abrir documento</button>`
-                            : `<button type="button" class="btn btn-sm btn-primary btn-abrir-recurso-demo" data-resource-key="${esc(recurso.chaveVisual)}"><i class="bi-journal-bookmark me-1"></i>${recurso.tipo === "personal_vade" ? "Abrir Vade Mecum" : "Acessar recurso"}</button>`)
+                            : `<button type="button" class="btn btn-sm btn-primary btn-abrir-recurso-demo" data-resource-key="${esc(recurso.chaveVisual)}"><i class="bi-journal-bookmark me-1"></i>${recurso.tipo === "personal_vade" ? "Abrir cadernos" : "Acessar recurso"}</button>`)
                         : `<button type="button" class="btn btn-sm btn-outline-secondary" disabled><i class="bi-lock me-1"></i>Em planejamento</button>`}
                 </div>
             </article>
@@ -3871,6 +4000,11 @@ document.getElementById("btnVoltarCatalogoBiblioteca").addEventListener("click",
 document.getElementById("btnVoltarRecursosBiblioteca").addEventListener("click", abrirInicioBiblioteca);
 document.getElementById("buscaCatalogoVade").addEventListener("input", renderizarCatalogoVade);
 document.getElementById("btnNovoVade").addEventListener("click", () => abrirFormularioVade());
+document.getElementById("btnCriarCadernoDoLeitor").addEventListener("click", () => {
+    document.getElementById("wsCadernoArtigoPopover").open = false;
+    abrirPainelVade();
+    abrirFormularioVade();
+});
 document.getElementById("btnFecharVade").addEventListener("click", () => {
     fecharFormularioVade();
     colecaoVadeOrganizandoId = null;
@@ -3906,7 +4040,7 @@ document.getElementById("formVade").addEventListener("submit", async evento => {
             colecaoVadeOrganizandoId = salvo.id;
             rascunhoDocumentosVade = [];
             renderizarVade();
-            mostrarStatusVade("success", "Caderno criado. Agora escolha as normas e salve a organização.");
+            mostrarStatusVade("success", "Caderno criado. Você já pode salvar artigos durante a leitura ou organizar normas completas.");
         }
     } catch (erro) {
         console.error("Falha ao salvar o Vade Mecum", erro);
@@ -6368,6 +6502,7 @@ window.encerrarHub = () => {
     colecaoVadeOrganizandoId = null;
     rascunhoDocumentosVade = [];
     operacaoVadeEmAndamento = false;
+    operacaoCadernoArtigoEmAndamento = false;
     documentoLeitorAtual = null;
     dispositivoLeitorAtual = null;
     preencherCatalogoMaterias();
