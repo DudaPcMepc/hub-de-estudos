@@ -2,6 +2,7 @@ import { withSupabase } from "npm:@supabase/server@^1";
 
 const PRODUCTION_URL = "https://dudapcmepc.github.io/hub-de-estudos/";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PRIVATE_VADE_BUCKET = "private-legal-notebook-pdfs";
 
 function readAction(value: unknown): string {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "";
@@ -149,9 +150,17 @@ export default {
             { target_user_id: targetUserId },
           );
           if (previewError) throw previewError;
+          const { count: privatePdfCount, error: privatePdfCountError } = await context.supabaseAdmin
+            .from("user_vade_files")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", targetUserId);
+          if (privatePdfCountError) throw privatePdfCountError;
           return Response.json({
             target: { id: target.user.id, email: target.email },
-            preview,
+            preview: {
+              ...(preview && typeof preview === "object" ? preview : {}),
+              private_vade_pdfs: privatePdfCount || 0,
+            },
             confirmation: `EXCLUIR ${target.email}`,
           });
         }
@@ -177,6 +186,42 @@ export default {
               : "Não foi possível preparar a exclusão com segurança." },
             { status: sharedOwner || changed ? 409 : 502 },
           );
+        }
+
+        while (true) {
+          const { data: privateFiles, error: privateFilesError } = await context.supabaseAdmin
+            .from("user_vade_files")
+            .select("storage_path")
+            .eq("user_id", targetUserId)
+            .limit(1000);
+          if (privateFilesError) throw privateFilesError;
+          const paths = (privateFiles || [])
+            .map((file: { storage_path?: unknown }) => String(file.storage_path || ""))
+            .filter(Boolean);
+          if (!paths.length) break;
+
+          const { error: storageError } = await context.supabaseAdmin.storage
+            .from(PRIVATE_VADE_BUCKET)
+            .remove(paths);
+          if (storageError) {
+            console.error("Failed to remove private legal PDFs before user deletion");
+            return Response.json(
+              { error: "Não foi possível remover os PDFs privados da conta. Nenhum usuário foi excluído." },
+              { status: 502 },
+            );
+          }
+          const { error: metadataError } = await context.supabaseAdmin
+            .from("user_vade_files")
+            .delete()
+            .eq("user_id", targetUserId)
+            .in("storage_path", paths);
+          if (metadataError) {
+            console.error("Failed to remove private legal PDF metadata before user deletion");
+            return Response.json(
+              { error: "Os PDFs foram removidos, mas a exclusão da conta precisa ser tentada novamente." },
+              { status: 502 },
+            );
+          }
         }
 
         const { error: deleteError } = await context.supabaseAdmin.auth.admin.deleteUser(targetUserId, false);
