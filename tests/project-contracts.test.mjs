@@ -859,6 +859,54 @@ test("a restauração exige o espaço pessoal do proprietário", () => {
     assert.match(migration, /result\s*:=\s*public\.import_local_hub/);
 });
 
+test("as anotações dos Cadernos jurídicos são privadas, versionadas e independentes da lista de artigos", () => {
+    const migration = readProjectFile("supabase/migrations/202609010001_private_legal_notebook_notes.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+
+    assert.match(migration, /create table public\.user_vade_notes/i);
+    assert.match(migration, /foreign key \(collection_id, workspace_id, user_id\)[\s\S]*?references public\.user_vade_collections\(id, workspace_id, user_id\) on delete cascade/i);
+    assert.match(migration, /provision_id uuid references public\.legal_provisions\(id\) on delete set null/i);
+    assert.doesNotMatch(migration, /references public\.user_vade_collection_provisions/i);
+    assert.match(migration, /kind in \('note', 'summary'\)/i);
+    assert.match(migration, /before update on public\.user_vade_notes[\s\S]*?private\.bump_note_version\(\)/i);
+    assert.match(migration, /alter table public\.user_vade_notes force row level security/i);
+    assert.match(migration, /user_vade_notes_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(migration, /user_vade_notes_insert_self[\s\S]*?with check[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /revoke all on table public\.user_vade_notes from public, anon, authenticated/i);
+    assert.match(migration, /grant select, insert, update, delete on table public\.user_vade_notes to authenticated/i);
+
+    assert.match(repository, /export async function carregarAnotacoesColecaoVade/);
+    assert.match(repository, /export async function criarAnotacaoColecaoVade/);
+    assert.match(repository, /export async function atualizarAnotacaoColecaoVade/);
+    assert.match(repository, /export async function excluirAnotacaoColecaoVade/);
+    assert.match(repository, /user_vade_notes"\)\.update\([\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)[\s\S]*?\.eq\("version", versao\)/);
+    assert.match(repository, /user_vade_notes"\)\.delete\(\)[\s\S]*?\.eq\("version", versao\)/);
+    assert.match(auth, /listarAnotacoes: carregarAnotacoesColecaoVade/);
+    assert.match(auth, /criarAnotacao: criarAnotacaoColecaoVade/);
+    assert.match(auth, /atualizarAnotacao: atualizarAnotacaoColecaoVade/);
+    assert.match(auth, /excluirAnotacao: excluirAnotacaoColecaoVade/);
+});
+
+test("cada Caderno jurídico possui editor amplo de anotações com vínculo opcional ao artigo", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /class="legal-notebook-tab btn-aba-artigos-caderno/);
+    assert.match(html, /class="legal-notebook-tab btn-aba-anotacoes-caderno/);
+    assert.match(html, /function htmlPainelAnotacoesCaderno/);
+    assert.match(html, /class="legal-notebook-notes-layout"/);
+    assert.match(html, /class="form-control legal-notebook-note-title"/);
+    assert.match(html, /class="form-control legal-notebook-note-content"/);
+    assert.match(html, /Anotação geral do caderno/);
+    assert.match(html, /Criar anotação deste artigo/);
+    assert.match(html, /listarAnotacoes\(colecao\.id\)/);
+    assert.match(html, /criarAnotacao\(colecao\.id, dados\)/);
+    assert.match(html, /atualizarAnotacao\(rascunho\.id, dados, rascunho\.versao\)/);
+    assert.match(html, /excluirAnotacao\(rascunho\.id, rascunho\.versao\)/);
+    assert.match(html, /Há alterações não salvas nesta anotação/);
+    assert.match(html, /window\.prepararSaidaHub = async \(\) => \{[\s\S]*?confirmarDescarteAnotacaoCaderno\(\)/);
+});
+
 test("as migrations têm identificadores únicos e permanecem em ordem", () => {
     const files = readdirSync(join(projectRoot, "supabase", "migrations"))
         .filter((file) => file.endsWith(".sql"))
