@@ -11,6 +11,8 @@ const STATUS_TAREFAS = new Set(["pendente", "concluido"]);
 const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
 const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
 const TIPOS_ANOTACAO_VADE = new Set(["note", "summary"]);
+const BUCKET_PDFS_VADE = "private-legal-notebook-pdfs";
+const LIMITE_PDF_VADE_BYTES = 25 * 1024 * 1024;
 
 let contextoAtivo = null;
 let mapasLegados = new Map();
@@ -491,6 +493,136 @@ export async function excluirAnotacaoColecaoVade(id, versaoEsperada) {
     const removido = verificarResposta(resposta, "Não foi possível excluir a anotação do caderno.");
     if (!removido) throw erroRepositorio("Esta anotação foi alterada em outra aba. Recarregue o caderno antes de excluí-la.");
     return removido.id;
+}
+
+function mapearPdfColecaoVade(item) {
+    return {
+        id: item.id,
+        colecaoId: item.collection_id,
+        nomeOriginal: item.original_name,
+        nome: item.display_name,
+        descricao: item.description || "",
+        tamanho: Number(item.size_bytes) || 0,
+        tipo: item.mime_type,
+        criadoEm: item.created_at,
+        atualizadoEm: item.updated_at
+    };
+}
+
+async function validarPdfColecaoVade(arquivo) {
+    if (!arquivo || typeof arquivo.slice !== "function" || typeof arquivo.size !== "number") {
+        throw erroRepositorio("Selecione um arquivo PDF válido.");
+    }
+    if (arquivo.size < 1 || arquivo.size > LIMITE_PDF_VADE_BYTES) {
+        throw erroRepositorio("O PDF precisa ter no máximo 25 MB.");
+    }
+    const nome = texto(arquivo.name, 255, "Nome original do PDF", true).trim();
+    if (!nome.toLowerCase().endsWith(".pdf")) throw erroRepositorio("O arquivo precisa usar a extensão .pdf.");
+    const cabecalho = new Uint8Array(await arquivo.slice(0, 5).arrayBuffer());
+    if (String.fromCharCode(...cabecalho) !== "%PDF-") {
+        throw erroRepositorio("O arquivo selecionado não possui uma assinatura PDF válida.");
+    }
+    return { nome, tamanho: arquivo.size };
+}
+
+export async function carregarPdfsColecaoVade(id) {
+    const contexto = obterContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const resposta = await supabase.from("user_vade_files")
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .eq("collection_id", colecaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("updated_at", { ascending: false });
+    return (verificarResposta(resposta, "Não foi possível carregar os PDFs privados do caderno.") || [])
+        .map(mapearPdfColecaoVade);
+}
+
+export async function enviarPdfColecaoVade(id, arquivo, metadados = {}) {
+    const contexto = exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const arquivoId = exigirUuidNovo(metadados.id, "PDF privado");
+    const validado = await validarPdfColecaoVade(arquivo);
+    const nomePadrao = validado.nome.replace(/\.pdf$/i, "");
+    const caminho = `${contexto.userId}/${contexto.workspaceId}/${colecaoId}/${arquivoId}.pdf`;
+    const registroResposta = await supabase.from("user_vade_files").insert({
+        id: arquivoId,
+        collection_id: colecaoId,
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        storage_path: caminho,
+        original_name: validado.nome,
+        display_name: texto(metadados.nome || nomePadrao, 200, "Nome do PDF", true).trim(),
+        description: texto(metadados.descricao, 1000, "Descrição do PDF"),
+        mime_type: "application/pdf",
+        size_bytes: validado.tamanho
+    }).select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at").single();
+    const registro = verificarRegistro(registroResposta, "Não foi possível preparar o PDF privado.");
+    const envio = await supabase.storage.from(BUCKET_PDFS_VADE).upload(caminho, arquivo, {
+        cacheControl: "3600",
+        contentType: "application/pdf",
+        upsert: false
+    });
+    if (envio.error) {
+        const limpeza = await supabase.rpc("remove_user_vade_file_metadata", { p_file_id: arquivoId });
+        if (limpeza.error) {
+            throw erroRepositorio("O envio falhou e o cadastro temporário não pôde ser limpo. Recarregue o caderno antes de tentar novamente.", envio.error);
+        }
+        throw erroRepositorio("Não foi possível enviar o PDF privado. O cadastro temporário foi removido.", envio.error);
+    }
+    return mapearPdfColecaoVade(registro);
+}
+
+export async function atualizarPdfColecaoVade(id, alteracoes) {
+    const contexto = exigirContexto();
+    const arquivoId = exigirUuidNovo(id, "PDF privado");
+    const valores = {};
+    if (Object.hasOwn(alteracoes, "nome")) valores.display_name = texto(alteracoes.nome, 200, "Nome do PDF", true).trim();
+    if (Object.hasOwn(alteracoes, "descricao")) valores.description = texto(alteracoes.descricao, 1000, "Descrição do PDF");
+    if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada para o PDF.");
+    const resposta = await supabase.from("user_vade_files").update(valores)
+        .eq("id", arquivoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .maybeSingle();
+    return mapearPdfColecaoVade(verificarRegistro(resposta, "Não foi possível atualizar o PDF privado."));
+}
+
+export async function criarUrlPdfColecaoVade(id) {
+    const contexto = obterContexto();
+    const arquivoId = exigirUuidNovo(id, "PDF privado");
+    const resposta = await supabase.from("user_vade_files")
+        .select("storage_path")
+        .eq("id", arquivoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .maybeSingle();
+    const arquivo = verificarRegistro(resposta, "Não foi possível localizar o PDF privado.");
+    const assinatura = await supabase.storage.from(BUCKET_PDFS_VADE).createSignedUrl(arquivo.storage_path, 300);
+    const dados = verificarResposta(assinatura, "Não foi possível abrir o PDF privado.");
+    if (!dados?.signedUrl) throw erroRepositorio("O endereço temporário do PDF não foi criado.");
+    return dados.signedUrl;
+}
+
+export async function excluirPdfColecaoVade(id) {
+    const contexto = exigirContexto();
+    const arquivoId = exigirUuidNovo(id, "PDF privado");
+    const consulta = await supabase.from("user_vade_files")
+        .select("storage_path")
+        .eq("id", arquivoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .maybeSingle();
+    const arquivo = verificarRegistro(consulta, "Não foi possível localizar o PDF privado.");
+    verificarResposta(
+        await supabase.storage.from(BUCKET_PDFS_VADE).remove([arquivo.storage_path]),
+        "Não foi possível remover o arquivo privado."
+    );
+    return verificarRegistro(
+        await supabase.rpc("remove_user_vade_file_metadata", { p_file_id: arquivoId }),
+        "O arquivo foi removido, mas o cadastro precisa ser atualizado novamente."
+    );
 }
 
 export async function criarColecaoVade(colecao) {
