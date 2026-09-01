@@ -982,3 +982,29 @@ test("a exclusão administrativa exige prévia, confirmação e protege administ
     assert.match(html, /id=["']modalExcluirUsuario["']/);
     assert.match(html, /id=["']confirmacaoExclusaoUsuario["']/);
 });
+
+test("os Cadernos jurídicos oferecem revisão ordenada, progresso e retomada privados", () => {
+    const migration = readProjectFile("supabase/migrations/202608310006_legal_notebook_review.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /add column reviewed_at timestamptz/i);
+    assert.match(migration, /add column last_provision_id uuid references public\.legal_provisions\(id\) on delete set null/i);
+    assert.match(migration, /set_user_vade_provision_review[\s\S]*?user_id = current_user_id[\s\S]*?private\.is_workspace_member/i);
+    assert.match(migration, /replace_user_vade_provision_order[\s\S]*?count\(distinct requested_id\)[\s\S]*?exatamente os artigos atuais/i);
+    assert.match(migration, /remember_user_vade_provision[\s\S]*?exists \([\s\S]*?item\.provision_id = p_provision_id/i);
+    assert.match(migration, /grant execute on function public\.set_user_vade_provision_review\(uuid, uuid, boolean\) to authenticated/i);
+    assert.match(migration, /grant execute on function public\.replace_user_vade_provision_order\(uuid, uuid\[\]\) to authenticated/i);
+    assert.match(migration, /grant execute on function public\.remember_user_vade_provision\(uuid, uuid\) to authenticated/i);
+    assert.match(repository, /\.rpc\("set_user_vade_provision_review"/);
+    assert.match(repository, /\.rpc\("replace_user_vade_provision_order"/);
+    assert.match(repository, /\.rpc\("remember_user_vade_provision"/);
+    assert.match(auth, /salvarRevisaoArtigo:/);
+    assert.match(auth, /salvarOrdemArtigos:/);
+    assert.match(auth, /salvarUltimoArtigo:/);
+    assert.match(html, /class="[^"]*btn-estudar-vade/);
+    assert.match(html, /class="[^"]*filtro-busca-caderno/);
+    assert.match(html, /id="wsModoRevisaoCaderno"/);
+    assert.match(html, /id="btnMarcarRevisadoCaderno"/);
+});

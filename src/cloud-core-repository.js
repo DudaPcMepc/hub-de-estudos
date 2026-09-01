@@ -328,7 +328,7 @@ export async function carregarColecoesVade() {
     const contexto = obterContexto();
     const [colecoesResposta, documentosResposta, artigosResposta] = await Promise.all([
         supabase.from("user_vade_collections")
-            .select("id, name, description, position, created_at, updated_at")
+            .select("id, name, description, position, last_provision_id, created_at, updated_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .order("position", { ascending: true })
@@ -340,7 +340,7 @@ export async function carregarColecoesVade() {
             .order("collection_id", { ascending: true })
             .order("position", { ascending: true }),
         supabase.from("user_vade_collection_provisions")
-            .select("collection_id, document_id, provision_id, position, added_at, documento:legal_documents(short_title), dispositivo:legal_provisions(label, heading)")
+            .select("collection_id, document_id, provision_id, position, added_at, reviewed_at, documento:legal_documents(short_title), dispositivo:legal_provisions(label, heading)")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .order("collection_id", { ascending: true })
@@ -354,6 +354,7 @@ export async function carregarColecoesVade() {
         nome: colecao.name,
         descricao: colecao.description || "",
         posicao: Number(colecao.position) || 0,
+        ultimoDispositivoId: colecao.last_provision_id || null,
         criadoEm: colecao.created_at,
         atualizadoEm: colecao.updated_at,
         documentos: documentos.filter(item => item.collection_id === colecao.id).map(item => ({
@@ -368,7 +369,8 @@ export async function carregarColecoesVade() {
             rotulo: item.dispositivo?.label || "Artigo",
             titulo: item.dispositivo?.heading || "",
             posicao: Number(item.position) || 0,
-            adicionadoEm: item.added_at
+            adicionadoEm: item.added_at,
+            revisadoEm: item.reviewed_at || null
         }))
     }));
 }
@@ -393,7 +395,8 @@ export async function criarColecaoVade(colecao) {
         criadoEm: salvo.created_at,
         atualizadoEm: salvo.updated_at,
         documentos: [],
-        artigos: []
+        artigos: [],
+        ultimoDispositivoId: null
     };
 }
 
@@ -469,6 +472,54 @@ export async function salvarArtigoColecaoVade(id, dispositivoId, adicionar = tru
         posicao: Number(salvo.saved_position) || 0,
         adicionadoEm: salvo.saved_added_at
     };
+}
+
+export async function salvarRevisaoArtigoColecaoVade(id, dispositivoId, revisado = true) {
+    exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const artigoId = exigirUuidNovo(dispositivoId, "Artigo jurídico");
+    if (typeof revisado !== "boolean") throw erroRepositorio("O estado de revisão do artigo é inválido.");
+    const resposta = await supabase.rpc("set_user_vade_provision_review", {
+        p_collection_id: colecaoId,
+        p_provision_id: artigoId,
+        p_reviewed: revisado
+    });
+    const valor = verificarResposta(resposta, "Não foi possível atualizar a revisão do artigo.");
+    if (revisado && !valor) throw erroRepositorio("O Supabase não confirmou a revisão do artigo.");
+    return valor || null;
+}
+
+export async function salvarOrdemArtigosColecaoVade(id, dispositivosIds) {
+    exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    if (!Array.isArray(dispositivosIds) || dispositivosIds.length > 500) {
+        throw erroRepositorio("A ordem dos artigos do caderno é inválida.");
+    }
+    const ids = dispositivosIds.map(dispositivoId => exigirUuidNovo(dispositivoId, "Artigo jurídico"));
+    if (new Set(ids).size !== ids.length) throw erroRepositorio("A ordem contém artigos repetidos.");
+    const resposta = await supabase.rpc("replace_user_vade_provision_order", {
+        p_collection_id: colecaoId,
+        p_provision_ids: ids
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível reordenar os artigos do caderno.") || [];
+    if (salvos.length !== ids.length) throw erroRepositorio("O Supabase não confirmou a nova ordem dos artigos.");
+    return salvos.map(item => ({
+        dispositivoId: item.saved_provision_id,
+        posicao: Number(item.saved_position) || 0
+    }));
+}
+
+export async function salvarUltimoArtigoColecaoVade(id, dispositivoId) {
+    exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const artigoId = exigirUuidNovo(dispositivoId, "Artigo jurídico");
+    const resposta = await supabase.rpc("remember_user_vade_provision", {
+        p_collection_id: colecaoId,
+        p_provision_id: artigoId
+    });
+    const salvo = verificarResposta(resposta, "Não foi possível guardar a posição de leitura do caderno.");
+    if (salvo !== artigoId) throw erroRepositorio("O Supabase não confirmou a posição de leitura do caderno.");
+    return salvo;
 }
 
 export async function excluirColecaoVade(id) {

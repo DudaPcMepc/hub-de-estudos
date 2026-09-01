@@ -748,6 +748,16 @@
     .personal-vade-article-copy strong, .personal-vade-article-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .personal-vade-article-copy strong { color: var(--pimentel-cafe); font-size: .74rem; }
     .personal-vade-article-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
+    .personal-vade-review-tools { display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(9rem, .45fr); gap: .55rem; padding: .7rem .85rem; border-top: 1px solid rgba(59, 41, 35, .07); }
+    .personal-vade-review-summary { padding: .65rem .85rem 0; color: var(--pimentel-cafe-claro); font-size: .68rem; }
+    .personal-vade-review-summary strong { color: var(--pimentel-cafe); }
+    .personal-vade-no-results { padding: .8rem; color: var(--pimentel-cafe-claro); font-size: .68rem; text-align: center; }
+    .personal-vade-article-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .25rem; flex-shrink: 0; }
+    .personal-vade-progress { height: .35rem; margin-top: .4rem; overflow: hidden; background: rgba(59, 41, 35, .09); border-radius: 999px; }
+    .personal-vade-progress > span { display: block; height: 100%; background: var(--pimentel-vermelho); border-radius: inherit; transition: width .2s ease; }
+    .personal-vade-article.is-reviewed { background: rgba(82, 96, 71, .09); }
+    .personal-vade-article.is-reviewed .personal-vade-article-copy strong { color: #526047; }
+    .personal-vade-article-review { color: #526047; }
     .legal-notebook-popover-card { right: 0; left: auto; width: min(19rem, calc(100vw - 2rem)); }
     .legal-notebook-popover-title { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
     .legal-notebook-options { display: grid; gap: .35rem; max-height: 15rem; overflow-y: auto; }
@@ -756,7 +766,13 @@
     .legal-notebook-option.is-saved { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .11); }
     .legal-notebook-option i { flex: 0 0 auto; }
     .legal-notebook-empty { color: var(--pimentel-cafe-claro); font-size: .68rem; line-height: 1.45; }
-    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document { align-items: flex-start; flex-wrap: wrap; } }
+    .legal-notebook-review-bar { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem 1rem; color: var(--pimentel-cafe); background: rgba(244, 226, 212, .52); border-bottom: 1px solid rgba(59, 41, 35, .07); }
+    .legal-notebook-review-copy { min-width: 0; }
+    .legal-notebook-review-copy strong, .legal-notebook-review-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .legal-notebook-review-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
+    .legal-notebook-review-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
+    .legal-notebook-review-actions .btn { white-space: nowrap; }
+    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools { grid-template-columns: 1fr; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
     .vade-catalog-search { position: relative; }
@@ -1858,6 +1874,15 @@
                                 <span class="legal-reading-sync d-none" id="wsStatusHistoricoLeitura" role="status" aria-live="polite"></span>
                             </div>
                         </header>
+                        <section class="legal-notebook-review-bar d-none" id="wsModoRevisaoCaderno" aria-label="Modo de revisão do caderno">
+                            <div class="legal-notebook-review-copy"><strong id="wsRevisaoCadernoNome">Caderno jurídico</strong><small id="wsRevisaoCadernoProgresso">Artigo 1 de 1</small></div>
+                            <div class="legal-notebook-review-actions">
+                                <button type="button" class="btn btn-sm btn-link text-secondary" id="btnArtigoAnteriorCaderno" aria-label="Artigo anterior"><i class="bi-chevron-left"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="btnMarcarRevisadoCaderno" aria-pressed="false"><i class="bi-check2-circle me-1"></i><span>Marcar revisado</span></button>
+                                <button type="button" class="btn btn-sm btn-link text-secondary" id="btnProximoArtigoCaderno" aria-label="Próximo artigo"><i class="bi-chevron-right"></i></button>
+                                <button type="button" class="btn btn-sm btn-link text-secondary" id="btnSairRevisaoCaderno" aria-label="Sair do modo de revisão" title="Sair da revisão"><i class="bi-x-lg"></i></button>
+                            </div>
+                        </section>
                         <section class="legal-reader-action-panel d-none" id="wsPainelAcaoLeitor" aria-labelledby="wsAcaoLeitorTitulo">
                             <header>
                                 <div><strong class="d-block small" id="wsAcaoLeitorTitulo">Ação do leitor</strong><small class="text-muted" id="wsAcaoLeitorAjuda"></small></div>
@@ -2752,6 +2777,10 @@ let colecaoVadeOrganizandoId = null;
 let rascunhoDocumentosVade = [];
 let operacaoVadeEmAndamento = false;
 let operacaoCadernoArtigoEmAndamento = false;
+let operacaoRevisaoCadernoEmAndamento = false;
+let cadernoRevisaoAtualId = null;
+let filtrosCadernosJuridicos = new Map();
+let geracaoUltimoArtigoCaderno = 0;
 
 function capturarSessaoHubAtual() {
     const contexto = window.HUB_SESSION_CONTEXT;
@@ -3180,6 +3209,101 @@ async function alternarArtigoNoCaderno(colecaoId, botao = null) {
     }
 }
 
+function artigosOrdenadosCaderno(colecao) {
+    return [...(colecao?.artigos || [])].sort((a, b) => a.posicao - b.posicao);
+}
+
+function encerrarModoRevisaoCaderno() {
+    cadernoRevisaoAtualId = null;
+    document.getElementById("wsModoRevisaoCaderno")?.classList.add("d-none");
+}
+
+async function abrirModoRevisaoCaderno(colecao, dispositivoId = null) {
+    const artigos = artigosOrdenadosCaderno(colecao);
+    if (!artigos.length) return;
+    const alvoId = artigos.some(item => item.dispositivoId === dispositivoId)
+        ? dispositivoId
+        : (artigos.some(item => item.dispositivoId === colecao.ultimoDispositivoId) ? colecao.ultimoDispositivoId : artigos[0].dispositivoId);
+    const artigo = artigos.find(item => item.dispositivoId === alvoId);
+    const documento = documentoVadePorId(artigo?.documentoId);
+    const materia = materiaPorId(materiaAbertaId);
+    if (documento && materia) await abrirLeitorJuridico(documento, materia, alvoId, { cadernoId: colecao.id });
+}
+
+async function lembrarUltimoArtigoCaderno(colecao, dispositivoId) {
+    const sessao = capturarSessaoHubAtual();
+    const geracao = ++geracaoUltimoArtigoCaderno;
+    try {
+        await exigirNuvemVade().salvarUltimoArtigo(colecao.id, dispositivoId);
+        if (!sessaoHubPermaneceAtual(sessao) || geracao !== geracaoUltimoArtigoCaderno || cadernoRevisaoAtualId !== colecao.id || dispositivoLeitorAtual?.id !== dispositivoId) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, ultimoDispositivoId: dispositivoId } : item);
+    } catch (erro) {
+        console.error("Falha ao guardar a posição do caderno", erro);
+    }
+}
+
+function renderizarModoRevisaoCaderno({ lembrarPosicao = false } = {}) {
+    const painel = document.getElementById("wsModoRevisaoCaderno");
+    const colecao = colecoesVade.find(item => item.id === cadernoRevisaoAtualId);
+    const artigos = artigosOrdenadosCaderno(colecao);
+    const indice = artigos.findIndex(item => item.dispositivoId === dispositivoLeitorAtual?.id);
+    if (!colecao || indice < 0) {
+        encerrarModoRevisaoCaderno();
+        return;
+    }
+    const artigo = artigos[indice];
+    const revisado = Boolean(artigo.revisadoEm);
+    painel.classList.remove("d-none");
+    document.getElementById("wsRevisaoCadernoNome").textContent = colecao.nome;
+    document.getElementById("wsRevisaoCadernoProgresso").textContent = `Artigo ${indice + 1} de ${artigos.length} · ${artigos.filter(item => item.revisadoEm).length} revisado(s)`;
+    document.getElementById("btnArtigoAnteriorCaderno").disabled = indice === 0;
+    document.getElementById("btnProximoArtigoCaderno").disabled = indice === artigos.length - 1;
+    const botao = document.getElementById("btnMarcarRevisadoCaderno");
+    botao.setAttribute("aria-pressed", String(revisado));
+    botao.classList.toggle("btn-success", revisado);
+    botao.classList.toggle("btn-outline-success", !revisado);
+    botao.querySelector("span").textContent = revisado ? "Revisado" : "Marcar revisado";
+    botao.querySelector("i").className = `bi-${revisado ? "check-circle-fill" : "check2-circle"} me-1`;
+    if (lembrarPosicao && colecao.ultimoDispositivoId !== dispositivoLeitorAtual.id) lembrarUltimoArtigoCaderno(colecao, dispositivoLeitorAtual.id);
+}
+
+async function navegarArtigoCaderno(direcao) {
+    const colecao = colecoesVade.find(item => item.id === cadernoRevisaoAtualId);
+    const artigos = artigosOrdenadosCaderno(colecao);
+    const indice = artigos.findIndex(item => item.dispositivoId === dispositivoLeitorAtual?.id);
+    const alvo = artigos[indice + direcao];
+    if (colecao && alvo) await abrirModoRevisaoCaderno(colecao, alvo.dispositivoId);
+}
+
+async function alternarRevisaoArtigoCaderno() {
+    if (operacaoRevisaoCadernoEmAndamento) return;
+    const colecao = colecoesVade.find(item => item.id === cadernoRevisaoAtualId);
+    const artigo = colecao?.artigos?.find(item => item.dispositivoId === dispositivoLeitorAtual?.id);
+    if (!colecao || !artigo) return;
+    const sessao = capturarSessaoHubAtual();
+    const dispositivoId = artigo.dispositivoId;
+    const revisado = !artigo.revisadoEm;
+    operacaoRevisaoCadernoEmAndamento = true;
+    const botao = document.getElementById("btnMarcarRevisadoCaderno");
+    botao.disabled = true;
+    try {
+        const revisadoEm = await exigirNuvemVade().salvarRevisaoArtigo(colecao.id, dispositivoId, revisado);
+        if (!sessaoHubPermaneceAtual(sessao) || cadernoRevisaoAtualId !== colecao.id || dispositivoLeitorAtual?.id !== dispositivoId) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? {
+            ...item,
+            artigos: (item.artigos || []).map(atual => atual.dispositivoId === dispositivoId ? { ...atual, revisadoEm } : atual)
+        } : item);
+        renderizarModoRevisaoCaderno();
+        document.getElementById("wsLeitorOrientacao").textContent = revisado ? "Artigo marcado como revisado." : "Artigo devolvido às revisões pendentes.";
+    } catch (erro) {
+        console.error("Falha ao atualizar revisão do artigo", erro);
+        if (sessaoHubPermaneceAtual(sessao)) document.getElementById("wsLeitorOrientacao").textContent = erro?.message || "Não foi possível atualizar a revisão.";
+    } finally {
+        operacaoRevisaoCadernoEmAndamento = false;
+        botao.disabled = false;
+    }
+}
+
 function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } = {}) {
     if (!documentoLeitorAtual || !dispositivo) return;
     fecharMenuSelecaoLeitor();
@@ -3270,6 +3394,7 @@ function renderizarDispositivoLeitor(dispositivo, { registrarLeitura = false } =
     btnFavorito.setAttribute("aria-label", favorito ? "Remover artigo dos favoritos" : "Favoritar artigo");
     btnFavorito.title = favorito ? "Remover dos favoritos" : "Favoritar artigo";
     renderizarSeletorCadernosArtigo();
+    renderizarModoRevisaoCaderno({ lembrarPosicao: registrarLeitura });
     renderizarIndiceLeitor(document.getElementById("wsBuscaArtigo").value);
     if (registrarLeitura && materia) registrarLeituraAtual(materia, dispositivo);
 }
@@ -3653,7 +3778,7 @@ function abrirCatalogoVade(rolar = true) {
     if (rolar) document.getElementById("wsCatalogoVade").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-async function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null) {
+async function abrirLeitorJuridico(documento, materia, dispositivoInicialId = null, { cadernoId = null } = {}) {
     const sessao = capturarSessaoHubAtual();
     const materiaIdOrigem = String(materia?.id || "");
     try {
@@ -3677,6 +3802,7 @@ async function abrirLeitorJuridico(documento, materia, dispositivoInicialId = nu
     ["wsInicioBiblioteca", "wsCatalogoVade", "wsVadePanel", "wsRecursosMateria"].forEach(id => document.getElementById(id).classList.add("d-none"));
     document.getElementById("btnMostrarRecursosBiblioteca").classList.remove("is-active");
     documentoLeitorAtual = documento;
+    cadernoRevisaoAtualId = cadernoId;
     dispositivoLeitorAtual = documento.versao.dispositivos.find(item => item.id === dispositivoInicialId) || documento.versao.dispositivos[0] || null;
     document.getElementById("wsLeitorEstado").textContent = "TEXTO OFICIAL ESTRUTURADO";
     document.getElementById("wsLeitorTitulo").textContent = documento.tituloCurto;
@@ -3730,6 +3856,78 @@ function abrirFormularioVade(colecao = null) {
     document.getElementById("vadeNome").focus({ preventScroll: true });
 }
 
+function aplicarFiltrosCaderno(card) {
+    const busca = chaveBuscaCatalogoVade(card.querySelector(".filtro-busca-caderno")?.value || "");
+    const estado = card.querySelector(".filtro-status-caderno")?.value || "todos";
+    let visiveis = 0;
+    card.querySelectorAll(".personal-vade-article").forEach(item => {
+        const correspondeBusca = !busca || item.dataset.search.includes(busca);
+        const correspondeEstado = estado === "todos" || (estado === "revisados") === (item.dataset.reviewed === "true");
+        const visivel = correspondeBusca && correspondeEstado;
+        item.classList.toggle("d-none", !visivel);
+        if (visivel) visiveis += 1;
+    });
+    card.querySelector(".personal-vade-no-results")?.classList.toggle("d-none", visiveis > 0);
+    filtrosCadernosJuridicos.set(card.dataset.vadeId, { busca: card.querySelector(".filtro-busca-caderno")?.value || "", estado });
+}
+
+async function moverArtigoNoCaderno(colecao, dispositivoId, direcao, botao = null) {
+    if (operacaoRevisaoCadernoEmAndamento) return;
+    const artigos = artigosOrdenadosCaderno(colecao);
+    const origem = artigos.findIndex(item => item.dispositivoId === dispositivoId);
+    const destino = origem + direcao;
+    if (origem < 0 || destino < 0 || destino >= artigos.length) return;
+    [artigos[origem], artigos[destino]] = [artigos[destino], artigos[origem]];
+    const sessao = capturarSessaoHubAtual();
+    operacaoRevisaoCadernoEmAndamento = true;
+    if (botao) botao.disabled = true;
+    mostrarStatusVade("pending", "Salvando a nova ordem dos artigos...");
+    try {
+        const posicoes = await exigirNuvemVade().salvarOrdemArtigos(colecao.id, artigos.map(item => item.dispositivoId));
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        const porId = new Map(posicoes.map(item => [item.dispositivoId, item.posicao]));
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? {
+            ...item,
+            artigos: (item.artigos || []).map(artigo => ({ ...artigo, posicao: porId.get(artigo.dispositivoId) ?? artigo.posicao }))
+        } : item);
+        renderizarVade();
+        mostrarStatusVade("success", "Ordem dos artigos confirmada no Supabase.");
+    } catch (erro) {
+        console.error("Falha ao reordenar artigos do caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível salvar a ordem dos artigos.");
+    } finally {
+        operacaoRevisaoCadernoEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
+async function alternarRevisaoArtigoLista(colecao, dispositivoId, botao = null) {
+    if (operacaoRevisaoCadernoEmAndamento) return;
+    const artigo = colecao?.artigos?.find(item => item.dispositivoId === dispositivoId);
+    if (!artigo) return;
+    const sessao = capturarSessaoHubAtual();
+    const revisado = !artigo.revisadoEm;
+    operacaoRevisaoCadernoEmAndamento = true;
+    if (botao) botao.disabled = true;
+    mostrarStatusVade("pending", revisado ? "Marcando artigo como revisado..." : "Devolvendo artigo às revisões pendentes...");
+    try {
+        const revisadoEm = await exigirNuvemVade().salvarRevisaoArtigo(colecao.id, dispositivoId, revisado);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? {
+            ...item,
+            artigos: (item.artigos || []).map(atual => atual.dispositivoId === dispositivoId ? { ...atual, revisadoEm } : atual)
+        } : item);
+        renderizarVade();
+        mostrarStatusVade("success", revisado ? "Artigo marcado como revisado." : "Artigo marcado como pendente.");
+    } catch (erro) {
+        console.error("Falha ao atualizar a revisão no caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível atualizar a revisão.");
+    } finally {
+        operacaoRevisaoCadernoEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
 function renderizarVade() {
     const lista = document.getElementById("wsVadeLista");
     if (!colecoesVade.length) {
@@ -3744,12 +3942,16 @@ function renderizarVade() {
             ? rascunhoDocumentosVade
             : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
         const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
-        const artigos = [...(colecao.artigos || [])].sort((a, b) => a.posicao - b.posicao);
+        const artigos = artigosOrdenadosCaderno(colecao);
+        const revisados = artigos.filter(artigo => artigo.revisadoEm).length;
+        const progresso = artigos.length ? Math.round((revisados / artigos.length) * 100) : 0;
+        const filtro = filtrosCadernosJuridicos.get(colecao.id) || { busca: "", estado: "todos" };
         const disponiveis = documentosJuridicos.filter(documento => !idsDocumentos.includes(documento.id));
         return `<article class="personal-vade-card" data-vade-id="${esc(colecao.id)}">
             <div class="personal-vade-card-head">
                 <div class="min-w-0"><h6 class="fw-bold mb-1"><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h6><p class="personal-vade-description mb-0">${esc(colecao.descricao || "Caderno jurídico pessoal")}</p></div>
                 <div class="d-flex flex-wrap gap-1">
+                    ${artigos.length ? `<button type="button" class="btn btn-sm btn-primary btn-estudar-vade"><i class="bi-play-fill me-1"></i>${colecao.ultimoDispositivoId ? "Retomar" : "Estudar caderno"}</button>` : ""}
                     <button type="button" class="btn btn-sm btn-outline-primary btn-organizar-vade"><i class="bi-list-check me-1"></i>${organizando ? "Fechar organização" : "Organizar"}</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-vade" aria-label="Renomear ${esc(colecao.nome)}"><i class="bi-pencil"></i></button>
                     <button type="button" class="btn btn-sm btn-outline-danger btn-excluir-vade" aria-label="Excluir ${esc(colecao.nome)}"><i class="bi-trash"></i></button>
@@ -3764,12 +3966,13 @@ function renderizarVade() {
                     </div>
                 </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-journal-x me-1"></i>Nenhuma norma adicionada.</div>`}
             </div>
+            ${artigos.length ? `<div class="personal-vade-review-summary"><div class="d-flex justify-content-between gap-2"><strong>${revisados} de ${artigos.length} revisado(s)</strong><span>${progresso}%</span></div><div class="personal-vade-progress" role="progressbar" aria-label="Progresso de revisão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progresso}"><span style="width:${progresso}%"></span></div></div><div class="personal-vade-review-tools"><div><label class="visually-hidden" for="busca-caderno-${esc(colecao.id)}">Buscar artigo no caderno</label><input type="search" class="form-control form-control-sm filtro-busca-caderno" id="busca-caderno-${esc(colecao.id)}" value="${esc(filtro.busca)}" placeholder="Buscar artigo ou norma..."></div><div><label class="visually-hidden" for="estado-caderno-${esc(colecao.id)}">Filtrar revisão</label><select class="form-select form-select-sm filtro-status-caderno" id="estado-caderno-${esc(colecao.id)}"><option value="todos" ${filtro.estado === "todos" ? "selected" : ""}>Todos</option><option value="pendentes" ${filtro.estado === "pendentes" ? "selected" : ""}>Pendentes</option><option value="revisados" ${filtro.estado === "revisados" ? "selected" : ""}>Revisados</option></select></div></div>` : ""}
             <div class="personal-vade-articles">
                 <div class="personal-vade-articles-title"><strong><i class="bi-bookmark-check me-1"></i>Artigos salvos</strong><span>${artigos.length}</span></div>
-                ${artigos.length ? artigos.map(artigo => `<div class="personal-vade-article">
+                ${artigos.length ? artigos.map((artigo, indice) => `<div class="personal-vade-article ${artigo.revisadoEm ? "is-reviewed" : ""}" data-search="${esc(chaveBuscaCatalogoVade(`${artigo.rotulo || ""} ${artigo.titulo || ""} ${artigo.documentoTitulo || ""}`))}" data-reviewed="${Boolean(artigo.revisadoEm)}">
                     <div class="personal-vade-article-copy"><strong>${esc(artigo.rotulo || "Artigo")}${artigo.titulo ? ` — ${esc(artigo.titulo)}` : ""}</strong><small>${esc(artigo.documentoTitulo || "Norma jurídica")}</small></div>
-                    <div class="d-flex gap-1 flex-shrink-0"><button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button></div>
-                </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
+                    <div class="personal-vade-article-actions"><button type="button" class="btn btn-sm ${artigo.revisadoEm ? "btn-success" : "btn-outline-success"} btn-revisar-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="${artigo.revisadoEm ? "Marcar como pendente" : "Marcar como revisado"}"><i class="bi-${artigo.revisadoEm ? "check-circle-fill" : "check2-circle"}"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover artigo para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="1" ${indice === artigos.length - 1 ? "disabled" : ""} aria-label="Mover artigo para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button></div>
+                </div>`).join("") + `<div class="personal-vade-no-results d-none"><i class="bi-search me-1"></i>Nenhum artigo corresponde aos filtros.</div>` : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
             </div>
             ${organizando ? `<div class="personal-vade-organizer"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}
         </article>`;
@@ -3779,6 +3982,10 @@ function renderizarVade() {
         const colecao = colecoesVade.find(item => item.id === card.dataset.vadeId);
         card.querySelector(".btn-renomear-vade").addEventListener("click", () => abrirFormularioVade(colecao));
         card.querySelector(".btn-excluir-vade").addEventListener("click", () => excluirVade(colecao));
+        card.querySelector(".btn-estudar-vade")?.addEventListener("click", () => abrirModoRevisaoCaderno(colecao));
+        card.querySelector(".filtro-busca-caderno")?.addEventListener("input", () => aplicarFiltrosCaderno(card));
+        card.querySelector(".filtro-status-caderno")?.addEventListener("change", () => aplicarFiltrosCaderno(card));
+        aplicarFiltrosCaderno(card);
         card.querySelector(".btn-organizar-vade").addEventListener("click", () => {
             if (colecaoVadeOrganizandoId === colecao.id) {
                 colecaoVadeOrganizandoId = null;
@@ -3800,6 +4007,8 @@ function renderizarVade() {
             if (documento && materia) abrirLeitorJuridico(documento, materia, botao.dataset.provisionId);
         }));
         card.querySelectorAll(".btn-remover-artigo-vade").forEach(botao => botao.addEventListener("click", () => removerArtigoDoCaderno(colecao, botao.dataset.provisionId, botao)));
+        card.querySelectorAll(".btn-revisar-artigo-vade").forEach(botao => botao.addEventListener("click", () => alternarRevisaoArtigoLista(colecao, botao.dataset.provisionId, botao)));
+        card.querySelectorAll(".btn-mover-artigo-vade").forEach(botao => botao.addEventListener("click", () => moverArtigoNoCaderno(colecao, botao.dataset.provisionId, Number(botao.dataset.direcao), botao)));
         card.querySelectorAll(".btn-adicionar-documento-vade").forEach(botao => botao.addEventListener("click", () => {
             if (!rascunhoDocumentosVade.includes(botao.dataset.documentId)) rascunhoDocumentosVade.push(botao.dataset.documentId);
             renderizarVade();
@@ -3841,7 +4050,11 @@ async function removerArtigoDoCaderno(colecao, dispositivoId, botao = null) {
         await exigirNuvemVade().salvarArtigo(colecao.id, dispositivoId, false);
         if (!sessaoHubPermaneceAtual(sessao)) return;
         colecoesVade = colecoesVade.map(item => item.id === colecao.id
-            ? { ...item, artigos: (item.artigos || []).filter(artigo => artigo.dispositivoId !== dispositivoId) }
+            ? {
+                ...item,
+                ultimoDispositivoId: item.ultimoDispositivoId === dispositivoId ? null : item.ultimoDispositivoId,
+                artigos: (item.artigos || []).filter(artigo => artigo.dispositivoId !== dispositivoId)
+            }
             : item);
         renderizarVade();
         mostrarStatusVade("success", "Artigo removido. O texto oficial e seus grifos foram preservados.");
@@ -3886,6 +4099,8 @@ async function excluirVade(colecao) {
         colecoesVade = colecoesVade.filter(item => item.id !== colecao.id);
         if (colecaoVadeEmEdicaoId === colecao.id) fecharFormularioVade();
         if (colecaoVadeOrganizandoId === colecao.id) colecaoVadeOrganizandoId = null;
+        if (cadernoRevisaoAtualId === colecao.id) encerrarModoRevisaoCaderno();
+        filtrosCadernosJuridicos.delete(colecao.id);
         renderizarVade();
         mostrarStatusVade("success", "Caderno excluído. Seus estudos nos artigos foram preservados.");
     } catch (erro) {
@@ -4150,6 +4365,7 @@ function renderizarMetricasMateria(materia, progresso = progressoMateria(materia
 document.getElementById("btnFecharLeitorPrototipo").addEventListener("click", () => {
     definirModoFocoLeitor(false);
     fecharPainelAcaoLeitor();
+    encerrarModoRevisaoCaderno();
     abrirInicioBiblioteca(false);
 });
 
@@ -4263,6 +4479,10 @@ document.getElementById("btnAlternarIndice").addEventListener("click", () => {
 });
 
 document.getElementById("btnModoFoco").addEventListener("click", () => definirModoFocoLeitor(!modoFocoLeitorAtivo));
+document.getElementById("btnArtigoAnteriorCaderno").addEventListener("click", () => navegarArtigoCaderno(-1));
+document.getElementById("btnProximoArtigoCaderno").addEventListener("click", () => navegarArtigoCaderno(1));
+document.getElementById("btnMarcarRevisadoCaderno").addEventListener("click", alternarRevisaoArtigoCaderno);
+document.getElementById("btnSairRevisaoCaderno").addEventListener("click", encerrarModoRevisaoCaderno);
 
 document.getElementById("btnFavoritarArtigo").addEventListener("click", async () => {
     const materia = materiaPorId(materiaAbertaId);
@@ -6503,6 +6723,10 @@ window.encerrarHub = () => {
     rascunhoDocumentosVade = [];
     operacaoVadeEmAndamento = false;
     operacaoCadernoArtigoEmAndamento = false;
+    operacaoRevisaoCadernoEmAndamento = false;
+    cadernoRevisaoAtualId = null;
+    filtrosCadernosJuridicos = new Map();
+    geracaoUltimoArtigoCaderno += 1;
     documentoLeitorAtual = null;
     dispositivoLeitorAtual = null;
     preencherCatalogoMaterias();
