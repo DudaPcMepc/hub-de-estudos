@@ -888,6 +888,25 @@ test("as anotações dos Cadernos jurídicos são privadas, versionadas e indepe
     assert.match(auth, /excluirAnotacao: excluirAnotacaoColecaoVade/);
 });
 
+test("cada Caderno jurídico possui editor amplo de anotações com vínculo opcional ao artigo", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /class="legal-notebook-tab btn-aba-artigos-caderno/);
+    assert.match(html, /class="legal-notebook-tab btn-aba-anotacoes-caderno/);
+    assert.match(html, /function htmlPainelAnotacoesCaderno/);
+    assert.match(html, /class="legal-notebook-notes-layout"/);
+    assert.match(html, /class="form-control legal-notebook-note-title"/);
+    assert.match(html, /class="form-control legal-notebook-note-content"/);
+    assert.match(html, /Anotação geral do caderno/);
+    assert.match(html, /Criar anotação deste artigo/);
+    assert.match(html, /listarAnotacoes\(colecao\.id\)/);
+    assert.match(html, /criarAnotacao\(colecao\.id, dados\)/);
+    assert.match(html, /atualizarAnotacao\(rascunho\.id, dados, rascunho\.versao\)/);
+    assert.match(html, /excluirAnotacao\(rascunho\.id, rascunho\.versao\)/);
+    assert.match(html, /Há alterações não salvas nesta anotação/);
+    assert.match(html, /window\.prepararSaidaHub = async \(\) => \{[\s\S]*?confirmarDescarteAnotacaoCaderno\(\)/);
+});
+
 test("as migrations têm identificadores únicos e permanecem em ordem", () => {
     const files = readdirSync(join(projectRoot, "supabase", "migrations"))
         .filter((file) => file.endsWith(".sql"))
