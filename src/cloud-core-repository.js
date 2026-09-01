@@ -10,6 +10,7 @@ const STATUS_TOPICOS = new Set(["nao", "estudando", "revisar", "dominado"]);
 const STATUS_TAREFAS = new Set(["pendente", "concluido"]);
 const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
 const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
+const TIPOS_ANOTACAO_VADE = new Set(["note", "summary"]);
 
 let contextoAtivo = null;
 let mapasLegados = new Map();
@@ -388,6 +389,108 @@ export async function carregarColecoesVade() {
             revisadoEm: item.reviewed_at || null
         }))
     }));
+}
+
+function mapearAnotacaoColecaoVade(item) {
+    return {
+        id: item.id,
+        colecaoId: item.collection_id,
+        dispositivoId: item.provision_id || null,
+        tipo: item.kind,
+        titulo: item.title || "",
+        conteudo: item.content || "",
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        fixada: item.pinned === true,
+        versao: Number(item.version) || 1,
+        criadoEm: item.created_at,
+        atualizadoEm: item.updated_at
+    };
+}
+
+function tipoAnotacaoVade(valor) {
+    const tipo = String(valor || "note");
+    if (!TIPOS_ANOTACAO_VADE.has(tipo)) throw erroRepositorio("Tipo da anotação jurídica inválido.");
+    return tipo;
+}
+
+export async function carregarAnotacoesColecaoVade(id) {
+    const contexto = obterContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const resposta = await supabase.from("user_vade_notes")
+        .select("id, collection_id, provision_id, kind, title, content, tags, pinned, version, created_at, updated_at")
+        .eq("collection_id", colecaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("pinned", { ascending: false })
+        .order("updated_at", { ascending: false });
+    return (verificarResposta(resposta, "Não foi possível carregar as anotações do caderno.") || [])
+        .map(mapearAnotacaoColecaoVade);
+}
+
+export async function criarAnotacaoColecaoVade(id, anotacao) {
+    const contexto = exigirContexto();
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const anotacaoId = exigirUuidNovo(anotacao?.id, "Anotação jurídica");
+    const dispositivoId = anotacao?.dispositivoId
+        ? exigirUuidNovo(anotacao.dispositivoId, "Artigo jurídico")
+        : null;
+    const resposta = await supabase.from("user_vade_notes").insert({
+        id: anotacaoId,
+        collection_id: colecaoId,
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        provision_id: dispositivoId,
+        kind: tipoAnotacaoVade(anotacao?.tipo),
+        title: texto(anotacao?.titulo, 500, "Título da anotação"),
+        content: texto(anotacao?.conteudo, 500000, "Conteúdo da anotação"),
+        tags: tagsValidas(anotacao?.tags || []),
+        pinned: anotacao?.fixada === true
+    }).select("id, collection_id, provision_id, kind, title, content, tags, pinned, version, created_at, updated_at").single();
+    return mapearAnotacaoColecaoVade(verificarRegistro(resposta, "Não foi possível criar a anotação do caderno."));
+}
+
+export async function atualizarAnotacaoColecaoVade(id, alteracoes, versaoEsperada) {
+    const contexto = exigirContexto();
+    const anotacaoId = exigirUuidNovo(id, "Anotação jurídica");
+    const versao = numeroLimitado(versaoEsperada, "Versão da anotação jurídica", 1, 2147483647, true);
+    const valores = {};
+    if (Object.hasOwn(alteracoes, "dispositivoId")) {
+        valores.provision_id = alteracoes.dispositivoId
+            ? exigirUuidNovo(alteracoes.dispositivoId, "Artigo jurídico")
+            : null;
+    }
+    if (Object.hasOwn(alteracoes, "tipo")) valores.kind = tipoAnotacaoVade(alteracoes.tipo);
+    if (Object.hasOwn(alteracoes, "titulo")) valores.title = texto(alteracoes.titulo, 500, "Título da anotação");
+    if (Object.hasOwn(alteracoes, "conteudo")) valores.content = texto(alteracoes.conteudo, 500000, "Conteúdo da anotação");
+    if (Object.hasOwn(alteracoes, "tags")) valores.tags = tagsValidas(alteracoes.tags);
+    if (Object.hasOwn(alteracoes, "fixada")) valores.pinned = alteracoes.fixada === true;
+    if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada para a anotação jurídica.");
+    const resposta = await supabase.from("user_vade_notes").update(valores)
+        .eq("id", anotacaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("version", versao)
+        .select("id, collection_id, provision_id, kind, title, content, tags, pinned, version, created_at, updated_at")
+        .maybeSingle();
+    const salvo = verificarResposta(resposta, "Não foi possível atualizar a anotação do caderno.");
+    if (!salvo) throw erroRepositorio("Esta anotação foi alterada em outra aba. Recarregue o caderno antes de editar novamente.");
+    return mapearAnotacaoColecaoVade(salvo);
+}
+
+export async function excluirAnotacaoColecaoVade(id, versaoEsperada) {
+    const contexto = exigirContexto();
+    const anotacaoId = exigirUuidNovo(id, "Anotação jurídica");
+    const versao = numeroLimitado(versaoEsperada, "Versão da anotação jurídica", 1, 2147483647, true);
+    const resposta = await supabase.from("user_vade_notes").delete()
+        .eq("id", anotacaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("version", versao)
+        .select("id")
+        .maybeSingle();
+    const removido = verificarResposta(resposta, "Não foi possível excluir a anotação do caderno.");
+    if (!removido) throw erroRepositorio("Esta anotação foi alterada em outra aba. Recarregue o caderno antes de excluí-la.");
+    return removido.id;
 }
 
 export async function criarColecaoVade(colecao) {
