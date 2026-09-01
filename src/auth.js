@@ -73,10 +73,13 @@ import {
     salvarArtigoColecaoVade,
     criarSecaoColecaoVade,
     moverArtigoParaSecaoColecaoVade,
+    moverArtigosParaSecaoColecaoVade,
+    removerArtigosColecaoVade,
     renomearSecaoColecaoVade,
     salvarOrdemArtigosColecaoVade,
     salvarOrdemSecoesColecaoVade,
     salvarRevisaoArtigoColecaoVade,
+    salvarRevisaoArtigosColecaoVade,
     salvarUltimoArtigoColecaoVade,
     salvarDocumentosColecaoVade,
     salvarLayoutWidgets
@@ -121,10 +124,13 @@ window.HUB_CLOUD_VADE = Object.freeze({
     listar: carregarColecoesVade,
     salvarArtigo: salvarArtigoColecaoVade,
     moverArtigoParaSecao: moverArtigoParaSecaoColecaoVade,
+    moverArtigosParaSecao: moverArtigosParaSecaoColecaoVade,
+    removerArtigos: removerArtigosColecaoVade,
     renomearSecao: renomearSecaoColecaoVade,
     salvarOrdemArtigos: salvarOrdemArtigosColecaoVade,
     salvarOrdemSecoes: salvarOrdemSecoesColecaoVade,
     salvarRevisaoArtigo: salvarRevisaoArtigoColecaoVade,
+    salvarRevisaoArtigos: salvarRevisaoArtigosColecaoVade,
     salvarUltimoArtigo: salvarUltimoArtigoColecaoVade,
     salvarDocumentos: salvarDocumentosColecaoVade
 });

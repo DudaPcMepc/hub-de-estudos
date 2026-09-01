@@ -505,6 +505,63 @@ export async function salvarRevisaoArtigoColecaoVade(id, dispositivoId, revisado
     return valor || null;
 }
 
+function validarArtigosLoteColecaoVade(id, dispositivosIds) {
+    const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    if (!Array.isArray(dispositivosIds) || dispositivosIds.length < 1 || dispositivosIds.length > 500) {
+        throw erroRepositorio("Selecione entre 1 e 500 artigos do caderno.");
+    }
+    const ids = dispositivosIds.map(dispositivoId => exigirUuidNovo(dispositivoId, "Artigo jurídico"));
+    if (new Set(ids).size !== ids.length) throw erroRepositorio("A seleção contém artigos repetidos.");
+    return { colecaoId, ids };
+}
+
+export async function salvarRevisaoArtigosColecaoVade(id, dispositivosIds, revisado = true) {
+    exigirContexto();
+    const { colecaoId, ids } = validarArtigosLoteColecaoVade(id, dispositivosIds);
+    if (typeof revisado !== "boolean") throw erroRepositorio("O estado de revisão dos artigos é inválido.");
+    const resposta = await supabase.rpc("set_user_vade_provisions_review", {
+        p_collection_id: colecaoId,
+        p_provision_ids: ids,
+        p_reviewed: revisado
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível atualizar a revisão dos artigos.") || [];
+    if (salvos.length !== ids.length) throw erroRepositorio("O Supabase não confirmou todos os artigos selecionados.");
+    return salvos.map(item => ({ dispositivoId: item.saved_provision_id, revisadoEm: item.saved_reviewed_at || null }));
+}
+
+export async function moverArtigosParaSecaoColecaoVade(id, dispositivosIds, secaoId = null) {
+    exigirContexto();
+    const { colecaoId, ids } = validarArtigosLoteColecaoVade(id, dispositivosIds);
+    const secaoValidada = secaoId ? exigirUuidNovo(secaoId, "Seção do caderno") : null;
+    const resposta = await supabase.rpc("set_user_vade_provisions_section", {
+        p_collection_id: colecaoId,
+        p_provision_ids: ids,
+        p_section_id: secaoValidada
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível mover os artigos para a seção.") || [];
+    if (salvos.length !== ids.length) throw erroRepositorio("O Supabase não confirmou todos os artigos movidos.");
+    return salvos.map(item => ({
+        dispositivoId: item.saved_provision_id,
+        secaoId: item.saved_section_id || null,
+        posicao: Number(item.saved_position) || 0
+    }));
+}
+
+export async function removerArtigosColecaoVade(id, dispositivosIds) {
+    exigirContexto();
+    const { colecaoId, ids } = validarArtigosLoteColecaoVade(id, dispositivosIds);
+    const resposta = await supabase.rpc("remove_user_vade_provisions", {
+        p_collection_id: colecaoId,
+        p_provision_ids: ids
+    });
+    const removidos = verificarResposta(resposta, "Não foi possível remover os artigos do caderno.") || [];
+    const confirmados = removidos.map(item => item.removed_provision_id);
+    if (confirmados.length !== ids.length || confirmados.some(dispositivoId => !ids.includes(dispositivoId))) {
+        throw erroRepositorio("O Supabase não confirmou todos os artigos removidos.");
+    }
+    return confirmados;
+}
+
 export async function salvarOrdemArtigosColecaoVade(id, dispositivosIds) {
     exigirContexto();
     const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
