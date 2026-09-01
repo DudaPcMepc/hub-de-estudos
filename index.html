@@ -877,6 +877,11 @@
     .legal-notebook-file-copy small { margin-top: .18rem; color: var(--pimentel-cafe-claro); font-size: .63rem; }
     .legal-notebook-file-origin { display: inline-flex; align-items: center; gap: .25rem; width: fit-content; margin-top: .35rem; padding: .18rem .42rem; color: #7a3c32; background: rgba(176, 65, 51, .09); border-radius: 999px; font-size: .58rem; font-weight: 700; }
     .legal-notebook-file-actions { display: flex; gap: .35rem; }
+    .legal-notebook-file-card.is-editing { align-items: flex-start; border-color: rgba(154, 29, 45, .2); box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .06); }
+    .legal-notebook-file-edit { min-width: 0; display: grid; grid-template-columns: minmax(10rem, .7fr) minmax(14rem, 1fr) auto; align-items: end; flex: 1; gap: .65rem; }
+    .legal-notebook-file-edit label { color: var(--pimentel-cafe-claro); font-size: .64rem; font-weight: 700; }
+    .legal-notebook-file-edit input { margin-top: .25rem; }
+    .legal-notebook-file-edit-actions { display: flex; justify-content: flex-end; gap: .4rem; }
     .legal-notebook-files-empty { min-height: 16rem; display: grid; place-items: center; color: var(--pimentel-cafe-claro); text-align: center; border: 1px dashed rgba(59, 41, 35, .14); border-radius: .85rem; }
     .legal-notebook-pdf-viewer { min-height: 34rem; display: grid; grid-template-rows: auto 1fr; overflow: hidden; background: #252525; border-radius: .85rem; }
     .legal-notebook-pdf-viewer-head { display: flex; align-items: center; gap: .7rem; padding: .65rem .8rem; color: #fff; background: #342d2a; }
@@ -896,7 +901,7 @@
     .legal-notebook-review-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
     .legal-notebook-review-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
     .legal-notebook-review-actions .btn { white-space: nowrap; }
-    @media (max-width: 767.98px) { .personal-vade-list.is-overview { grid-template-columns: 1fr; } .legal-notebook-workspace-header { grid-template-columns: 1fr; } .legal-notebook-workspace-actions { justify-content: space-between; } .legal-notebook-progress-summary { text-align: left; } .legal-notebook-workspace-toolbar, .legal-notebook-workspace-toolbar.has-selection-control { grid-template-columns: 1fr; } .legal-notebook-workspace-body { display: block; min-height: 0; } .legal-notebook-sidebar { display: none; } .legal-notebook-mobile-section { display: block; margin-bottom: .8rem; } .legal-notebook-content { padding: .85rem; } .legal-notebook-bulk-bar { align-items: stretch; flex-wrap: wrap; } .legal-notebook-bulk-section { flex: 1 1 12rem; width: auto; } .legal-notebook-bulk-actions { flex: 1 1 100%; justify-content: flex-end; margin-left: 0; } .legal-notebook-notes-layout { grid-template-columns: 1fr; } .legal-notebook-notes-list { max-height: 13rem; } .legal-notebook-note-meta, .legal-notebook-note-footer, .legal-notebook-file-upload { grid-template-columns: 1fr; } .legal-notebook-note-editor, .legal-notebook-files { padding: .9rem; } .legal-notebook-file-card { align-items: flex-start; flex-wrap: wrap; } .legal-notebook-file-actions { width: 100%; justify-content: flex-end; } }
+    @media (max-width: 767.98px) { .personal-vade-list.is-overview { grid-template-columns: 1fr; } .legal-notebook-workspace-header { grid-template-columns: 1fr; } .legal-notebook-workspace-actions { justify-content: space-between; } .legal-notebook-progress-summary { text-align: left; } .legal-notebook-workspace-toolbar, .legal-notebook-workspace-toolbar.has-selection-control { grid-template-columns: 1fr; } .legal-notebook-workspace-body { display: block; min-height: 0; } .legal-notebook-sidebar { display: none; } .legal-notebook-mobile-section { display: block; margin-bottom: .8rem; } .legal-notebook-content { padding: .85rem; } .legal-notebook-bulk-bar { align-items: stretch; flex-wrap: wrap; } .legal-notebook-bulk-section { flex: 1 1 12rem; width: auto; } .legal-notebook-bulk-actions { flex: 1 1 100%; justify-content: flex-end; margin-left: 0; } .legal-notebook-notes-layout { grid-template-columns: 1fr; } .legal-notebook-notes-list { max-height: 13rem; } .legal-notebook-note-meta, .legal-notebook-note-footer, .legal-notebook-file-upload, .legal-notebook-file-edit { grid-template-columns: 1fr; } .legal-notebook-note-editor, .legal-notebook-files { padding: .9rem; } .legal-notebook-file-card { align-items: flex-start; flex-wrap: wrap; } .legal-notebook-file-card.is-editing .legal-notebook-file-edit { flex-basis: calc(100% - 3.2rem); } .legal-notebook-file-actions { width: 100%; justify-content: flex-end; } }
     @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document, .personal-vade-article { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools, .personal-vade-section-form { grid-template-columns: 1fr; } .personal-vade-section-select { width: 100%; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } .legal-notebook-workspace-actions { align-items: stretch; flex-direction: column; } .legal-notebook-article-primary { width: 100%; justify-content: flex-end; } .legal-notebook-article-menu-panel { right: 0; width: min(15rem, calc(100vw - 3rem)); } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
@@ -2958,6 +2963,7 @@ let pdfsCadernosVade = new Map();
 let pdfsCarregadosCadernosVade = new Set();
 let pdfsCarregandoCadernosVade = new Set();
 let pdfAbertoCaderno = new Map();
+let pdfEmEdicaoCaderno = new Map();
 let operacaoPdfCadernoEmAndamento = false;
 
 function capturarSessaoHubAtual() {
@@ -4585,6 +4591,14 @@ function tamanhoArquivoLegivel(bytes) {
     return `${(tamanho / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
 }
 
+function htmlCartaoPdfCaderno(colecao, arquivo) {
+    const editando = pdfEmEdicaoCaderno.get(colecao.id) === arquivo.id;
+    if (editando) {
+        return `<article class="legal-notebook-file-card is-editing" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><form class="legal-notebook-file-edit form-editar-pdf-caderno" data-file-id="${esc(arquivo.id)}"><label>Nome do material<input type="text" class="form-control form-control-sm campo-editar-nome-pdf" maxlength="200" value="${esc(arquivo.nome)}" required></label><label>Fonte / autoria / editora<input type="text" class="form-control form-control-sm campo-editar-fonte-pdf" maxlength="1000" value="${esc(arquivo.descricao || "")}" placeholder="Ex.: editora ou autoria indicada no PDF"></label><div class="legal-notebook-file-edit-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-cancelar-edicao-pdf">Cancelar</button><button type="submit" class="btn btn-sm btn-primary btn-salvar-edicao-pdf"><i class="bi-check2 me-1"></i>Salvar identificação</button></div></form></article>`;
+    }
+    return `<article class="legal-notebook-file-card" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><div class="legal-notebook-file-copy"><strong>${esc(arquivo.nome)}</strong><small>${esc(arquivo.nomeOriginal)} · ${tamanhoArquivoLegivel(arquivo.tamanho)}${arquivo.descricao ? ` · Fonte/créditos: ${esc(arquivo.descricao)}` : ""}</small>${arquivo.descricao ? `<span class="legal-notebook-file-origin"><i class="bi-person-badge"></i>Material de terceiros · uso privado</span>` : ""}</div><div class="legal-notebook-file-actions"><button type="button" class="btn btn-sm btn-primary btn-abrir-pdf-caderno" data-file-id="${esc(arquivo.id)}"><i class="bi-book me-1"></i>Abrir</button><button type="button" class="btn btn-sm btn-outline-secondary btn-editar-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Editar informações de ${esc(arquivo.nome)}" title="Editar nome e créditos"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Excluir ${esc(arquivo.nome)}"><i class="bi-trash"></i></button></div></article>`;
+}
+
 function htmlPainelPdfsCaderno(colecao) {
     if (pdfsCarregandoCadernosVade.has(colecao.id)) {
         return `<section class="legal-notebook-notes-loading"><div><span class="spinner-border spinner-border-sm mb-2" aria-hidden="true"></span><strong class="d-block">Carregando seus materiais privados...</strong></div></section>`;
@@ -4594,7 +4608,7 @@ function htmlPainelPdfsCaderno(colecao) {
         return `<section class="legal-notebook-files"><div class="legal-notebook-pdf-viewer"><header class="legal-notebook-pdf-viewer-head"><button type="button" class="btn btn-sm btn-outline-light btn-fechar-pdf-caderno" aria-label="Voltar aos materiais"><i class="bi-arrow-left"></i></button><strong>${esc(aberto.nome)}</strong>${aberto.descricao ? `<span class="badge text-bg-light" title="Fonte ou créditos: ${esc(aberto.descricao)}">material de terceiros · uso privado</span>` : ""}<a class="btn btn-sm btn-outline-light" href="${esc(aberto.url)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em uma nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a><span class="badge text-bg-dark">acesso temporário</span></header><iframe src="${esc(aberto.url)}" title="${esc(aberto.nome)}" referrerpolicy="no-referrer" sandbox="allow-downloads"></iframe></div></section>`;
     }
     const arquivos = pdfsDoCaderno(colecao.id);
-    const lista = arquivos.length ? `<div class="legal-notebook-file-list">${arquivos.map(arquivo => `<article class="legal-notebook-file-card" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><div class="legal-notebook-file-copy"><strong>${esc(arquivo.nome)}</strong><small>${esc(arquivo.nomeOriginal)} · ${tamanhoArquivoLegivel(arquivo.tamanho)}${arquivo.descricao ? ` · Fonte/créditos: ${esc(arquivo.descricao)}` : ""}</small>${arquivo.descricao ? `<span class="legal-notebook-file-origin"><i class="bi-person-badge"></i>Material de terceiros · uso privado</span>` : ""}</div><div class="legal-notebook-file-actions"><button type="button" class="btn btn-sm btn-primary btn-abrir-pdf-caderno" data-file-id="${esc(arquivo.id)}"><i class="bi-book me-1"></i>Abrir</button><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Editar informações de ${esc(arquivo.nome)}" title="Editar nome e créditos"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Excluir ${esc(arquivo.nome)}"><i class="bi-trash"></i></button></div></article>`).join("")}</div>` : `<div class="legal-notebook-files-empty"><div><i class="bi-file-earmark-lock fs-2 d-block mb-2"></i><strong class="d-block mb-1">Nenhum PDF privado neste caderno</strong><small>Adicione um material pessoal para consultar durante os estudos.</small></div></div>`;
+    const lista = arquivos.length ? `<div class="legal-notebook-file-list">${arquivos.map(arquivo => htmlCartaoPdfCaderno(colecao, arquivo)).join("")}</div>` : `<div class="legal-notebook-files-empty"><div><i class="bi-file-earmark-lock fs-2 d-block mb-2"></i><strong class="d-block mb-1">Nenhum PDF privado neste caderno</strong><small>Adicione um material pessoal para consultar durante os estudos.</small></div></div>`;
     return `<section class="legal-notebook-files"><header class="legal-notebook-files-head"><div><h6 class="fw-bold mb-1"><i class="bi-folder-lock me-1"></i>Materiais privados</h6><p class="mb-0">PDFs acessíveis somente pela sua conta.</p></div><span class="badge rounded-pill text-bg-light">${arquivos.length}/20 arquivos</span></header><form class="legal-notebook-file-upload form-upload-pdf-caderno"><label>Arquivo PDF<input type="file" class="form-control form-control-sm campo-arquivo-pdf-caderno" accept="application/pdf,.pdf" required></label><label>Nome no caderno (opcional)<input type="text" class="form-control form-control-sm campo-nome-pdf-caderno" maxlength="200" placeholder="Ex.: Vade Mecum GCM"></label><label>Fonte / autoria / editora (opcional)<input type="text" class="form-control form-control-sm campo-fonte-pdf-caderno" maxlength="1000" placeholder="Ex.: nome da editora ou responsável"></label><button type="submit" class="btn btn-sm btn-primary btn-enviar-pdf-caderno" ${arquivos.length >= 20 ? "disabled" : ""}><i class="bi-cloud-arrow-up me-1"></i>Adicionar PDF</button></form><div class="legal-notebook-file-safety"><i class="bi-shield-lock"></i><span>Até 25 MB. O arquivo usa armazenamento privado e endereço temporário ao abrir. O envio não transfere autoria ou direitos de distribuição.</span></div>${lista}</section>`;
 }
 
@@ -4670,18 +4684,39 @@ async function abrirPdfCaderno(colecao, arquivo) {
     }
 }
 
-async function renomearPdfCaderno(colecao, arquivo) {
-    const nome = prompt("Nome do material no caderno:", arquivo?.nome || "")?.trim();
-    if (!nome || operacaoPdfCadernoEmAndamento) return;
-    const descricaoInformada = prompt("Fonte, autoria ou editora (deixe em branco se não se aplicar):", arquivo?.descricao || "");
-    if (descricaoInformada === null) return;
-    const descricao = descricaoInformada.trim();
-    if (nome === arquivo.nome && descricao === (arquivo.descricao || "")) return;
+function iniciarEdicaoPdfCaderno(colecao, arquivo) {
+    if (!arquivo || operacaoPdfCadernoEmAndamento) return;
+    pdfEmEdicaoCaderno.set(colecao.id, arquivo.id);
+    renderizarVade();
+    document.querySelector(`.form-editar-pdf-caderno[data-file-id="${arquivo.id}"] .campo-editar-fonte-pdf`)?.focus();
+}
+
+function cancelarEdicaoPdfCaderno(colecao) {
+    if (operacaoPdfCadernoEmAndamento) return;
+    pdfEmEdicaoCaderno.delete(colecao.id);
+    renderizarVade();
+}
+
+async function salvarEdicaoPdfCaderno(colecao, arquivo, form) {
+    if (!arquivo || operacaoPdfCadernoEmAndamento) return;
+    const nome = form.querySelector(".campo-editar-nome-pdf")?.value.trim() || "";
+    const descricao = form.querySelector(".campo-editar-fonte-pdf")?.value.trim() || "";
+    if (!nome) {
+        form.querySelector(".campo-editar-nome-pdf")?.focus();
+        mostrarStatusVade("error", "Informe o nome do material.");
+        return;
+    }
+    if (nome === arquivo.nome && descricao === (arquivo.descricao || "")) {
+        cancelarEdicaoPdfCaderno(colecao);
+        return;
+    }
     operacaoPdfCadernoEmAndamento = true;
+    form.querySelectorAll("button, input").forEach(campo => { campo.disabled = true; });
     mostrarStatusVade("pending", "Atualizando as informações do material...");
     try {
         const salvo = await exigirNuvemVade().atualizarPdf(arquivo.id, { nome, descricao });
         pdfsCadernosVade.set(colecao.id, pdfsDoCaderno(colecao.id).map(item => item.id === salvo.id ? salvo : item));
+        pdfEmEdicaoCaderno.delete(colecao.id);
         renderizarVade();
         mostrarStatusVade("success", "Informações do material atualizadas.");
     } catch (erro) {
@@ -4689,6 +4724,7 @@ async function renomearPdfCaderno(colecao, arquivo) {
         mostrarStatusVade("error", erro?.message || "Não foi possível atualizar as informações do material.");
     } finally {
         operacaoPdfCadernoEmAndamento = false;
+        if (form?.isConnected) form.querySelectorAll("button, input").forEach(campo => { campo.disabled = false; });
     }
 }
 
@@ -4699,6 +4735,7 @@ async function excluirPdfCaderno(colecao, arquivo) {
     try {
         await exigirNuvemVade().excluirPdf(arquivo.id);
         pdfsCadernosVade.set(colecao.id, pdfsDoCaderno(colecao.id).filter(item => item.id !== arquivo.id));
+        if (pdfEmEdicaoCaderno.get(colecao.id) === arquivo.id) pdfEmEdicaoCaderno.delete(colecao.id);
         if (pdfAbertoCaderno.get(colecao.id)?.id === arquivo.id) pdfAbertoCaderno.delete(colecao.id);
         renderizarVade();
         mostrarStatusVade("success", "PDF excluído do espaço privado.");
@@ -4714,7 +4751,12 @@ function conectarEventosPdfsCaderno(card, colecao) {
     card.querySelector(".form-upload-pdf-caderno")?.addEventListener("submit", evento => { evento.preventDefault(); enviarPdfCaderno(colecao, evento.currentTarget); });
     card.querySelector(".btn-fechar-pdf-caderno")?.addEventListener("click", () => { pdfAbertoCaderno.delete(colecao.id); renderizarVade(); });
     card.querySelectorAll(".btn-abrir-pdf-caderno").forEach(botao => botao.addEventListener("click", () => abrirPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === botao.dataset.fileId))));
-    card.querySelectorAll(".btn-renomear-pdf-caderno").forEach(botao => botao.addEventListener("click", () => renomearPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === botao.dataset.fileId))));
+    card.querySelectorAll(".btn-editar-pdf-caderno").forEach(botao => botao.addEventListener("click", () => iniciarEdicaoPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === botao.dataset.fileId))));
+    card.querySelectorAll(".form-editar-pdf-caderno").forEach(form => form.addEventListener("submit", evento => {
+        evento.preventDefault();
+        salvarEdicaoPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === form.dataset.fileId), form);
+    }));
+    card.querySelectorAll(".btn-cancelar-edicao-pdf").forEach(botao => botao.addEventListener("click", () => cancelarEdicaoPdfCaderno(colecao)));
     card.querySelectorAll(".btn-excluir-pdf-caderno").forEach(botao => botao.addEventListener("click", () => excluirPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === botao.dataset.fileId))));
 }
 

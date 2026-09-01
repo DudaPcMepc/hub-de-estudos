@@ -1014,6 +1014,11 @@ test("cada Caderno jurídico oferece materiais privados e leitor temporário de 
     assert.match(html, /Material de terceiros · uso privado/);
     assert.match(html, /descricao: form\.querySelector\("\.campo-fonte-pdf-caderno"\)/);
     assert.match(html, /atualizarPdf\(arquivo\.id, \{ nome, descricao \}\)/);
+    assert.match(html, /class="legal-notebook-file-edit form-editar-pdf-caderno"/);
+    assert.match(html, /Salvar identificação/);
+    assert.match(html, /function iniciarEdicaoPdfCaderno/);
+    assert.match(html, /function salvarEdicaoPdfCaderno/);
+    assert.doesNotMatch(html, /prompt\("Nome do material no caderno:/);
     assert.match(html, /Até 25 MB/);
     assert.match(html, /20 arquivos/);
     assert.match(html, /class="legal-notebook-pdf-viewer"/);
