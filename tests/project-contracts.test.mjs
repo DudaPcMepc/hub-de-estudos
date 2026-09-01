@@ -1047,3 +1047,31 @@ test("cada Caderno jurídico abre em um espaço amplo sem duplicar o modelo de d
     assert.match(html, /@media \(max-width: 767\.98px\)[\s\S]*?\.legal-notebook-sidebar \{ display: none; \}/);
     assert.doesNotMatch(html, /HUB_CLOUD_VADE\.criarWorkspaceCaderno/);
 });
+
+test("as ações coletivas dos Cadernos jurídicos são atômicas, privadas e explícitas", () => {
+    const migration = readProjectFile("supabase/migrations/202608310008_legal_notebook_bulk_actions.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const html = readProjectFile("index.html");
+
+    for (const functionName of ["set_user_vade_provisions_review", "set_user_vade_provisions_section", "remove_user_vade_provisions"]) {
+        assert.match(migration, new RegExp(`create or replace function public\\.${functionName}`, "i"));
+        assert.match(migration, new RegExp(`${functionName}[\\s\\S]*?current_user_id[\\s\\S]*?private\\.is_workspace_member`, "i"));
+        assert.match(migration, new RegExp(`grant execute on function public\\.${functionName}\\([^;]+to authenticated`, "i"));
+    }
+    assert.match(migration, /count\(distinct requested_id\)/g);
+    assert.match(migration, /A seleção contém artigos inválidos ou repetidos\./g);
+    assert.match(migration, /set_user_vade_provisions_section[\s\S]*?section\.collection_id = p_collection_id[\s\S]*?section\.user_id = current_user_id/i);
+    assert.doesNotMatch(migration, /delete from public\.user_legal_(?:highlights|bookmarks|reading_history)/i);
+    assert.match(repository, /\.rpc\("set_user_vade_provisions_review"/);
+    assert.match(repository, /\.rpc\("set_user_vade_provisions_section"/);
+    assert.match(repository, /\.rpc\("remove_user_vade_provisions"/);
+    assert.match(auth, /salvarRevisaoArtigos:/);
+    assert.match(auth, /moverArtigosParaSecao:/);
+    assert.match(auth, /removerArtigos:/);
+    assert.match(html, /btn-alternar-selecao-caderno/);
+    assert.match(html, /class="[^"]*selecionar-artigo-caderno/);
+    assert.match(html, /class="legal-notebook-bulk-bar"/);
+    assert.match(html, /Selecionar visíveis/);
+    assert.match(html, /Os textos legais, grifos, favoritos, notas e o histórico de leitura serão preservados\./);
+});
