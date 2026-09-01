@@ -136,12 +136,17 @@
     .modal-content { border: 0; border-radius: 1rem; box-shadow: 0 1rem 3rem rgba(41, 33, 30, .2); }
     .modal-header { border-bottom-color: rgba(59, 41, 35, .12); }
     .alert-warning { --bs-alert-bg: #fff3e8; --bs-alert-border-color: #e7b89f; --bs-alert-color: #6f3525; }
-    .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
+    .card-materia { cursor: default; transition: transform .15s, box-shadow .15s; }
     .card-materia .card-body { padding: 1.3rem; }
     .card-materia .card-actions { padding-top: .35rem; }
-    .card-materia:active { cursor: grabbing; }
     .card-materia:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
     .card-materia.sortable-ghost { opacity: .35; }
+    .materia-drag-handle { cursor: default; transition: transform .15s, box-shadow .15s; }
+    #gridMaterias.is-organizing .card-materia { outline: 1px dashed rgba(154, 29, 45, .2); outline-offset: -1px; }
+    #gridMaterias.is-organizing .materia-drag-handle { cursor: grab; touch-action: none; box-shadow: 0 0 0 .18rem rgba(154, 29, 45, .12); }
+    #gridMaterias.is-organizing .materia-drag-handle:active { cursor: grabbing; transform: scale(1.06); }
+    #gridMaterias.is-dragging .card-materia:hover { transform: none; }
+    .subject-order-notice { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: -.35rem 0 1rem; padding: .65rem .8rem; color: var(--pimentel-cafe); background: rgba(244, 226, 212, .42); border: 1px solid rgba(154, 29, 45, .12); border-radius: .75rem; font-size: .7rem; }
     .badge-cor { width: 34px; height: 34px; border-radius: .5rem; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
     .materia-progress-bar { background-color: var(--pimentel-vermelho); }
     .study-overview {
@@ -1311,18 +1316,20 @@
                 </div>
                 <div class="col-lg-3">
                     <select class="form-select" id="ordemMaterias">
-                        <option value="manual">Ordem manual (arrastar)</option>
+                        <option value="manual">Ordem personalizada</option>
                         <option value="nome">Nome (A–Z)</option>
                         <option value="progresso">Maior progresso</option>
                         <option value="pendencias">Mais pendências</option>
                     </select>
                 </div>
-                <div class="col-lg-4 d-flex gap-2 justify-content-lg-end">
+                <div class="col-lg-4 d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <button class="btn btn-outline-secondary rounded-pill" id="btnOrganizarMaterias" type="button" aria-pressed="false"><i class="bi-arrows-move me-1"></i><span>Organizar matérias</span></button>
                     <button class="btn btn-outline-primary rounded-pill" id="btnRevisarTudo"><i class="bi-lightning-charge me-1"></i>Revisar hoje (<span id="contadorRevisao">0</span>)</button>
                     <button class="btn btn-success rounded-pill" id="btnNovaMateria"><i class="bi-plus-circle me-1"></i>Nova Matéria</button>
                 </div>
             </div>
             <section class="study-overview mb-4" id="resumoMaterias" aria-label="Resumo de desempenho"></section>
+            <div class="subject-order-notice d-none" id="avisoOrganizacaoMaterias" role="status"><span><i class="bi-hand-index-thumb me-1"></i>Arraste pelo ícone colorido de cada matéria. No celular, toque e segure brevemente.</span><small>A ordem é salva automaticamente.</small></div>
             <div class="row g-3" id="gridMaterias"></div>
         </div>
 
@@ -1761,45 +1768,42 @@
                         </header>
                         <div class="mind-map-toolbar" role="toolbar" aria-label="Ferramentas do mapa mental">
                             <div class="mind-map-tool-group mind-map-primary-tools" aria-label="Ferramentas principais">
-                                <button class="mind-map-tool active" type="button" data-mind-tool="select" aria-pressed="true" title="Selecionar e mover"><i class="bi-cursor"></i><span>Selecionar</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="pan" aria-pressed="false" title="Mover a tela"><i class="bi-hand-index-thumb"></i><span>Mover</span></button>
-                                <button class="mind-map-tool" type="button" data-mind-tool="node" aria-pressed="false" title="Adicionar conceito"><i class="bi-card-text"></i><span>Conceito</span></button>
-                                <button class="mind-map-tool" id="btnMindLock" type="button" title="Fixar posição" aria-pressed="false" disabled><i class="bi-unlock"></i><span id="mindMapLockLabel">Fixar</span></button>
+                                <button class="mind-map-tool" type="button" data-mind-tool="node" aria-label="Adicionar conceito" aria-pressed="false" title="Adicionar conceito"><i class="bi-card-text"></i><span>Conceito</span></button>
                             </div>
                             <button class="mind-map-tool mind-map-mobile-more" id="btnMindMobileTools" type="button" aria-label="Mais ferramentas" aria-expanded="false" aria-controls="mindMapMobileExtra"><i class="bi-grid"></i><span>Mais</span></button>
                             <div class="mind-map-mobile-extra" id="mindMapMobileExtra">
                                 <div class="mind-map-mobile-panel-header"><strong>Mais ferramentas</strong><button class="mind-map-icon-button" id="btnMindMobileToolsClose" type="button" aria-label="Fechar ferramentas"><i class="bi-x-lg"></i></button></div>
                                 <div class="mind-map-tool-group" aria-label="Criação avançada">
-                                    <button class="mind-map-tool" type="button" data-mind-tool="rect" aria-pressed="false" title="Adicionar retângulo"><i class="bi-square"></i><span>Forma</span></button>
-                                    <button class="mind-map-tool" type="button" data-mind-tool="ellipse" aria-pressed="false" title="Adicionar círculo"><i class="bi-circle"></i><span>Círculo</span></button>
-                                    <button class="mind-map-tool" type="button" data-mind-tool="edge" aria-pressed="false" title="Ligar dois elementos"><i class="bi-bezier2"></i><span>Ligar</span></button>
-                                    <button class="mind-map-tool" type="button" data-mind-tool="draw" aria-pressed="false" title="Desenho livre"><i class="bi-pencil"></i><span>Desenhar</span></button>
-                                    <button class="mind-map-tool" type="button" data-mind-tool="eraser" aria-pressed="false" title="Apagar partes dos desenhos"><i class="bi-eraser"></i><span>Borracha</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="rect" aria-label="Adicionar retângulo" aria-pressed="false" title="Adicionar retângulo"><i class="bi-square"></i><span>Forma</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="ellipse" aria-label="Adicionar círculo" aria-pressed="false" title="Adicionar círculo"><i class="bi-circle"></i><span>Círculo</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="edge" aria-label="Ligar dois elementos" aria-pressed="false" title="Ligar dois elementos"><i class="bi-bezier2"></i><span>Ligar</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="draw" aria-label="Desenho livre" aria-pressed="false" title="Desenho livre"><i class="bi-pencil"></i><span>Desenhar</span></button>
+                                    <button class="mind-map-tool" type="button" data-mind-tool="eraser" aria-label="Borracha" aria-pressed="false" title="Apagar partes dos desenhos"><i class="bi-eraser"></i><span>Borracha</span></button>
                                 </div>
                                 <div class="mind-map-tool-group" aria-label="Aparência">
-                                    <label class="mind-map-color-control" title="Cor do elemento"><span>Cor</span><input id="mindMapColor" type="color" value="#b8322a" aria-label="Cor do elemento"></label>
+                                    <label class="mind-map-color-control" title="Cor do elemento"><i class="bi-palette" aria-hidden="true"></i><span class="visually-hidden">Cor</span><input id="mindMapColor" type="color" value="#b8322a" aria-label="Cor do elemento"></label>
                                     <select class="form-select form-select-sm mind-map-line-style" id="mindMapLineStyle" aria-label="Estilo da linha" title="Estilo das conexões">
-                                        <option value="solid">Linha contínua</option>
-                                        <option value="dashed">Linha pontilhada</option>
+                                        <option value="solid">━</option>
+                                        <option value="dashed">┄</option>
                                     </select>
                                     <label class="mind-map-eraser-control d-none" id="mindMapEraserControl" title="Tamanho da borracha"><i class="bi-circle"></i><input id="mindMapEraserSize" type="range" min="10" max="72" step="2" value="28" aria-label="Tamanho da borracha"><output id="mindMapEraserSizeLabel" for="mindMapEraserSize">28</output></label>
                                 </div>
                                 <div class="mind-map-tool-group" aria-label="Edição">
-                                    <button class="mind-map-tool" id="btnMindUndo" type="button" title="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i><span>Desfazer</span></button>
-                                    <button class="mind-map-tool" id="btnMindRedo" type="button" title="Refazer" disabled><i class="bi-arrow-clockwise"></i><span>Refazer</span></button>
-                                    <button class="mind-map-tool" id="btnMindDuplicate" type="button" title="Duplicar selecionado" disabled><i class="bi-copy"></i><span>Duplicar</span></button>
-                                    <button class="mind-map-tool" id="btnMindFront" type="button" title="Trazer para frente" disabled><i class="bi-front"></i><span>Frente</span></button>
-                                    <button class="mind-map-tool mind-map-tool-danger" id="btnMindDelete" type="button" title="Excluir selecionado" disabled><i class="bi-trash"></i><span>Excluir</span></button>
+                                    <button class="mind-map-tool" id="btnMindUndo" type="button" aria-label="Desfazer" title="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i><span>Desfazer</span></button>
+                                    <button class="mind-map-tool" id="btnMindRedo" type="button" aria-label="Refazer" title="Refazer" disabled><i class="bi-arrow-clockwise"></i><span>Refazer</span></button>
+                                    <button class="mind-map-tool" id="btnMindDuplicate" type="button" aria-label="Duplicar selecionado" title="Duplicar selecionado" disabled><i class="bi-copy"></i><span>Duplicar</span></button>
+                                    <button class="mind-map-tool" id="btnMindFront" type="button" aria-label="Trazer para frente" title="Trazer para frente" disabled><i class="bi-front"></i><span>Frente</span></button>
+                                    <button class="mind-map-tool mind-map-tool-danger" id="btnMindDelete" type="button" aria-label="Excluir selecionado" title="Excluir selecionado" disabled><i class="bi-trash"></i><span>Excluir</span></button>
                                 </div>
                                 <div class="mind-map-tool-group mind-map-zoom-controls" aria-label="Zoom">
-                                    <button class="mind-map-tool" id="btnMindZoomOut" type="button" title="Diminuir zoom"><i class="bi-dash-lg"></i></button>
+                                    <button class="mind-map-tool" id="btnMindZoomOut" type="button" aria-label="Diminuir zoom" title="Diminuir zoom"><i class="bi-dash-lg"></i></button>
                                     <span id="mindMapZoomLabel">100%</span>
-                                    <button class="mind-map-tool" id="btnMindZoomIn" type="button" title="Aumentar zoom"><i class="bi-plus-lg"></i></button>
-                                    <button class="mind-map-tool" id="btnMindFit" type="button" title="Enquadrar conteúdo"><i class="bi-arrows-fullscreen"></i></button>
+                                    <button class="mind-map-tool" id="btnMindZoomIn" type="button" aria-label="Aumentar zoom" title="Aumentar zoom"><i class="bi-plus-lg"></i></button>
+                                    <button class="mind-map-tool" id="btnMindFit" type="button" aria-label="Enquadrar conteúdo" title="Enquadrar conteúdo"><i class="bi-arrows-fullscreen"></i></button>
                                 </div>
                             </div>
                         </div>
-                        <div class="mind-map-hint" id="mindMapHint">Clique duas vezes em um conceito para editar o texto.</div>
+                        <div class="mind-map-hint" id="mindMapHint">Clique para selecionar. Segure e arraste para mover; ao soltar, a posição é salva.</div>
                         <div class="mind-map-stage" id="mindMapStage" tabindex="0" aria-label="Tela livre do mapa mental">
                             <svg class="mind-map-canvas" id="mindMapCanvas" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa mental">
                                 <defs>
@@ -2426,6 +2430,7 @@ function renderizarMarkdown(txt) {
 let sortableInstancia = null;
 let filtroMaterias = "";
 let ordemMaterias = "manual";
+let modoOrganizarMaterias = false;
 let operacaoMateriaEmAndamento = false;
 let catalogoMaterias = [];
 let widgetsPorMateria = new Map();
@@ -2597,6 +2602,7 @@ function sincronizarEdital(editalRemoto) {
 function limparFiltrosDeMaterias() {
     filtroMaterias = "";
     ordemMaterias = "manual";
+    modoOrganizarMaterias = false;
     document.getElementById("buscaMaterias").value = "";
     document.getElementById("ordemMaterias").value = "manual";
 }
@@ -2608,6 +2614,23 @@ function materiaCombina(m, q) {
         m.cards.map(c => c.frente + " " + c.verso).join(" ")
     ].join(" ").toLowerCase();
     return alvo.includes(q);
+}
+
+function atualizarControlesOrganizacaoMaterias(totalMaterias) {
+    const botao = document.getElementById("btnOrganizarMaterias");
+    const aviso = document.getElementById("avisoOrganizacaoMaterias");
+    const grid = document.getElementById("gridMaterias");
+    const disponivel = ordemMaterias === "manual" && !filtroMaterias.trim() && totalMaterias > 1;
+    if (!disponivel) modoOrganizarMaterias = false;
+    botao.disabled = !disponivel || operacaoMateriaEmAndamento;
+    botao.classList.toggle("btn-danger", modoOrganizarMaterias);
+    botao.classList.toggle("btn-outline-secondary", !modoOrganizarMaterias);
+    botao.setAttribute("aria-pressed", String(modoOrganizarMaterias));
+    botao.innerHTML = modoOrganizarMaterias
+        ? '<i class="bi-check2 me-1"></i><span>Concluir organização</span>'
+        : '<i class="bi-arrows-move me-1"></i><span>Organizar matérias</span>';
+    aviso.classList.toggle("d-none", !modoOrganizarMaterias);
+    grid.classList.toggle("is-organizing", modoOrganizarMaterias);
 }
 
 function renderizarMaterias() {
@@ -2648,8 +2671,10 @@ function renderizarMaterias() {
         </div>`;
     const contador = document.getElementById("contadorRevisao");
     if (contador) contador.textContent = vencidos;
+    atualizarControlesOrganizacaoMaterias(todas.length);
 
     if (lista.length === 0) {
+        if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
         grid.innerHTML = `<div class="col-12 text-center text-muted py-5">${q ? "Nenhuma matéria encontrada para essa busca." : 'Nenhuma matéria ainda. Clique em "Nova Matéria".'}</div>`;
         popularSelects();
         return;
@@ -2665,7 +2690,7 @@ function renderizarMaterias() {
                 <div class="card card-materia h-100 border-0 shadow-sm">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge-cor bg-${m.cor} me-2"><i class="bi-grip-vertical"></i></span>
+                            <span class="badge-cor materia-drag-handle bg-${m.cor} me-2" title="${modoOrganizarMaterias ? "Arrastar matéria" : "Identificação da matéria"}"><i class="bi-${modoOrganizarMaterias ? "grip-vertical" : "journal-bookmark-fill"}"></i></span>
                             <div class="flex-grow-1 min-w-0">
                                 <h6 class="fw-bold mb-0 text-truncate">${esc(m.nome)}</h6>
                                 <span class="small text-muted">${dom}/${m.topicos.length} tópicos · ${p}%</span>
@@ -2681,9 +2706,9 @@ function renderizarMaterias() {
                             ${err ? `<span class="badge bg-danger-subtle text-danger border badge-mini"><i class="bi-x-circle me-1"></i>${err} erros</span>` : ""}
                         </div>
                         <div class="card-actions mt-auto d-flex gap-2">
-                            <button class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia" data-id="${m.id}"><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
-                            <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar"><i class="bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir"><i class="bi-trash"></i></button>
+                            <button class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia" data-id="${m.id}" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
+                            <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -2695,11 +2720,17 @@ function renderizarMaterias() {
     grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => excluirMateriaComRelacionados(b.dataset.id)));
 
     if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
-    if (ordemMaterias === "manual" && !q) {
+    if (modoOrganizarMaterias && ordemMaterias === "manual" && !q) {
         sortableInstancia = Sortable.create(grid, {
             animation: 150,
             ghostClass: "sortable-ghost",
+            handle: ".materia-drag-handle",
+            delay: 180,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
+            onStart: () => grid.classList.add("is-dragging"),
             onEnd: async evento => {
+                grid.classList.remove("is-dragging");
                 if (operacaoMateriaEmAndamento) {
                     renderizarMaterias();
                     return;
@@ -2724,6 +2755,7 @@ function renderizarMaterias() {
                     return;
                 }
                 operacaoMateriaEmAndamento = true;
+                atualizarControlesOrganizacaoMaterias(atuais.length);
                 try {
                     await exigirNuvemMaterias().reordenar(ids);
                     salvarMaterias(ordenadas);
@@ -2736,6 +2768,7 @@ function renderizarMaterias() {
                     renderizarMaterias();
                 } finally {
                     operacaoMateriaEmAndamento = false;
+                    atualizarControlesOrganizacaoMaterias(ordenadas.length);
                 }
             }
         });
@@ -2761,8 +2794,13 @@ function popularSelects() {
     }
 }
 
-document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; renderizarMaterias(); });
-document.getElementById("ordemMaterias").addEventListener("change", e => { ordemMaterias = e.target.value; renderizarMaterias(); });
+document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
+document.getElementById("ordemMaterias").addEventListener("change", e => { ordemMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
+document.getElementById("btnOrganizarMaterias").addEventListener("click", () => {
+    if (operacaoMateriaEmAndamento || ordemMaterias !== "manual" || filtroMaterias.trim() || materiasNormalizadas().length < 2) return;
+    modoOrganizarMaterias = !modoOrganizarMaterias;
+    renderizarMaterias();
+});
 document.getElementById("btnNovaMateria").addEventListener("click", () => abrirFormularioMateria(null));
 
 // ---------- Criar / editar matéria ----------

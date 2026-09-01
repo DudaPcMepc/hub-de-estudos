@@ -147,35 +147,37 @@
 .mind-map-mobile-panel-header { display: none; }
 .mind-map-mobile-extra { display: contents; }
 .mind-map-tool {
-    min-width: 2.15rem;
-    min-height: 2.15rem;
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: .35rem;
-    padding: .4rem .55rem;
+    padding: 0;
     color: var(--pimentel-cafe-claro);
     background: transparent;
     border: 0;
     border-radius: .55rem;
-    font-size: .72rem;
+    font-size: .9rem;
     white-space: nowrap;
 }
+.mind-map-tool > span { display: none; }
 .mind-map-toolbar .mind-map-mobile-more { display: none; }
 .mind-map-tool:hover:not(:disabled), .mind-map-tool.active { color: #fff; background: var(--pimentel-vermelho-escuro); }
 .mind-map-tool:disabled { opacity: .35; }
 .mind-map-tool-danger:hover:not(:disabled) { background: #a52b25; }
-.mind-map-color-control { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .45rem; color: var(--pimentel-cafe-claro); font-size: .7rem; }
-.mind-map-color-control input { width: 1.75rem; height: 1.75rem; padding: 0; border: 0; border-radius: 50%; overflow: hidden; }
-.mind-map-line-style { width: 128px; border-color: rgba(59, 41, 35, .12); font-size: .7rem; }
+.mind-map-color-control { display: inline-flex; align-items: center; gap: .22rem; padding: .16rem .28rem; color: var(--pimentel-cafe-claro); font-size: .66rem; }
+.mind-map-color-control input { width: 1.25rem; height: 1.25rem; padding: 0; border: 0; border-radius: 50%; overflow: hidden; }
+.mind-map-line-style { width: 2.65rem; min-height: 1.8rem; padding: .12rem 1rem .12rem .35rem; border-color: rgba(59, 41, 35, .12); font-size: 1rem; }
 .mind-map-eraser-control { display: inline-flex; align-items: center; gap: .35rem; min-width: 145px; padding: .25rem .45rem; color: var(--pimentel-cafe-claro); font-size: .68rem; }
 .mind-map-eraser-control input { width: 88px; accent-color: var(--pimentel-vermelho); }
 .mind-map-eraser-control output { min-width: 1.5rem; text-align: right; }
 .mind-map-zoom-controls span { min-width: 2.6rem; color: var(--pimentel-cafe-claro); text-align: center; font-size: .68rem; }
 .mind-map-hint { padding: .35rem .85rem; color: #78665f; background: #f4eee7; font-size: .68rem; }
 .mind-map-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; cursor: default; outline: 0; touch-action: none; }
-.mind-map-stage[data-tool="pan"] { cursor: grab; }
-.mind-map-stage[data-tool="pan"].is-dragging { cursor: grabbing; }
+.mind-map-stage[data-tool="select"] .mind-map-grid-background { cursor: grab; }
+.mind-map-stage[data-tool="select"].is-dragging,
+.mind-map-stage[data-tool="select"].is-dragging .mind-map-grid-background { cursor: grabbing; }
 .mind-map-stage[data-tool="node"],
 .mind-map-stage[data-tool="rect"],
 .mind-map-stage[data-tool="ellipse"],
@@ -187,13 +189,30 @@
 .mind-map-element { cursor: move; }
 .mind-map-element .mind-map-node-surface { filter: drop-shadow(0 5px 8px rgba(59, 41, 35, .1)); }
 .mind-map-element.selected .mind-map-node-surface { stroke: #2167d5 !important; stroke-width: 3 !important; }
+.mind-map-selection-frame { fill: none; stroke: rgba(33, 103, 213, .68); stroke-width: 1.5; stroke-dasharray: 5 4; pointer-events: none; vector-effect: non-scaling-stroke; }
 .mind-map-resize-control[data-mind-resize="nw"], .mind-map-resize-control[data-mind-resize="se"] { cursor: nwse-resize; }
 .mind-map-resize-control[data-mind-resize="ne"], .mind-map-resize-control[data-mind-resize="sw"] { cursor: nesw-resize; }
+.mind-map-resize-control[data-mind-resize="n"], .mind-map-resize-control[data-mind-resize="s"] { cursor: ns-resize; }
+.mind-map-resize-control[data-mind-resize="e"], .mind-map-resize-control[data-mind-resize="w"] { cursor: ew-resize; }
 .mind-map-resize-hit { fill: transparent; pointer-events: all; }
 .mind-map-resize-handle { fill: #fffdf9; stroke: #2167d5; stroke-width: 2; pointer-events: none; vector-effect: non-scaling-stroke; }
-.mind-map-element.is-locked .mind-map-node-surface { stroke-dasharray: 6 4; }
-.mind-map-lock-badge circle { fill: #fffdf9; stroke: rgba(59, 41, 35, .2); stroke-width: 1; }
-.mind-map-lock-badge text { fill: #5b433a !important; font-size: 12px; font-weight: 700; }
+.mind-map-actions-control, .mind-map-actions-item, .mind-map-color-option, .mind-map-more-colors { cursor: pointer; outline: none; }
+.mind-map-actions-control circle { fill: #fffdf9; stroke: #b8322a; stroke-width: 2; filter: drop-shadow(0 3px 5px rgba(59, 41, 35, .18)); }
+.mind-map-actions-control text { fill: #92271f !important; font-size: 11px; font-weight: 900; letter-spacing: -1px; pointer-events: none; }
+.mind-map-actions-control:hover circle, .mind-map-actions-control:focus circle { fill: #fff1ec; stroke-width: 2.5; }
+.mind-map-actions-menu { filter: drop-shadow(0 8px 14px rgba(59, 41, 35, .2)); }
+.mind-map-actions-menu-bg { fill: #fffdf9; stroke: rgba(59, 41, 35, .13); stroke-width: 1; }
+.mind-map-actions-item rect { fill: transparent; }
+.mind-map-actions-item text { fill: #3b2923 !important; font-size: 12px; font-weight: 700; pointer-events: none; }
+.mind-map-actions-item:hover rect, .mind-map-actions-item:focus rect { fill: #f7eee9; }
+.mind-map-actions-item.is-danger text { fill: #a52b25 !important; }
+.mind-map-actions-item.is-danger:hover rect, .mind-map-actions-item.is-danger:focus rect { fill: #fff0ed; }
+.mind-map-actions-label { fill: #78665f !important; font-size: 10px !important; font-weight: 700 !important; pointer-events: none; }
+.mind-map-color-option circle { stroke: rgba(59, 41, 35, .25); stroke-width: 1.5; }
+.mind-map-color-option:hover circle, .mind-map-color-option:focus circle { stroke: #2167d5; stroke-width: 3; }
+.mind-map-more-colors circle { fill: #fff; stroke: #78665f; stroke-width: 1.5; }
+.mind-map-more-colors text { fill: #5b433a !important; font-size: 13px; font-weight: 800; pointer-events: none; }
+.mind-map-more-colors:hover circle, .mind-map-more-colors:focus circle { stroke: #2167d5; stroke-width: 2.5; }
 .mind-map-element text { pointer-events: none; font-family: system-ui, sans-serif; font-size: 14px; font-weight: 600; }
 .mind-map-edge { fill: none; stroke-width: 2.4; marker-end: url(#mindMapArrow); pointer-events: stroke; cursor: pointer; }
 .mind-map-edge.selected { stroke-width: 4; filter: drop-shadow(0 0 3px rgba(33, 103, 213, .4)); }
@@ -260,9 +279,7 @@
     .mind-map-mobile-panel-header { display: flex; align-items: center; justify-content: space-between; color: var(--pimentel-cafe); font-size: .82rem; }
     .mind-map-mobile-extra .mind-map-tool-group { width: 100%; flex-wrap: wrap; padding: 0 0 .55rem; border-right: 0; border-bottom: 1px solid rgba(59, 41, 35, .08); }
     .mind-map-mobile-extra .mind-map-tool-group:last-child { padding-bottom: 0; border-bottom: 0; }
-    .mind-map-tool span { display: none; }
-    .mind-map-mobile-extra .mind-map-tool span { display: inline; }
-    .mind-map-line-style { width: 112px; }
+    .mind-map-line-style { width: 2.65rem; }
     .mind-map-hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mind-map-minimap { width: 120px; height: 74px; }
 }
