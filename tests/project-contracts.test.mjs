@@ -965,6 +965,7 @@ test("os PDFs dos Cadernos jurídicos usam bucket privado, limite e caminho isol
 
     assert.match(migration, /insert into storage\.buckets[\s\S]*?'private-legal-notebook-pdfs'[\s\S]*?false[\s\S]*?26214400[\s\S]*?'application\/pdf'/i);
     assert.match(migration, /create table public\.user_vade_files/i);
+    assert.match(migration, /upload_status text not null default 'pending' check \(upload_status in \('pending', 'ready'\)\)/i);
     assert.match(migration, /references public\.user_vade_collections\(id, workspace_id, user_id\) on delete restrict/i);
     assert.match(migration, /storage_path = concat\([\s\S]*?user_id::text[\s\S]*?workspace_id::text[\s\S]*?collection_id::text[\s\S]*?id::text/i);
     assert.match(migration, /alter table public\.user_vade_files force row level security/i);
@@ -976,14 +977,22 @@ test("os PDFs dos Cadernos jurídicos usam bucket privado, limite e caminho isol
     assert.match(migration, /create or replace function private\.protect_user_vade_file_identity/i);
     assert.match(migration, /new\.storage_path is distinct from old\.storage_path[\s\S]*?A identidade do PDF é imutável/i);
     assert.match(migration, /create or replace function public\.remove_user_vade_file_metadata/i);
+    assert.match(migration, /create or replace function public\.finalize_user_vade_file/i);
+    assert.match(migration, /create or replace function public\.reconcile_user_vade_files/i);
+    assert.match(migration, /file\.created_at < now\(\) - interval '15 minutes'/i);
+    assert.match(migration, /set upload_status = 'ready'[\s\S]*?storage\.objects/i);
     assert.match(migration, /if exists \([\s\S]*?from storage\.objects[\s\S]*?Remova o arquivo do armazenamento antes de apagar seu cadastro/i);
-    assert.match(migration, /grant select, insert, update on table public\.user_vade_files to authenticated/i);
+    assert.match(migration, /grant select, insert on table public\.user_vade_files to authenticated/i);
+    assert.match(migration, /grant update \(display_name, description\) on table public\.user_vade_files to authenticated/i);
     assert.doesNotMatch(migration, /grant select, insert, update, delete on table public\.user_vade_files/i);
 
     assert.match(repository, /const BUCKET_PDFS_VADE = "private-legal-notebook-pdfs"/);
     assert.match(repository, /String\.fromCharCode\(\.\.\.cabecalho\) !== "%PDF-"/);
     assert.match(repository, /export async function enviarPdfColecaoVade/);
+    assert.match(repository, /supabase\.rpc\("reconcile_user_vade_files", \{ p_collection_id: colecaoId \}\)/);
     assert.match(repository, /supabase\.storage\.from\(BUCKET_PDFS_VADE\)\.upload\(caminho, arquivo/);
+    assert.match(repository, /supabase\.rpc\("finalize_user_vade_file", \{ p_file_id: arquivoId \}\)/);
+    assert.match(repository, /\.eq\("upload_status", "ready"\)/);
     assert.match(repository, /createSignedUrl\(arquivo\.storage_path, 300\)/);
     assert.match(repository, /supabase\.storage\.from\(BUCKET_PDFS_VADE\)\.remove\(\[arquivo\.storage_path\]\)/);
     assert.match(repository, /supabase\.rpc\("remove_user_vade_file_metadata", \{ p_file_id: arquivoId \}\)/);
@@ -1004,10 +1013,13 @@ test("cada Caderno jurídico oferece materiais privados e leitor temporário de 
     assert.match(html, /20 arquivos/);
     assert.match(html, /class="legal-notebook-pdf-viewer"/);
     assert.match(html, /referrerpolicy="no-referrer"/);
+    assert.match(html, /sandbox="allow-downloads"/);
+    assert.match(html, /target="_blank" rel="noopener noreferrer"/);
     assert.match(html, /listarPdfs\(colecao\.id\)/);
     assert.match(html, /enviarPdf\(colecao\.id, arquivo/);
     assert.match(html, /criarUrlPdf\(arquivo\.id\)/);
     assert.match(html, /excluirPdf\(arquivo\.id\)/);
+    assert.match(html, /Este caderno possui \$\{arquivos\.length\} PDF\(s\) privado\(s\)/);
 });
 
 test("as migrations têm identificadores únicos e permanecem em ordem", () => {
@@ -1125,11 +1137,16 @@ test("a exclusão administrativa exige prévia, confirmação e protege administ
     assert.match(edgeFunction, /targetIsAdmin === true/);
     assert.match(edgeFunction, /preview_user_deletion/);
     assert.match(edgeFunction, /prepare_user_deletion/);
+    assert.match(edgeFunction, /private_vade_pdfs/);
+    assert.match(edgeFunction, /\.from\(PRIVATE_VADE_BUCKET\)[\s\S]*?\.remove\(paths\)/);
+    assert.match(edgeFunction, /\.from\("user_vade_files"\)[\s\S]*?\.delete\(\)[\s\S]*?\.in\("storage_path", paths\)/);
     assert.match(edgeFunction, /auth\.admin\.deleteUser/);
     assert.ok(edgeFunction.indexOf("prepare_user_deletion") < edgeFunction.indexOf("auth.admin.deleteUser"));
+    assert.ok(edgeFunction.indexOf(".remove(paths)") < edgeFunction.indexOf("auth.admin.deleteUser"));
     assert.match(edgeFunction, /expectedConfirmation\s*=\s*`EXCLUIR \$\{target\.email\}`/);
     assert.match(frontend, /confirmation !== currentDeletion\.confirmation/);
     assert.match(frontend, /preview-delete/);
+    assert.match(frontend, /private_vade_pdfs", "PDFs privados dos cadernos jurídicos/);
     assert.match(html, /id=["']modalExcluirUsuario["']/);
     assert.match(html, /id=["']confirmacaoExclusaoUsuario["']/);
 });

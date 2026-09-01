@@ -732,6 +732,7 @@
     .personal-vade-status { min-height: 1.25rem; margin-bottom: .55rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
     .personal-vade-status.is-success { color: #526047; }
     .personal-vade-status.is-error { color: var(--pimentel-vermelho-escuro); }
+    .personal-vade-status.is-warning { color: #7a571b; }
     .personal-vade-empty { padding: 2.2rem 1rem; text-align: center; color: var(--pimentel-cafe-claro); border: 1px dashed rgba(59, 41, 35, .16); border-radius: .85rem; }
     .personal-vade-empty i { display: block; margin-bottom: .55rem; color: rgba(184, 50, 42, .42); font-size: 2rem; }
     .personal-vade-list { display: grid; gap: .8rem; }
@@ -4589,7 +4590,7 @@ function htmlPainelPdfsCaderno(colecao) {
     }
     const aberto = pdfAbertoCaderno.get(colecao.id);
     if (aberto) {
-        return `<section class="legal-notebook-files"><div class="legal-notebook-pdf-viewer"><header class="legal-notebook-pdf-viewer-head"><button type="button" class="btn btn-sm btn-outline-light btn-fechar-pdf-caderno" aria-label="Voltar aos materiais"><i class="bi-arrow-left"></i></button><strong>${esc(aberto.nome)}</strong><span class="badge text-bg-dark">acesso temporário</span></header><iframe src="${esc(aberto.url)}" title="${esc(aberto.nome)}" referrerpolicy="no-referrer"></iframe></div></section>`;
+        return `<section class="legal-notebook-files"><div class="legal-notebook-pdf-viewer"><header class="legal-notebook-pdf-viewer-head"><button type="button" class="btn btn-sm btn-outline-light btn-fechar-pdf-caderno" aria-label="Voltar aos materiais"><i class="bi-arrow-left"></i></button><strong>${esc(aberto.nome)}</strong><a class="btn btn-sm btn-outline-light" href="${esc(aberto.url)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em uma nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a><span class="badge text-bg-dark">acesso temporário</span></header><iframe src="${esc(aberto.url)}" title="${esc(aberto.nome)}" referrerpolicy="no-referrer" sandbox="allow-downloads"></iframe></div></section>`;
     }
     const arquivos = pdfsDoCaderno(colecao.id);
     const lista = arquivos.length ? `<div class="legal-notebook-file-list">${arquivos.map(arquivo => `<article class="legal-notebook-file-card" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><div class="legal-notebook-file-copy"><strong>${esc(arquivo.nome)}</strong><small>${esc(arquivo.nomeOriginal)} · ${tamanhoArquivoLegivel(arquivo.tamanho)}${arquivo.descricao ? ` · ${esc(arquivo.descricao)}` : ""}</small></div><div class="legal-notebook-file-actions"><button type="button" class="btn btn-sm btn-primary btn-abrir-pdf-caderno" data-file-id="${esc(arquivo.id)}"><i class="bi-book me-1"></i>Abrir</button><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Renomear ${esc(arquivo.nome)}"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Excluir ${esc(arquivo.nome)}"><i class="bi-trash"></i></button></div></article>`).join("")}</div>` : `<div class="legal-notebook-files-empty"><div><i class="bi-file-earmark-lock fs-2 d-block mb-2"></i><strong class="d-block mb-1">Nenhum PDF privado neste caderno</strong><small>Adicione um material pessoal para consultar durante os estudos.</small></div></div>`;
@@ -4939,11 +4940,27 @@ async function salvarDocumentosVade(colecao) {
 }
 
 async function excluirVade(colecao) {
-    if (operacaoVadeEmAndamento || !confirm(`Excluir o caderno “${colecao.nome}”? Seus grifos e anotações nos artigos não serão apagados.`)) return;
+    if (operacaoVadeEmAndamento) return;
     operacaoVadeEmAndamento = true;
     const sessao = capturarSessaoHubAtual();
-    mostrarStatusVade("pending", "Excluindo o caderno no Supabase...");
+    mostrarStatusVade("pending", "Conferindo os materiais privados do caderno...");
     try {
+        const arquivos = await exigirNuvemVade().listarPdfs(colecao.id);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        pdfsCadernosVade.set(colecao.id, arquivos);
+        pdfsCarregadosCadernosVade.add(colecao.id);
+        if (arquivos.length) {
+            abasCadernosJuridicos.set(colecao.id, "materiais");
+            cadernoVadeAbertoId = colecao.id;
+            renderizarVade();
+            mostrarStatusVade("warning", `Este caderno possui ${arquivos.length} PDF(s) privado(s). Exclua os materiais nesta aba antes de remover o caderno.`);
+            return;
+        }
+        if (!confirm(`Excluir o caderno “${colecao.nome}”? Seus grifos e anotações nos artigos não serão apagados.`)) {
+            mostrarStatusVade();
+            return;
+        }
+        mostrarStatusVade("pending", "Excluindo o caderno no Supabase...");
         await exigirNuvemVade().excluir(colecao.id);
         if (!sessaoHubPermaneceAtual(sessao)) return;
         colecoesVade = colecoesVade.filter(item => item.id !== colecao.id);

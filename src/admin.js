@@ -33,6 +33,7 @@ const PREVIEW_LABELS = Object.freeze([
     ["personal_error_entries", "Registros no caderno de erros"],
     ["personal_quiz_attempts", "Tentativas de simulados"],
     ["personal_subject_performance", "Históricos de desempenho"],
+    ["private_vade_pdfs", "PDFs privados dos cadernos jurídicos"],
     ["ai_daily_usage_days", "Registros de uso da IA"]
 ]);
 

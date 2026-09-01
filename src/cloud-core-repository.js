@@ -528,11 +528,16 @@ async function validarPdfColecaoVade(arquivo) {
 export async function carregarPdfsColecaoVade(id) {
     const contexto = obterContexto();
     const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    verificarResposta(
+        await supabase.rpc("reconcile_user_vade_files", { p_collection_id: colecaoId }),
+        "Não foi possível conferir os envios pendentes deste caderno."
+    );
     const resposta = await supabase.from("user_vade_files")
         .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
         .eq("collection_id", colecaoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
+        .eq("upload_status", "ready")
         .order("updated_at", { ascending: false });
     return (verificarResposta(resposta, "Não foi possível carregar os PDFs privados do caderno.") || [])
         .map(mapearPdfColecaoVade);
@@ -555,9 +560,10 @@ export async function enviarPdfColecaoVade(id, arquivo, metadados = {}) {
         display_name: texto(metadados.nome || nomePadrao, 200, "Nome do PDF", true).trim(),
         description: texto(metadados.descricao, 1000, "Descrição do PDF"),
         mime_type: "application/pdf",
-        size_bytes: validado.tamanho
-    }).select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at").single();
-    const registro = verificarRegistro(registroResposta, "Não foi possível preparar o PDF privado.");
+        size_bytes: validado.tamanho,
+        upload_status: "pending"
+    }).select("id").single();
+    verificarRegistro(registroResposta, "Não foi possível preparar o PDF privado.");
     const envio = await supabase.storage.from(BUCKET_PDFS_VADE).upload(caminho, arquivo, {
         cacheControl: "3600",
         contentType: "application/pdf",
@@ -570,7 +576,18 @@ export async function enviarPdfColecaoVade(id, arquivo, metadados = {}) {
         }
         throw erroRepositorio("Não foi possível enviar o PDF privado. O cadastro temporário foi removido.", envio.error);
     }
-    return mapearPdfColecaoVade(registro);
+    const finalizacao = await supabase.rpc("finalize_user_vade_file", { p_file_id: arquivoId });
+    if (finalizacao.error) {
+        throw erroRepositorio("O PDF chegou ao espaço privado, mas a confirmação ficou pendente. Reabra a aba Materiais para recuperá-lo automaticamente.", finalizacao.error);
+    }
+    const salvo = await supabase.from("user_vade_files")
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .eq("id", arquivoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("upload_status", "ready")
+        .maybeSingle();
+    return mapearPdfColecaoVade(verificarRegistro(salvo, "O PDF foi enviado, mas ainda não está disponível para leitura."));
 }
 
 export async function atualizarPdfColecaoVade(id, alteracoes) {
@@ -597,6 +614,7 @@ export async function criarUrlPdfColecaoVade(id) {
         .eq("id", arquivoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
+        .eq("upload_status", "ready")
         .maybeSingle();
     const arquivo = verificarRegistro(resposta, "Não foi possível localizar o PDF privado.");
     const assinatura = await supabase.storage.from(BUCKET_PDFS_VADE).createSignedUrl(arquivo.storage_path, 300);
@@ -903,6 +921,20 @@ export async function moverArtigoParaSecaoColecaoVade(id, dispositivoId, secaoId
 export async function excluirColecaoVade(id) {
     const contexto = exigirContexto();
     const colecaoId = exigirUuidNovo(id, "Caderno jurídico");
+    const arquivosResposta = await supabase.from("user_vade_files")
+        .select("upload_status")
+        .eq("collection_id", colecaoId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .limit(1)
+        .maybeSingle();
+    const arquivo = verificarResposta(arquivosResposta, "Não foi possível conferir os materiais privados do caderno.");
+    if (arquivo?.upload_status === "pending") {
+        throw erroRepositorio("Há um envio de PDF ainda pendente neste caderno. Reabra Materiais e aguarde a recuperação antes de excluí-lo.");
+    }
+    if (arquivo) {
+        throw erroRepositorio("Este caderno possui PDFs privados. Remova os materiais na aba Materiais antes de excluir o caderno.");
+    }
     verificarRegistro(await supabase.from("user_vade_collections").delete()
         .eq("id", colecaoId)
         .eq("workspace_id", contexto.workspaceId)
