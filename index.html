@@ -753,6 +753,14 @@
     .personal-vade-review-summary strong { color: var(--pimentel-cafe); }
     .personal-vade-no-results { padding: .8rem; color: var(--pimentel-cafe-claro); font-size: .68rem; text-align: center; }
     .personal-vade-article-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .25rem; flex-shrink: 0; }
+    .personal-vade-sections-manager { display: grid; gap: .55rem; padding: .75rem .85rem; background: rgba(244, 226, 212, .22); border-top: 1px solid rgba(59, 41, 35, .07); }
+    .personal-vade-section-form { display: grid; grid-template-columns: minmax(10rem, 1fr) auto; gap: .45rem; }
+    .personal-vade-section-list { display: grid; gap: .35rem; }
+    .personal-vade-section-row { display: flex; align-items: center; justify-content: space-between; gap: .55rem; padding: .45rem .55rem; background: #fff; border-radius: .55rem; }
+    .personal-vade-section-group { display: grid; gap: .4rem; }
+    .personal-vade-section-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .3rem .15rem; color: var(--pimentel-cafe); font-size: .68rem; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .personal-vade-section-heading span { color: var(--pimentel-cafe-claro); }
+    .personal-vade-section-select { width: min(9rem, 30vw); }
     .personal-vade-progress { height: .35rem; margin-top: .4rem; overflow: hidden; background: rgba(59, 41, 35, .09); border-radius: 999px; }
     .personal-vade-progress > span { display: block; height: 100%; background: var(--pimentel-vermelho); border-radius: inherit; transition: width .2s ease; }
     .personal-vade-article.is-reviewed { background: rgba(82, 96, 71, .09); }
@@ -772,7 +780,7 @@
     .legal-notebook-review-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
     .legal-notebook-review-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
     .legal-notebook-review-actions .btn { white-space: nowrap; }
-    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools { grid-template-columns: 1fr; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } }
+    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document, .personal-vade-article { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools, .personal-vade-section-form { grid-template-columns: 1fr; } .personal-vade-section-select { width: 100%; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
     .vade-catalog-search { position: relative; }
@@ -2781,6 +2789,8 @@ let operacaoRevisaoCadernoEmAndamento = false;
 let cadernoRevisaoAtualId = null;
 let filtrosCadernosJuridicos = new Map();
 let geracaoUltimoArtigoCaderno = 0;
+let colecaoVadeSecoesAbertoId = null;
+let operacaoSecaoVadeEmAndamento = false;
 
 function capturarSessaoHubAtual() {
     const contexto = window.HUB_SESSION_CONTEXT;
@@ -3209,8 +3219,17 @@ async function alternarArtigoNoCaderno(colecaoId, botao = null) {
     }
 }
 
+function secoesOrdenadasCaderno(colecao) {
+    return [...(colecao?.secoes || [])].sort((a, b) => a.posicao - b.posicao);
+}
+
 function artigosOrdenadosCaderno(colecao) {
-    return [...(colecao?.artigos || [])].sort((a, b) => a.posicao - b.posicao);
+    const ordemSecoes = new Map(secoesOrdenadasCaderno(colecao).map((secao, indice) => [secao.id, indice]));
+    const semSecao = ordemSecoes.size;
+    return [...(colecao?.artigos || [])].sort((a, b) => {
+        const diferencaSecao = (ordemSecoes.get(a.secaoId) ?? semSecao) - (ordemSecoes.get(b.secaoId) ?? semSecao);
+        return diferencaSecao || a.posicao - b.posicao;
+    });
 }
 
 function encerrarModoRevisaoCaderno() {
@@ -3868,15 +3887,24 @@ function aplicarFiltrosCaderno(card) {
         if (visivel) visiveis += 1;
     });
     card.querySelector(".personal-vade-no-results")?.classList.toggle("d-none", visiveis > 0);
+    const filtroAtivo = Boolean(busca) || estado !== "todos";
+    card.querySelectorAll(".personal-vade-section-group").forEach(grupo => {
+        const possuiArtigoVisivel = Boolean(grupo.querySelector(".personal-vade-article:not(.d-none)"));
+        grupo.classList.toggle("d-none", filtroAtivo && !possuiArtigoVisivel);
+    });
     filtrosCadernosJuridicos.set(card.dataset.vadeId, { busca: card.querySelector(".filtro-busca-caderno")?.value || "", estado });
 }
 
 async function moverArtigoNoCaderno(colecao, dispositivoId, direcao, botao = null) {
     if (operacaoRevisaoCadernoEmAndamento) return;
-    const artigos = artigosOrdenadosCaderno(colecao);
-    const origem = artigos.findIndex(item => item.dispositivoId === dispositivoId);
-    const destino = origem + direcao;
-    if (origem < 0 || destino < 0 || destino >= artigos.length) return;
+    const artigos = [...(colecao.artigos || [])].sort((a, b) => a.posicao - b.posicao);
+    const atual = artigos.find(item => item.dispositivoId === dispositivoId);
+    const grupo = artigos.filter(item => (item.secaoId || null) === (atual?.secaoId || null));
+    const origemGrupo = grupo.findIndex(item => item.dispositivoId === dispositivoId);
+    const alvo = grupo[origemGrupo + direcao];
+    if (!atual || origemGrupo < 0 || !alvo) return;
+    const origem = artigos.findIndex(item => item.dispositivoId === atual.dispositivoId);
+    const destino = artigos.findIndex(item => item.dispositivoId === alvo.dispositivoId);
     [artigos[origem], artigos[destino]] = [artigos[destino], artigos[origem]];
     const sessao = capturarSessaoHubAtual();
     operacaoRevisaoCadernoEmAndamento = true;
@@ -3928,6 +3956,139 @@ async function alternarRevisaoArtigoLista(colecao, dispositivoId, botao = null) 
     }
 }
 
+async function criarSecaoVade(colecao, campo, botao = null) {
+    const nome = campo?.value.trim();
+    if (operacaoSecaoVadeEmAndamento || !nome) return;
+    operacaoSecaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    if (botao) botao.disabled = true;
+    mostrarStatusVade("pending", "Criando a seção no Supabase...");
+    try {
+        const salva = await exigirNuvemVade().criarSecao(colecao.id, nome);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, secoes: [...(item.secoes || []), salva] } : item);
+        renderizarVade();
+        mostrarStatusVade("success", `Seção “${salva.nome}” criada.`);
+    } catch (erro) {
+        console.error("Falha ao criar seção do caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível criar a seção.");
+    } finally {
+        operacaoSecaoVadeEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
+async function renomearSecaoVade(colecao, secao) {
+    if (!secao) return;
+    const nome = prompt("Novo nome da seção:", secao.nome)?.trim();
+    if (!nome || nome === secao.nome || operacaoSecaoVadeEmAndamento) return;
+    operacaoSecaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    mostrarStatusVade("pending", "Renomeando a seção...");
+    try {
+        const salva = await exigirNuvemVade().renomearSecao(secao.id, nome);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, secoes: (item.secoes || []).map(atual => atual.id === secao.id ? salva : atual) } : item);
+        renderizarVade();
+        mostrarStatusVade("success", "Seção renomeada.");
+    } catch (erro) {
+        console.error("Falha ao renomear seção do caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível renomear a seção.");
+    } finally {
+        operacaoSecaoVadeEmAndamento = false;
+    }
+}
+
+async function excluirSecaoVade(colecao, secao) {
+    if (!secao) return;
+    const quantidade = (colecao.artigos || []).filter(artigo => artigo.secaoId === secao.id).length;
+    const detalhe = quantidade ? ` Os ${quantidade} artigo(s) voltarão para “Sem seção”.` : "";
+    if (operacaoSecaoVadeEmAndamento || !confirm(`Excluir a seção “${secao.nome}”?${detalhe}`)) return;
+    operacaoSecaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    mostrarStatusVade("pending", "Excluindo a seção...");
+    try {
+        await exigirNuvemVade().excluirSecao(secao.id);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? {
+            ...item,
+            secoes: (item.secoes || []).filter(atual => atual.id !== secao.id),
+            artigos: (item.artigos || []).map(artigo => artigo.secaoId === secao.id ? { ...artigo, secaoId: null } : artigo)
+        } : item);
+        renderizarVade();
+        mostrarStatusVade("success", "Seção excluída; os artigos foram preservados.");
+    } catch (erro) {
+        console.error("Falha ao excluir seção do caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível excluir a seção.");
+    } finally {
+        operacaoSecaoVadeEmAndamento = false;
+    }
+}
+
+async function moverSecaoVade(colecao, secaoId, direcao, botao = null) {
+    if (operacaoSecaoVadeEmAndamento) return;
+    const secoes = secoesOrdenadasCaderno(colecao);
+    const origem = secoes.findIndex(item => item.id === secaoId);
+    const destino = origem + direcao;
+    if (origem < 0 || destino < 0 || destino >= secoes.length) return;
+    [secoes[origem], secoes[destino]] = [secoes[destino], secoes[origem]];
+    operacaoSecaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    if (botao) botao.disabled = true;
+    mostrarStatusVade("pending", "Salvando a ordem das seções...");
+    try {
+        const posicoes = await exigirNuvemVade().salvarOrdemSecoes(colecao.id, secoes.map(item => item.id));
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        const porId = new Map(posicoes.map(item => [item.id, item.posicao]));
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, secoes: (item.secoes || []).map(secao => ({ ...secao, posicao: porId.get(secao.id) ?? secao.posicao })) } : item);
+        renderizarVade();
+        mostrarStatusVade("success", "Ordem das seções confirmada.");
+    } catch (erro) {
+        console.error("Falha ao reordenar seções do caderno", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível reordenar as seções.");
+    } finally {
+        operacaoSecaoVadeEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
+async function moverArtigoParaSecaoVade(colecao, dispositivoId, secaoId, campo = null) {
+    if (operacaoSecaoVadeEmAndamento) return;
+    operacaoSecaoVadeEmAndamento = true;
+    const sessao = capturarSessaoHubAtual();
+    if (campo) campo.disabled = true;
+    mostrarStatusVade("pending", "Movendo o artigo para a seção...");
+    try {
+        const salva = await exigirNuvemVade().moverArtigoParaSecao(colecao.id, dispositivoId, secaoId || null);
+        if (!sessaoHubPermaneceAtual(sessao)) return;
+        colecoesVade = colecoesVade.map(item => item.id === colecao.id ? { ...item, artigos: (item.artigos || []).map(artigo => artigo.dispositivoId === dispositivoId ? { ...artigo, secaoId: salva } : artigo) } : item);
+        renderizarVade();
+        mostrarStatusVade("success", salva ? "Artigo movido para a seção." : "Artigo movido para “Sem seção”.");
+    } catch (erro) {
+        console.error("Falha ao mover artigo entre seções", erro);
+        if (sessaoHubPermaneceAtual(sessao)) mostrarStatusVade("error", erro?.message || "Não foi possível mover o artigo.");
+        if (campo?.isConnected) campo.value = colecao.artigos.find(artigo => artigo.dispositivoId === dispositivoId)?.secaoId || "";
+    } finally {
+        operacaoSecaoVadeEmAndamento = false;
+        if (campo?.isConnected) campo.disabled = false;
+    }
+}
+
+function htmlArtigoCaderno(artigo, colecao, indiceGrupo, totalGrupo) {
+    const secoes = secoesOrdenadasCaderno(colecao);
+    return `<div class="personal-vade-article ${artigo.revisadoEm ? "is-reviewed" : ""}" data-search="${esc(chaveBuscaCatalogoVade(`${artigo.rotulo || ""} ${artigo.titulo || ""} ${artigo.documentoTitulo || ""}`))}" data-reviewed="${Boolean(artigo.revisadoEm)}">
+        <div class="personal-vade-article-copy"><strong>${esc(artigo.rotulo || "Artigo")}${artigo.titulo ? ` — ${esc(artigo.titulo)}` : ""}</strong><small>${esc(artigo.documentoTitulo || "Norma jurídica")}</small></div>
+        <div class="personal-vade-article-actions">
+            <select class="form-select form-select-sm personal-vade-section-select mover-artigo-secao-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Seção de ${esc(artigo.rotulo || "artigo")}"><option value="" ${!artigo.secaoId ? "selected" : ""}>Sem seção</option>${secoes.map(secao => `<option value="${esc(secao.id)}" ${artigo.secaoId === secao.id ? "selected" : ""}>${esc(secao.nome)}</option>`).join("")}</select>
+            <button type="button" class="btn btn-sm ${artigo.revisadoEm ? "btn-success" : "btn-outline-success"} btn-revisar-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="${artigo.revisadoEm ? "Marcar como pendente" : "Marcar como revisado"}"><i class="bi-${artigo.revisadoEm ? "check-circle-fill" : "check2-circle"}"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="-1" ${indiceGrupo === 0 ? "disabled" : ""} aria-label="Mover artigo para cima nesta seção"><i class="bi-arrow-up"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="1" ${indiceGrupo === totalGrupo - 1 ? "disabled" : ""} aria-label="Mover artigo para baixo nesta seção"><i class="bi-arrow-down"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button>
+        </div>
+    </div>`;
+}
+
 function renderizarVade() {
     const lista = document.getElementById("wsVadeLista");
     if (!colecoesVade.length) {
@@ -3943,6 +4104,8 @@ function renderizarVade() {
             : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
         const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
         const artigos = artigosOrdenadosCaderno(colecao);
+        const secoes = secoesOrdenadasCaderno(colecao);
+        const gerenciandoSecoes = colecao.id === colecaoVadeSecoesAbertoId;
         const revisados = artigos.filter(artigo => artigo.revisadoEm).length;
         const progresso = artigos.length ? Math.round((revisados / artigos.length) * 100) : 0;
         const filtro = filtrosCadernosJuridicos.get(colecao.id) || { busca: "", estado: "todos" };
@@ -3952,6 +4115,7 @@ function renderizarVade() {
                 <div class="min-w-0"><h6 class="fw-bold mb-1"><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h6><p class="personal-vade-description mb-0">${esc(colecao.descricao || "Caderno jurídico pessoal")}</p></div>
                 <div class="d-flex flex-wrap gap-1">
                     ${artigos.length ? `<button type="button" class="btn btn-sm btn-primary btn-estudar-vade"><i class="bi-play-fill me-1"></i>${colecao.ultimoDispositivoId ? "Retomar" : "Estudar caderno"}</button>` : ""}
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-secoes-vade"><i class="bi-folder2-open me-1"></i>${gerenciandoSecoes ? "Fechar seções" : "Seções"}</button>
                     <button type="button" class="btn btn-sm btn-outline-primary btn-organizar-vade"><i class="bi-list-check me-1"></i>${organizando ? "Fechar organização" : "Organizar"}</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-vade" aria-label="Renomear ${esc(colecao.nome)}"><i class="bi-pencil"></i></button>
                     <button type="button" class="btn btn-sm btn-outline-danger btn-excluir-vade" aria-label="Excluir ${esc(colecao.nome)}"><i class="bi-trash"></i></button>
@@ -3966,13 +4130,11 @@ function renderizarVade() {
                     </div>
                 </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-journal-x me-1"></i>Nenhuma norma adicionada.</div>`}
             </div>
+            ${gerenciandoSecoes ? `<div class="personal-vade-sections-manager"><div><strong class="d-block small"><i class="bi-folder2-open me-1"></i>Organizar seções</strong><small class="text-muted">Crie áreas temáticas e mova os artigos pelo seletor de cada item.</small></div><div class="personal-vade-section-form"><input type="text" class="form-control form-control-sm nova-secao-vade" maxlength="120" placeholder="Ex.: Direitos fundamentais"><button type="button" class="btn btn-sm btn-primary btn-criar-secao-vade"><i class="bi-plus-lg me-1"></i>Criar seção</button></div><div class="personal-vade-section-list">${secoes.length ? secoes.map((secao, indice) => `<div class="personal-vade-section-row"><strong class="small">${esc(secao.nome)}</strong><div class="d-flex gap-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="1" ${indice === secoes.length - 1 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Renomear ${esc(secao.nome)}"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Excluir ${esc(secao.nome)}"><i class="bi-trash"></i></button></div></div>`).join("") : `<small class="text-muted">Nenhuma seção criada ainda.</small>`}</div></div>` : ""}
             ${artigos.length ? `<div class="personal-vade-review-summary"><div class="d-flex justify-content-between gap-2"><strong>${revisados} de ${artigos.length} revisado(s)</strong><span>${progresso}%</span></div><div class="personal-vade-progress" role="progressbar" aria-label="Progresso de revisão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progresso}"><span style="width:${progresso}%"></span></div></div><div class="personal-vade-review-tools"><div><label class="visually-hidden" for="busca-caderno-${esc(colecao.id)}">Buscar artigo no caderno</label><input type="search" class="form-control form-control-sm filtro-busca-caderno" id="busca-caderno-${esc(colecao.id)}" value="${esc(filtro.busca)}" placeholder="Buscar artigo ou norma..."></div><div><label class="visually-hidden" for="estado-caderno-${esc(colecao.id)}">Filtrar revisão</label><select class="form-select form-select-sm filtro-status-caderno" id="estado-caderno-${esc(colecao.id)}"><option value="todos" ${filtro.estado === "todos" ? "selected" : ""}>Todos</option><option value="pendentes" ${filtro.estado === "pendentes" ? "selected" : ""}>Pendentes</option><option value="revisados" ${filtro.estado === "revisados" ? "selected" : ""}>Revisados</option></select></div></div>` : ""}
             <div class="personal-vade-articles">
                 <div class="personal-vade-articles-title"><strong><i class="bi-bookmark-check me-1"></i>Artigos salvos</strong><span>${artigos.length}</span></div>
-                ${artigos.length ? artigos.map((artigo, indice) => `<div class="personal-vade-article ${artigo.revisadoEm ? "is-reviewed" : ""}" data-search="${esc(chaveBuscaCatalogoVade(`${artigo.rotulo || ""} ${artigo.titulo || ""} ${artigo.documentoTitulo || ""}`))}" data-reviewed="${Boolean(artigo.revisadoEm)}">
-                    <div class="personal-vade-article-copy"><strong>${esc(artigo.rotulo || "Artigo")}${artigo.titulo ? ` — ${esc(artigo.titulo)}` : ""}</strong><small>${esc(artigo.documentoTitulo || "Norma jurídica")}</small></div>
-                    <div class="personal-vade-article-actions"><button type="button" class="btn btn-sm ${artigo.revisadoEm ? "btn-success" : "btn-outline-success"} btn-revisar-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="${artigo.revisadoEm ? "Marcar como pendente" : "Marcar como revisado"}"><i class="bi-${artigo.revisadoEm ? "check-circle-fill" : "check2-circle"}"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover artigo para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="1" ${indice === artigos.length - 1 ? "disabled" : ""} aria-label="Mover artigo para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button></div>
-                </div>`).join("") + `<div class="personal-vade-no-results d-none"><i class="bi-search me-1"></i>Nenhum artigo corresponde aos filtros.</div>` : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
+                ${artigos.length ? [...secoes.map(secao => ({ id: secao.id, nome: secao.nome })), { id: null, nome: "Sem seção" }].map(grupo => { const itens = artigos.filter(artigo => (artigo.secaoId || null) === grupo.id); return `<section class="personal-vade-section-group"><div class="personal-vade-section-heading"><strong><i class="bi-${grupo.id ? "folder2" : "tray"} me-1"></i>${esc(grupo.nome)}</strong><span>${itens.length}</span></div>${itens.length ? itens.map((artigo, indice) => htmlArtigoCaderno(artigo, colecao, indice, itens.length)).join("") : `<small class="text-muted py-1">Nenhum artigo nesta seção.</small>`}</section>`; }).join("") + `<div class="personal-vade-no-results d-none"><i class="bi-search me-1"></i>Nenhum artigo corresponde aos filtros.</div>` : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
             </div>
             ${organizando ? `<div class="personal-vade-organizer"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}
         </article>`;
@@ -3983,6 +4145,26 @@ function renderizarVade() {
         card.querySelector(".btn-renomear-vade").addEventListener("click", () => abrirFormularioVade(colecao));
         card.querySelector(".btn-excluir-vade").addEventListener("click", () => excluirVade(colecao));
         card.querySelector(".btn-estudar-vade")?.addEventListener("click", () => abrirModoRevisaoCaderno(colecao));
+        card.querySelector(".btn-secoes-vade").addEventListener("click", () => {
+            colecaoVadeSecoesAbertoId = colecaoVadeSecoesAbertoId === colecao.id ? null : colecao.id;
+            if (colecaoVadeSecoesAbertoId) {
+                colecaoVadeOrganizandoId = null;
+                rascunhoDocumentosVade = [];
+            }
+            renderizarVade();
+        });
+        const campoNovaSecao = card.querySelector(".nova-secao-vade");
+        card.querySelector(".btn-criar-secao-vade")?.addEventListener("click", evento => criarSecaoVade(colecao, campoNovaSecao, evento.currentTarget));
+        campoNovaSecao?.addEventListener("keydown", evento => {
+            if (evento.key === "Enter") {
+                evento.preventDefault();
+                criarSecaoVade(colecao, campoNovaSecao, card.querySelector(".btn-criar-secao-vade"));
+            }
+        });
+        card.querySelectorAll(".btn-renomear-secao-vade").forEach(botao => botao.addEventListener("click", () => renomearSecaoVade(colecao, (colecao.secoes || []).find(secao => secao.id === botao.dataset.sectionId))));
+        card.querySelectorAll(".btn-excluir-secao-vade").forEach(botao => botao.addEventListener("click", () => excluirSecaoVade(colecao, (colecao.secoes || []).find(secao => secao.id === botao.dataset.sectionId))));
+        card.querySelectorAll(".btn-mover-secao-vade").forEach(botao => botao.addEventListener("click", () => moverSecaoVade(colecao, botao.dataset.sectionId, Number(botao.dataset.direcao), botao)));
+        card.querySelectorAll(".mover-artigo-secao-vade").forEach(campo => campo.addEventListener("change", () => moverArtigoParaSecaoVade(colecao, campo.dataset.provisionId, campo.value || null, campo)));
         card.querySelector(".filtro-busca-caderno")?.addEventListener("input", () => aplicarFiltrosCaderno(card));
         card.querySelector(".filtro-status-caderno")?.addEventListener("change", () => aplicarFiltrosCaderno(card));
         aplicarFiltrosCaderno(card);
@@ -3992,6 +4174,7 @@ function renderizarVade() {
                 rascunhoDocumentosVade = [];
             } else {
                 colecaoVadeOrganizandoId = colecao.id;
+                colecaoVadeSecoesAbertoId = null;
                 rascunhoDocumentosVade = [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
             }
             renderizarVade();
@@ -4099,6 +4282,7 @@ async function excluirVade(colecao) {
         colecoesVade = colecoesVade.filter(item => item.id !== colecao.id);
         if (colecaoVadeEmEdicaoId === colecao.id) fecharFormularioVade();
         if (colecaoVadeOrganizandoId === colecao.id) colecaoVadeOrganizandoId = null;
+        if (colecaoVadeSecoesAbertoId === colecao.id) colecaoVadeSecoesAbertoId = null;
         if (cadernoRevisaoAtualId === colecao.id) encerrarModoRevisaoCaderno();
         filtrosCadernosJuridicos.delete(colecao.id);
         renderizarVade();
@@ -6727,6 +6911,8 @@ window.encerrarHub = () => {
     cadernoRevisaoAtualId = null;
     filtrosCadernosJuridicos = new Map();
     geracaoUltimoArtigoCaderno += 1;
+    colecaoVadeSecoesAbertoId = null;
+    operacaoSecaoVadeEmAndamento = false;
     documentoLeitorAtual = null;
     dispositivoLeitorAtual = null;
     preencherCatalogoMaterias();

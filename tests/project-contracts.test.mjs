@@ -1008,3 +1008,26 @@ test("os Cadernos jurídicos oferecem revisão ordenada, progresso e retomada pr
     assert.match(html, /id="wsModoRevisaoCaderno"/);
     assert.match(html, /id="btnMarcarRevisadoCaderno"/);
 });
+
+test("as seções dos Cadernos jurídicos organizam artigos sem romper o isolamento por usuário", () => {
+    const migration = readProjectFile("supabase/migrations/202608310007_legal_notebook_sections.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /create table public\.user_vade_collection_sections/i);
+    assert.match(migration, /foreign key \(collection_id, workspace_id, user_id\)[\s\S]*?references public\.user_vade_collections\(id, workspace_id, user_id\) on delete cascade/i);
+    assert.match(migration, /add column section_id uuid references public\.user_vade_collection_sections\(id\) on delete set null/i);
+    assert.match(migration, /user_vade_collection_sections_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(migration, /set_user_vade_provision_section[\s\S]*?section\.collection_id = p_collection_id[\s\S]*?section\.user_id = current_user_id/i);
+    assert.match(migration, /replace_user_vade_section_order[\s\S]*?exatamente as seções atuais do caderno/i);
+    assert.match(migration, /grant select on table public\.user_vade_collection_sections to authenticated/i);
+    assert.doesNotMatch(migration, /grant (?:insert|update|delete|all)[^;]*user_vade_collection_sections[^;]*authenticated/i);
+    assert.match(repository, /\.rpc\("create_user_vade_section"/);
+    assert.match(repository, /\.rpc\("set_user_vade_provision_section"/);
+    assert.match(auth, /criarSecao:/);
+    assert.match(auth, /moverArtigoParaSecao:/);
+    assert.match(html, /class="[^"]*btn-secoes-vade/);
+    assert.match(html, /class="[^"]*mover-artigo-secao-vade/);
+    assert.match(html, />Sem seção</);
+});
