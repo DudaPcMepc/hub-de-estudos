@@ -1031,3 +1031,19 @@ test("as seções dos Cadernos jurídicos organizam artigos sem romper o isolame
     assert.match(html, /class="[^"]*mover-artigo-secao-vade/);
     assert.match(html, />Sem seção</);
 });
+
+test("cada Caderno jurídico abre em um espaço amplo sem duplicar o modelo de dados", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /let cadernoVadeAbertoId = null/);
+    assert.match(html, /function htmlWorkspaceCaderno\(colecao\)/);
+    assert.match(html, /class="legal-notebook-workspace"/);
+    assert.match(html, /class="legal-notebook-workspace-body"/);
+    assert.match(html, /class="legal-notebook-sidebar"/);
+    assert.match(html, /class="[^\"]*seletor-secao-caderno/);
+    assert.match(html, /class="[^\"]*btn-voltar-lista-vade/);
+    assert.match(html, /class="[^\"]*btn-abrir-caderno-vade/);
+    assert.match(html, /class="legal-notebook-article-menu"/);
+    assert.match(html, /@media \(max-width: 767\.98px\)[\s\S]*?\.legal-notebook-sidebar \{ display: none; \}/);
+    assert.doesNotMatch(html, /HUB_CLOUD_VADE\.criarWorkspaceCaderno/);
+});
