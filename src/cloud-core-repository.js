@@ -326,7 +326,7 @@ export async function carregarBibliotecaJuridica() {
 
 export async function carregarColecoesVade() {
     const contexto = obterContexto();
-    const [colecoesResposta, documentosResposta, artigosResposta] = await Promise.all([
+    const [colecoesResposta, documentosResposta, artigosResposta, secoesResposta] = await Promise.all([
         supabase.from("user_vade_collections")
             .select("id, name, description, position, last_provision_id, created_at, updated_at")
             .eq("workspace_id", contexto.workspaceId)
@@ -340,7 +340,13 @@ export async function carregarColecoesVade() {
             .order("collection_id", { ascending: true })
             .order("position", { ascending: true }),
         supabase.from("user_vade_collection_provisions")
-            .select("collection_id, document_id, provision_id, position, added_at, reviewed_at, documento:legal_documents(short_title), dispositivo:legal_provisions(label, heading)")
+            .select("collection_id, document_id, provision_id, section_id, position, added_at, reviewed_at, documento:legal_documents(short_title), dispositivo:legal_provisions(label, heading)")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .order("collection_id", { ascending: true })
+            .order("position", { ascending: true }),
+        supabase.from("user_vade_collection_sections")
+            .select("id, collection_id, name, position, created_at, updated_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .order("collection_id", { ascending: true })
@@ -349,6 +355,7 @@ export async function carregarColecoesVade() {
     const colecoes = verificarResposta(colecoesResposta, "Não foi possível carregar seus cadernos jurídicos.") || [];
     const documentos = verificarResposta(documentosResposta, "Não foi possível carregar as normas dos seus cadernos.") || [];
     const artigos = verificarResposta(artigosResposta, "Não foi possível carregar os artigos dos seus cadernos.") || [];
+    const secoes = verificarResposta(secoesResposta, "Não foi possível carregar as seções dos seus cadernos.") || [];
     return colecoes.map(colecao => ({
         id: colecao.id,
         nome: colecao.name,
@@ -362,9 +369,17 @@ export async function carregarColecoesVade() {
             posicao: Number(item.position) || 0,
             adicionadoEm: item.added_at
         })),
+        secoes: secoes.filter(item => item.collection_id === colecao.id).map(item => ({
+            id: item.id,
+            nome: item.name,
+            posicao: Number(item.position) || 0,
+            criadoEm: item.created_at,
+            atualizadoEm: item.updated_at
+        })),
         artigos: artigos.filter(item => item.collection_id === colecao.id).map(item => ({
             documentoId: item.document_id,
             dispositivoId: item.provision_id,
+            secaoId: item.section_id || null,
             documentoTitulo: item.documento?.short_title || "Norma jurídica",
             rotulo: item.dispositivo?.label || "Artigo",
             titulo: item.dispositivo?.heading || "",
@@ -395,6 +410,7 @@ export async function criarColecaoVade(colecao) {
         criadoEm: salvo.created_at,
         atualizadoEm: salvo.updated_at,
         documentos: [],
+        secoes: [],
         artigos: [],
         ultimoDispositivoId: null
     };
@@ -520,6 +536,76 @@ export async function salvarUltimoArtigoColecaoVade(id, dispositivoId) {
     const salvo = verificarResposta(resposta, "Não foi possível guardar a posição de leitura do caderno.");
     if (salvo !== artigoId) throw erroRepositorio("O Supabase não confirmou a posição de leitura do caderno.");
     return salvo;
+}
+
+function mapearSecaoVade(item) {
+    return {
+        id: item.saved_id,
+        nome: item.saved_name,
+        posicao: Number(item.saved_position) || 0,
+        criadoEm: item.saved_created_at,
+        atualizadoEm: item.saved_updated_at
+    };
+}
+
+export async function criarSecaoColecaoVade(id, nome) {
+    exigirContexto();
+    const resposta = await supabase.rpc("create_user_vade_section", {
+        p_collection_id: exigirUuidNovo(id, "Caderno jurídico"),
+        p_name: texto(nome, 120, "Nome da seção", true).trim()
+    });
+    const salvo = (verificarResposta(resposta, "Não foi possível criar a seção do caderno.") || [])[0];
+    if (!salvo) throw erroRepositorio("O Supabase não confirmou a nova seção.");
+    return mapearSecaoVade(salvo);
+}
+
+export async function renomearSecaoColecaoVade(id, nome) {
+    exigirContexto();
+    const resposta = await supabase.rpc("rename_user_vade_section", {
+        p_section_id: exigirUuidNovo(id, "Seção do caderno"),
+        p_name: texto(nome, 120, "Nome da seção", true).trim()
+    });
+    const salvo = (verificarResposta(resposta, "Não foi possível renomear a seção.") || [])[0];
+    if (!salvo) throw erroRepositorio("O Supabase não confirmou a seção renomeada.");
+    return mapearSecaoVade(salvo);
+}
+
+export async function excluirSecaoColecaoVade(id) {
+    exigirContexto();
+    const resposta = await supabase.rpc("delete_user_vade_section", {
+        p_section_id: exigirUuidNovo(id, "Seção do caderno")
+    });
+    if (verificarResposta(resposta, "Não foi possível excluir a seção.") !== true) {
+        throw erroRepositorio("O Supabase não confirmou a exclusão da seção.");
+    }
+}
+
+export async function salvarOrdemSecoesColecaoVade(id, secoesIds) {
+    exigirContexto();
+    if (!Array.isArray(secoesIds) || secoesIds.length > 100) throw erroRepositorio("A ordem das seções é inválida.");
+    const ids = secoesIds.map(secaoId => exigirUuidNovo(secaoId, "Seção do caderno"));
+    if (new Set(ids).size !== ids.length) throw erroRepositorio("A ordem contém seções repetidas.");
+    const resposta = await supabase.rpc("replace_user_vade_section_order", {
+        p_collection_id: exigirUuidNovo(id, "Caderno jurídico"),
+        p_section_ids: ids
+    });
+    const salvos = verificarResposta(resposta, "Não foi possível reordenar as seções.") || [];
+    if (salvos.length !== ids.length) throw erroRepositorio("O Supabase não confirmou a nova ordem das seções.");
+    return salvos.map(item => ({ id: item.saved_section_id, posicao: Number(item.saved_position) || 0 }));
+}
+
+export async function moverArtigoParaSecaoColecaoVade(id, dispositivoId, secaoId = null) {
+    exigirContexto();
+    const resposta = await supabase.rpc("set_user_vade_provision_section", {
+        p_collection_id: exigirUuidNovo(id, "Caderno jurídico"),
+        p_provision_id: exigirUuidNovo(dispositivoId, "Artigo jurídico"),
+        p_section_id: secaoId ? exigirUuidNovo(secaoId, "Seção do caderno") : null
+    });
+    const salvo = (verificarResposta(resposta, "Não foi possível mover o artigo para a seção.") || [])[0];
+    if (!salvo || salvo.saved_provision_id !== dispositivoId || (salvo.saved_section_id || null) !== (secaoId || null)) {
+        throw erroRepositorio("O Supabase não confirmou a seção do artigo.");
+    }
+    return salvo.saved_section_id || null;
 }
 
 export async function excluirColecaoVade(id) {
