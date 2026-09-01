@@ -136,12 +136,17 @@
     .modal-content { border: 0; border-radius: 1rem; box-shadow: 0 1rem 3rem rgba(41, 33, 30, .2); }
     .modal-header { border-bottom-color: rgba(59, 41, 35, .12); }
     .alert-warning { --bs-alert-bg: #fff3e8; --bs-alert-border-color: #e7b89f; --bs-alert-color: #6f3525; }
-    .card-materia { cursor: grab; transition: transform .15s, box-shadow .15s; }
+    .card-materia { cursor: default; transition: transform .15s, box-shadow .15s; }
     .card-materia .card-body { padding: 1.3rem; }
     .card-materia .card-actions { padding-top: .35rem; }
-    .card-materia:active { cursor: grabbing; }
     .card-materia:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
     .card-materia.sortable-ghost { opacity: .35; }
+    .materia-drag-handle { cursor: default; transition: transform .15s, box-shadow .15s; }
+    #gridMaterias.is-organizing .card-materia { outline: 1px dashed rgba(154, 29, 45, .2); outline-offset: -1px; }
+    #gridMaterias.is-organizing .materia-drag-handle { cursor: grab; touch-action: none; box-shadow: 0 0 0 .18rem rgba(154, 29, 45, .12); }
+    #gridMaterias.is-organizing .materia-drag-handle:active { cursor: grabbing; transform: scale(1.06); }
+    #gridMaterias.is-dragging .card-materia:hover { transform: none; }
+    .subject-order-notice { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: -.35rem 0 1rem; padding: .65rem .8rem; color: var(--pimentel-cafe); background: rgba(244, 226, 212, .42); border: 1px solid rgba(154, 29, 45, .12); border-radius: .75rem; font-size: .7rem; }
     .badge-cor { width: 34px; height: 34px; border-radius: .5rem; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
     .materia-progress-bar { background-color: var(--pimentel-vermelho); }
     .study-overview {
@@ -1290,18 +1295,20 @@
                 </div>
                 <div class="col-lg-3">
                     <select class="form-select" id="ordemMaterias">
-                        <option value="manual">Ordem manual (arrastar)</option>
+                        <option value="manual">Ordem personalizada</option>
                         <option value="nome">Nome (A–Z)</option>
                         <option value="progresso">Maior progresso</option>
                         <option value="pendencias">Mais pendências</option>
                     </select>
                 </div>
-                <div class="col-lg-4 d-flex gap-2 justify-content-lg-end">
+                <div class="col-lg-4 d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <button class="btn btn-outline-secondary rounded-pill" id="btnOrganizarMaterias" type="button" aria-pressed="false"><i class="bi-arrows-move me-1"></i><span>Organizar matérias</span></button>
                     <button class="btn btn-outline-primary rounded-pill" id="btnRevisarTudo"><i class="bi-lightning-charge me-1"></i>Revisar hoje (<span id="contadorRevisao">0</span>)</button>
                     <button class="btn btn-success rounded-pill" id="btnNovaMateria"><i class="bi-plus-circle me-1"></i>Nova Matéria</button>
                 </div>
             </div>
             <section class="study-overview mb-4" id="resumoMaterias" aria-label="Resumo de desempenho"></section>
+            <div class="subject-order-notice d-none" id="avisoOrganizacaoMaterias" role="status"><span><i class="bi-hand-index-thumb me-1"></i>Arraste pelo ícone colorido de cada matéria. No celular, toque e segure brevemente.</span><small>A ordem é salva automaticamente.</small></div>
             <div class="row g-3" id="gridMaterias"></div>
         </div>
 
@@ -2405,6 +2412,7 @@ function renderizarMarkdown(txt) {
 let sortableInstancia = null;
 let filtroMaterias = "";
 let ordemMaterias = "manual";
+let modoOrganizarMaterias = false;
 let operacaoMateriaEmAndamento = false;
 let catalogoMaterias = [];
 let widgetsPorMateria = new Map();
@@ -2576,6 +2584,7 @@ function sincronizarEdital(editalRemoto) {
 function limparFiltrosDeMaterias() {
     filtroMaterias = "";
     ordemMaterias = "manual";
+    modoOrganizarMaterias = false;
     document.getElementById("buscaMaterias").value = "";
     document.getElementById("ordemMaterias").value = "manual";
 }
@@ -2587,6 +2596,23 @@ function materiaCombina(m, q) {
         m.cards.map(c => c.frente + " " + c.verso).join(" ")
     ].join(" ").toLowerCase();
     return alvo.includes(q);
+}
+
+function atualizarControlesOrganizacaoMaterias(totalMaterias) {
+    const botao = document.getElementById("btnOrganizarMaterias");
+    const aviso = document.getElementById("avisoOrganizacaoMaterias");
+    const grid = document.getElementById("gridMaterias");
+    const disponivel = ordemMaterias === "manual" && !filtroMaterias.trim() && totalMaterias > 1;
+    if (!disponivel) modoOrganizarMaterias = false;
+    botao.disabled = !disponivel || operacaoMateriaEmAndamento;
+    botao.classList.toggle("btn-danger", modoOrganizarMaterias);
+    botao.classList.toggle("btn-outline-secondary", !modoOrganizarMaterias);
+    botao.setAttribute("aria-pressed", String(modoOrganizarMaterias));
+    botao.innerHTML = modoOrganizarMaterias
+        ? '<i class="bi-check2 me-1"></i><span>Concluir organização</span>'
+        : '<i class="bi-arrows-move me-1"></i><span>Organizar matérias</span>';
+    aviso.classList.toggle("d-none", !modoOrganizarMaterias);
+    grid.classList.toggle("is-organizing", modoOrganizarMaterias);
 }
 
 function renderizarMaterias() {
@@ -2627,8 +2653,10 @@ function renderizarMaterias() {
         </div>`;
     const contador = document.getElementById("contadorRevisao");
     if (contador) contador.textContent = vencidos;
+    atualizarControlesOrganizacaoMaterias(todas.length);
 
     if (lista.length === 0) {
+        if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
         grid.innerHTML = `<div class="col-12 text-center text-muted py-5">${q ? "Nenhuma matéria encontrada para essa busca." : 'Nenhuma matéria ainda. Clique em "Nova Matéria".'}</div>`;
         popularSelects();
         return;
@@ -2644,7 +2672,7 @@ function renderizarMaterias() {
                 <div class="card card-materia h-100 border-0 shadow-sm">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge-cor bg-${m.cor} me-2"><i class="bi-grip-vertical"></i></span>
+                            <span class="badge-cor materia-drag-handle bg-${m.cor} me-2" title="${modoOrganizarMaterias ? "Arrastar matéria" : "Identificação da matéria"}"><i class="bi-${modoOrganizarMaterias ? "grip-vertical" : "journal-bookmark-fill"}"></i></span>
                             <div class="flex-grow-1 min-w-0">
                                 <h6 class="fw-bold mb-0 text-truncate">${esc(m.nome)}</h6>
                                 <span class="small text-muted">${dom}/${m.topicos.length} tópicos · ${p}%</span>
@@ -2660,9 +2688,9 @@ function renderizarMaterias() {
                             ${err ? `<span class="badge bg-danger-subtle text-danger border badge-mini"><i class="bi-x-circle me-1"></i>${err} erros</span>` : ""}
                         </div>
                         <div class="card-actions mt-auto d-flex gap-2">
-                            <button class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia" data-id="${m.id}"><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
-                            <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar"><i class="bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir"><i class="bi-trash"></i></button>
+                            <button class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia" data-id="${m.id}" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-box-arrow-in-right me-1"></i>Abrir</button>
+                            <button class="btn btn-sm btn-outline-secondary btn-editar-materia" data-id="${m.id}" title="Editar" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir-materia" data-id="${m.id}" title="Excluir" ${modoOrganizarMaterias ? "disabled" : ""}><i class="bi-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -2674,11 +2702,17 @@ function renderizarMaterias() {
     grid.querySelectorAll(".btn-excluir-materia").forEach(b => b.addEventListener("click", () => excluirMateriaComRelacionados(b.dataset.id)));
 
     if (sortableInstancia) { sortableInstancia.destroy(); sortableInstancia = null; }
-    if (ordemMaterias === "manual" && !q) {
+    if (modoOrganizarMaterias && ordemMaterias === "manual" && !q) {
         sortableInstancia = Sortable.create(grid, {
             animation: 150,
             ghostClass: "sortable-ghost",
+            handle: ".materia-drag-handle",
+            delay: 180,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
+            onStart: () => grid.classList.add("is-dragging"),
             onEnd: async evento => {
+                grid.classList.remove("is-dragging");
                 if (operacaoMateriaEmAndamento) {
                     renderizarMaterias();
                     return;
@@ -2703,6 +2737,7 @@ function renderizarMaterias() {
                     return;
                 }
                 operacaoMateriaEmAndamento = true;
+                atualizarControlesOrganizacaoMaterias(atuais.length);
                 try {
                     await exigirNuvemMaterias().reordenar(ids);
                     salvarMaterias(ordenadas);
@@ -2715,6 +2750,7 @@ function renderizarMaterias() {
                     renderizarMaterias();
                 } finally {
                     operacaoMateriaEmAndamento = false;
+                    atualizarControlesOrganizacaoMaterias(ordenadas.length);
                 }
             }
         });
@@ -2740,8 +2776,13 @@ function popularSelects() {
     }
 }
 
-document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; renderizarMaterias(); });
-document.getElementById("ordemMaterias").addEventListener("change", e => { ordemMaterias = e.target.value; renderizarMaterias(); });
+document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
+document.getElementById("ordemMaterias").addEventListener("change", e => { ordemMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
+document.getElementById("btnOrganizarMaterias").addEventListener("click", () => {
+    if (operacaoMateriaEmAndamento || ordemMaterias !== "manual" || filtroMaterias.trim() || materiasNormalizadas().length < 2) return;
+    modoOrganizarMaterias = !modoOrganizarMaterias;
+    renderizarMaterias();
+});
 document.getElementById("btnNovaMateria").addEventListener("click", () => abrirFormularioMateria(null));
 
 // ---------- Criar / editar matéria ----------

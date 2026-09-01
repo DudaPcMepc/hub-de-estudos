@@ -72,10 +72,26 @@ test("as matérias usam hierarquia visual previsível e resumo em formato de pai
     assert.match(html, /class="btn btn-sm btn-primary flex-grow-1 btn-abrir-materia"/);
     assert.doesNotMatch(html, /btn-\$\{m\.cor\} flex-grow-1 btn-abrir-materia/);
     assert.match(html, /class="progress-bar materia-progress-bar"/);
-    assert.match(html, /class="badge-cor bg-\$\{m\.cor\}/);
+    assert.match(html, /class="badge-cor materia-drag-handle bg-\$\{m\.cor\}/);
     assert.match(html, /class="study-overview mb-4" id="resumoMaterias"/);
     assert.match(html, /class="btn btn-sm navbar-support-btn" id="btnPreviaMigracao"/);
     assert.match(html, /class="btn btn-sm navbar-support-btn" id="btnExportar"/);
+});
+
+test("a ordem manual das matérias só aceita arraste durante o modo de organização", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="btnOrganizarMaterias"[^>]*aria-pressed="false"/);
+    assert.match(html, /id="avisoOrganizacaoMaterias"/);
+    assert.match(html, /let modoOrganizarMaterias = false/);
+    assert.match(html, /if \(modoOrganizarMaterias && ordemMaterias === "manual" && !q\)/);
+    assert.match(html, /handle: "\.materia-drag-handle"/);
+    assert.match(html, /delayOnTouchOnly: true/);
+    assert.match(html, /touchStartThreshold: 5/);
+    assert.match(html, /modoOrganizarMaterias = false; renderizarMaterias\(\)/);
+    assert.match(html, /Concluir organização/);
+    assert.match(html, /#gridMaterias\.is-organizing \.materia-drag-handle[\s\S]*?touch-action: none/);
+    assert.doesNotMatch(html, /\.card-materia \{ cursor: grab/);
 });
 
 test("cada matéria abre em uma página ampla com caderno expansível", () => {
