@@ -766,6 +766,51 @@
     .personal-vade-article.is-reviewed { background: rgba(82, 96, 71, .09); }
     .personal-vade-article.is-reviewed .personal-vade-article-copy strong { color: #526047; }
     .personal-vade-article-review { color: #526047; }
+    .personal-vade-panel.is-workspace > .personal-vade-header { display: none; }
+    .personal-vade-list.is-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .personal-vade-overview-card { display: grid; grid-template-rows: 1fr auto; min-height: 11rem; padding: 1.1rem; background: #fff; border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .45rem 1.2rem rgba(59, 41, 35, .05); }
+    .personal-vade-overview-card h6 { color: var(--pimentel-cafe); }
+    .personal-vade-overview-meta { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .85rem; }
+    .personal-vade-overview-meta span { padding: .3rem .55rem; color: var(--pimentel-cafe-claro); background: rgba(244, 226, 212, .42); border-radius: 999px; font-size: .66rem; }
+    .personal-vade-overview-actions { display: flex; align-items: center; justify-content: space-between; gap: .55rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid rgba(59, 41, 35, .07); }
+    .legal-notebook-workspace { min-height: min(72vh, 52rem); overflow: hidden; background: #fff; border: 1px solid rgba(59, 41, 35, .09); border-radius: 1.1rem; box-shadow: 0 .8rem 2rem rgba(59, 41, 35, .07); }
+    .legal-notebook-workspace-header { position: sticky; top: 0; z-index: 8; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: 1rem 1.15rem; background: rgba(255, 253, 249, .96); border-bottom: 1px solid rgba(59, 41, 35, .08); backdrop-filter: blur(12px); }
+    .legal-notebook-workspace-title { display: flex; align-items: flex-start; gap: .75rem; min-width: 0; }
+    .legal-notebook-workspace-title h5 { margin: 0; color: var(--pimentel-cafe); font-size: 1.02rem; }
+    .legal-notebook-workspace-title p { margin: .2rem 0 0; color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    .legal-notebook-back { width: 2rem; height: 2rem; padding: 0; color: var(--pimentel-cafe); background: transparent; border: 0; border-radius: 50%; }
+    .legal-notebook-back:hover { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .07); }
+    .legal-notebook-workspace-actions { display: flex; align-items: center; gap: .45rem; }
+    .legal-notebook-progress-summary { min-width: 8.5rem; color: var(--pimentel-cafe-claro); font-size: .66rem; text-align: right; }
+    .legal-notebook-progress-summary strong { display: block; color: var(--pimentel-cafe); font-size: .75rem; }
+    .legal-notebook-workspace-toolbar { display: grid; grid-template-columns: minmax(12rem, 1fr) 11rem; gap: .6rem; padding: .8rem 1rem; background: rgba(244, 226, 212, .18); border-bottom: 1px solid rgba(59, 41, 35, .06); }
+    .legal-notebook-workspace-body { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 31rem; }
+    .legal-notebook-sidebar { padding: 1rem .8rem; background: rgba(244, 226, 212, .22); }
+    .legal-notebook-sidebar-label { display: block; margin: 0 .55rem .5rem; color: var(--pimentel-cafe-claro); font-size: .62rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .legal-notebook-section-nav { display: grid; gap: .18rem; }
+    .legal-notebook-section-button { display: flex; align-items: center; justify-content: space-between; gap: .55rem; width: 100%; padding: .55rem .65rem; color: var(--pimentel-cafe-claro); text-align: left; background: transparent; border: 0; border-radius: .65rem; font-size: .72rem; }
+    .legal-notebook-section-button:hover { color: var(--pimentel-cafe); background: rgba(255, 255, 255, .62); }
+    .legal-notebook-section-button.is-active { color: var(--pimentel-vermelho-escuro); background: #fff; box-shadow: 0 .25rem .7rem rgba(59, 41, 35, .05); font-weight: 700; }
+    .legal-notebook-section-button > span:last-child { min-width: 1.35rem; padding: .12rem .35rem; text-align: center; background: rgba(59, 41, 35, .06); border-radius: 999px; font-size: .6rem; }
+    .legal-notebook-sidebar-actions { display: grid; gap: .35rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid rgba(59, 41, 35, .08); }
+    .legal-notebook-mobile-section { display: none; }
+    .legal-notebook-content { min-width: 0; padding: 1rem 1.15rem 1.25rem; }
+    .legal-notebook-content .personal-vade-articles { padding: 0; border-top: 0; }
+    .legal-notebook-content .personal-vade-section-heading { padding: .45rem .15rem .65rem; font-size: .76rem; }
+    .legal-notebook-content .personal-vade-article { padding: .75rem .8rem; background: rgba(244, 226, 212, .16); }
+    .legal-notebook-content .personal-vade-article-copy strong { font-size: .8rem; white-space: normal; }
+    .legal-notebook-content .personal-vade-article-copy small { margin-top: .18rem; font-size: .66rem; }
+    .legal-notebook-article-primary { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
+    .legal-notebook-article-menu { position: relative; }
+    .legal-notebook-article-menu summary { display: grid; place-items: center; width: 2rem; height: 2rem; color: var(--pimentel-cafe-claro); cursor: pointer; list-style: none; border-radius: .55rem; }
+    .legal-notebook-article-menu summary::-webkit-details-marker { display: none; }
+    .legal-notebook-article-menu summary:hover, .legal-notebook-article-menu[open] summary { color: var(--pimentel-cafe); background: rgba(59, 41, 35, .06); }
+    .legal-notebook-article-menu-panel { position: absolute; top: calc(100% + .3rem); right: 0; z-index: 12; display: grid; gap: .4rem; width: 13rem; padding: .55rem; background: #fff; border: 1px solid rgba(59, 41, 35, .1); border-radius: .7rem; box-shadow: 0 .7rem 1.5rem rgba(59, 41, 35, .14); }
+    .legal-notebook-article-menu-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
+    .legal-notebook-sections-inline { margin-bottom: 1rem; border: 1px solid rgba(59, 41, 35, .08); border-radius: .8rem; }
+    .legal-notebook-documents { display: grid; gap: .35rem; margin-top: 1rem; }
+    .legal-notebook-document-link { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .45rem .55rem; color: var(--pimentel-cafe-claro); text-align: left; background: transparent; border: 0; border-radius: .55rem; font-size: .68rem; }
+    .legal-notebook-document-link:hover { color: var(--pimentel-vermelho-escuro); background: #fff; }
     .legal-notebook-popover-card { right: 0; left: auto; width: min(19rem, calc(100vw - 2rem)); }
     .legal-notebook-popover-title { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
     .legal-notebook-options { display: grid; gap: .35rem; max-height: 15rem; overflow-y: auto; }
@@ -780,7 +825,8 @@
     .legal-notebook-review-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
     .legal-notebook-review-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
     .legal-notebook-review-actions .btn { white-space: nowrap; }
-    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document, .personal-vade-article { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools, .personal-vade-section-form { grid-template-columns: 1fr; } .personal-vade-section-select { width: 100%; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } }
+    @media (max-width: 767.98px) { .personal-vade-list.is-overview { grid-template-columns: 1fr; } .legal-notebook-workspace-header { grid-template-columns: 1fr; } .legal-notebook-workspace-actions { justify-content: space-between; } .legal-notebook-progress-summary { text-align: left; } .legal-notebook-workspace-toolbar { grid-template-columns: 1fr; } .legal-notebook-workspace-body { display: block; min-height: 0; } .legal-notebook-sidebar { display: none; } .legal-notebook-mobile-section { display: block; margin-bottom: .8rem; } .legal-notebook-content { padding: .85rem; } }
+    @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document, .personal-vade-article { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools, .personal-vade-section-form { grid-template-columns: 1fr; } .personal-vade-section-select { width: 100%; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } .legal-notebook-workspace-actions { align-items: stretch; flex-direction: column; } .legal-notebook-article-primary { width: 100%; justify-content: flex-end; } .legal-notebook-article-menu-panel { right: 0; width: min(15rem, calc(100vw - 3rem)); } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
     .vade-catalog-search { position: relative; }
@@ -2788,6 +2834,8 @@ let operacaoCadernoArtigoEmAndamento = false;
 let operacaoRevisaoCadernoEmAndamento = false;
 let cadernoRevisaoAtualId = null;
 let filtrosCadernosJuridicos = new Map();
+let cadernoVadeAbertoId = null;
+let secoesAtivasCadernos = new Map();
 let geracaoUltimoArtigoCaderno = 0;
 let colecaoVadeSecoesAbertoId = null;
 let operacaoSecaoVadeEmAndamento = false;
@@ -3778,7 +3826,7 @@ function renderizarInicioBiblioteca(materia) {
     const totalArtigos = colecoesVade.reduce((total, colecao) => total + (colecao.artigos?.length || 0), 0);
     const primeiro = [...colecoesVade].sort((a, b) => Number(a.posicao || 0) - Number(b.posicao || 0))[0] || null;
     document.getElementById("wsResumoCadernos").innerHTML = `<div class="library-notebook-count"><i class="bi-journal-bookmark-fill" aria-hidden="true"></i><div><strong>${colecoesVade.length}</strong><small>${colecoesVade.length === 1 ? "caderno privado" : "cadernos privados"} · ${totalArtigos} artigo(s) · ${totalDocumentos} norma(s)</small></div></div>${primeiro ? `<div class="library-notebook-latest"><strong class="d-block mb-1">${esc(primeiro.nome)}</strong><span>${esc(primeiro.descricao || "Caderno jurídico pessoal")}</span></div>` : `<div class="library-notebook-latest">Crie um caderno para reunir artigos e normas importantes do seu edital.</div>`}<button type="button" class="btn btn-sm w-100 library-notebook-action" id="btnAcaoResumoCadernos"><i class="bi-${primeiro ? "journals" : "plus-lg"} me-1"></i>${primeiro ? "Ver cadernos jurídicos" : "Criar primeiro caderno"}</button>`;
-    document.getElementById("btnAcaoResumoCadernos").addEventListener("click", () => { abrirPainelVade(); if (!primeiro) abrirFormularioVade(); });
+    document.getElementById("btnAcaoResumoCadernos").addEventListener("click", () => { cadernoVadeAbertoId = null; abrirPainelVade(); if (!primeiro) abrirFormularioVade(); });
 }
 
 function abrirInicioBiblioteca(rolar = true) {
@@ -4076,72 +4124,58 @@ async function moverArtigoParaSecaoVade(colecao, dispositivoId, secaoId, campo =
 
 function htmlArtigoCaderno(artigo, colecao, indiceGrupo, totalGrupo) {
     const secoes = secoesOrdenadasCaderno(colecao);
-    return `<div class="personal-vade-article ${artigo.revisadoEm ? "is-reviewed" : ""}" data-search="${esc(chaveBuscaCatalogoVade(`${artigo.rotulo || ""} ${artigo.titulo || ""} ${artigo.documentoTitulo || ""}`))}" data-reviewed="${Boolean(artigo.revisadoEm)}">
+    return `<div class="personal-vade-article ${artigo.revisadoEm ? "is-reviewed" : ""}" data-search="${esc(chaveBuscaCatalogoVade(`${artigo.rotulo || ""} ${artigo.titulo || ""} ${artigo.documentoTitulo || ""}`))}" data-reviewed="${Boolean(artigo.revisadoEm)}" data-section-id="${esc(artigo.secaoId || "none")}">
         <div class="personal-vade-article-copy"><strong>${esc(artigo.rotulo || "Artigo")}${artigo.titulo ? ` — ${esc(artigo.titulo)}` : ""}</strong><small>${esc(artigo.documentoTitulo || "Norma jurídica")}</small></div>
-        <div class="personal-vade-article-actions">
-            <select class="form-select form-select-sm personal-vade-section-select mover-artigo-secao-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Seção de ${esc(artigo.rotulo || "artigo")}"><option value="" ${!artigo.secaoId ? "selected" : ""}>Sem seção</option>${secoes.map(secao => `<option value="${esc(secao.id)}" ${artigo.secaoId === secao.id ? "selected" : ""}>${esc(secao.nome)}</option>`).join("")}</select>
+        <div class="legal-notebook-article-primary">
             <button type="button" class="btn btn-sm ${artigo.revisadoEm ? "btn-success" : "btn-outline-success"} btn-revisar-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="${artigo.revisadoEm ? "Marcar como pendente" : "Marcar como revisado"}"><i class="bi-${artigo.revisadoEm ? "check-circle-fill" : "check2-circle"}"></i></button>
-            <button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="-1" ${indiceGrupo === 0 ? "disabled" : ""} aria-label="Mover artigo para cima nesta seção"><i class="bi-arrow-up"></i></button>
-            <button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="1" ${indiceGrupo === totalGrupo - 1 ? "disabled" : ""} aria-label="Mover artigo para baixo nesta seção"><i class="bi-arrow-down"></i></button>
-            <button type="button" class="btn btn-sm btn-outline-secondary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book"></i></button>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-x-lg"></i></button>
+            <button type="button" class="btn btn-sm btn-primary btn-abrir-artigo-vade" data-document-id="${esc(artigo.documentoId)}" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Abrir ${esc(artigo.rotulo || "artigo")}"><i class="bi-book me-1"></i>Abrir</button>
+            <details class="legal-notebook-article-menu"><summary aria-label="Mais opções para ${esc(artigo.rotulo || "artigo")}" title="Mais opções"><i class="bi-three-dots"></i></summary><div class="legal-notebook-article-menu-panel">
+                <label class="small text-muted">Mover para a seção<select class="form-select form-select-sm mt-1 personal-vade-section-select mover-artigo-secao-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Seção de ${esc(artigo.rotulo || "artigo")}"><option value="" ${!artigo.secaoId ? "selected" : ""}>Sem seção</option>${secoes.map(secao => `<option value="${esc(secao.id)}" ${artigo.secaoId === secao.id ? "selected" : ""}>${esc(secao.nome)}</option>`).join("")}</select></label>
+                <div class="legal-notebook-article-menu-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="-1" ${indiceGrupo === 0 ? "disabled" : ""} aria-label="Mover artigo para cima nesta seção"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" data-direcao="1" ${indiceGrupo === totalGrupo - 1 ? "disabled" : ""} aria-label="Mover artigo para baixo nesta seção"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-artigo-vade" data-provision-id="${esc(artigo.dispositivoId)}" aria-label="Remover ${esc(artigo.rotulo || "artigo")} deste caderno"><i class="bi-trash"></i></button></div>
+            </div></details>
         </div>
     </div>`;
 }
 
-function renderizarVade() {
-    const lista = document.getElementById("wsVadeLista");
-    if (!colecoesVade.length) {
-        lista.innerHTML = `<div class="personal-vade-empty"><i class="bi-journal-plus" aria-hidden="true"></i><strong class="d-block mb-1">Seus Cadernos jurídicos começam aqui</strong><small class="d-block mb-3">Crie um caderno e salve artigos diretamente durante a leitura.</small><button type="button" class="btn btn-sm btn-primary" id="btnPrimeiroVade"><i class="bi-plus-lg me-1"></i>Criar primeiro caderno</button></div>`;
-        document.getElementById("btnPrimeiroVade").addEventListener("click", () => abrirFormularioVade());
-        return;
-    }
-    lista.className = "personal-vade-list";
-    lista.innerHTML = colecoesVade.map(colecao => {
-        const organizando = colecao.id === colecaoVadeOrganizandoId;
-        const idsDocumentos = organizando
-            ? rascunhoDocumentosVade
-            : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
-        const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
-        const artigos = artigosOrdenadosCaderno(colecao);
-        const secoes = secoesOrdenadasCaderno(colecao);
-        const gerenciandoSecoes = colecao.id === colecaoVadeSecoesAbertoId;
-        const revisados = artigos.filter(artigo => artigo.revisadoEm).length;
-        const progresso = artigos.length ? Math.round((revisados / artigos.length) * 100) : 0;
-        const filtro = filtrosCadernosJuridicos.get(colecao.id) || { busca: "", estado: "todos" };
-        const disponiveis = documentosJuridicos.filter(documento => !idsDocumentos.includes(documento.id));
-        return `<article class="personal-vade-card" data-vade-id="${esc(colecao.id)}">
-            <div class="personal-vade-card-head">
-                <div class="min-w-0"><h6 class="fw-bold mb-1"><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h6><p class="personal-vade-description mb-0">${esc(colecao.descricao || "Caderno jurídico pessoal")}</p></div>
-                <div class="d-flex flex-wrap gap-1">
-                    ${artigos.length ? `<button type="button" class="btn btn-sm btn-primary btn-estudar-vade"><i class="bi-play-fill me-1"></i>${colecao.ultimoDispositivoId ? "Retomar" : "Estudar caderno"}</button>` : ""}
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-secoes-vade"><i class="bi-folder2-open me-1"></i>${gerenciandoSecoes ? "Fechar seções" : "Seções"}</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-organizar-vade"><i class="bi-list-check me-1"></i>${organizando ? "Fechar organização" : "Organizar"}</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-vade" aria-label="Renomear ${esc(colecao.nome)}"><i class="bi-pencil"></i></button>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-excluir-vade" aria-label="Excluir ${esc(colecao.nome)}"><i class="bi-trash"></i></button>
-                </div>
-            </div>
-            <div class="personal-vade-documents">
-                ${documentos.length ? documentos.map((documento, indice) => `<div class="personal-vade-document">
-                    <div class="personal-vade-document-copy"><strong><i class="${iconeDocumentoVade(documento)} me-1"></i>${esc(documento.tituloCurto)}</strong><small>${esc(documento.versao.fonteNome)}</small></div>
-                    <div class="d-flex gap-1 flex-shrink-0">
-                        ${organizando ? `<button type="button" class="btn btn-sm btn-outline-secondary btn-mover-documento-vade" data-index="${indice}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-documento-vade" data-index="${indice}" data-direcao="1" ${indice === documentos.length - 1 ? "disabled" : ""} aria-label="Mover para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-remover-documento-vade" data-document-id="${esc(documento.id)}" aria-label="Remover ${esc(documento.tituloCurto)}"><i class="bi-x-lg"></i></button>` : ""}
-                        <button type="button" class="btn btn-sm btn-primary btn-abrir-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-book me-1"></i>Abrir</button>
-                    </div>
-                </div>`).join("") : `<div class="text-center text-muted small py-2"><i class="bi-journal-x me-1"></i>Nenhuma norma adicionada.</div>`}
-            </div>
-            ${gerenciandoSecoes ? `<div class="personal-vade-sections-manager"><div><strong class="d-block small"><i class="bi-folder2-open me-1"></i>Organizar seções</strong><small class="text-muted">Crie áreas temáticas e mova os artigos pelo seletor de cada item.</small></div><div class="personal-vade-section-form"><input type="text" class="form-control form-control-sm nova-secao-vade" maxlength="120" placeholder="Ex.: Direitos fundamentais"><button type="button" class="btn btn-sm btn-primary btn-criar-secao-vade"><i class="bi-plus-lg me-1"></i>Criar seção</button></div><div class="personal-vade-section-list">${secoes.length ? secoes.map((secao, indice) => `<div class="personal-vade-section-row"><strong class="small">${esc(secao.nome)}</strong><div class="d-flex gap-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="1" ${indice === secoes.length - 1 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Renomear ${esc(secao.nome)}"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Excluir ${esc(secao.nome)}"><i class="bi-trash"></i></button></div></div>`).join("") : `<small class="text-muted">Nenhuma seção criada ainda.</small>`}</div></div>` : ""}
-            ${artigos.length ? `<div class="personal-vade-review-summary"><div class="d-flex justify-content-between gap-2"><strong>${revisados} de ${artigos.length} revisado(s)</strong><span>${progresso}%</span></div><div class="personal-vade-progress" role="progressbar" aria-label="Progresso de revisão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progresso}"><span style="width:${progresso}%"></span></div></div><div class="personal-vade-review-tools"><div><label class="visually-hidden" for="busca-caderno-${esc(colecao.id)}">Buscar artigo no caderno</label><input type="search" class="form-control form-control-sm filtro-busca-caderno" id="busca-caderno-${esc(colecao.id)}" value="${esc(filtro.busca)}" placeholder="Buscar artigo ou norma..."></div><div><label class="visually-hidden" for="estado-caderno-${esc(colecao.id)}">Filtrar revisão</label><select class="form-select form-select-sm filtro-status-caderno" id="estado-caderno-${esc(colecao.id)}"><option value="todos" ${filtro.estado === "todos" ? "selected" : ""}>Todos</option><option value="pendentes" ${filtro.estado === "pendentes" ? "selected" : ""}>Pendentes</option><option value="revisados" ${filtro.estado === "revisados" ? "selected" : ""}>Revisados</option></select></div></div>` : ""}
-            <div class="personal-vade-articles">
-                <div class="personal-vade-articles-title"><strong><i class="bi-bookmark-check me-1"></i>Artigos salvos</strong><span>${artigos.length}</span></div>
-                ${artigos.length ? [...secoes.map(secao => ({ id: secao.id, nome: secao.nome })), { id: null, nome: "Sem seção" }].map(grupo => { const itens = artigos.filter(artigo => (artigo.secaoId || null) === grupo.id); return `<section class="personal-vade-section-group"><div class="personal-vade-section-heading"><strong><i class="bi-${grupo.id ? "folder2" : "tray"} me-1"></i>${esc(grupo.nome)}</strong><span>${itens.length}</span></div>${itens.length ? itens.map((artigo, indice) => htmlArtigoCaderno(artigo, colecao, indice, itens.length)).join("") : `<small class="text-muted py-1">Nenhum artigo nesta seção.</small>`}</section>`; }).join("") + `<div class="personal-vade-no-results d-none"><i class="bi-search me-1"></i>Nenhum artigo corresponde aos filtros.</div>` : `<div class="text-center text-muted small py-2"><i class="bi-bookmark me-1"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`}
-            </div>
-            ${organizando ? `<div class="personal-vade-organizer"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}
-        </article>`;
-    }).join("");
+function secaoAtivaDoCaderno(colecao) {
+    const ativa = secoesAtivasCadernos.get(colecao.id) || "all";
+    return ativa === "all" || ativa === "none" || (colecao.secoes || []).some(secao => secao.id === ativa) ? ativa : "all";
+}
 
-    lista.querySelectorAll("[data-vade-id]").forEach(card => {
-        const colecao = colecoesVade.find(item => item.id === card.dataset.vadeId);
+function htmlGerenciadorSecoesCaderno(colecao, secoes) {
+    return `<div class="personal-vade-sections-manager legal-notebook-sections-inline"><div><strong class="d-block small"><i class="bi-folder2-open me-1"></i>Organizar seções</strong><small class="text-muted">Crie áreas temáticas e mova os artigos pelo menu de cada item.</small></div><div class="personal-vade-section-form"><input type="text" class="form-control form-control-sm nova-secao-vade" maxlength="120" placeholder="Ex.: Direitos fundamentais"><button type="button" class="btn btn-sm btn-primary btn-criar-secao-vade"><i class="bi-plus-lg me-1"></i>Criar seção</button></div><div class="personal-vade-section-list">${secoes.length ? secoes.map((secao, indice) => `<div class="personal-vade-section-row"><strong class="small">${esc(secao.nome)}</strong><div class="d-flex gap-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="-1" ${indice === 0 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para cima"><i class="bi-arrow-up"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-mover-secao-vade" data-section-id="${esc(secao.id)}" data-direcao="1" ${indice === secoes.length - 1 ? "disabled" : ""} aria-label="Mover ${esc(secao.nome)} para baixo"><i class="bi-arrow-down"></i></button><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Renomear ${esc(secao.nome)}"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-secao-vade" data-section-id="${esc(secao.id)}" aria-label="Excluir ${esc(secao.nome)}"><i class="bi-trash"></i></button></div></div>`).join("") : `<small class="text-muted">Nenhuma seção criada ainda.</small>`}</div></div>`;
+}
+
+function htmlResumoCaderno(colecao) {
+    const artigos = artigosOrdenadosCaderno(colecao);
+    const revisados = artigos.filter(artigo => artigo.revisadoEm).length;
+    const progresso = artigos.length ? Math.round((revisados / artigos.length) * 100) : 0;
+    return `<article class="personal-vade-overview-card" data-vade-id="${esc(colecao.id)}"><div><h6 class="fw-bold mb-1"><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h6><p class="personal-vade-description mb-0">${esc(colecao.descricao || "Caderno jurídico pessoal")}</p><div class="personal-vade-overview-meta"><span><i class="bi-bookmark me-1"></i>${artigos.length} artigo(s)</span><span><i class="bi-folder2 me-1"></i>${(colecao.secoes || []).length} seção(ões)</span><span><i class="bi-check2-circle me-1"></i>${progresso}% revisado</span></div></div><div class="personal-vade-overview-actions"><small class="text-muted">${revisados} de ${artigos.length} concluído(s)</small><button type="button" class="btn btn-sm btn-primary btn-abrir-caderno-vade"><i class="bi-box-arrow-in-right me-1"></i>Abrir caderno</button></div></article>`;
+}
+
+function htmlWorkspaceCaderno(colecao) {
+    const organizando = colecao.id === colecaoVadeOrganizandoId;
+    const idsDocumentos = organizando ? rascunhoDocumentosVade : [...colecao.documentos].sort((a, b) => a.posicao - b.posicao).map(item => item.documentoId);
+    const documentos = idsDocumentos.map(documentoVadePorId).filter(Boolean);
+    const artigos = artigosOrdenadosCaderno(colecao);
+    const secoes = secoesOrdenadasCaderno(colecao);
+    const gerenciandoSecoes = colecao.id === colecaoVadeSecoesAbertoId;
+    const revisados = artigos.filter(artigo => artigo.revisadoEm).length;
+    const progresso = artigos.length ? Math.round((revisados / artigos.length) * 100) : 0;
+    const filtro = filtrosCadernosJuridicos.get(colecao.id) || { busca: "", estado: "todos" };
+    const disponiveis = documentosJuridicos.filter(documento => !idsDocumentos.includes(documento.id));
+    const secaoAtiva = secaoAtivaDoCaderno(colecao);
+    const grupos = [...secoes.map(secao => ({ id: secao.id, nome: secao.nome })), { id: "none", nome: "Sem seção" }];
+    const gruposVisiveis = secaoAtiva === "all" ? grupos : grupos.filter(grupo => grupo.id === secaoAtiva);
+    const opcoesSecao = `<option value="all" ${secaoAtiva === "all" ? "selected" : ""}>Todos os artigos (${artigos.length})</option>${grupos.map(grupo => `<option value="${esc(grupo.id)}" ${secaoAtiva === grupo.id ? "selected" : ""}>${esc(grupo.nome)} (${artigos.filter(artigo => (artigo.secaoId || "none") === grupo.id).length})</option>`).join("")}`;
+    const htmlArtigos = artigos.length ? gruposVisiveis.map(grupo => { const itens = artigos.filter(artigo => (artigo.secaoId || "none") === grupo.id); return `<section class="personal-vade-section-group"><div class="personal-vade-section-heading"><strong><i class="bi-${grupo.id !== "none" ? "folder2" : "tray"} me-1"></i>${esc(grupo.nome)}</strong><span>${itens.length}</span></div>${itens.length ? itens.map((artigo, indice) => htmlArtigoCaderno(artigo, colecao, indice, itens.length)).join("") : `<div class="text-center text-muted small py-4"><i class="bi-folder2-open d-block mb-2 fs-4"></i>Nenhum artigo nesta seção.</div>`}</section>`; }).join("") + `<div class="personal-vade-no-results d-none"><i class="bi-search me-1"></i>Nenhum artigo corresponde aos filtros.</div>` : `<div class="text-center text-muted small py-5"><i class="bi-bookmark d-block mb-2 fs-3"></i>Abra uma lei e use o ícone de caderno para salvar artigos.</div>`;
+    return `<article class="legal-notebook-workspace" data-vade-id="${esc(colecao.id)}"><header class="legal-notebook-workspace-header"><div class="legal-notebook-workspace-title"><button type="button" class="legal-notebook-back btn-voltar-lista-vade" aria-label="Voltar para meus cadernos" title="Voltar"><i class="bi-arrow-left"></i></button><div class="min-w-0"><h5><i class="bi-journal-bookmark-fill me-1"></i>${esc(colecao.nome)}</h5><p>${esc(colecao.descricao || "Caderno jurídico pessoal")}</p></div></div><div class="legal-notebook-workspace-actions"><div class="legal-notebook-progress-summary"><strong>${revisados} de ${artigos.length} revisado(s)</strong><span>${progresso}% concluído</span><div class="personal-vade-progress"><span style="width:${progresso}%"></span></div></div>${artigos.length ? `<button type="button" class="btn btn-sm btn-primary btn-estudar-vade"><i class="bi-play-fill me-1"></i>${colecao.ultimoDispositivoId ? "Retomar" : "Estudar"}</button>` : ""}<details class="legal-notebook-article-menu"><summary aria-label="Mais opções do caderno" title="Mais opções"><i class="bi-three-dots-vertical"></i></summary><div class="legal-notebook-article-menu-panel"><button type="button" class="btn btn-sm btn-outline-secondary btn-renomear-vade"><i class="bi-pencil me-1"></i>Renomear</button><button type="button" class="btn btn-sm btn-outline-secondary btn-organizar-vade"><i class="bi-list-check me-1"></i>${organizando ? "Fechar normas" : "Organizar normas"}</button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-vade"><i class="bi-trash me-1"></i>Excluir caderno</button></div></details></div></header><div class="legal-notebook-workspace-toolbar"><label><span class="visually-hidden">Buscar artigo no caderno</span><input type="search" class="form-control form-control-sm filtro-busca-caderno" value="${esc(filtro.busca)}" placeholder="Buscar artigo ou norma..."></label><label><span class="visually-hidden">Filtrar revisão</span><select class="form-select form-select-sm filtro-status-caderno"><option value="todos" ${filtro.estado === "todos" ? "selected" : ""}>Todos</option><option value="pendentes" ${filtro.estado === "pendentes" ? "selected" : ""}>Pendentes</option><option value="revisados" ${filtro.estado === "revisados" ? "selected" : ""}>Revisados</option></select></label></div><div class="legal-notebook-workspace-body"><aside class="legal-notebook-sidebar"><span class="legal-notebook-sidebar-label">Seções</span><nav class="legal-notebook-section-nav" aria-label="Seções do caderno"><button type="button" class="legal-notebook-section-button btn-secao-filtro-vade ${secaoAtiva === "all" ? "is-active" : ""}" data-section-id="all"><span class="flex-grow-1 text-start">Todos os artigos</span><span>${artigos.length}</span></button>${grupos.map(grupo => `<button type="button" class="legal-notebook-section-button btn-secao-filtro-vade ${secaoAtiva === grupo.id ? "is-active" : ""}" data-section-id="${esc(grupo.id)}"><span class="flex-grow-1 text-start"><i class="bi-${grupo.id !== "none" ? "folder2" : "tray"} me-1"></i>${esc(grupo.nome)}</span><span>${artigos.filter(artigo => (artigo.secaoId || "none") === grupo.id).length}</span></button>`).join("")}</nav><div class="legal-notebook-sidebar-actions"><button type="button" class="btn btn-sm btn-link text-start btn-secoes-vade"><i class="bi-folder-plus me-1"></i>${gerenciandoSecoes ? "Fechar organização" : "Gerenciar seções"}</button><button type="button" class="btn btn-sm btn-link text-start btn-organizar-vade"><i class="bi-journals me-1"></i>${organizando ? "Fechar normas" : "Organizar normas"}</button></div>${documentos.length ? `<div class="legal-notebook-documents"><span class="legal-notebook-sidebar-label mt-2">Normas</span>${documentos.map(documento => `<button type="button" class="legal-notebook-document-link btn-abrir-documento-vade" data-document-id="${esc(documento.id)}"><i class="${iconeDocumentoVade(documento)}"></i><span>${esc(documento.tituloCurto)}</span></button>`).join("")}</div>` : ""}</aside><main class="legal-notebook-content"><label class="legal-notebook-mobile-section"><span class="form-label small">Seção</span><select class="form-select form-select-sm seletor-secao-caderno">${opcoesSecao}</select></label>${gerenciandoSecoes ? htmlGerenciadorSecoesCaderno(colecao, secoes) : ""}<div class="personal-vade-articles"><div class="personal-vade-articles-title"><strong><i class="bi-bookmark-check me-1"></i>${secaoAtiva === "all" ? "Todos os artigos" : esc(grupos.find(grupo => grupo.id === secaoAtiva)?.nome || "Artigos")}</strong><span>${secaoAtiva === "all" ? artigos.length : artigos.filter(artigo => (artigo.secaoId || "none") === secaoAtiva).length}</span></div>${htmlArtigos}</div>${organizando ? `<div class="personal-vade-organizer mt-3"><strong class="d-block small">Adicionar normas disponíveis</strong><div class="personal-vade-available">${disponiveis.length ? disponiveis.map(documento => `<button type="button" class="btn btn-sm btn-outline-secondary btn-adicionar-documento-vade" data-document-id="${esc(documento.id)}"><i class="bi-plus-lg me-1"></i>${esc(documento.tituloCurto)}</button>`).join("") : `<small class="text-muted">Todas as normas disponíveis já estão neste caderno.</small>`}</div><div class="d-flex justify-content-end mt-3"><button type="button" class="btn btn-sm btn-primary btn-salvar-documentos-vade"><i class="bi-cloud-check me-1"></i>Salvar organização</button></div></div>` : ""}</main></div></article>`;
+}
+
+function conectarEventosWorkspaceCaderno(card, colecao) {
+        card.querySelector(".btn-voltar-lista-vade")?.addEventListener("click", () => { cadernoVadeAbertoId = null; colecaoVadeOrganizandoId = null; colecaoVadeSecoesAbertoId = null; rascunhoDocumentosVade = []; renderizarVade(); });
+        card.querySelectorAll(".btn-secao-filtro-vade").forEach(botao => botao.addEventListener("click", () => { secoesAtivasCadernos.set(colecao.id, botao.dataset.sectionId); renderizarVade(); }));
+        card.querySelector(".seletor-secao-caderno")?.addEventListener("change", evento => { secoesAtivasCadernos.set(colecao.id, evento.currentTarget.value); renderizarVade(); });
         card.querySelector(".btn-renomear-vade").addEventListener("click", () => abrirFormularioVade(colecao));
         card.querySelector(".btn-excluir-vade").addEventListener("click", () => excluirVade(colecao));
         card.querySelector(".btn-estudar-vade")?.addEventListener("click", () => abrirModoRevisaoCaderno(colecao));
@@ -4208,7 +4242,32 @@ function renderizarVade() {
             renderizarVade();
         }));
         card.querySelector(".btn-salvar-documentos-vade")?.addEventListener("click", () => salvarDocumentosVade(colecao));
-    });
+}
+
+function renderizarVade() {
+    const painel = document.getElementById("wsVadePanel");
+    const lista = document.getElementById("wsVadeLista");
+    const colecaoAberta = colecoesVade.find(item => item.id === cadernoVadeAbertoId) || null;
+    if (cadernoVadeAbertoId && !colecaoAberta) cadernoVadeAbertoId = null;
+    painel.classList.toggle("is-workspace", Boolean(colecaoAberta));
+    if (!colecoesVade.length) {
+        lista.className = "";
+        lista.innerHTML = `<div class="personal-vade-empty"><i class="bi-journal-plus" aria-hidden="true"></i><strong class="d-block mb-1">Seus Cadernos jurídicos começam aqui</strong><small class="d-block mb-3">Crie um caderno e salve artigos diretamente durante a leitura.</small><button type="button" class="btn btn-sm btn-primary" id="btnPrimeiroVade"><i class="bi-plus-lg me-1"></i>Criar primeiro caderno</button></div>`;
+        document.getElementById("btnPrimeiroVade").addEventListener("click", () => abrirFormularioVade());
+        return;
+    }
+    if (!colecaoAberta) {
+        lista.className = "personal-vade-list is-overview";
+        lista.innerHTML = colecoesVade.map(htmlResumoCaderno).join("");
+        lista.querySelectorAll("[data-vade-id]").forEach(card => {
+            const colecao = colecoesVade.find(item => item.id === card.dataset.vadeId);
+            card.querySelector(".btn-abrir-caderno-vade").addEventListener("click", () => { cadernoVadeAbertoId = colecao.id; renderizarVade(); document.getElementById("wsVadePanel").scrollIntoView({ behavior: "smooth", block: "start" }); });
+        });
+        return;
+    }
+    lista.className = "";
+    lista.innerHTML = htmlWorkspaceCaderno(colecaoAberta);
+    conectarEventosWorkspaceCaderno(lista.querySelector("[data-vade-id]"), colecaoAberta);
 }
 
 function abrirPainelVade() {
@@ -4283,8 +4342,10 @@ async function excluirVade(colecao) {
         if (colecaoVadeEmEdicaoId === colecao.id) fecharFormularioVade();
         if (colecaoVadeOrganizandoId === colecao.id) colecaoVadeOrganizandoId = null;
         if (colecaoVadeSecoesAbertoId === colecao.id) colecaoVadeSecoesAbertoId = null;
+        if (cadernoVadeAbertoId === colecao.id) cadernoVadeAbertoId = null;
         if (cadernoRevisaoAtualId === colecao.id) encerrarModoRevisaoCaderno();
         filtrosCadernosJuridicos.delete(colecao.id);
+        secoesAtivasCadernos.delete(colecao.id);
         renderizarVade();
         mostrarStatusVade("success", "Caderno excluído. Seus estudos nos artigos foram preservados.");
     } catch (erro) {
@@ -4360,6 +4421,7 @@ function renderizarBibliotecaMateria(materia) {
         const recurso = recursos.find(item => item.chaveVisual === botao.dataset.resourceKey);
         if (!recurso) return;
         if (recurso.tipo === "personal_vade") {
+            cadernoVadeAbertoId = null;
             abrirPainelVade();
             return;
         }
@@ -4394,19 +4456,22 @@ document.getElementById("btnOrganizarWidgets").addEventListener("click", () => {
 
 document.getElementById("btnMostrarRecursosBiblioteca").addEventListener("click", abrirRecursosBiblioteca);
 document.getElementById("btnVerTodoCatalogo").addEventListener("click", abrirCatalogoVade);
-document.getElementById("btnVerCadernosBiblioteca").addEventListener("click", abrirPainelVade);
+document.getElementById("btnVerCadernosBiblioteca").addEventListener("click", () => { cadernoVadeAbertoId = null; abrirPainelVade(); });
 document.getElementById("btnVoltarCatalogoBiblioteca").addEventListener("click", abrirInicioBiblioteca);
 document.getElementById("btnVoltarRecursosBiblioteca").addEventListener("click", abrirInicioBiblioteca);
 document.getElementById("buscaCatalogoVade").addEventListener("input", renderizarCatalogoVade);
 document.getElementById("btnNovoVade").addEventListener("click", () => abrirFormularioVade());
 document.getElementById("btnCriarCadernoDoLeitor").addEventListener("click", () => {
     document.getElementById("wsCadernoArtigoPopover").open = false;
+    cadernoVadeAbertoId = null;
     abrirPainelVade();
     abrirFormularioVade();
 });
 document.getElementById("btnFecharVade").addEventListener("click", () => {
     fecharFormularioVade();
+    cadernoVadeAbertoId = null;
     colecaoVadeOrganizandoId = null;
+    colecaoVadeSecoesAbertoId = null;
     rascunhoDocumentosVade = [];
     abrirInicioBiblioteca(false);
 });
@@ -4436,6 +4501,7 @@ document.getElementById("formVade").addEventListener("submit", async evento => {
             if (!sessaoHubPermaneceAtual(sessao)) return;
             colecoesVade.push(salvo);
             fecharFormularioVade();
+            cadernoVadeAbertoId = salvo.id;
             colecaoVadeOrganizandoId = salvo.id;
             rascunhoDocumentosVade = [];
             renderizarVade();
@@ -6910,6 +6976,8 @@ window.encerrarHub = () => {
     operacaoRevisaoCadernoEmAndamento = false;
     cadernoRevisaoAtualId = null;
     filtrosCadernosJuridicos = new Map();
+    cadernoVadeAbertoId = null;
+    secoesAtivasCadernos = new Map();
     geracaoUltimoArtigoCaderno += 1;
     colecaoVadeSecoesAbertoId = null;
     operacaoSecaoVadeEmAndamento = false;
