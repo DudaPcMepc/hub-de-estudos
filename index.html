@@ -3336,7 +3336,7 @@ function renderizarIndiceLeitor(filtro = "") {
         subgrupos.get(subtitulo).push(item);
     });
     indice.innerHTML = dispositivos.length ? `
-        <span class="legal-index-count">${dispositivos.length} artigo(s) ${termo ? "encontrado(s)" : "nesta versão"}</span>
+        <span class="legal-index-count">${dispositivos.length} item(ns) ${termo ? "encontrado(s)" : "nesta versão"}</span>
         ${[...grupos].map(([titulo, subgrupos]) => `<section class="legal-index-group">
             <div class="legal-index-group-title">${esc(titulo)}</div>
             ${[...subgrupos].map(([subtitulo, itens]) => `${subtitulo ? `<div class="legal-index-subtitle">${esc(subtitulo)}</div>` : ""}${itens.map(item => `
