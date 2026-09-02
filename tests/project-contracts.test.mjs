@@ -12,6 +12,7 @@ import {
 } from "../scripts/import-disarmament-statute.mjs";
 import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-guards-statute.mjs";
 import { normalizarDispositivosMariaDaPenha } from "../scripts/import-maria-da-penha.mjs";
+import { normalizarDispositivosCrimesHediondos } from "../scripts/import-heinous-crimes-law.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -910,6 +911,55 @@ test("o importador da Lei Maria da Penha corrige os rótulos dos artigos acresci
 
     assert.equal(normalizado.rotulo, "Art. 12-D");
     assert.equal(normalizado.conteudo, "Conteúdo");
+});
+
+test("a Lei dos Crimes Hediondos usa a versão oficial atualizada sem confundir artigos citados", () => {
+    const migration = readProjectFile("supabase/migrations/202609020006_complete_heinous_crimes_law.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 13);
+    assert.match(migration, /www2\.camara\.leg\.br\/legin\/fed\/lei\/1990\/lei-8072-25-julho-1990-372192-normaatualizada-pl\.html/);
+    assert.match(migration, /Texto atualizado consultado em 01\/09\/2026/);
+    assert.match(migration, /"chave":"art-1"/);
+    assert.match(migration, /"chave":"art-13"/);
+    assert.doesNotMatch(migration, /"chave":"art-(?:159|213|214|223|267|270)"/);
+    assert.match(migration, /Art\. 159\.[\s\S]*?Art\. 270\./);
+    assert.match(migration, /vicaricídio/);
+    assert.match(migration, /Lei nº 15\.384, de 9\/4\/2026/);
+    assert.match(migration, /Lei nº 15\.487, de 6\/8\/2026/);
+    assert.match(migration, /Lei nº 15\.358, de 24\/3\/2026/);
+    for (const catalogoId of ["000000000002", "000000000003", "000000000005"]) {
+        assert.match(migration, new RegExp(`10000000-0000-4000-8000-${catalogoId}`));
+    }
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "hediondos"[\s\S]*?slugs: \["crimes-hediondos-lei-8072-1990"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"crimes-hediondos-lei-8072-1990"/);
+    assert.match(html, /chave\.includes\("crimes-hediondos"\)[\s\S]*?documento\.slug === "crimes-hediondos-lei-8072-1990"/);
+});
+
+test("o importador mantém no art. 6º as alterações citadas do Código Penal", () => {
+    const base = Array.from({ length: 13 }, (_, indice) => ({
+        chave: `art-${indice + 1}`,
+        sequencia: indice + 1,
+        caminho: ["LEI DOS CRIMES HEDIONDOS"],
+        titulo: "LEI DOS CRIMES HEDIONDOS",
+        rotulo: `Art. ${indice + 1}.`,
+        conteudo: indice === 5 ? "O Código Penal passa a vigorar:" : "Conteúdo"
+    }));
+    const citados = [159, 213, 214, 223, 267, 270].map((numero, indice) => ({
+        chave: `art-${numero}`,
+        sequencia: 7 + indice,
+        caminho: ["LEI DOS CRIMES HEDIONDOS"],
+        titulo: "Citação",
+        rotulo: `Art. ${numero}.`,
+        conteudo: `Redação citada ${numero}`
+    }));
+    const normalizados = normalizarDispositivosCrimesHediondos([...base.slice(0, 6), ...citados, ...base.slice(6)]);
+
+    assert.equal(normalizados.length, 13);
+    assert.equal(normalizados.at(-1).sequencia, 13);
+    assert.match(normalizados.find(item => item.chave === "art-6").conteudo, /Art\. 159\.[\s\S]*?Art\. 270\./);
+    assert.equal(normalizados.find(item => item.chave === "art-7").titulo, "LEI DOS CRIMES HEDIONDOS");
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
