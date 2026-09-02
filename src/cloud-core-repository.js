@@ -1350,7 +1350,7 @@ export async function carregarFlashcardsRemotos() {
             .order("subject_id", { ascending: true })
             .order("created_at", { ascending: true }),
         supabase.from("flashcard_progress")
-            .select("flashcard_id, box, next_review, correct_count, error_count")
+            .select("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
     ]);
@@ -1380,6 +1380,7 @@ export async function carregarFlashcardsRemotos() {
     }
     const materiasLegadas = idsLocaisPorRemotos.get("subject");
     const cardsLegados = idsLocaisPorRemotos.get("flashcard");
+    const topicosEditalLegados = idsLocaisPorRemotos.get("exam_topic");
     return cards.map(card => {
         const progresso = progressoPorCard.get(card.id) || {};
         return {
@@ -1390,7 +1391,10 @@ export async function carregarFlashcardsRemotos() {
             caixa: Math.min(5, Math.max(1, Number(progresso.box) || 1)),
             proxima: progresso.next_review || new Date().toISOString().slice(0, 10),
             acertos: Math.max(0, Number(progresso.correct_count) || 0),
-            erros: Math.max(0, Number(progresso.error_count) || 0)
+            erros: Math.max(0, Number(progresso.error_count) || 0),
+            topicoEditalId: progresso.exam_topic_id
+                ? (topicosEditalLegados?.get(progresso.exam_topic_id) || progresso.exam_topic_id)
+                : null
         };
     });
 }
@@ -1823,7 +1827,8 @@ export async function criarFlashcard(materiaIdLocal, card) {
         box: Math.min(5, Math.max(1, Number(card.caixa) || 1)),
         next_review: card.proxima,
         correct_count: Math.max(0, Number(card.acertos) || 0),
-        error_count: Math.max(0, Number(card.erros) || 0)
+        error_count: Math.max(0, Number(card.erros) || 0),
+        exam_topic_id: card.topicoEditalId ? resolverId("exam_topic", card.topicoEditalId) : null
     });
     if (progressoResposta.error) {
         const compensacao = await supabase.from("flashcards").delete()
@@ -1862,6 +1867,17 @@ export async function atualizarProgressoFlashcard(idLocal, progresso) {
         .eq("user_id", contexto.userId)
         .select("id")
         .maybeSingle(), "Não foi possível atualizar o progresso do flashcard.");
+}
+
+export async function atualizarTopicoFlashcard(idLocal, topicoEditalId) {
+    const contexto = exigirContexto();
+    const examTopicId = topicoEditalId ? resolverId("exam_topic", topicoEditalId) : null;
+    verificarRegistro(await supabase.from("flashcard_progress").update({ exam_topic_id: examTopicId })
+        .eq("flashcard_id", resolverId("flashcard", idLocal))
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível vincular o flashcard ao tópico do Edital.");
 }
 
 export async function excluirFlashcard(idLocal) {

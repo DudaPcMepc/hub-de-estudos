@@ -8,6 +8,7 @@ import {
     atualizarNota,
     atualizarFlashcard,
     atualizarProgressoFlashcard,
+    atualizarTopicoFlashcard,
     atualizarLink,
     atualizarTarefa,
     atualizarRegistroEstudo,
@@ -188,6 +189,7 @@ window.HUB_CLOUD_NOTES = Object.freeze({
 window.HUB_CLOUD_FLASHCARDS = Object.freeze({
     atualizar: atualizarFlashcard,
     atualizarProgresso: atualizarProgressoFlashcard,
+    atualizarTopico: atualizarTopicoFlashcard,
     criar: criarFlashcard,
     excluir: excluirFlashcard,
     listar: carregarFlashcardsRemotos
