@@ -257,7 +257,11 @@
     .calendar-period:first-child { padding-top: 0; border-top: 0; }
     .calendar-period-header { display: flex; align-items: center; justify-content: space-between; gap: .35rem; margin-bottom: .35rem; color: #765f55; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .035em; }
     .calendar-period-header i { color: var(--pimentel-vermelho); }
+    .calendar-period-heading { display: flex; align-items: center; gap: .28rem; }
+    .calendar-period-actions { display: flex; align-items: center; gap: .28rem; }
     .calendar-period-count { min-width: 1.15rem; padding: .08rem .28rem; color: #70584e; background: rgba(91, 67, 58, .07); border-radius: 999px; text-align: center; }
+    .calendar-period-add { width: 1.45rem; height: 1.45rem; display: inline-grid; place-items: center; padding: 0; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); border: 0; border-radius: 50%; font-size: .72rem; line-height: 1; }
+    .calendar-period-add:hover, .calendar-period-add:focus-visible { color: #fff; background: var(--pimentel-vermelho); }
     .calendar-period-empty { padding: .35rem .25rem; color: rgba(91, 67, 58, .48); font-size: .65rem; text-align: center; }
     .calendar-period.is-unspecified { opacity: .82; }
     .calendar-empty { min-height: 310px; display: grid; place-items: center; align-content: center; gap: .3rem; color: rgba(91, 67, 58, .58); font-size: .7rem; text-align: center; }
@@ -283,6 +287,8 @@
     .calendar-task-note { display: -webkit-box; overflow: hidden; margin-top: .35rem; padding-top: .32rem; border-top: 1px dashed currentColor; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #68564f; font-size: .62rem; font-style: italic; line-height: 1.3; }
     .calendar-task.is-complete .calendar-task-meta, .calendar-task.is-complete .calendar-task-note { color: #3f674c; }
     .calendar-day-total { display: block; margin-top: .25rem; color: #27623d; font-size: .66rem; font-weight: 700; }
+    .calendar-mobile-nav { width: 100%; align-items: center; justify-content: space-between; gap: .5rem; }
+    .calendar-mobile-date { min-width: 0; flex: 1; color: var(--pimentel-cafe); font-size: .78rem; font-weight: 700; text-align: center; text-transform: capitalize; }
     .study-diary-panel { padding: 1rem; background: rgba(255, 253, 249, .88); border: 1px solid rgba(59, 41, 35, .11); border-radius: 1rem; }
     .study-diary-summary { display: flex; flex-wrap: wrap; gap: .45rem; }
     .study-diary-stat { padding: .45rem .65rem; color: #5b433a; background: rgba(91, 67, 58, .07); border-radius: .7rem; font-size: .75rem; }
@@ -1342,6 +1348,22 @@
         .simulation-generator-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .simulation-actions { grid-column: 1 / -1; }
     }
+    @media (max-width: 767.98px) {
+        .weekly-calendar-scroll { overflow: visible; padding-inline: 0; }
+        .weekly-calendar-grid { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+        .calendar-day { min-height: 440px; }
+        .calendar-day-header { padding-block: .9rem .72rem; }
+        .calendar-weekday { font-size: .88rem; }
+        .calendar-date { font-size: .76rem; }
+        .calendar-day-body { min-height: 355px; padding: .7rem; }
+        .calendar-period { padding-block: .65rem; }
+        .calendar-period-header { font-size: .72rem; }
+        .calendar-period-add { width: 1.8rem; height: 1.8rem; font-size: .85rem; }
+        .calendar-task { padding: .7rem; }
+        .calendar-task-subject { font-size: .8rem; }
+        .calendar-task-content { font-size: .74rem; -webkit-line-clamp: 4; }
+        .calendar-task-meta, .calendar-task-note { font-size: .68rem; }
+    }
     @media (max-width: 575.98px) {
         .study-session-form { grid-template-columns: 1fr; }
         .session-actions { grid-column: auto; grid-template-columns: 1fr; }
@@ -1578,11 +1600,16 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <div class="calendar-card-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                        <h6 class="fw-bold mb-0"><i class="bi-calendar3 me-1"></i>Calendário semanal</h6>
-                        <div class="btn-group btn-group-sm">
+                        <h6 class="fw-bold mb-0"><i class="bi-calendar3 me-1"></i><span class="d-none d-md-inline">Calendário semanal</span><span class="d-md-none">Agenda do dia</span></h6>
+                        <div class="btn-group btn-group-sm d-none d-md-flex calendar-week-nav">
                             <button class="btn btn-outline-secondary" id="btnSemanaAnterior"><i class="bi-chevron-left"></i></button>
                             <button class="btn btn-outline-secondary" id="btnSemanaHoje">Hoje</button>
                             <button class="btn btn-outline-secondary" id="btnSemanaProxima"><i class="bi-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-mobile-nav d-flex d-md-none" aria-label="Navegação diária">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaAnterior" aria-label="Dia anterior"><i class="bi-chevron-left"></i></button>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none calendar-mobile-date" id="btnDiaHoje"><span id="rotuloDiaMobile">Hoje</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaProximo" aria-label="Próximo dia"><i class="bi-chevron-right"></i></button>
                         </div>
                     </div>
                     <div class="weekly-calendar-scroll">
@@ -7273,13 +7300,26 @@ function renderizarFilaRevisoes() {
 
 // ---------- Calendário semanal ----------
 let offsetSemana = 0;
+let offsetDiaMobile = 0;
+const consultaCalendarioMobile = window.matchMedia("(max-width: 767.98px)");
 
-function obterDiasDaSemana() {
-    const hoje = new Date();
-    hoje.setDate(hoje.getDate() + offsetSemana * 7);
-    const diaSemana = hoje.getDay();
-    const segunda = new Date(hoje);
-    segunda.setDate(hoje.getDate() - ((diaSemana + 6) % 7));
+function calendarioMobileAtivo() {
+    return consultaCalendarioMobile.matches;
+}
+
+function obterDiaCalendarioMobile() {
+    const dia = new Date();
+    dia.setHours(12, 0, 0, 0);
+    dia.setDate(dia.getDate() + offsetDiaMobile);
+    return dia;
+}
+
+function obterDiasDaSemana(referencia = null) {
+    const diaBase = referencia ? new Date(referencia) : new Date();
+    if (!referencia) diaBase.setDate(diaBase.getDate() + offsetSemana * 7);
+    const diaSemana = diaBase.getDay();
+    const segunda = new Date(diaBase);
+    segunda.setDate(diaBase.getDate() - ((diaSemana + 6) % 7));
     const dias = [];
     for (let i = 0; i < 7; i++) {
         const d = new Date(segunda);
@@ -7287,6 +7327,12 @@ function obterDiasDaSemana() {
         dias.push(d);
     }
     return dias;
+}
+function obterDiasVisiveisCalendario() {
+    return calendarioMobileAtivo() ? [obterDiaCalendarioMobile()] : obterDiasDaSemana();
+}
+function obterDiasDiario() {
+    return calendarioMobileAtivo() ? obterDiasDaSemana(obterDiaCalendarioMobile()) : obterDiasDaSemana();
 }
 function paraISO(data) {
     const ano = data.getFullYear();
@@ -7297,11 +7343,17 @@ function paraISO(data) {
 function ehHoje(data) { return paraISO(data) === paraISO(new Date()); }
 
 function renderizarCalendario() {
-    const dias = obterDiasDaSemana();
-    const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+    const dias = obterDiasVisiveisCalendario();
     const tarefas = obterTarefas();
     const registros = obterRegistrosEstudo();
     const ordemPeriodos = ["morning", "afternoon", "evening", "unspecified"];
+    const rotuloDiaMobile = document.getElementById("rotuloDiaMobile");
+    if (rotuloDiaMobile && calendarioMobileAtivo()) {
+        const diaMobile = dias[0];
+        const dataLonga = diaMobile.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+        rotuloDiaMobile.textContent = `${ehHoje(diaMobile) ? "Hoje · " : ""}${dataLonga.charAt(0).toUpperCase()}${dataLonga.slice(1)}`;
+    }
+    document.getElementById("calendarioSemanal").setAttribute("aria-label", calendarioMobileAtivo() ? "Agenda diária" : "Calendário semanal");
 
     const cartaoTarefa = tarefa => `<button type="button" class="calendar-task ${tarefa.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(tarefa.id)}" title="${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir sessão"}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button>`;
     const cartaoRegistro = registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}" title="Editar este registro do Diário"><span class="calendar-task-subject">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</span><span class="calendar-task-content">${esc(registro.conteudo)}</span><span class="calendar-task-meta"><span><i class="bi-clock me-1"></i>${registro.minutos} min estudados</span>${registro.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}${registro.tipo === "review" ? "<span>Revisão</span>" : ""}</span>${registro.anotacoes ? `<span class="calendar-task-note"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</span>` : ""}</button>`;
@@ -7317,17 +7369,18 @@ function renderizarCalendario() {
             ...estudadosNoDia.map(registro => ({ tipo: "registro", periodo: normalizarPeriodoEstudo(registro.periodo), valor: registro }))
         ];
         const periodosVisiveis = ordemPeriodos.filter(periodo => periodo !== "unspecified" || itens.some(item => item.periodo === "unspecified"));
-        const conteudo = itens.length === 0
-            ? `<div class="calendar-empty"><i class="bi-calendar2" aria-hidden="true"></i><span>Sem sessões</span></div>`
-            : periodosVisiveis.map(periodo => {
+        const conteudo = periodosVisiveis.map(periodo => {
                 const dadosPeriodo = PERIODOS_ESTUDO[periodo];
                 const itensPeriodo = itens.filter(item => item.periodo === periodo);
-                return `<section class="calendar-period ${periodo === "unspecified" ? "is-unspecified" : ""}" aria-label="${esc(dadosPeriodo.rotulo)}"><header class="calendar-period-header"><span><i class="${dadosPeriodo.icone} me-1"></i>${esc(dadosPeriodo.rotulo)}</span><span class="calendar-period-count">${itensPeriodo.length}</span></header>${itensPeriodo.length ? itensPeriodo.map(item => item.tipo === "registro" ? cartaoRegistro(item.valor) : cartaoTarefa(item.valor)).join("") : '<div class="calendar-period-empty">Livre</div>'}</section>`;
+                const botaoAdicionar = periodo === "unspecified" ? "" : `<button type="button" class="calendar-period-add btn-adicionar-periodo" data-date="${iso}" data-period="${periodo}" aria-label="Adicionar sessão em ${esc(dadosPeriodo.rotulo)} de ${esc(d.toLocaleDateString("pt-BR"))}" title="Adicionar sessão"><i class="bi-plus-lg" aria-hidden="true"></i></button>`;
+                return `<section class="calendar-period ${periodo === "unspecified" ? "is-unspecified" : ""}" aria-label="${esc(dadosPeriodo.rotulo)}"><header class="calendar-period-header"><span class="calendar-period-heading"><i class="${dadosPeriodo.icone} me-1"></i>${esc(dadosPeriodo.rotulo)}</span><span class="calendar-period-actions"><span class="calendar-period-count">${itensPeriodo.length}</span>${botaoAdicionar}</span></header>${itensPeriodo.length ? itensPeriodo.map(item => item.tipo === "registro" ? cartaoRegistro(item.valor) : cartaoTarefa(item.valor)).join("") : '<div class="calendar-period-empty"><span>Sem sessões</span></div>'}</section>`;
             }).join("");
+        const nomeDia = d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
+        const nomeDiaFormatado = `${nomeDia.charAt(0).toUpperCase()}${nomeDia.slice(1)}`;
         return `
             <article class="calendar-day ${ehHoje(d) ? "is-today" : ""}">
                 <header class="calendar-day-header">
-                    <span class="calendar-weekday">${nomesDias[i]}</span>
+                    <span class="calendar-weekday">${nomeDiaFormatado}</span>
                     <span class="calendar-date">${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>
                     ${minutosDoDia ? `<span class="calendar-day-total">${formatarDuracao(minutosDoDia)} estudadas</span>` : ""}
                 </header>
@@ -7339,6 +7392,20 @@ function renderizarCalendario() {
         await alternarStatusTarefaSincronizada(el.dataset.id);
     }));
     document.querySelectorAll(".btn-editar-registro-cal").forEach(el => el.addEventListener("click", () => abrirEdicaoRegistroEstudo(el.dataset.id)));
+    document.querySelectorAll(".btn-adicionar-periodo").forEach(el => el.addEventListener("click", () => prepararNovaSessaoNoPeriodo(el.dataset.date, el.dataset.period)));
+}
+
+function prepararNovaSessaoNoPeriodo(data, periodo) {
+    if (!obterMaterias().length) {
+        alert("Cadastre uma matéria antes de criar uma sessão de estudo.");
+        return;
+    }
+    limparEdicaoTarefa();
+    document.getElementById("tarefaData").value = data;
+    document.getElementById("tarefaPeriodo").value = normalizarPeriodoEstudo(periodo, false);
+    const formulario = document.getElementById("formTarefa");
+    formulario.closest(".study-session-card")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    window.setTimeout(() => document.getElementById("tarefaMateria").focus(), 250);
 }
 
 function formatarDuracao(minutos) {
@@ -7350,7 +7417,7 @@ function formatarDuracao(minutos) {
 }
 
 function renderizarDiarioSemana() {
-    const dias = obterDiasDaSemana();
+    const dias = obterDiasDiario();
     const datas = new Set(dias.map(paraISO));
     const registros = obterRegistrosEstudo().filter(registro => datas.has(registro.dataEstudo));
     const totalMinutos = registros.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
@@ -7382,9 +7449,19 @@ function renderizarDiarioSemana() {
     document.querySelectorAll(".btn-excluir-registro-estudo").forEach(botao => botao.addEventListener("click", () => excluirRegistroEstudoSincronizado(botao.dataset.id)));
 }
 
-document.getElementById("btnSemanaAnterior").addEventListener("click", () => { offsetSemana--; renderizarCalendario(); });
-document.getElementById("btnSemanaProxima").addEventListener("click", () => { offsetSemana++; renderizarCalendario(); });
-document.getElementById("btnSemanaHoje").addEventListener("click", () => { offsetSemana = 0; renderizarCalendario(); });
+function renderizarPeriodoCalendario() {
+    renderizarCalendario();
+    renderizarDiarioSemana();
+}
+
+document.getElementById("btnSemanaAnterior").addEventListener("click", () => { offsetSemana--; renderizarPeriodoCalendario(); });
+document.getElementById("btnSemanaProxima").addEventListener("click", () => { offsetSemana++; renderizarPeriodoCalendario(); });
+document.getElementById("btnSemanaHoje").addEventListener("click", () => { offsetSemana = 0; renderizarPeriodoCalendario(); });
+document.getElementById("btnDiaAnterior").addEventListener("click", () => { offsetDiaMobile--; renderizarPeriodoCalendario(); });
+document.getElementById("btnDiaProximo").addEventListener("click", () => { offsetDiaMobile++; renderizarPeriodoCalendario(); });
+document.getElementById("btnDiaHoje").addEventListener("click", () => { offsetDiaMobile = 0; renderizarPeriodoCalendario(); });
+if (typeof consultaCalendarioMobile.addEventListener === "function") consultaCalendarioMobile.addEventListener("change", renderizarPeriodoCalendario);
+else consultaCalendarioMobile.addListener(renderizarPeriodoCalendario);
 
 function renderizarTudoCronograma() {
     renderizarTarefas();
