@@ -6,6 +6,10 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { extrairDispositivos } from "../scripts/import-legal-sources.mjs";
+import {
+    extrairAnexoTaxasEstatutoDesarmamento,
+    prepararHtmlEstatutoDesarmamento
+} from "../scripts/import-disarmament-statute.mjs";
 import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-guards-statute.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
@@ -805,7 +809,7 @@ test("o Estatuto das Guardas usa a fonte oficial integral e pertence à Legisla�
     assert.match(migration, /10000000-0000-4000-8000-000000000005/);
     assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
     assert.match(html, /id: "guardas"[\s\S]*?slugs: \["estatuto-geral-guardas-municipais-lei-13022-2014"/);
-    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?documento\.slug === "estatuto-geral-guardas-municipais-lei-13022-2014"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"estatuto-geral-guardas-municipais-lei-13022-2014"[\s\S]*?\.includes\(documento\.slug\)/);
 });
 
 test("o importador do Estatuto corrige somente a grafia estrutural da fonte oficial", () => {
@@ -818,6 +822,56 @@ test("o importador do Estatuto corrige somente a grafia estrutural da fonte ofic
     assert.deepEqual(normalizado.caminho, ["ESTATUTO GERAL DAS GUARDAS MUNICIPAIS", "CAPÍTULO III — DAS COMPETÊNCIAS"]);
     assert.equal(normalizado.titulo, "CAPÍTULO III — DAS COMPETÊNCIAS");
     assert.equal(normalizado.conteudo, "O conteúdo legal permanece COMPETÉNCIAS quando essa palavra fizer parte do texto.");
+});
+
+test("o Estatuto do Desarmamento usa a versão oficial integral e inclui o Anexo de taxas", () => {
+    const migration = readProjectFile("supabase/migrations/202609020004_complete_disarmament_statute.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 41);
+    assert.equal([...migration.matchAll(/"chave":"anexo-tabela-taxas"/g)].length, 1);
+    assert.match(migration, /https:\/\/www\.planalto\.gov\.br\/ccivil_03\/leis\/2003\/l10\.826compilado\.htm/);
+    assert.match(migration, /Texto compilado consultado em 01\/09\/2026/);
+    assert.match(migration, /"chave":"art-7-a"/);
+    assert.match(migration, /"chave":"art-11-a"/);
+    assert.match(migration, /"chave":"art-21-a"/);
+    assert.match(migration, /"chave":"art-34-a"/);
+    assert.match(migration, /"rotulo":"Art\. 21-A"/);
+    assert.match(migration, /"rotulo":"Art\. 34-A"/);
+    assert.match(migration, /Incluído pela Lei nº 15\.358, de 2026/);
+    assert.match(migration, /CAPÍTULO VI — DISPOSIÇÕES FINAIS/);
+    assert.match(migration, /ANEXO — TABELA DE TAXAS/);
+    assert.match(migration, /VIII - Expedição de segunda via de porte de arma de fogo/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000002/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000005/);
+    assert.doesNotMatch(migration, /o s integrantes|çã o|N acional|Pú blica/);
+    assert.doesNotMatch(migration, /deckaradas|transporte 60,00 de valores/);
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "desarmamento"[\s\S]*?slugs: \["estatuto-desarmamento-lei-10826-2003"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"estatuto-desarmamento-lei-10826-2003"/);
+    assert.match(html, /chave\.includes\("desarmamento"\) \|\| chave\.includes\("armas"\) \|\| chave\.includes\("armamento"\)/);
+});
+
+test("o importador do Estatuto do Desarmamento recompõe palavras e separa o Anexo", () => {
+    const html = `
+        <p>CAPÍTULO I</p><p>DO TESTE</p>
+        <p>Art. 1º O<span>s</span> integrantes atuarão no Pa<span>í</span>s.</p>
+        <p>Brasília, 22 de dezembro de 2003.</p>
+        <p>ANEXO<br></p><p>(Redação dada pela Lei nº 11.706, de 2008)</p><p>TABELA DE TAXAS</p>
+        <table>
+            <tr><td><p>ATO ADMINISTRATIVO</p></td><td><p>R$</p></td></tr>
+            <tr><td><p>I - Registro</p></td><td><p>60,00</p></td></tr>
+            <tr><td><p>II - Renovação</p></td><td><p>60,00</p></td></tr>
+            <tr><td><p>VIII - Expedição de segunda via de porte de arma de fogo</p></td><td><p>60,00</p></td></tr>
+        </table>
+    `;
+    const [artigo] = extrairDispositivos(prepararHtmlEstatutoDesarmamento(html), { raiz: "ESTATUTO DO DESARMAMENTO" });
+    const anexo = extrairAnexoTaxasEstatutoDesarmamento(html, { sequencia: 2 });
+
+    assert.equal(artigo.conteudo, "Os integrantes atuarão no País.");
+    assert.equal(anexo.chave, "anexo-tabela-taxas");
+    assert.equal(anexo.sequencia, 2);
+    assert.match(anexo.conteudo, /I - Registro — 60,00\nII - Renovação — 60,00\nVIII - Expedição/);
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
