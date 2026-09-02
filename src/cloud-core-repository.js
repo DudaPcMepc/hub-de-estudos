@@ -2038,7 +2038,7 @@ export async function criarTopicosEdital(itemIdLocal, topicos) {
         exam_subject_id: itemId,
         title: texto(topico.titulo, 1000, "Título do tópico", true),
         checked: topico.concluido === true,
-        position
+        position: Number.isInteger(topico.position) && topico.position >= 0 && topico.position <= 100000 ? topico.position : position
     }));
     const resposta = verificarResposta(await supabase.from("exam_topics").insert(registros).select("id, updated_at"), "Não foi possível criar o checklist do edital.") || [];
     resposta.forEach(registro => versoesTopicosEdital.set(registro.id, registro.updated_at));
@@ -2054,6 +2054,19 @@ export async function atualizarTopicoEdital(idLocal, concluido) {
     const versao = versoesTopicosEdital.get(id);
     if (versao) consulta = consulta.eq("updated_at", versao);
     const registro = verificarRegistro(await consulta.select("updated_at").maybeSingle(), "O checklist mudou em outra sessão. Recarregue antes de salvar novamente.");
+    versoesTopicosEdital.set(id, registro.updated_at);
+}
+
+export async function renomearTopicoEdital(idLocal, titulo) {
+    const contexto = exigirContexto();
+    const id = resolverId("exam_topic", idLocal);
+    const versao = versoesTopicosEdital.get(id);
+    let consulta = supabase.from("exam_topics").update({ title: texto(titulo, 1000, "Título do tópico", true) })
+        .eq("id", id)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId);
+    if (versao) consulta = consulta.eq("updated_at", versao);
+    const registro = verificarRegistro(await consulta.select("updated_at").maybeSingle(), "O checklist mudou em outra sessão. Recarregue antes de renomear.");
     versoesTopicosEdital.set(id, registro.updated_at);
 }
 
