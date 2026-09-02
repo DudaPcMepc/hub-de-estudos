@@ -262,6 +262,57 @@
     .task-meta-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
     .task-meta-chip { padding: .16rem .42rem; color: #67534a; background: rgba(91, 67, 58, .075); border-radius: 999px; font-size: .67rem; font-weight: 600; }
     .task-meta-chip.is-review { color: #6a251f; background: rgba(184, 50, 42, .1); }
+    .today-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .today-heading h1 { color: var(--pimentel-cafe); font-size: clamp(1.45rem, 3vw, 2rem); }
+    .today-heading p { color: var(--pimentel-cafe-claro); }
+    .today-date { display: inline-flex; align-items: center; gap: .4rem; color: var(--pimentel-cafe-claro); font-size: .78rem; font-weight: 600; white-space: nowrap; }
+    .today-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
+    .today-metric { min-width: 0; padding: .85rem; background: rgba(255, 253, 249, .92); border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; box-shadow: 0 .2rem .65rem rgba(59, 41, 35, .04); }
+    .today-metric-label { display: block; color: #79665e; font-size: .68rem; font-weight: 650; }
+    .today-metric-value { display: block; margin-top: .25rem; color: var(--pimentel-cafe); font-size: 1.15rem; line-height: 1.1; }
+    .today-metric-helper { display: block; margin-top: .25rem; color: #7a6961; font-size: .65rem; }
+    .today-progress { height: .32rem; margin-top: .48rem; overflow: hidden; background: rgba(91, 67, 58, .1); border-radius: 999px; }
+    .today-progress > span { display: block; height: 100%; background: linear-gradient(90deg, #3d7f5c, #65a679); border-radius: inherit; }
+    .today-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .78fr); gap: 1rem; align-items: start; }
+    .today-panel, .today-side-block { background: rgba(255, 253, 249, .94); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .3rem .9rem rgba(59, 41, 35, .05); }
+    .today-panel { overflow: hidden; }
+    .today-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: 1rem; border-bottom: 1px solid rgba(59, 41, 35, .09); }
+    .today-panel-heading h2, .today-side-heading h2 { margin: 0; color: var(--pimentel-cafe); font-size: .95rem; }
+    .today-panel-heading p { margin: .15rem 0 0; color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    .today-period { padding: .25rem 1rem 0; }
+    .today-period-label { display: flex; align-items: center; gap: .4rem; padding: .7rem 0 .35rem; color: #806d64; font-size: .64rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
+    .today-session { display: grid; grid-template-columns: .38rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .75rem 0; border-bottom: 1px solid rgba(59, 41, 35, .075); }
+    .today-period:last-child .today-session:last-child { border-bottom: 0; }
+    .today-session-mark { width: .38rem; height: 2.55rem; background: var(--pimentel-vermelho); border-radius: 999px; }
+    .today-session.is-complete .today-session-mark { background: #4f8a67; }
+    .today-session-copy { min-width: 0; }
+    .today-session-copy strong, .today-session-copy > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .today-session-copy strong { color: var(--pimentel-cafe); font-size: .82rem; }
+    .today-session-copy > span { margin-top: .08rem; color: #6f5c53; font-size: .72rem; }
+    .today-session-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
+    .today-session-meta span { padding: .13rem .36rem; color: #705f57; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .62rem; font-weight: 600; }
+    .today-session-status { display: inline-flex; align-items: center; gap: .3rem; color: #34714f; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .today-side { display: grid; gap: .75rem; }
+    .today-side-block { padding: .9rem; }
+    .today-side-heading { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .65rem; }
+    .today-count { padding: .2rem .48rem; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: 999px; font-size: .62rem; font-weight: 700; }
+    .today-count.is-warning { color: #805518; background: rgba(190, 119, 23, .12); }
+    .today-side-item { display: flex; gap: .6rem; align-items: flex-start; padding: .58rem 0; border-bottom: 1px solid rgba(59, 41, 35, .07); }
+    .today-side-item:last-child { padding-bottom: 0; border-bottom: 0; }
+    .today-side-icon { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .08); border-radius: .65rem; }
+    .today-side-copy { min-width: 0; }
+    .today-side-copy strong, .today-side-copy span { display: block; }
+    .today-side-copy strong { color: var(--pimentel-cafe); font-size: .76rem; }
+    .today-side-copy span { margin-top: .12rem; color: #78665e; font-size: .65rem; line-height: 1.35; }
+    .today-side-action { width: 100%; margin-top: .7rem; }
+    .today-quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
+    .today-quick-action { min-width: 0; min-height: 68px; display: grid; place-items: center; align-content: center; gap: .25rem; padding: .45rem .25rem; color: var(--pimentel-cafe); background: rgba(91, 67, 58, .065); border: 0; border-radius: .7rem; font-size: .64rem; }
+    .today-quick-action i { color: var(--pimentel-vermelho); font-size: 1rem; }
+    .today-empty { min-height: 220px; display: grid; place-items: center; align-content: center; gap: .35rem; padding: 1.5rem; color: var(--pimentel-cafe-claro); text-align: center; }
+    .today-empty i { color: #4f8a67; font-size: 2rem; }
+    .today-empty strong { color: var(--pimentel-cafe); }
+    .today-celebration { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; padding: .8rem 1rem; color: #315a43; background: rgba(79, 138, 103, .1); border: 1px solid rgba(79, 138, 103, .18); border-radius: .85rem; }
+    .today-celebration i { font-size: 1.25rem; }
     .retention-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
     .retention-option { position: relative; }
     .retention-option input { position: absolute; opacity: 0; pointer-events: none; }
@@ -1394,6 +1445,7 @@
         .legal-reader-action-grid, .legal-reader-action-grid.is-note { grid-template-columns: 1fr; }
     }
     @media (max-width: 991.98px) {
+        .today-layout { grid-template-columns: 1fr; }
         .study-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .study-stat + .study-stat { border-left: 0; }
         .study-stat:last-child { grid-column: 1 / -1; }
@@ -1424,6 +1476,14 @@
         .calendar-task-meta, .calendar-task-note { font-size: .68rem; }
     }
     @media (max-width: 575.98px) {
+        .today-heading { align-items: flex-start; flex-direction: column; gap: .45rem; }
+        .today-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
+        .today-metric { padding: .7rem; }
+        .today-panel-heading { align-items: flex-start; flex-direction: column; }
+        .today-panel-heading .btn { width: 100%; }
+        .today-session { grid-template-columns: .32rem minmax(0, 1fr); gap: .6rem; }
+        .today-session > .btn, .today-session > .today-session-status { grid-column: 2; justify-self: start; }
+        .today-session > .btn { width: 100%; }
         .session-detail-grid { grid-template-columns: 1fr; }
         .session-detail-item.is-wide { grid-column: auto; }
         .study-session-form { grid-template-columns: 1fr; }
@@ -1586,7 +1646,8 @@
     </div>
 
     <ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto" id="abas" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-hoje" type="button"><i class="bi-house-heart-fill me-1"></i>Hoje</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-cronograma" type="button"><i class="bi-calendar-week-fill me-1"></i>Cronograma</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-edital" type="button"><i class="bi-file-earmark-spreadsheet-fill me-1"></i>Edital &amp; Estratégia</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-fire me-1"></i>Simulados (IA)</button></li>
@@ -1597,9 +1658,50 @@
     <div class="tab-content">
 
         <!-- ============================================================ -->
+        <!-- HOJE -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade show active" id="p-hoje">
+            <header class="today-heading">
+                <div>
+                    <h1 class="fw-bold mb-1">Seu plano para hoje</h1>
+                    <p class="mb-0">Prioridades reunidas para você estudar sem perder tempo organizando.</p>
+                </div>
+                <span class="today-date" id="dataCentralHoje"><i class="bi-calendar3" aria-hidden="true"></i></span>
+            </header>
+            <div class="today-celebration d-none" id="conquistaCentralHoje" role="status">
+                <i class="bi-stars" aria-hidden="true"></i>
+                <div><strong class="d-block">Plano do dia concluído!</strong><small>Você cumpriu suas sessões e revisões. Excelente constância.</small></div>
+            </div>
+            <section class="today-metrics" id="metricasCentralHoje" aria-label="Resumo do dia"></section>
+            <div class="today-layout">
+                <section class="today-panel" aria-labelledby="tituloAgendaHoje">
+                    <header class="today-panel-heading">
+                        <div><h2 class="fw-bold" id="tituloAgendaHoje">Agenda de hoje</h2><p>Conteúdos conectados ao cronograma e ao edital.</p></div>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="btnAdicionarSessaoHoje"><i class="bi-plus-lg me-1"></i>Adicionar sessão</button>
+                    </header>
+                    <div id="agendaCentralHoje"></div>
+                </section>
+                <aside class="today-side" aria-label="Prioridades e atalhos do dia">
+                    <section class="today-side-block" id="revisoesCentralHoje"></section>
+                    <section class="today-side-block" id="atrasosCentralHoje"></section>
+                    <section class="today-side-block" id="prioridadeCentralHoje"></section>
+                    <section class="today-side-block" id="leituraCentralHoje"></section>
+                    <section class="today-side-block">
+                        <div class="today-side-heading"><h2 class="fw-bold">Acesso rápido</h2></div>
+                        <div class="today-quick-actions">
+                            <button type="button" class="today-quick-action" data-today-tab="#p-simulados"><i class="bi-stars" aria-hidden="true"></i><span>Simulado</span></button>
+                            <button type="button" class="today-quick-action" id="btnFlashcardsHoje"><i class="bi-card-heading" aria-hidden="true"></i><span>Flashcards</span></button>
+                            <button type="button" class="today-quick-action" data-today-tab="#p-erros"><i class="bi-journal-x" aria-hidden="true"></i><span>Erros</span></button>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
         <!-- MATÉRIAS -->
         <!-- ============================================================ -->
-                <div class="tab-pane fade show active" id="p-materias">
+        <div class="tab-pane fade" id="p-materias">
             <div class="row g-2 align-items-center mb-3">
                 <div class="col-lg-5">
                     <div class="input-group">
@@ -2727,6 +2829,130 @@ function novoId() {
 function hojeISO() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function somarDias(iso, n) { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function dataBR(iso) { return iso ? iso.split("-").reverse().join("/") : "—"; }
+
+function ativarAbaPrincipal(alvo) {
+    const botao = document.querySelector(`[data-bs-target="${alvo}"]`);
+    if (!botao) return;
+    bootstrap.Tab.getOrCreateInstance(botao).show();
+}
+
+function prioridadeAtualDoEdital() {
+    const edital = obterEdital();
+    const totalPontos = calcularPontosTotais(edital);
+    return edital.materias.map((item, indice) => {
+        const topicos = Array.isArray(item.topicos) ? item.topicos : [];
+        const pendentes = topicos.filter(topico => topico.concluido !== true);
+        const pontos = Math.max(0, Number(item.questoes) || 0) * Math.max(0, Number(item.peso) || 0);
+        const relevancia = totalPontos > 0 ? (pontos / totalPontos) * 100 : 0;
+        return { item, indice, pendentes, pontos, relevancia };
+    }).filter(item => item.pendentes.length)
+        .sort((a, b) => b.pontos - a.pontos || b.pendentes.length - a.pendentes.length || a.indice - b.indice)[0] || null;
+}
+
+function ultimaLeituraJuridicaDisponivel() {
+    return [...historicoLeituraJuridica]
+        .sort((a, b) => String(b.ultimaLeituraEm || "").localeCompare(String(a.ultimaLeituraEm || "")))
+        .map(item => ({ item, localizado: referenciaDispositivoJuridico(item.dispositivoId), materia: materiaPorId(item.materiaId) }))
+        .find(registro => registro.localizado && registro.materia) || null;
+}
+
+function renderizarHoje() {
+    const raiz = document.getElementById("p-hoje");
+    if (!raiz || !USUARIO_ATUAL_ID) return;
+    const hoje = hojeISO();
+    const agora = new Date();
+    document.getElementById("dataCentralHoje").innerHTML = `<i class="bi-calendar3" aria-hidden="true"></i>${esc(agora.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }))}`;
+
+    const tarefas = obterTarefas();
+    const tarefasHoje = tarefas.filter(tarefa => tarefa.data === hoje)
+        .sort((a, b) => {
+            const ordem = { morning: 0, afternoon: 1, evening: 2 };
+            return (ordem[normalizarPeriodoEstudo(a.periodo)] ?? 1) - (ordem[normalizarPeriodoEstudo(b.periodo)] ?? 1)
+                || nomeDaMateria(a.materiaId).localeCompare(nomeDaMateria(b.materiaId), "pt-BR");
+        });
+    const concluidasHoje = tarefasHoje.filter(tarefa => tarefa.status === "concluido").length;
+    const minutosPlanejados = tarefasHoje.reduce((total, tarefa) => total + (Number(tarefa.minutosPlanejados) || 0), 0);
+    const registrosHoje = obterRegistrosEstudo().filter(registro => registro.dataEstudo === hoje);
+    const minutosEstudados = registrosHoje.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+    const cumprimento = tarefasHoje.length ? Math.round((concluidasHoje / tarefasHoje.length) * 100) : 0;
+    const revisoesTarefas = tarefas.filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje)
+        .sort((a, b) => a.proximaRevisao.localeCompare(b.proximaRevisao));
+    const flashcardsPendentes = materiasNormalizadas().reduce((total, materia) => total + cardsVencidos(materia).length, 0);
+    const totalRevisoes = revisoesTarefas.length + flashcardsPendentes;
+    const atrasadas = tarefas.filter(tarefa => tarefa.status === "pendente" && tarefa.data && tarefa.data < hoje)
+        .sort((a, b) => a.data.localeCompare(b.data));
+    const semEstimativa = tarefasHoje.filter(tarefa => !Number(tarefa.minutosPlanejados)).length;
+
+    document.getElementById("metricasCentralHoje").innerHTML = `
+        <article class="today-metric"><span class="today-metric-label">Tempo planejado</span><strong class="today-metric-value">${formatarDuracao(minutosPlanejados)}</strong><small class="today-metric-helper">${tarefasHoje.length} ${tarefasHoje.length === 1 ? "sessão" : "sessões"}${semEstimativa ? ` · ${semEstimativa} sem estimativa` : ""}</small></article>
+        <article class="today-metric"><span class="today-metric-label">Tempo estudado</span><strong class="today-metric-value">${formatarDuracao(minutosEstudados)}</strong><small class="today-metric-helper">${registrosHoje.length} ${registrosHoje.length === 1 ? "registro real" : "registros reais"}</small></article>
+        <article class="today-metric"><span class="today-metric-label">Progresso do dia</span><strong class="today-metric-value">${concluidasHoje} de ${tarefasHoje.length}</strong><div class="today-progress" role="progressbar" aria-label="Progresso das sessões de hoje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cumprimento}"><span style="width:${cumprimento}%"></span></div></article>
+        <article class="today-metric"><span class="today-metric-label">Revisões pendentes</span><strong class="today-metric-value">${totalRevisoes}</strong><small class="today-metric-helper">${revisoesTarefas.filter(tarefa => tarefa.proximaRevisao < hoje).length} atrasadas · ${flashcardsPendentes} flashcards</small></article>`;
+
+    const periodos = ["morning", "afternoon", "evening"];
+    const htmlTarefa = tarefa => {
+        const concluida = tarefa.status === "concluido";
+        const temporizando = String(estadoTemporizadorEstudo?.tarefaId || "") === String(tarefa.id);
+        const rotuloAcao = temporizando ? (estadoTemporizadorEstudo.executando ? "Estudando agora" : "Continuar estudo") : "Iniciar estudo";
+        const iconeAcao = temporizando && estadoTemporizadorEstudo.executando ? "bi-stopwatch-fill" : "bi-play-fill";
+        return `<article class="today-session ${concluida ? "is-complete" : ""}">
+            <span class="today-session-mark" aria-hidden="true"></span>
+            <div class="today-session-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)}</span><div class="today-session-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}</div></div>
+            ${concluida ? '<span class="today-session-status"><i class="bi-check-circle-fill"></i>Concluída</span>' : `<button type="button" class="btn btn-sm ${temporizando ? "btn-success" : "btn-primary"} rounded-pill btn-iniciar-hoje" data-id="${esc(tarefa.id)}"><i class="${iconeAcao} me-1"></i>${rotuloAcao}</button>`}
+        </article>`;
+    };
+    document.getElementById("agendaCentralHoje").innerHTML = tarefasHoje.length ? periodos.map(periodo => {
+        const itens = tarefasHoje.filter(tarefa => normalizarPeriodoEstudo(tarefa.periodo) === periodo);
+        if (!itens.length) return "";
+        const config = PERIODOS_ESTUDO[periodo];
+        return `<section class="today-period"><div class="today-period-label"><i class="${config.icone}" aria-hidden="true"></i>${config.rotulo}</div>${itens.map(htmlTarefa).join("")}</section>`;
+    }).join("") : '<div class="today-empty"><i class="bi-calendar2-heart" aria-hidden="true"></i><strong>Seu dia ainda está livre.</strong><span>Adicione uma sessão ou use a prioridade do edital para começar.</span><button type="button" class="btn btn-sm btn-primary rounded-pill mt-2" id="btnPrimeiraSessaoHoje"><i class="bi-plus-lg me-1"></i>Planejar primeira sessão</button></div>';
+
+    const revisoes = document.getElementById("revisoesCentralHoje");
+    revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
+
+    const painelAtrasos = document.getElementById("atrasosCentralHoje");
+    painelAtrasos.classList.toggle("d-none", atrasadas.length === 0);
+    painelAtrasos.innerHTML = atrasadas.length ? `<div class="today-side-heading"><h2 class="fw-bold">Sessões atrasadas</h2><span class="today-count is-warning">${atrasadas.length}</span></div>${atrasadas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-calendar2-x"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)} · ${dataBR(tarefa.data)}</span></div></div>`).join("")}<button type="button" class="btn btn-sm btn-outline-warning rounded-pill today-side-action btn-reagendar-hoje-central" data-id="${esc(atrasadas[0].id)}"><i class="bi-calendar2-plus me-1"></i>Reagendar a mais antiga</button>` : "";
+
+    const prioridade = prioridadeAtualDoEdital();
+    document.getElementById("prioridadeCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Próxima prioridade</h2><span class="today-count">Edital</span></div>${prioridade ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-bullseye"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(prioridade.item.materiaId))}</strong><span>${esc(prioridade.pendentes[0].titulo)}${prioridade.relevancia ? ` · ${prioridade.relevancia.toFixed(1)}% da prova` : ""}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" data-today-tab="#p-edital">Ver estratégia</button>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2-all"></i></span><div class="today-side-copy"><strong>Sem prioridade pendente</strong><span>Configure o edital ou adicione tópicos ao checklist.</span></div></div>'}`;
+
+    const leitura = ultimaLeituraJuridicaDisponivel();
+    const descricaoLeitura = leitura ? `${leitura.localizado.documento.tituloCurto} · ${leitura.localizado.dispositivo?.rotulo || leitura.localizado.rotulo || "Artigo"}` : "";
+    document.getElementById("leituraCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Continuar leitura</h2></div>${leitura ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-book-half"></i></span><div class="today-side-copy"><strong>${esc(descricaoLeitura)}</strong><span>${esc(leitura.materia.nome)} · lido ${esc(formatarDataHistoricoLeitura(leitura.item.ultimaLeituraEm))}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnRetomarLeituraHoje" data-reading-id="${esc(leitura.item.dispositivoId)}" data-materia-id="${esc(leitura.materia.id)}"><i class="bi-bookmark me-1"></i>Retomar leitura</button>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-book"></i></span><div class="today-side-copy"><strong>Nenhuma leitura recente</strong><span>Abra a Biblioteca de uma matéria para iniciar.</span></div></div>'}`;
+
+    const concluiuPlano = tarefasHoje.length > 0 && concluidasHoje === tarefasHoje.length && totalRevisoes === 0;
+    document.getElementById("conquistaCentralHoje").classList.toggle("d-none", !concluiuPlano);
+
+    raiz.querySelectorAll("[data-today-tab]").forEach(botao => botao.addEventListener("click", () => ativarAbaPrincipal(botao.dataset.todayTab)));
+    raiz.querySelectorAll(".btn-iniciar-hoje").forEach(botao => botao.addEventListener("click", () => { iniciarTemporizadorEstudo(botao.dataset.id); renderizarHoje(); }));
+    document.getElementById("btnPrimeiraSessaoHoje")?.addEventListener("click", abrirFormularioSessaoHoje);
+    document.getElementById("btnComecarRevisaoHoje")?.addEventListener("click", () => revisoesTarefas.length ? abrirConclusaoEstudo(revisoesTarefas[0].id) : iniciarRevisao(null));
+    document.querySelector(".btn-reagendar-hoje-central")?.addEventListener("click", async evento => { await reagendarTarefaParaHoje(evento.currentTarget.dataset.id, evento.currentTarget); });
+    document.getElementById("btnRetomarLeituraHoje")?.addEventListener("click", evento => {
+        const botao = evento.currentTarget;
+        const materia = materiaPorId(botao.dataset.materiaId);
+        if (materia) void abrirAtalhoLeitura(botao.dataset.readingId, materia);
+    });
+}
+
+function abrirFormularioSessaoHoje() {
+    ativarAbaPrincipal("#p-cronograma");
+    window.setTimeout(() => {
+        limparEdicaoTarefa();
+        document.getElementById("formTarefa")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.getElementById("tarefaMateria")?.focus({ preventScroll: true });
+    }, 180);
+}
+
+document.getElementById("btnAdicionarSessaoHoje").addEventListener("click", abrirFormularioSessaoHoje);
+document.getElementById("btnFlashcardsHoje").addEventListener("click", () => {
+    const vencidos = materiasNormalizadas().reduce((total, materia) => total + cardsVencidos(materia).length, 0);
+    if (vencidos) iniciarRevisao(null);
+    else ativarAbaPrincipal("#p-materias");
+});
+document.querySelector('[data-bs-target="#p-hoje"]').addEventListener("shown.bs.tab", renderizarHoje);
 
 // ---------- Modelo / migração ----------
 function normalizarMateria(m) {
@@ -7959,6 +8185,7 @@ function renderizarTudoCronograma() {
     renderizarCalendario();
     renderizarDiarioSemana();
     renderizarResumoSemanalCronograma();
+    renderizarHoje();
 }
 
 // ============================================================
@@ -9168,6 +9395,7 @@ function iniciar() {
     renderizarEdital();
     renderizarErros();
     renderizarDesempenho();
+    renderizarHoje();
     limparBackdropsOrfaos();
 }
 window.obterDadosParaPreviaMigracao = () => {
