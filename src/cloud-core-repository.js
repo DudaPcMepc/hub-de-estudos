@@ -9,6 +9,7 @@ const PRIORIDADES = new Set(["alta", "media", "baixa"]);
 const STATUS_TOPICOS = new Set(["nao", "estudando", "revisar", "dominado"]);
 const STATUS_TAREFAS = new Set(["pendente", "concluido"]);
 const NIVEIS_RETENCAO = new Set(["forgot", "partial", "good", "mastered"]);
+const PERIODOS_ESTUDO = new Set(["morning", "afternoon", "evening", "unspecified"]);
 const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
 const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
 const TIPOS_ANOTACAO_VADE = new Set(["note", "summary"]);
@@ -96,6 +97,13 @@ function dataIso(valor, campo, obrigatoria = false) {
     const data = new Date(`${resultado}T00:00:00Z`);
     if (Number.isNaN(data.getTime()) || data.toISOString().slice(0, 10) !== resultado) throw erroRepositorio(`${campo} inválida.`);
     return resultado;
+}
+
+function periodoEstudo(valor, permitirIndefinido = true) {
+    const periodo = String(valor || "");
+    if (PERIODOS_ESTUDO.has(periodo) && (permitirIndefinido || periodo !== "unspecified")) return periodo;
+    if (permitirIndefinido && !periodo) return "unspecified";
+    throw erroRepositorio("Período de estudo inválido.");
 }
 
 function instanteIso(valor, campo) {
@@ -1408,7 +1416,7 @@ export async function carregarLinksRemotos() {
 export async function carregarTarefasRemotas() {
     const contexto = obterContexto();
     const resposta = await supabase.from("study_tasks")
-        .select("id, subject_id, topic, due_date, status, assigned_to, exam_topic_id, planned_minutes, retention_level, next_review_date, last_studied_at, review_history")
+        .select("id, subject_id, topic, due_date, study_period, status, assigned_to, exam_topic_id, planned_minutes, retention_level, next_review_date, last_studied_at, review_history")
         .eq("workspace_id", contexto.workspaceId)
         .eq("assigned_to", contexto.userId)
         .order("due_date", { ascending: true, nullsFirst: false })
@@ -1421,6 +1429,7 @@ export async function carregarTarefasRemotas() {
         materiaId: materiasLegadas?.get(tarefa.subject_id) || tarefa.subject_id,
         topico: tarefa.topic,
         data: tarefa.due_date || "",
+        periodo: periodoEstudo(tarefa.study_period),
         status: STATUS_TAREFAS.has(tarefa.status) ? tarefa.status : "pendente",
         responsavelId: tarefa.assigned_to || null,
         topicoEditalId: tarefa.exam_topic_id || null,
@@ -1445,6 +1454,7 @@ function mapearRegistroEstudo(registro) {
         conteudo: registro.studied_content,
         anotacoes: registro.private_notes || "",
         dataEstudo: registro.studied_on,
+        periodo: periodoEstudo(registro.study_period),
         minutos: registro.duration_minutes,
         retencao: NIVEIS_RETENCAO.has(registro.retention_level) ? registro.retention_level : "good",
         tipo: registro.event_kind === "review" ? "review" : "study",
@@ -1456,7 +1466,7 @@ function mapearRegistroEstudo(registro) {
 export async function carregarRegistrosEstudo() {
     const contexto = obterContexto();
     const resposta = await supabase.from("study_session_logs")
-        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, duration_minutes, retention_level, event_kind, created_at, updated_at")
+        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, study_period, duration_minutes, retention_level, event_kind, created_at, updated_at")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .order("studied_on", { ascending: false })
@@ -1910,6 +1920,7 @@ export async function criarTarefa(tarefa) {
         subject_id: resolverId("subject", tarefa.materiaId),
         topic: texto(tarefa.topico, 2000, "Conteúdo da sessão", true),
         due_date: dataIso(tarefa.data, "Data da sessão", true),
+        study_period: periodoEstudo(tarefa.periodo, false),
         status: STATUS_TAREFAS.has(tarefa.status) ? tarefa.status : "pendente",
         exam_topic_id: tarefa.topicoEditalId ? resolverId("exam_topic", tarefa.topicoEditalId) : null,
         planned_minutes: tarefa.minutosPlanejados == null || tarefa.minutosPlanejados === ""
@@ -1929,6 +1940,7 @@ export async function atualizarTarefa(idLocal, alteracoes) {
     if (Object.hasOwn(alteracoes, "materiaId")) valores.subject_id = resolverId("subject", alteracoes.materiaId);
     if (Object.hasOwn(alteracoes, "topico")) valores.topic = texto(alteracoes.topico, 2000, "Conteúdo da sessão", true);
     if (Object.hasOwn(alteracoes, "data")) valores.due_date = dataIso(alteracoes.data, "Data da sessão", true);
+    if (Object.hasOwn(alteracoes, "periodo")) valores.study_period = periodoEstudo(alteracoes.periodo);
     if (Object.hasOwn(alteracoes, "topicoEditalId")) valores.exam_topic_id = alteracoes.topicoEditalId
         ? resolverId("exam_topic", alteracoes.topicoEditalId)
         : null;
@@ -1957,7 +1969,8 @@ export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, 
         mark_exam_topic_complete: marcarTopicoEdital === true,
         studied_content: texto(detalhes.conteudo, 5000, "Conteúdo estudado", true),
         private_notes: texto(detalhes.anotacoes || "", 20000, "Anotações da sessão"),
-        studied_on: dataIso(detalhes.dataEstudo, "Data do estudo", true)
+        studied_on: dataIso(detalhes.dataEstudo, "Data do estudo", true),
+        study_period: periodoEstudo(detalhes.periodo, false)
     }).maybeSingle();
     const registro = verificarRegistro(resposta, "Não foi possível registrar esta revisão no Supabase.");
     if (registro.linked_exam_topic_id && registro.exam_topic_updated_at) versoesTopicosEdital.set(registro.linked_exam_topic_id, registro.exam_topic_updated_at);
@@ -1978,6 +1991,7 @@ export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, 
             studied_content: registro.logged_content,
             private_notes: registro.logged_notes,
             studied_on: registro.logged_studied_on,
+            study_period: registro.logged_study_period,
             duration_minutes: duracaoMinutos,
             retention_level: retencao,
             event_kind: registro.logged_event_kind,
@@ -1993,13 +2007,14 @@ export async function atualizarRegistroEstudo(id, alteracoes) {
     if (Object.hasOwn(alteracoes, "conteudo")) valores.studied_content = texto(alteracoes.conteudo, 5000, "Conteúdo estudado", true);
     if (Object.hasOwn(alteracoes, "anotacoes")) valores.private_notes = texto(alteracoes.anotacoes || "", 20000, "Anotações da sessão");
     if (Object.hasOwn(alteracoes, "dataEstudo")) valores.studied_on = dataIso(alteracoes.dataEstudo, "Data do estudo", true);
+    if (Object.hasOwn(alteracoes, "periodo")) valores.study_period = periodoEstudo(alteracoes.periodo);
     if (Object.hasOwn(alteracoes, "minutos")) valores.duration_minutes = numeroLimitado(alteracoes.minutos, "Tempo estudado", 1, 1440, true);
     if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada.");
     const resposta = await supabase.from("study_session_logs").update(valores)
         .eq("id", exigirUuidNovo(id, "Registro do Diário"))
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
-        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, duration_minutes, retention_level, event_kind, created_at, updated_at")
+        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, study_period, duration_minutes, retention_level, event_kind, created_at, updated_at")
         .maybeSingle();
     return mapearRegistroEstudo(verificarRegistro(resposta, "Não foi possível atualizar o registro do Diário."));
 }
