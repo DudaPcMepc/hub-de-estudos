@@ -233,6 +233,26 @@ test("o cronograma usa formulário responsivo, semana em cartões e estados vazi
     assert.match(html, /class="schedule-list-panel is-complete"/);
 });
 
+test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /data-bs-target="#p-hoje"[^>]*>[\s\S]*?Hoje<\/button>/);
+    assert.match(html, /class="tab-pane fade show active" id="p-hoje"/);
+    assert.match(html, /id="metricasCentralHoje"/);
+    assert.match(html, /id="agendaCentralHoje"/);
+    assert.match(html, /id="revisoesCentralHoje"/);
+    assert.match(html, /id="prioridadeCentralHoje"/);
+    assert.match(html, /id="leituraCentralHoje"/);
+    assert.match(html, /function renderizarHoje\(\)/);
+    assert.match(html, /obterTarefas\(\)/);
+    assert.match(html, /obterRegistrosEstudo\(\)/);
+    assert.match(html, /function prioridadeAtualDoEdital\(\)/);
+    assert.match(html, /function ultimaLeituraJuridicaDisponivel\(\)/);
+    assert.match(html, /iniciarTemporizadorEstudo\(botao\.dataset\.id\)/);
+    assert.match(html, /reagendarTarefaParaHoje/);
+    assert.match(html, /@media \(max-width: 575\.98px\)[\s\S]*?\.today-session \{ grid-template-columns: \.32rem minmax\(0, 1fr\)/);
+});
+
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
