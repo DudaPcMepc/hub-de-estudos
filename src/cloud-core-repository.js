@@ -1481,7 +1481,7 @@ export async function carregarRegistrosEstudo() {
 export async function carregarErrosRemotos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("error_entries")
-        .select("id, subject_id, theme, observation, occurred_on")
+        .select("id, subject_id, theme, observation, occurred_on, exam_topic_id")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .order("occurred_on", { ascending: true })
@@ -1489,12 +1489,14 @@ export async function carregarErrosRemotos() {
     const erros = verificarResposta(resposta, "Não foi possível carregar o caderno de erros do Supabase.") || [];
     const materiasLegadas = idsLocaisPorRemotos.get("subject");
     const errosLegados = idsLocaisPorRemotos.get("error_entry");
+    const topicosEditalLegados = idsLocaisPorRemotos.get("exam_topic");
     return erros.map(erro => ({
         id: errosLegados?.get(erro.id) || erro.id,
         materiaId: materiasLegadas?.get(erro.subject_id) || erro.subject_id,
         tema: erro.theme,
         obs: erro.observation || "",
-        data: erro.occurred_on || ""
+        data: erro.occurred_on || "",
+        topicoEditalId: erro.exam_topic_id ? (topicosEditalLegados?.get(erro.exam_topic_id) || erro.exam_topic_id) : null
     }));
 }
 
@@ -2064,7 +2066,8 @@ export async function criarErro(erro) {
         user_id: contexto.userId,
         theme: texto(erro.tema, 4000, "Tema do erro", true),
         observation: texto(erro.obs, 10000, "Observação do erro"),
-        occurred_on: dataIso(erro.data, "Data do erro", true)
+        occurred_on: dataIso(erro.data, "Data do erro", true),
+        exam_topic_id: erro.topicoEditalId ? resolverId("exam_topic", erro.topicoEditalId) : null
     }), "Não foi possível registrar o erro no Supabase.");
     registrarId("error_entry", erro.id, id);
     return id;

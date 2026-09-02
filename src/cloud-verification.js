@@ -74,7 +74,8 @@ function normalizarDadosLocais(dados) {
             materiaId: String(item.materiaId),
             tema: item.tema || "",
             obs: item.obs || "",
-            data: item.data || ""
+            data: item.data || "",
+            topicoEditalId: item.topicoEditalId || null
         }))),
         desempenho: Object.entries(dados.desempenho || {})
             .map(([materiaId, valor]) => ({
@@ -139,7 +140,7 @@ async function buscarDadosRemotos(contexto) {
         supabase.from("exam_settings").select("exam_name, board_name, vacancies, exam_date").eq("workspace_id", workspaceId).eq("user_id", userId).maybeSingle(),
         supabase.from("exam_subjects").select("id, subject_id, question_count, weight").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("exam_topics").select("id, exam_subject_id, title, checked, position").eq("workspace_id", workspaceId).eq("user_id", userId).order("position"),
-        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on").eq("workspace_id", workspaceId).eq("user_id", userId),
+        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("subject_performance").select("subject_id, correct_answers, total_answers").eq("workspace_id", workspaceId).eq("user_id", userId)
     ]);
 
@@ -235,7 +236,8 @@ async function buscarDadosRemotos(contexto) {
             materiaId: idLegado(mapas, "subject", item.subject_id),
             tema: item.theme,
             obs: item.observation,
-            data: item.occurred_on || ""
+            data: item.occurred_on || "",
+            topicoEditalId: item.exam_topic_id ? idLegado(mapas, "exam_topic", item.exam_topic_id) : null
         }))),
         desempenho: performance
             .map(item => ({

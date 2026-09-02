@@ -709,26 +709,45 @@
     .performance-empty-copy strong { display: block; color: var(--pimentel-cafe); font-size: 1rem; }
     .performance-empty-copy p { max-width: 390px; margin: .35rem 0 .9rem; color: var(--pimentel-cafe-claro); font-size: .82rem; }
     .error-form-card {
-        background: linear-gradient(135deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .72));
+        overflow: hidden;
+        background: rgba(255, 253, 249, .96);
         border: 1px solid rgba(59, 41, 35, .1) !important;
+        box-shadow: 0 .45rem 1.4rem rgba(59, 41, 35, .075) !important;
     }
+    .error-form-heading { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: 1.15rem; }
+    .error-form-heading-icon {
+        width: 2.55rem;
+        height: 2.55rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .1);
+        border-radius: .8rem;
+        font-size: 1.05rem;
+    }
+    .error-form-heading h6 { color: var(--pimentel-cafe); }
+    .error-form-heading p { margin: .22rem 0 0; color: var(--pimentel-cafe-claro); font-size: .76rem; }
     .error-entry-form {
         display: grid;
-        grid-template-columns: minmax(220px, .9fr) minmax(300px, 1.5fr);
-        gap: .85rem;
+        grid-template-columns: minmax(180px, .75fr) minmax(240px, 1fr) minmax(240px, 1fr);
+        gap: .9rem 1rem;
     }
-    .error-entry-form .form-label { color: var(--pimentel-cafe); font-weight: 600; }
+    .error-entry-form .form-label { margin-bottom: .38rem; color: var(--pimentel-cafe); font-size: .72rem; font-weight: 700; letter-spacing: .01em; }
     .error-entry-form .form-control,
     .error-entry-form .form-select {
-        background: #fffdf9;
+        min-height: 44px;
+        background: #fff;
         border-color: rgba(59, 41, 35, .22);
+        border-radius: .7rem;
     }
     .error-entry-form .form-control:focus,
     .error-entry-form .form-select:focus { border-color: rgba(184, 50, 42, .58); box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11); }
     .error-notes { grid-column: 1 / -1; }
-    .error-notes textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
+    .error-notes textarea { min-height: 104px; resize: vertical; line-height: 1.55; }
     .error-form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
-    .error-form-actions .btn { min-width: 170px; min-height: 42px; border-radius: .65rem; }
+    .error-form-actions .btn { min-width: 185px; min-height: 43px; border-radius: .7rem; font-weight: 650; }
     .error-list-panel {
         overflow: hidden;
         background: rgba(255, 253, 249, .82);
@@ -741,11 +760,11 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding: .9rem 1rem;
+        padding: 1rem 1.1rem;
         background: rgba(91, 67, 58, .045);
         border-bottom: 1px solid rgba(59, 41, 35, .09);
     }
-    .error-list-title { color: var(--pimentel-cafe); }
+    .error-list-title { color: var(--pimentel-cafe); font-size: .95rem; }
     .error-list-summary {
         display: inline-flex;
         align-items: center;
@@ -754,8 +773,25 @@
         font-size: .7rem;
     }
     .error-list-filter { width: min(100%, 230px); background-color: #fffdf9; border-color: rgba(59, 41, 35, .18); }
-    .error-list-content { padding: 1rem; }
-    .error-list-content > .card:last-child { margin-bottom: 0 !important; }
+    .error-list-filters { display: flex; gap: .55rem; }
+    .error-list-content { display: grid; gap: 1rem; padding: 1rem; }
+    .error-subject-group { overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
+    .error-subject-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .75rem .9rem; background: rgba(91, 67, 58, .045); }
+    .error-subject-title { display: flex; align-items: center; gap: .55rem; min-width: 0; color: var(--pimentel-cafe); font-size: .82rem; font-weight: 750; }
+    .error-subject-icon { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: .55rem; }
+    .error-subject-count { padding: .18rem .48rem; color: var(--pimentel-cafe-claro); background: rgba(59, 41, 35, .07); border-radius: 999px; font-size: .63rem; font-weight: 700; }
+    .error-entry-list { display: grid; }
+    .error-entry-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: .95rem; border-top: 1px solid rgba(59, 41, 35, .075); }
+    .error-entry-card:first-child { border-top: 0; }
+    .error-entry-main { min-width: 0; }
+    .error-entry-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-bottom: .35rem; color: var(--pimentel-cafe-claro); font-size: .65rem; }
+    .error-entry-date { display: inline-flex; align-items: center; gap: .25rem; }
+    .error-entry-title { margin: 0; color: var(--pimentel-cafe); font-size: .88rem; font-weight: 750; line-height: 1.35; }
+    .error-entry-note { margin: .4rem 0 0; padding-left: .65rem; color: #6e5b52; border-left: 2px solid rgba(184, 50, 42, .18); font-size: .74rem; line-height: 1.5; white-space: pre-line; }
+    .error-entry-actions { display: inline-flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
+    .error-entry-actions .btn-primary { border-radius: .65rem; font-size: .7rem; font-weight: 700; }
+    .error-entry-actions .btn-outline-danger { width: 2.05rem; height: 2.05rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-color: transparent; border-radius: .6rem; }
+    .error-topic-badge { display: inline-flex; align-items: center; padding: .18rem .45rem; color: #6b4c40; background: rgba(184, 50, 42, .08); border-radius: 999px; font-size: .63rem; font-weight: 700; }
     .error-empty {
         min-height: 220px;
         display: grid;
@@ -783,6 +819,27 @@
     }
     .error-empty strong { color: var(--pimentel-cafe); }
     .error-empty small { max-width: 380px; }
+    .exam-topic-learning { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: .42rem 0 0 1.8rem; }
+    .exam-topic-learning > span:not(.exam-topic-quick-actions) { display: inline-flex; align-items: center; padding: .22rem .48rem; color: #6e5b52; background: rgba(91, 67, 58, .06); border: 1px solid rgba(59, 41, 35, .055); border-radius: 999px; font-size: .65rem; font-weight: 700; }
+    .exam-topic-learning .is-due { color: #7b4d10; background: rgba(190, 119, 23, .12); }
+    .exam-topic-learning .is-error { color: #842029; background: rgba(184, 50, 42, .1); }
+    .exam-topic-quick-actions { display: inline-flex; align-items: center; gap: .35rem; margin-left: auto; }
+    .exam-topic-quick-actions .btn { padding: .18rem .48rem !important; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .065); border-radius: 999px; font-size: .63rem; font-weight: 700; text-decoration: none; }
+    .exam-topic-quick-actions .btn:hover { background: rgba(184, 50, 42, .12); }
+    .error-card-modal .modal-content { overflow: hidden; }
+    .error-card-modal .modal-header { padding: 1.05rem 1.2rem; background: linear-gradient(120deg, rgba(244, 226, 212, .55), rgba(255, 253, 249, .98)); }
+    .error-card-modal .modal-title { color: var(--pimentel-cafe); }
+    .error-card-eyebrow { margin-bottom: .18rem; color: var(--pimentel-vermelho-escuro); font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .error-card-editor { padding: 1.15rem 1.2rem; background: #fcfaf7; }
+    .error-card-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .error-card-field { padding: .9rem; background: #fff; border: 1px solid rgba(59, 41, 35, .1); border-radius: .8rem; }
+    .error-card-field-label { display: flex; align-items: center; gap: .45rem; margin-bottom: .5rem; color: var(--pimentel-cafe); font-size: .75rem; font-weight: 750; }
+    .error-card-step { width: 1.35rem; height: 1.35rem; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--pimentel-vermelho); border-radius: 50%; font-size: .62rem; }
+    .error-card-field textarea { min-height: 132px; resize: vertical; line-height: 1.5; border-color: rgba(59, 41, 35, .16); }
+    .error-card-link { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-top: .9rem; padding: .8rem .9rem; background: rgba(244, 226, 212, .32); border-radius: .8rem; }
+    .error-card-link-copy { min-width: 0; flex: 1; }
+    .error-card-link .form-select { max-width: 420px; background-color: #fff; }
+    .error-card-modal .modal-footer { padding: .85rem 1.2rem; background: #fff; }
     .opcao-resposta { cursor: pointer; text-align: left; }
     .opcao-resposta.correta { background-color: #d1e7dd !important; border-color: #badbcc !important; font-weight: 600; }
     .opcao-resposta.incorreta { background-color: #f8d7da !important; border-color: #f5c2c7 !important; }
@@ -1474,6 +1531,13 @@
         .error-form-actions .btn { width: 100%; }
         .error-list-toolbar { align-items: stretch; flex-direction: column; }
         .error-list-filter { width: 100%; }
+        .error-list-filters { display: grid; grid-template-columns: 1fr; }
+        .error-entry-card { grid-template-columns: 1fr; gap: .75rem; }
+        .error-entry-actions { width: 100%; }
+        .error-entry-actions .btn-primary { flex: 1; }
+        .error-card-link { align-items: stretch; flex-direction: column; }
+        .exam-topic-learning { margin-left: 0; }
+        .exam-topic-quick-actions { width: 100%; margin-left: 0; }
         .library-hero { align-items: flex-start; }
         .legal-reader-prototype { height: clamp(480px, 82dvh, 720px); }
         .legal-reader-header { align-items: stretch; flex-direction: column; gap: .55rem; padding: .65rem .75rem; }
@@ -1496,6 +1560,8 @@
     }
     @media (max-width: 991.98px) {
         .today-layout { grid-template-columns: 1fr; }
+        .error-entry-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .error-topic { grid-column: 1 / -1; }
         .study-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .study-stat + .study-stat { border-left: 0; }
         .study-stat:last-child { grid-column: 1 / -1; }
@@ -1506,6 +1572,9 @@
         .simulation-actions { grid-column: 1 / -1; }
     }
     @media (max-width: 767.98px) {
+        .error-entry-form { grid-template-columns: 1fr; }
+        .error-topic, .error-notes, .error-form-actions { grid-column: auto; }
+        .error-card-editor-grid { grid-template-columns: 1fr; }
         .weekly-calendar-scroll { overflow: visible; padding-inline: 0; }
         .weekly-calendar-grid { min-width: 0; grid-template-columns: minmax(0, 1fr); }
         .calendar-day { min-height: 440px; }
@@ -2035,18 +2104,25 @@
         <div class="tab-pane fade" id="p-erros">
             <div class="card error-form-card shadow-sm mb-4">
                 <div class="card-body">
-                    <h6 class="fw-bold mb-3"><i class="bi-plus-circle me-1"></i>Registrar erro manualmente</h6>
+                    <div class="error-form-heading">
+                        <span class="error-form-heading-icon"><i class="bi-journal-plus" aria-hidden="true"></i></span>
+                        <div><h6 class="fw-bold mb-0">Registrar um aprendizado</h6><p>Anote o que confundiu você e transforme esse ponto em uma revisão objetiva.</p></div>
+                    </div>
                     <form id="formErro" class="error-entry-form">
                         <div class="error-subject">
-                            <label class="form-label small">Matéria</label>
+                            <label class="form-label" for="erroMateria">Matéria</label>
                             <select class="form-select" id="erroMateria" required></select>
                         </div>
                         <div class="error-topic">
-                            <label class="form-label small">Tema / questão</label>
+                            <label class="form-label" for="erroTema">Tema ou questão</label>
                             <input type="text" class="form-control" id="erroTema" placeholder="Ex: Prisão em flagrante" required>
                         </div>
+                        <div class="error-exam-topic">
+                            <label class="form-label" for="erroTopicoEdital">Vínculo com o Edital <span class="fw-normal text-muted">(opcional)</span></label>
+                            <select class="form-select" id="erroTopicoEdital"><option value="">Sem tópico</option></select>
+                        </div>
                         <div class="error-notes">
-                            <label class="form-label small">O que errei / por quê</label>
+                            <label class="form-label" for="erroObs">O que errei e como devo lembrar</label>
                             <textarea class="form-control" id="erroObs" rows="4" placeholder="Ex: Confundi flagrante com ordem judicial"></textarea>
                         </div>
                         <div class="error-form-actions">
@@ -2061,7 +2137,7 @@
                         <h6 class="error-list-title fw-bold mb-0" id="tituloListaErros"><i class="bi-journal-text me-2"></i>Registros do caderno</h6>
                         <span class="error-list-summary" id="resumoErros"></span>
                     </div>
-                    <select class="form-select form-select-sm error-list-filter" id="filtroErroMateria" aria-label="Filtrar erros por matéria"><option value="">Todas as matérias</option></select>
+                    <div class="error-list-filters"><select class="form-select form-select-sm error-list-filter" id="filtroErroMateria" aria-label="Filtrar erros por matéria"><option value="">Todas as matérias</option></select><select class="form-select form-select-sm error-list-filter" id="filtroErroTopico" aria-label="Filtrar erros por tópico do Edital"><option value="">Todos os tópicos</option></select></div>
                 </header>
                 <div class="error-list-content" id="listaErros"></div>
             </section>
@@ -2658,6 +2734,23 @@
                 </div>
             </div>
         </div>
+    </div></div>
+</div>
+
+<!-- ============ CRIAR FLASHCARD A PARTIR DE ERRO ============ -->
+<div class="modal fade" id="modalCardDoErro" tabindex="-1" aria-labelledby="tituloModalCardDoErro" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered error-card-modal"><div class="modal-content">
+        <div class="modal-header"><div><div class="error-card-eyebrow">Revisão ativa</div><h5 class="modal-title fw-bold" id="tituloModalCardDoErro"><i class="bi-card-heading me-2"></i>Transformar erro em flashcard</h5><p class="small text-muted mb-0 mt-1" id="contextoCardDoErro"></p></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <form id="formCardDoErro">
+            <div class="modal-body error-card-editor">
+                <div class="error-card-editor-grid">
+                    <div class="error-card-field"><label class="error-card-field-label" for="cardErroFrente"><span class="error-card-step">1</span>Frente — a pergunta</label><textarea class="form-control" id="cardErroFrente" rows="5" maxlength="5000" required></textarea></div>
+                    <div class="error-card-field"><label class="error-card-field-label" for="cardErroVerso"><span class="error-card-step">2</span>Verso — a resposta correta</label><textarea class="form-control" id="cardErroVerso" rows="5" maxlength="10000" required></textarea></div>
+                </div>
+                <div class="error-card-link"><div class="error-card-link-copy"><label class="form-label fw-semibold mb-1" for="cardErroTopicoEdital"><i class="bi-diagram-3 me-1"></i>Vincular ao tópico do Edital <span class="fw-normal text-muted">(opcional)</span></label><select class="form-select" id="cardErroTopicoEdital"><option value="">Sem tópico</option></select><div class="form-text">Esse vínculo alimenta os indicadores da matéria e mantém o card na revisão correta.</div></div></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary" id="btnSalvarCardDoErro"><i class="bi-plus-lg me-1"></i>Salvar e adicionar à revisão</button></div>
+        </form>
     </div></div>
 </div>
 
@@ -3327,7 +3420,8 @@ function sincronizarListaDeErros(errosRemotos) {
             materiaId: remoto.materiaId,
             tema: remoto.tema,
             obs: remoto.obs,
-            data: remoto.data
+            data: remoto.data,
+            topicoEditalId: remoto.topicoEditalId || null
         }));
     salvar(LS.erros, sincronizados);
 }
@@ -3562,6 +3656,8 @@ function popularSelects() {
         filtro.innerHTML = `<option value="">Todas as matérias</option>` + opcoes;
         filtro.value = valorAtual;
     }
+    popularTopicosErro();
+    popularFiltroTopicosErro();
     popularTopicosEditalCronograma();
 }
 
@@ -7382,12 +7478,12 @@ document.getElementById("btnExportarMateria").addEventListener("click", () => {
 let filaRevisao = [];
 let indiceRevisao = 0;
 
-function iniciarRevisao(materiaId) {
+function iniciarRevisao(materiaId, topicoEditalId = null) {
     const materias = materiasNormalizadas();
     filaRevisao = [];
     materias.forEach(m => {
         if (materiaId && String(m.id) !== String(materiaId)) return;
-        cardsVencidos(m).forEach(c => filaRevisao.push({ materiaId: m.id, materiaNome: m.nome, cardId: c.id }));
+        cardsVencidos(m).filter(card => !topicoEditalId || String(card.topicoEditalId) === String(topicoEditalId)).forEach(c => filaRevisao.push({ materiaId: m.id, materiaNome: m.nome, cardId: c.id }));
     });
     filaRevisao.sort(() => Math.random() - 0.5);
     indiceRevisao = 0;
@@ -7486,8 +7582,9 @@ document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEvent
         }
         if (nivel === "errei" && document.getElementById("chkRegistrarErro").checked) {
             try {
-                await registrarErro(item.materiaId, card.frente, "Errei na revisão de flashcards");
+                await registrarErro(item.materiaId, card.frente, "Errei na revisão de flashcards", card.topicoEditalId || null);
                 if (document.getElementById("listaErros")) renderizarErros();
+                renderizarEdital();
             } catch (falhaErro) {
                 console.error("Falha ao enviar o erro do flashcard ao caderno", falhaErro);
                 alert("O progresso do flashcard foi salvo, mas o registro não entrou no Caderno de Erros. Tente registrá-lo manualmente.");
@@ -8613,6 +8710,8 @@ function renderizarEdital() {
         const expandida = materiasEditalExpandidas.has(String(m.id));
         const detalheId = `edital-topicos-${String(m.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
         const nomeMateria = nomeDaMateria(m.materiaId);
+        const cardsDaMateria = materiaPorId(m.materiaId)?.cards || [];
+        const errosDaMateria = obterErros().filter(erro => String(erro.materiaId) === String(m.materiaId));
         const htmlEditor = topico => `<form class="exam-topic-editor form-topico-edital" data-item-id="${esc(m.id)}" ${topico ? `data-id="${esc(topico.id)}"` : ""}>
             <input type="text" class="form-control form-control-sm campo-titulo-topico-edital" maxlength="1000" value="${esc(topico?.titulo || "")}" placeholder="Digite o tópico do edital" aria-label="Título do tópico" required>
             <div class="exam-topic-editor-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-cancelar-topico-edital">Cancelar</button><button type="submit" class="btn btn-sm btn-primary"><i class="bi-check-lg me-1"></i>Salvar</button></div>
@@ -8621,11 +8720,14 @@ function renderizarEdital() {
             if (String(editorTopicoEdital?.itemId) === String(m.id) && String(editorTopicoEdital?.topicoId) === String(topico.id)) return htmlEditor(topico);
             const info = topico.concluido ? STATUS_TOPICO.dominado : STATUS_TOPICO.nao;
             const inputId = `check-edital-${String(topico.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+            const cardsDoTopico = cardsDaMateria.filter(card => String(card.topicoEditalId) === String(topico.id));
+            const cardsParaRevisar = cardsDoTopico.filter(card => String(card.proxima || hojeISO()) <= hojeISO()).length;
+            const errosDoTopico = errosDaMateria.filter(erro => String(erro.topicoEditalId) === String(topico.id)).length;
             return `<div class="exam-topic-item">
-                <label class="exam-topic-label" for="${inputId}">
+                <div class="flex-grow-1 min-w-0"><label class="exam-topic-label" for="${inputId}">
                     <input id="${inputId}" class="form-check-input m-0 check-topico-edital" type="checkbox" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" ${topico.concluido ? "checked" : ""}>
                     <span class="small exam-topic-title">${esc(topico.titulo)}</span>
-                </label>
+                </label><div class="exam-topic-learning"><span><i class="bi-card-heading me-1"></i>${cardsDoTopico.length} card${cardsDoTopico.length === 1 ? "" : "s"}</span><span class="${cardsParaRevisar ? "is-due" : ""}"><i class="bi-arrow-repeat me-1"></i>${cardsParaRevisar} para revisar</span><span class="${errosDoTopico ? "is-error" : ""}"><i class="bi-journal-x me-1"></i>${errosDoTopico} erro${errosDoTopico === 1 ? "" : "s"}</span>${cardsParaRevisar || errosDoTopico ? `<span class="exam-topic-quick-actions">${cardsParaRevisar ? `<button type="button" class="btn btn-sm btn-link p-0 btn-revisar-topico-edital" data-materia-id="${esc(m.materiaId)}" data-topico-id="${esc(topico.id)}"><i class="bi-play-fill me-1"></i>Revisar</button>` : ""}${errosDoTopico ? `<button type="button" class="btn btn-sm btn-link p-0 btn-ver-erros-topico" data-materia-id="${esc(m.materiaId)}" data-topico-id="${esc(topico.id)}"><i class="bi-arrow-up-right me-1"></i>Ver erros</button>` : ""}</span>` : ""}</div></div>
                 <span class="badge text-bg-${info.cor}">${info.rotulo}</span>
                 <span class="exam-topic-actions"><button type="button" class="btn btn-sm btn-link text-secondary exam-topic-edit" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Editar tópico" aria-label="Editar tópico ${esc(topico.titulo)}"><i class="bi-pencil" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tópico" aria-label="Remover tópico ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button></span>
             </div>`;
@@ -8651,6 +8753,9 @@ function renderizarEdital() {
         </tr>
         ${linhaTopicos}`;
     }).join("");
+
+    tabela.querySelectorAll(".btn-revisar-topico-edital").forEach(btn => btn.addEventListener("click", () => iniciarRevisao(btn.dataset.materiaId, btn.dataset.topicoId)));
+    tabela.querySelectorAll(".btn-ver-erros-topico").forEach(btn => btn.addEventListener("click", () => abrirErrosDoTopico(btn.dataset.materiaId, btn.dataset.topicoId)));
 
     tabela.querySelectorAll(".btn-toggle-topicos-edital").forEach(btn => btn.addEventListener("click", () => {
         const detalhe = document.getElementById(btn.getAttribute("aria-controls"));
@@ -8997,6 +9102,7 @@ document.getElementById("formAddMateriaEdital").addEventListener("submit", async
 // CADERNO DE ERROS
 // ============================================================
 let operacaoErroEmAndamento = false;
+let erroParaFlashcardId = null;
 
 function exigirNuvemErros() {
     if (!window.HUB_CLOUD_ERRORS) throw new Error("A conexão do caderno de erros com o Supabase ainda não está pronta.");
@@ -9009,9 +9115,37 @@ function exibirDataErro(data) {
     return correspondencia ? `${correspondencia[3]}/${correspondencia[2]}/${correspondencia[1]}` : valor;
 }
 
-async function registrarErro(materiaId, tema, obs) {
+function popularTopicosErro(valorPreferido = "") {
+    const select = document.getElementById("erroTopicoEdital");
+    if (!select) return;
+    const materiaId = document.getElementById("erroMateria").value;
+    const topicos = obterTopicosEditalDaMateria(materiaId);
+    const valorAtual = valorPreferido || select.value;
+    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    select.value = topicos.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
+    select.disabled = topicos.length === 0;
+}
+
+function popularFiltroTopicosErro(valorPreferido = "") {
+    const select = document.getElementById("filtroErroTopico");
+    if (!select) return;
+    const materiaId = document.getElementById("filtroErroMateria").value;
+    const itens = obterEdital().materias
+        .filter(item => !materiaId || String(item.materiaId) === String(materiaId))
+        .flatMap(item => (item.topicos || []).map(topico => ({ ...topico, materiaId: item.materiaId })));
+    const valorAtual = valorPreferido || select.value;
+    select.innerHTML = '<option value="">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + itens.map(topico => `<option value="${esc(topico.id)}">${materiaId ? "" : `${esc(nomeDaMateria(topico.materiaId))} — `}${esc(topico.titulo)}</option>`).join("");
+    select.value = valorAtual === "sem-topico" || itens.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
+}
+
+function topicoDoErro(erro) {
+    return obterTopicosEditalDaMateria(erro.materiaId).find(topico => String(topico.id) === String(erro.topicoEditalId)) || null;
+}
+
+async function registrarErro(materiaId, tema, obs, topicoEditalId = null) {
     const erros = obterErros();
-    const erro = { id: novoId(), materiaId, tema, obs, data: hojeISO() };
+    const topicoValido = obterTopicosEditalDaMateria(materiaId).some(topico => String(topico.id) === String(topicoEditalId));
+    const erro = { id: novoId(), materiaId, tema, obs, data: hojeISO(), topicoEditalId: topicoValido ? topicoEditalId : null };
     await exigirNuvemErros().criar(erro);
     try {
         erros.push(erro);
@@ -9026,7 +9160,13 @@ async function registrarErro(materiaId, tema, obs) {
 function renderizarErros() {
     const erros = obterErros();
     const filtro = document.getElementById("filtroErroMateria").value;
-    const lista = filtro ? erros.filter(e => String(e.materiaId) === String(filtro)) : erros;
+    const filtroTopico = document.getElementById("filtroErroTopico").value;
+    const lista = erros.filter(erro => {
+        if (filtro && String(erro.materiaId) !== String(filtro)) return false;
+        if (filtroTopico === "sem-topico" && topicoDoErro(erro)) return false;
+        if (filtroTopico && filtroTopico !== "sem-topico" && String(erro.topicoEditalId) !== String(filtroTopico)) return false;
+        return true;
+    });
     const container = document.getElementById("listaErros");
 
     const resumoTotal = erros.length === 0 ? "Nenhum erro registrado" : erros.length === 1 ? "1 erro registrado" : `${erros.length} erros registrados`;
@@ -9050,20 +9190,24 @@ function renderizarErros() {
     });
 
     container.innerHTML = Object.keys(porMateria).sort().map(nome => `
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white fw-bold">${esc(nome)} <span class="badge bg-secondary">${porMateria[nome].length}</span></div>
-            <ul class="list-group list-group-flush">
-                ${porMateria[nome].map(er => `
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-semibold">${esc(er.tema)}</div>
-                            ${er.obs ? `<div class="small text-muted">${esc(er.obs)}</div>` : ""}
-                            <div class="small text-muted">${esc(exibirDataErro(er.data))}</div>
+        <section class="error-subject-group">
+            <header class="error-subject-heading"><div class="error-subject-title"><span class="error-subject-icon"><i class="bi-book" aria-hidden="true"></i></span><span>${esc(nome)}</span></div><span class="error-subject-count">${porMateria[nome].length} ${porMateria[nome].length === 1 ? "registro" : "registros"}</span></header>
+            <div class="error-entry-list">
+                ${porMateria[nome].map(er => {
+                    const topico = topicoDoErro(er);
+                    return `<article class="error-entry-card">
+                        <div class="error-entry-main">
+                            <div class="error-entry-meta"><span class="error-entry-date"><i class="bi-calendar3" aria-hidden="true"></i>${esc(exibirDataErro(er.data))}</span>${topico ? `<span class="error-topic-badge"><i class="bi-bookmark" aria-hidden="true"></i>${esc(topico.titulo)}</span>` : ""}</div>
+                            <h6 class="error-entry-title">${esc(er.tema)}</h6>
+                            ${er.obs ? `<p class="error-entry-note">${esc(er.obs)}</p>` : ""}
                         </div>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}"><i class="bi-trash"></i></button>
-                    </li>`).join("")}
-            </ul>
-        </div>`).join("");
+                        <div class="error-entry-actions"><button class="btn btn-sm btn-primary btn-criar-card-erro" data-id="${er.id}" type="button" title="Transformar em flashcard"><i class="bi-card-heading me-1" aria-hidden="true"></i><span>Criar flashcard</span></button><button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}" type="button" title="Excluir erro" aria-label="Excluir erro"><i class="bi-trash"></i></button></div>
+                    </article>`;
+                }).join("")}
+            </div>
+        </section>`).join("");
+
+    container.querySelectorAll(".btn-criar-card-erro").forEach(btn => btn.addEventListener("click", () => abrirCardDoErro(btn.dataset.id)));
 
     container.querySelectorAll(".btn-excluir-erro").forEach(btn => btn.addEventListener("click", async () => {
         if (operacaoErroEmAndamento) return;
@@ -9076,6 +9220,7 @@ function renderizarErros() {
             salvar(LS.erros, erros.filter(item => String(item.id) !== String(erro.id)));
             renderizarErros();
             renderizarMaterias();
+            renderizarEdital();
             if (String(materiaAbertaId) === String(erro.materiaId)) renderizarWorkspace();
         } catch (falha) {
             console.error("Falha ao excluir registro do caderno de erros", falha);
@@ -9086,6 +9231,30 @@ function renderizarErros() {
     }));
 }
 
+function abrirCardDoErro(id) {
+    const erro = obterErros().find(item => String(item.id) === String(id));
+    if (!erro) return;
+    erroParaFlashcardId = erro.id;
+    document.getElementById("contextoCardDoErro").textContent = `${nomeDaMateria(erro.materiaId)}${topicoDoErro(erro) ? ` · ${topicoDoErro(erro).titulo}` : ""}`;
+    document.getElementById("cardErroFrente").value = /\?$/.test(erro.tema.trim()) ? erro.tema.trim() : `O que devo lembrar sobre: ${erro.tema.trim()}?`;
+    document.getElementById("cardErroVerso").value = erro.obs.trim() || `Revise o ponto registrado: ${erro.tema.trim()}`;
+    const select = document.getElementById("cardErroTopicoEdital");
+    const topicos = obterTopicosEditalDaMateria(erro.materiaId);
+    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}</option>`).join("");
+    select.value = topicoDoErro(erro)?.id || "";
+    select.disabled = topicos.length === 0;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCardDoErro")).show();
+}
+
+function abrirErrosDoTopico(materiaId, topicoEditalId) {
+    const aba = document.querySelector('[data-bs-target="#p-erros"]');
+    if (aba) bootstrap.Tab.getOrCreateInstance(aba).show();
+    document.getElementById("filtroErroMateria").value = materiaId;
+    popularFiltroTopicosErro(topicoEditalId);
+    renderizarErros();
+    document.getElementById("tituloListaErros")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 document.getElementById("formErro").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (operacaoErroEmAndamento) return;
@@ -9093,10 +9262,12 @@ document.getElementById("formErro").addEventListener("submit", async (e) => {
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
     operacaoErroEmAndamento = true;
     try {
-        await registrarErro(materiaId, document.getElementById("erroTema").value.trim(), document.getElementById("erroObs").value.trim());
+        await registrarErro(materiaId, document.getElementById("erroTema").value.trim(), document.getElementById("erroObs").value.trim(), document.getElementById("erroTopicoEdital").value || null);
         e.target.reset();
+        popularTopicosErro();
         renderizarErros();
         renderizarMaterias();
+        renderizarEdital();
     } catch (falha) {
         console.error("Falha ao registrar erro manualmente", falha);
         alert("O erro não foi registrado porque o Supabase não confirmou a operação.");
@@ -9104,7 +9275,26 @@ document.getElementById("formErro").addEventListener("submit", async (e) => {
         operacaoErroEmAndamento = false;
     }
 });
-document.getElementById("filtroErroMateria").addEventListener("change", renderizarErros);
+document.getElementById("erroMateria").addEventListener("change", () => popularTopicosErro());
+document.getElementById("filtroErroMateria").addEventListener("change", () => { popularFiltroTopicosErro(); renderizarErros(); });
+document.getElementById("filtroErroTopico").addEventListener("change", renderizarErros);
+document.getElementById("formCardDoErro").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (operacaoCardEmAndamento) return;
+    const erro = obterErros().find(item => String(item.id) === String(erroParaFlashcardId));
+    if (!erro) return;
+    const botao = document.getElementById("btnSalvarCardDoErro");
+    botao.disabled = true;
+    try {
+        const criado = await criarFlashcardSincronizado(document.getElementById("cardErroFrente").value, document.getElementById("cardErroVerso").value, { materiaId: erro.materiaId, topicoEditalId: document.getElementById("cardErroTopicoEdital").value || null });
+        if (!criado) return;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCardDoErro")).hide();
+        renderizarEdital();
+    } finally {
+        botao.disabled = false;
+    }
+});
+document.getElementById("modalCardDoErro").addEventListener("hidden.bs.modal", () => { erroParaFlashcardId = null; document.getElementById("formCardDoErro").reset(); });
 
 // ============================================================
 // SIMULADOS COM IA (Google Gemini)
@@ -9339,7 +9529,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 7;
+const VERSAO_BACKUP = 8;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -9544,9 +9734,14 @@ function validarPayloadBackup(payload) {
         objetoBackup(er, `Erro ${i + 1}`);
         const materiaId = idBackup(er.materiaId, "Matéria do erro");
         garantirReferenciaMateria(materiaId, idsMaterias, `Erro ${i + 1}`);
-        return { id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro") };
+        return { id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro"), topicoEditalId: versao >= 8 && er.topicoEditalId ? idBackup(er.topicoEditalId, "Tópico do Edital do erro") : null };
     });
     garantirIdsUnicos(erros, "Erros");
+    erros.forEach((erro, indice) => {
+        if (erro.topicoEditalId != null && !idsTopicosPorMateria.get(String(erro.materiaId))?.has(String(erro.topicoEditalId))) {
+            throw new Error(`Erro ${indice + 1} referencia um tópico inexistente no Edital.`);
+        }
+    });
 
     const desempenhoOrigem = objetoBackup(dados.desempenho, "Desempenho");
     const entradasDesempenho = Object.entries(desempenhoOrigem);
