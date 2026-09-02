@@ -1061,6 +1061,13 @@ test("o progresso de leitura dos PDFs é privado, persistente e retoma na págin
     assert.match(html, /function salvarProgressoPdfCaderno/);
     assert.match(html, /atualizarPdf\(aberto\.id, \{ paginaAtual, totalPaginas, registrarLeitura: true \}\)/);
     assert.match(html, /arquivo\.ultimaLeituraEm \? "Continuar" : "Abrir"/);
+    assert.match(html, /function rotuloUltimaLeituraPdf/);
+    assert.match(html, /class="legal-notebook-pdf-progress is-compact"/);
+    assert.match(html, /class="btn btn-sm btn-outline-light btn-editar-progresso-pdf"/);
+    assert.match(html, /pdfProgressoEmEdicaoCaderno\.add\(colecao\.id\)/);
+    assert.match(html, /pdfProgressoEmEdicaoCaderno\.delete\(colecao\.id\)/);
+    assert.match(html, /percentualLeituraPdf\(arquivo\) === 100 \? "Revisar"/);
+    assert.match(html, /Leitura concluída/);
 });
 
 test("as migrations têm identificadores únicos e permanecem em ordem", () => {

@@ -880,6 +880,7 @@
     .legal-notebook-file-reading span { color: var(--pimentel-cafe-claro); font-size: .59rem; }
     .legal-notebook-file-reading .progress { grid-column: 1 / -1; height: .25rem; background: rgba(59, 41, 35, .08); }
     .legal-notebook-file-reading .progress-bar { background: var(--pimentel-vermelho); }
+    .legal-notebook-file-reading.is-complete > span { color: var(--pimentel-vermelho-escuro); font-weight: 700; }
     .legal-notebook-file-actions { display: flex; gap: .35rem; }
     .legal-notebook-file-card.is-editing { align-items: flex-start; border-color: rgba(154, 29, 45, .2); box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .06); }
     .legal-notebook-file-edit { min-width: 0; display: grid; grid-template-columns: minmax(10rem, .7fr) minmax(14rem, 1fr) auto; align-items: end; flex: 1; gap: .65rem; }
@@ -894,6 +895,16 @@
     .legal-notebook-pdf-progress label { display: grid; gap: .2rem; margin: 0; color: rgba(255, 255, 255, .72); font-size: .58rem; font-weight: 700; }
     .legal-notebook-pdf-progress input { width: 5.4rem; }
     .legal-notebook-pdf-progress output { margin-left: auto; align-self: center; color: #fff; font-size: .66rem; font-weight: 700; }
+    .legal-notebook-pdf-progress.is-compact { align-items: center; padding-block: .48rem; }
+    .legal-notebook-pdf-progress-copy { min-width: 0; display: flex; align-items: center; gap: .55rem; }
+    .legal-notebook-pdf-progress-copy > i { width: 1.85rem; height: 1.85rem; display: inline-grid; place-items: center; flex: 0 0 auto; color: #3b2923; background: #fff8f2; border-radius: 50%; }
+    .legal-notebook-pdf-progress-copy strong, .legal-notebook-pdf-progress-copy small { display: block; }
+    .legal-notebook-pdf-progress-copy strong { font-size: .68rem; }
+    .legal-notebook-pdf-progress-copy small { margin-top: .08rem; color: rgba(255, 255, 255, .68); font-size: .56rem; }
+    .legal-notebook-pdf-progress-track { min-width: 8rem; flex: 1; }
+    .legal-notebook-pdf-progress-track .progress { height: .3rem; background: rgba(255, 255, 255, .14); }
+    .legal-notebook-pdf-progress-track .progress-bar { background: #f2c9bc; }
+    .legal-notebook-pdf-progress-percent { min-width: 2.5rem; color: #fff; text-align: right; font-size: .65rem; font-weight: 800; }
     .legal-notebook-pdf-viewer iframe { width: 100%; min-height: 31rem; border: 0; background: #fff; }
     .legal-notebook-popover-card { right: 0; left: auto; width: min(19rem, calc(100vw - 2rem)); }
     .legal-notebook-popover-title { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
@@ -909,7 +920,7 @@
     .legal-notebook-review-copy small { color: var(--pimentel-cafe-claro); font-size: .63rem; }
     .legal-notebook-review-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
     .legal-notebook-review-actions .btn { white-space: nowrap; }
-    @media (max-width: 767.98px) { .personal-vade-list.is-overview { grid-template-columns: 1fr; } .legal-notebook-workspace-header { grid-template-columns: 1fr; } .legal-notebook-workspace-actions { justify-content: space-between; } .legal-notebook-progress-summary { text-align: left; } .legal-notebook-workspace-toolbar, .legal-notebook-workspace-toolbar.has-selection-control { grid-template-columns: 1fr; } .legal-notebook-workspace-body { display: block; min-height: 0; } .legal-notebook-sidebar { display: none; } .legal-notebook-mobile-section { display: block; margin-bottom: .8rem; } .legal-notebook-content { padding: .85rem; } .legal-notebook-bulk-bar { align-items: stretch; flex-wrap: wrap; } .legal-notebook-bulk-section { flex: 1 1 12rem; width: auto; } .legal-notebook-bulk-actions { flex: 1 1 100%; justify-content: flex-end; margin-left: 0; } .legal-notebook-notes-layout { grid-template-columns: 1fr; } .legal-notebook-notes-list { max-height: 13rem; } .legal-notebook-note-meta, .legal-notebook-note-footer, .legal-notebook-file-upload, .legal-notebook-file-edit { grid-template-columns: 1fr; } .legal-notebook-note-editor, .legal-notebook-files { padding: .9rem; } .legal-notebook-file-card { align-items: flex-start; flex-wrap: wrap; } .legal-notebook-file-card.is-editing .legal-notebook-file-edit { flex-basis: calc(100% - 3.2rem); } .legal-notebook-file-actions { width: 100%; justify-content: flex-end; } .legal-notebook-pdf-progress { align-items: stretch; flex-wrap: wrap; } .legal-notebook-pdf-progress label { flex: 1 1 7rem; } .legal-notebook-pdf-progress input { width: 100%; } .legal-notebook-pdf-progress output { width: 100%; margin-left: 0; } }
+    @media (max-width: 767.98px) { .personal-vade-list.is-overview { grid-template-columns: 1fr; } .legal-notebook-workspace-header { grid-template-columns: 1fr; } .legal-notebook-workspace-actions { justify-content: space-between; } .legal-notebook-progress-summary { text-align: left; } .legal-notebook-workspace-toolbar, .legal-notebook-workspace-toolbar.has-selection-control { grid-template-columns: 1fr; } .legal-notebook-workspace-body { display: block; min-height: 0; } .legal-notebook-sidebar { display: none; } .legal-notebook-mobile-section { display: block; margin-bottom: .8rem; } .legal-notebook-content { padding: .85rem; } .legal-notebook-bulk-bar { align-items: stretch; flex-wrap: wrap; } .legal-notebook-bulk-section { flex: 1 1 12rem; width: auto; } .legal-notebook-bulk-actions { flex: 1 1 100%; justify-content: flex-end; margin-left: 0; } .legal-notebook-notes-layout { grid-template-columns: 1fr; } .legal-notebook-notes-list { max-height: 13rem; } .legal-notebook-note-meta, .legal-notebook-note-footer, .legal-notebook-file-upload, .legal-notebook-file-edit { grid-template-columns: 1fr; } .legal-notebook-note-editor, .legal-notebook-files { padding: .9rem; } .legal-notebook-file-card { align-items: flex-start; flex-wrap: wrap; } .legal-notebook-file-card.is-editing .legal-notebook-file-edit { flex-basis: calc(100% - 3.2rem); } .legal-notebook-file-actions { width: 100%; justify-content: flex-end; } .legal-notebook-pdf-progress { align-items: stretch; flex-wrap: wrap; } .legal-notebook-pdf-progress label { flex: 1 1 7rem; } .legal-notebook-pdf-progress input { width: 100%; } .legal-notebook-pdf-progress output { width: 100%; margin-left: 0; } .legal-notebook-pdf-progress.is-compact { align-items: center; flex-wrap: wrap; } .legal-notebook-pdf-progress-copy { flex: 1 1 calc(100% - 3rem); } .legal-notebook-pdf-progress-track { order: 3; flex-basis: calc(100% - 3.2rem); } .legal-notebook-pdf-progress-percent { order: 4; } }
     @media (max-width: 575.98px) { .personal-vade-header, .personal-vade-card-head { align-items: stretch; flex-direction: column; } .personal-vade-document, .personal-vade-article { align-items: flex-start; flex-wrap: wrap; } .personal-vade-review-tools, .personal-vade-section-form { grid-template-columns: 1fr; } .personal-vade-section-select { width: 100%; } .legal-notebook-review-bar { align-items: stretch; flex-direction: column; } .legal-notebook-review-actions { justify-content: space-between; } .legal-notebook-workspace-actions { align-items: stretch; flex-direction: column; } .legal-notebook-article-primary { width: 100%; justify-content: flex-end; } .legal-notebook-article-menu-panel { right: 0; width: min(15rem, calc(100vw - 3rem)); } }
     .vade-catalog-panel { margin: .25rem 0 1rem; padding: 0; }
     .vade-catalog-toolbar { display: grid; grid-template-columns: 1fr; gap: 12px; margin: .9rem 0; }
@@ -2972,6 +2983,7 @@ let pdfsCarregadosCadernosVade = new Set();
 let pdfsCarregandoCadernosVade = new Set();
 let pdfAbertoCaderno = new Map();
 let pdfEmEdicaoCaderno = new Map();
+let pdfProgressoEmEdicaoCaderno = new Set();
 let operacaoPdfCadernoEmAndamento = false;
 
 function capturarSessaoHubAtual() {
@@ -4611,14 +4623,28 @@ function urlPdfNaPagina(url, pagina) {
     return `${base}#page=${Math.max(1, Number(pagina) || 1)}&zoom=page-width`;
 }
 
+function rotuloUltimaLeituraPdf(valor) {
+    if (!valor) return "Leitura ainda não iniciada";
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) return "Leitura registrada";
+    const hoje = new Date();
+    const inicioHoje = Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    const inicioLeitura = Date.UTC(data.getFullYear(), data.getMonth(), data.getDate());
+    const dias = Math.round((inicioHoje - inicioLeitura) / 86400000);
+    if (dias === 0) return "Última leitura: hoje";
+    if (dias === 1) return "Última leitura: ontem";
+    return `Última leitura: ${new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(data)}`;
+}
+
 function htmlProgressoPdfCaderno(arquivo) {
     const percentual = percentualLeituraPdf(arquivo);
     const pagina = Number(arquivo.paginaAtual) || 1;
     const total = Number(arquivo.totalPaginas) || 0;
     const rotulo = !arquivo.ultimaLeituraEm
         ? "Leitura ainda não iniciada"
-        : total ? `Página ${pagina} de ${total}` : `Página ${pagina} · informe o total ao abrir`;
-    return `<div class="legal-notebook-file-reading"><span>${esc(rotulo)}</span><span>${percentual}%</span><div class="progress" role="progressbar" aria-label="Progresso de leitura" aria-valuenow="${percentual}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:${percentual}%"></div></div></div>`;
+        : percentual === 100 ? "Leitura concluída" : total ? `Página ${pagina} de ${total}` : `Página ${pagina} · informe o total ao abrir`;
+    const ultimaLeitura = arquivo.ultimaLeituraEm ? ` · ${rotuloUltimaLeituraPdf(arquivo.ultimaLeituraEm)}` : "";
+    return `<div class="legal-notebook-file-reading ${percentual === 100 ? "is-complete" : ""}"><span>${percentual === 100 ? `<i class="bi-check-circle-fill me-1"></i>` : ""}${esc(rotulo)}${esc(ultimaLeitura)}</span><span>${percentual}%</span><div class="progress" role="progressbar" aria-label="Progresso de leitura" aria-valuenow="${percentual}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:${percentual}%"></div></div></div>`;
 }
 
 function htmlCartaoPdfCaderno(colecao, arquivo) {
@@ -4626,7 +4652,7 @@ function htmlCartaoPdfCaderno(colecao, arquivo) {
     if (editando) {
         return `<article class="legal-notebook-file-card is-editing" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><form class="legal-notebook-file-edit form-editar-pdf-caderno" data-file-id="${esc(arquivo.id)}"><label>Nome do material<input type="text" class="form-control form-control-sm campo-editar-nome-pdf" maxlength="200" value="${esc(arquivo.nome)}" required></label><label>Fonte / autoria / editora<input type="text" class="form-control form-control-sm campo-editar-fonte-pdf" maxlength="1000" value="${esc(arquivo.descricao || "")}" placeholder="Ex.: editora ou autoria indicada no PDF"></label><div class="legal-notebook-file-edit-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-cancelar-edicao-pdf">Cancelar</button><button type="submit" class="btn btn-sm btn-primary btn-salvar-edicao-pdf"><i class="bi-check2 me-1"></i>Salvar identificação</button></div></form></article>`;
     }
-    const acaoLeitura = arquivo.ultimaLeituraEm ? "Continuar" : "Abrir";
+    const acaoLeitura = percentualLeituraPdf(arquivo) === 100 ? "Revisar" : arquivo.ultimaLeituraEm ? "Continuar" : "Abrir";
     return `<article class="legal-notebook-file-card" data-file-id="${esc(arquivo.id)}"><span class="legal-notebook-file-icon"><i class="bi-file-earmark-pdf"></i></span><div class="legal-notebook-file-copy"><strong>${esc(arquivo.nome)}</strong><small>${esc(arquivo.nomeOriginal)} · ${tamanhoArquivoLegivel(arquivo.tamanho)}${arquivo.descricao ? ` · Fonte/créditos: ${esc(arquivo.descricao)}` : ""}</small>${arquivo.descricao ? `<span class="legal-notebook-file-origin"><i class="bi-person-badge"></i>Material de terceiros · uso privado</span>` : ""}${htmlProgressoPdfCaderno(arquivo)}</div><div class="legal-notebook-file-actions"><button type="button" class="btn btn-sm btn-primary btn-abrir-pdf-caderno" data-file-id="${esc(arquivo.id)}"><i class="bi-book me-1"></i>${acaoLeitura}</button><button type="button" class="btn btn-sm btn-outline-secondary btn-editar-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Editar informações de ${esc(arquivo.nome)}" title="Editar nome e créditos"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-outline-danger btn-excluir-pdf-caderno" data-file-id="${esc(arquivo.id)}" aria-label="Excluir ${esc(arquivo.nome)}"><i class="bi-trash"></i></button></div></article>`;
 }
 
@@ -4640,7 +4666,11 @@ function htmlPainelPdfsCaderno(colecao) {
         const total = Number(aberto.totalPaginas) || "";
         const percentual = percentualLeituraPdf(aberto);
         const urlLeitura = urlPdfNaPagina(aberto.url, pagina);
-        return `<section class="legal-notebook-files"><div class="legal-notebook-pdf-viewer"><header class="legal-notebook-pdf-viewer-head"><button type="button" class="btn btn-sm btn-outline-light btn-fechar-pdf-caderno" aria-label="Voltar aos materiais"><i class="bi-arrow-left"></i></button><strong>${esc(aberto.nome)}</strong>${aberto.descricao ? `<span class="badge text-bg-light" title="Fonte ou créditos: ${esc(aberto.descricao)}">material de terceiros · uso privado</span>` : ""}<a class="btn btn-sm btn-outline-light" href="${esc(urlLeitura)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em uma nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a><span class="badge text-bg-dark">acesso temporário</span></header><form class="legal-notebook-pdf-progress form-progresso-pdf-caderno"><label>Página atual<input type="number" class="form-control form-control-sm campo-pagina-atual-pdf" min="1" max="100000" value="${pagina}" required></label><label>Total de páginas<input type="number" class="form-control form-control-sm campo-total-paginas-pdf" min="1" max="100000" value="${total}" placeholder="Ex.: 320" required></label><button type="submit" class="btn btn-sm btn-light btn-salvar-progresso-pdf"><i class="bi-bookmark-check me-1"></i>Salvar progresso</button><output>${percentual}% concluído</output></form><iframe src="${esc(urlLeitura)}" title="${esc(aberto.nome)}" referrerpolicy="no-referrer" sandbox="allow-downloads"></iframe></div></section>`;
+        const editandoProgresso = !total || pdfProgressoEmEdicaoCaderno.has(colecao.id);
+        const controleProgresso = editandoProgresso
+            ? `<form class="legal-notebook-pdf-progress form-progresso-pdf-caderno"><label>Página atual<input type="number" class="form-control form-control-sm campo-pagina-atual-pdf" min="1" max="100000" value="${pagina}" required></label><label>Total de páginas<input type="number" class="form-control form-control-sm campo-total-paginas-pdf" min="1" max="100000" value="${total}" placeholder="Ex.: 320" required></label><button type="submit" class="btn btn-sm btn-light btn-salvar-progresso-pdf"><i class="bi-bookmark-check me-1"></i>Salvar progresso</button>${total ? `<button type="button" class="btn btn-sm btn-outline-light btn-cancelar-progresso-pdf">Cancelar</button>` : ""}<output>${percentual}% concluído</output></form>`
+            : `<div class="legal-notebook-pdf-progress is-compact"><div class="legal-notebook-pdf-progress-copy"><i class="bi-bookmark-check-fill"></i><div><strong>${percentual === 100 ? "Leitura concluída" : `Página ${pagina} de ${total}`}</strong><small>${esc(rotuloUltimaLeituraPdf(aberto.ultimaLeituraEm))}</small></div></div><div class="legal-notebook-pdf-progress-track"><div class="progress" role="progressbar" aria-label="Progresso de leitura" aria-valuenow="${percentual}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:${percentual}%"></div></div></div><span class="legal-notebook-pdf-progress-percent">${percentual}%</span><button type="button" class="btn btn-sm btn-outline-light btn-editar-progresso-pdf" aria-label="Atualizar página de leitura" title="Atualizar página"><i class="bi-pencil"></i></button></div>`;
+        return `<section class="legal-notebook-files"><div class="legal-notebook-pdf-viewer"><header class="legal-notebook-pdf-viewer-head"><button type="button" class="btn btn-sm btn-outline-light btn-fechar-pdf-caderno" aria-label="Voltar aos materiais"><i class="bi-arrow-left"></i></button><strong>${esc(aberto.nome)}</strong>${aberto.descricao ? `<span class="badge text-bg-light" title="Fonte ou créditos: ${esc(aberto.descricao)}">material de terceiros · uso privado</span>` : ""}<a class="btn btn-sm btn-outline-light" href="${esc(urlLeitura)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em uma nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a><span class="badge text-bg-dark">acesso temporário</span></header>${controleProgresso}<iframe src="${esc(urlLeitura)}" title="${esc(aberto.nome)}" referrerpolicy="no-referrer" sandbox="allow-downloads"></iframe></div></section>`;
     }
     const arquivos = pdfsDoCaderno(colecao.id);
     const lista = arquivos.length ? `<div class="legal-notebook-file-list">${arquivos.map(arquivo => htmlCartaoPdfCaderno(colecao, arquivo)).join("")}</div>` : `<div class="legal-notebook-files-empty"><div><i class="bi-file-earmark-lock fs-2 d-block mb-2"></i><strong class="d-block mb-1">Nenhum PDF privado neste caderno</strong><small>Adicione um material pessoal para consultar durante os estudos.</small></div></div>`;
@@ -4715,6 +4745,8 @@ async function abrirPdfCaderno(colecao, arquivo) {
         } catch (erroProgresso) {
             console.warn("O PDF abriu, mas o início da leitura não foi registrado", erroProgresso);
         }
+        if (salvo.totalPaginas) pdfProgressoEmEdicaoCaderno.delete(colecao.id);
+        else pdfProgressoEmEdicaoCaderno.add(colecao.id);
         pdfAbertoCaderno.set(colecao.id, { ...salvo, url });
         renderizarVade();
         mostrarStatusVade("success", salvo.ultimaLeituraEm ? "PDF aberto na última página salva." : "PDF aberto. O progresso poderá ser salvo no controle acima da leitura.");
@@ -4750,6 +4782,7 @@ async function salvarProgressoPdfCaderno(colecao, form) {
         const salvo = await exigirNuvemVade().atualizarPdf(aberto.id, { paginaAtual, totalPaginas, registrarLeitura: true });
         pdfsCadernosVade.set(colecao.id, pdfsDoCaderno(colecao.id).map(item => item.id === salvo.id ? salvo : item));
         pdfAbertoCaderno.set(colecao.id, { ...salvo, url: aberto.url });
+        pdfProgressoEmEdicaoCaderno.delete(colecao.id);
         renderizarVade();
         mostrarStatusVade("success", `Progresso salvo: página ${paginaAtual} de ${totalPaginas}.`);
     } catch (erro) {
@@ -4826,7 +4859,9 @@ async function excluirPdfCaderno(colecao, arquivo) {
 
 function conectarEventosPdfsCaderno(card, colecao) {
     card.querySelector(".form-upload-pdf-caderno")?.addEventListener("submit", evento => { evento.preventDefault(); enviarPdfCaderno(colecao, evento.currentTarget); });
-    card.querySelector(".btn-fechar-pdf-caderno")?.addEventListener("click", () => { pdfAbertoCaderno.delete(colecao.id); renderizarVade(); });
+    card.querySelector(".btn-fechar-pdf-caderno")?.addEventListener("click", () => { pdfAbertoCaderno.delete(colecao.id); pdfProgressoEmEdicaoCaderno.delete(colecao.id); renderizarVade(); });
+    card.querySelector(".btn-editar-progresso-pdf")?.addEventListener("click", () => { pdfProgressoEmEdicaoCaderno.add(colecao.id); renderizarVade(); });
+    card.querySelector(".btn-cancelar-progresso-pdf")?.addEventListener("click", () => { pdfProgressoEmEdicaoCaderno.delete(colecao.id); renderizarVade(); });
     card.querySelector(".form-progresso-pdf-caderno")?.addEventListener("submit", evento => { evento.preventDefault(); salvarProgressoPdfCaderno(colecao, evento.currentTarget); });
     card.querySelectorAll(".campo-pagina-atual-pdf, .campo-total-paginas-pdf").forEach(campo => campo.addEventListener("input", () => atualizarSaidaProgressoPdf(campo.form)));
     card.querySelectorAll(".btn-abrir-pdf-caderno").forEach(botao => botao.addEventListener("click", () => abrirPdfCaderno(colecao, pdfsDoCaderno(colecao.id).find(item => item.id === botao.dataset.fileId))));
@@ -7751,6 +7786,7 @@ window.encerrarHub = () => {
     pdfsCarregandoCadernosVade = new Set();
     pdfAbertoCaderno = new Map();
     pdfEmEdicaoCaderno = new Map();
+    pdfProgressoEmEdicaoCaderno = new Set();
     operacaoPdfCadernoEmAndamento = false;
     documentoLeitorAtual = null;
     dispositivoLeitorAtual = null;
