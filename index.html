@@ -277,17 +277,21 @@
     .schedule-empty i { margin-bottom: .25rem; color: var(--pimentel-vermelho); font-size: 1.45rem; }
     .schedule-empty strong { color: var(--pimentel-cafe); }
     .schedule-empty small { max-width: 360px; }
-    .exam-header-card { border: 1px solid rgba(59, 41, 35, .1) !important; }
+    #p-edital { color: #332722; }
+    .exam-header-card { overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .14) !important; box-shadow: 0 12px 34px rgba(70, 48, 39, .09) !important; }
+    .exam-header-card > .card-header { background: #fffdf9 !important; border-bottom: 1px solid rgba(59, 41, 35, .11); }
+    .exam-header-card > .card-body { padding: 1.15rem; background: linear-gradient(180deg, #fffdf9 0%, #fbf6ef 100%); }
     .exam-action { min-height: 34px; border-radius: .65rem !important; }
     .exam-summary-card {
         height: 100%;
         display: flex;
         align-items: center;
-        gap: .75rem;
-        padding: .9rem;
-        background: linear-gradient(135deg, #fffdf9, rgba(244, 226, 212, .48));
-        border: 1px solid rgba(59, 41, 35, .1);
-        border-radius: .85rem;
+        gap: .65rem;
+        padding: .72rem .78rem;
+        background: #fff;
+        border: 1px solid rgba(59, 41, 35, .13);
+        border-radius: .78rem;
+        box-shadow: 0 3px 12px rgba(70, 48, 39, .05);
         text-align: left;
     }
     .exam-summary-icon {
@@ -298,12 +302,12 @@
         justify-content: center;
         flex-shrink: 0;
         color: var(--pimentel-vermelho-escuro);
-        background: rgba(184, 50, 42, .1);
+        background: rgba(184, 50, 42, .09);
         border-radius: .7rem;
         font-size: 1rem;
     }
-    .exam-summary-label { display: block; color: var(--pimentel-cafe-claro); font-size: .68rem; line-height: 1.1; }
-    .exam-summary-value { display: block; margin-top: .2rem; color: var(--pimentel-cafe); font-size: .96rem; line-height: 1.2; }
+    .exam-summary-label { display: block; color: #735e55; font-size: .73rem; font-weight: 600; line-height: 1.1; }
+    .exam-summary-value { display: block; margin-top: .16rem; color: #30231e; font-size: 1rem; line-height: 1.2; }
     .exam-matrix-heading { gap: .75rem; }
     .exam-total-badge {
         display: inline-flex;
@@ -318,10 +322,15 @@
         white-space: nowrap;
     }
     .exam-total-badge strong { color: var(--pimentel-vermelho-escuro); font-size: .8rem; }
-    .exam-matrix-table { overflow: hidden; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
+    .exam-matrix-table { overflow: hidden; background: #fff; border: 1px solid rgba(59, 41, 35, .14); border-radius: .85rem; box-shadow: 0 3px 12px rgba(70, 48, 39, .04); }
     .exam-matrix-table .table { --bs-table-hover-bg: rgba(184, 50, 42, .035); }
-    .exam-matrix-table thead th { padding-block: .75rem; color: var(--pimentel-cafe-claro); background: rgba(244, 226, 212, .48); border-bottom-color: rgba(59, 41, 35, .1); font-size: .72rem; text-transform: uppercase; letter-spacing: .025em; }
+    .exam-matrix-table thead th { padding: .7rem .65rem; color: #654f46; background: #f2e6dc; border-bottom-color: rgba(59, 41, 35, .14); font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .025em; vertical-align: middle; }
+    .exam-matrix-table tbody td { padding: .68rem .65rem; vertical-align: middle; }
+    .exam-matrix-table .form-control { color: #30231e; background: #fff; border-color: rgba(59, 41, 35, .22); }
     .exam-matrix-table .numeric-column { text-align: center; }
+    .exam-relevance-high { background-color: #2f7f76 !important; }
+    .exam-relevance-medium { background-color: #57968c !important; }
+    .exam-relevance-low { background-color: #8ab8af !important; }
     .exam-subject-row > td {
         background: linear-gradient(90deg, rgba(244, 226, 212, .58), rgba(255, 253, 249, .9));
         border-bottom-color: rgba(59, 41, 35, .08);
@@ -385,32 +394,35 @@
     .exam-topic-editor-actions { display: inline-flex; gap: .35rem; }
     .exam-topic-empty { padding: .8rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .65rem; text-align: center; }
     .exam-evolution {
-        margin-top: 1.25rem;
-        padding: 1.15rem;
-        background: linear-gradient(145deg, rgba(255, 253, 249, .98), rgba(244, 226, 212, .34));
-        border: 1px solid rgba(59, 41, 35, .1);
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff;
+        border: 1px solid rgba(59, 41, 35, .14);
         border-radius: .95rem;
+        box-shadow: 0 4px 16px rgba(70, 48, 39, .05);
     }
     .exam-evolution-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
-    .exam-evolution-heading p { color: var(--pimentel-cafe-claro); font-size: .78rem; }
+    .exam-evolution-heading p { color: #735e55; font-size: .82rem; }
     .exam-evolution-kicker { display: block; margin-bottom: .2rem; color: var(--pimentel-vermelho-escuro); font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
     .exam-chart-toggle { display: inline-flex; padding: .2rem; background: rgba(91, 67, 58, .07); border-radius: .65rem; }
     .btn-metrica-edital { padding: .38rem .65rem; color: var(--pimentel-cafe-claro); background: transparent; border: 0; border-radius: .48rem; font-size: .72rem; font-weight: 600; white-space: nowrap; }
     .btn-metrica-edital[aria-pressed="true"] { color: #fff; background: var(--pimentel-vermelho-escuro); box-shadow: 0 2px 8px rgba(99, 33, 28, .16); }
     .exam-insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
-    .exam-insight { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .6rem; align-items: center; padding: .7rem; background: rgba(255, 255, 255, .76); border: 1px solid rgba(59, 41, 35, .08); border-radius: .75rem; }
+    .exam-insight { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .6rem; align-items: center; padding: .68rem; background: #fbf7f2; border: 1px solid rgba(59, 41, 35, .11); border-radius: .75rem; }
     .exam-insight-icon { width: 2rem; height: 2rem; display: inline-grid; place-items: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: .6rem; }
     .exam-insight small, .exam-insight span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .exam-insight small { color: var(--pimentel-cafe-claro); font-size: .65rem; }
-    .exam-insight strong { display: block; overflow: hidden; color: var(--pimentel-cafe); font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
-    .exam-insight span { color: var(--pimentel-cafe-claro); font-size: .68rem; }
+    .exam-insight small { color: #735e55; font-size: .7rem; }
+    .exam-insight strong { display: block; overflow: hidden; color: #30231e; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+    .exam-insight span { color: #735e55; font-size: .72rem; }
     .exam-chart { display: grid; gap: .72rem; }
     .exam-chart-row { display: grid; grid-template-columns: minmax(125px, 1fr) minmax(180px, 2.6fr) auto; gap: .75rem; align-items: center; }
-    .exam-chart-label { overflow: hidden; color: var(--pimentel-cafe); font-size: .76rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .exam-chart-label { overflow: hidden; color: #30231e; font-size: .8rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
     .exam-chart-track { height: .65rem; overflow: hidden; background: rgba(91, 67, 58, .09); border-radius: 999px; }
-    .exam-chart-bar { width: var(--exam-chart-value); height: 100%; background: linear-gradient(90deg, var(--pimentel-vermelho), #d78362); border-radius: inherit; transition: width .25s ease; }
-    .exam-chart-row.is-weight .exam-chart-bar { background: linear-gradient(90deg, #725247, #b37d63); }
-    .exam-chart-value { min-width: 95px; color: var(--pimentel-cafe-claro); font-size: .7rem; text-align: right; }
+    .exam-chart-bar { width: var(--exam-chart-value); height: 100%; background: linear-gradient(90deg, #2f7f76, #69aa9f); border-radius: inherit; transition: width .25s ease; }
+    .exam-chart-row.is-weight .exam-chart-bar { background: linear-gradient(90deg, #62758a, #91a4b8); }
+    .exam-chart-value { min-width: 95px; color: #654f46; font-size: .75rem; font-weight: 600; text-align: right; }
+    .exam-empty-action { color: #4f403a; background: #fff; border: 1px solid rgba(59, 41, 35, .2); }
+    .exam-empty-action:hover { color: #30231e; background: #f2e6dc; border-color: rgba(59, 41, 35, .3); }
     .exam-evolution-empty { display: grid; place-items: center; gap: .35rem; min-height: 145px; padding: 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .75rem; text-align: center; }
     .exam-evolution-empty i { font-size: 1.5rem; opacity: .65; }
     @media (max-width: 575.98px) {
@@ -427,6 +439,7 @@
         .exam-chart-row { grid-template-columns: minmax(0, 1fr) auto; gap: .35rem .6rem; }
         .exam-chart-track { grid-column: 1 / -1; grid-row: 2; }
         .exam-chart-value { min-width: 0; }
+        .exam-header-card > .card-body { padding: .85rem; }
     }
     .exam-empty {
         min-height: 190px;
@@ -1544,14 +1557,14 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 mb-4">
+                    <div class="row g-2 mb-3">
                         <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-trophy" aria-hidden="true"></i></span><span><span class="exam-summary-label">Concurso</span><strong class="exam-summary-value" id="editalNome">Aguardando configuração</strong></span></div></div>
                         <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-bank" aria-hidden="true"></i></span><span><span class="exam-summary-label">Banca</span><strong class="exam-summary-value" id="editalBanca">Não informada</strong></span></div></div>
                         <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-people" aria-hidden="true"></i></span><span><span class="exam-summary-label">Vagas</span><strong class="exam-summary-value" id="editalVagas">A definir</strong></span></div></div>
                         <div class="col-md-3 col-6"><div class="exam-summary-card"><span class="exam-summary-icon"><i class="bi-calendar-event" aria-hidden="true"></i></span><span><span class="exam-summary-label">Data da prova</span><strong class="exam-summary-value" id="editalData">A definir</strong></span></div></div>
                     </div>
 
-                    <div class="exam-matrix-heading d-flex justify-content-between align-items-center flex-wrap mb-2">
+                    <div class="exam-matrix-heading d-flex justify-content-between align-items-center flex-wrap mb-3">
                         <h6 class="fw-bold mb-0"><i class="bi-calculator me-1"></i>Matriz de Pesos e Relevância</h6>
                         <span class="exam-total-badge"><i class="bi-bar-chart-line" aria-hidden="true"></i>Total da prova <strong id="editalTotalPontos">0 pts</strong></span>
                     </div>
@@ -7033,7 +7046,7 @@ function renderizarEdital() {
                 <span class="exam-empty-icon"><i class="bi-grid-3x3-gap" aria-hidden="true"></i></span>
                 <strong>Sua matriz ainda está vazia.</strong>
                 <small>Cadastre a primeira matéria para distribuir questões, pesos e prioridades da prova.</small>
-                <button type="button" class="btn btn-sm btn-outline-primary exam-action mt-2" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Cadastrar primeira matéria</button>
+                <button type="button" class="btn btn-sm exam-empty-action exam-action mt-2" data-bs-toggle="modal" data-bs-target="#modalAddMateriaEdital"><i class="bi-plus-lg me-1"></i>Cadastrar primeira matéria</button>
             </div>
         </td></tr>`;
         return;
@@ -7046,7 +7059,7 @@ function renderizarEdital() {
     tabela.innerHTML = ordenadas.map(m => {
         const pontos = Number(m.questoes) * Number(m.peso);
         const pct = total > 0 ? (pontos / total) * 100 : 0;
-        const cor = pct > 20 ? "bg-danger" : pct > 10 ? "bg-warning" : "bg-info";
+        const cor = pct > 20 ? "exam-relevance-high" : pct > 10 ? "exam-relevance-medium" : "exam-relevance-low";
         const topicos = Array.isArray(m.topicos) ? m.topicos : [];
         const dominados = topicos.filter(topico => topico.concluido === true).length;
         const expandida = materiasEditalExpandidas.has(String(m.id));

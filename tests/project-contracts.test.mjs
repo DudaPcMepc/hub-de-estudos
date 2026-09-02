@@ -289,6 +289,19 @@ test("o edital apresenta evolução real por matéria sem inventar contagem de v
     assert.doesNotMatch(html, /tópicos mais vistos/i);
 });
 
+test("o edital usa contraste legível e cores semânticas nos dados", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /\.exam-header-card \{[^}]*background: #fffdf9;[^}]*box-shadow:/);
+    assert.match(html, /\.exam-summary-label \{[^}]*color: #735e55;[^}]*font-size: \.73rem/);
+    assert.match(html, /\.exam-matrix-table tbody td \{ padding: \.68rem \.65rem;/);
+    assert.match(html, /\.exam-relevance-high \{ background-color: #2f7f76/);
+    assert.match(html, /\.exam-chart-bar \{[^}]*background: linear-gradient\(90deg, #2f7f76, #69aa9f\)/);
+    assert.match(html, /\.exam-chart-row\.is-weight \.exam-chart-bar \{ background: linear-gradient\(90deg, #62758a, #91a4b8\)/);
+    assert.match(html, /class="btn btn-sm exam-empty-action exam-action mt-2"/);
+    assert.doesNotMatch(html, /const cor = pct > 20 \? "bg-danger"/);
+});
+
 test("o simulado prioriza a geração, usa aviso neutro e orienta o primeiro resultado", () => {
     const html = readProjectFile("index.html");
 
