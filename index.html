@@ -2947,7 +2947,7 @@ const CATALOGO_VADE_DIGITAL = Object.freeze([
     { id: "prisao-temporaria", titulo: "Prisão Temporária", referencia: "Lei nº 7.960/1989", categoria: "penal", categoriaNome: "Penal e processual", icone: "bi-hourglass-split", slugs: ["prisao-temporaria-lei-7960-1989"] },
     { id: "desarmamento", titulo: "Estatuto do Desarmamento", referencia: "Lei nº 10.826/2003", categoria: "seguranca", categoriaNome: "Segurança pública", icone: "bi-shield-exclamation", slugs: ["estatuto-desarmamento-lei-10826-2003"] },
     { id: "maria-penha", titulo: "Lei Maria da Penha", referencia: "Lei nº 11.340/2006", categoria: "especial", categoriaNome: "Legislação especial", icone: "bi-person-heart", slugs: ["lei-maria-penha-11340-2006"] },
-    { id: "ctb", titulo: "Código de Trânsito Brasileiro", referencia: "Lei nº 9.503/1997", categoria: "transito", categoriaNome: "Trânsito", icone: "bi-signpost-2", slugs: ["codigo-transito-brasileiro-lei-9503-1997", "codigo-transito-brasileiro-1997"] },
+    { id: "ctb", titulo: "Código de Trânsito Brasileiro", referencia: "Lei nº 9.503/1997", categoria: "transito", categoriaNome: "Trânsito", icone: "bi-signpost-2", slugs: ["codigo-de-transito-brasileiro-lei-9503-1997", "codigo-transito-brasileiro-lei-9503-1997", "codigo-transito-brasileiro-1997"] },
     { id: "hediondos", titulo: "Crimes Hediondos", referencia: "Lei nº 8.072/1990", categoria: "especial", categoriaNome: "Legislação especial", icone: "bi-exclamation-octagon", slugs: ["crimes-hediondos-lei-8072-1990"] },
     { id: "tortura", titulo: "Lei de Tortura", referencia: "Lei nº 9.455/1997", categoria: "especial", categoriaNome: "Legislação especial", icone: "bi-file-earmark-lock", slugs: ["tortura-lei-9455-1997"] },
     { id: "drogas", titulo: "Lei de Drogas", referencia: "Lei nº 11.343/2006", categoria: "especial", categoriaNome: "Legislação especial", icone: "bi-capsule", slugs: ["lei-drogas-11343-2006"] },
@@ -3059,9 +3059,13 @@ function documentosJuridicosDaMateria(materia) {
         if (vinculados.length) return vinculados;
     }
     const chave = chaveMateriaCatalogo(materia.nome);
-    return chave.includes("constitucional")
-        ? documentosJuridicos.filter(documento => ["constituicao-federal-1988", "ato-disposicoes-constitucionais-transitorias-1988"].includes(documento.slug))
-        : [];
+    if (chave.includes("constitucional")) {
+        return documentosJuridicos.filter(documento => ["constituicao-federal-1988", "ato-disposicoes-constitucionais-transitorias-1988"].includes(documento.slug));
+    }
+    if (chave.includes("transito") || chave.includes("ctb")) {
+        return documentosJuridicos.filter(documento => documento.slug === "codigo-de-transito-brasileiro-lei-9503-1997");
+    }
+    return [];
 }
 
 function documentoJuridicoDaMateria(materia) {
