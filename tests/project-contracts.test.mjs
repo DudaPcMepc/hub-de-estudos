@@ -14,6 +14,7 @@ import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-
 import { normalizarDispositivosMariaDaPenha } from "../scripts/import-maria-da-penha.mjs";
 import { normalizarDispositivosCrimesHediondos } from "../scripts/import-heinous-crimes-law.mjs";
 import { normalizarDispositivosLeiTortura } from "../scripts/import-torture-law.mjs";
+import { normalizarDispositivosLeiDrogas } from "../scripts/import-drug-law.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -999,6 +1000,45 @@ test("o importador da Lei de Tortura uniformiza o cabeçalho sem alterar o texto
     assert.deepEqual(normalizado.caminho, ["LEI DOS CRIMES DE TORTURA"]);
     assert.equal(normalizado.titulo, "LEI DOS CRIMES DE TORTURA");
     assert.equal(normalizado.conteudo, "Constitui crime de tortura");
+});
+
+test("a Lei de Drogas usa o texto compilado integral e elimina a redação anterior duplicada", () => {
+    const migration = readProjectFile("supabase/migrations/202609020008_complete_drug_law.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 100);
+    assert.match(migration, /planalto\.gov\.br\/ccivil_03\/_ato2004-2006\/2006\/lei\/l11343\.htm/);
+    assert.match(migration, /Texto compilado consultado em 01\/09\/2026/);
+    for (const chave of ["art-1", "art-7-a", "art-8-f", "art-23-a", "art-28", "art-33", "art-40-a", "art-63-f", "art-75"]) {
+        assert.match(migration, new RegExp(`"chave":"${chave}"`));
+    }
+    assert.equal([...migration.matchAll(/"chave":"art-61"/g)].length, 1);
+    assert.match(migration, /prática, habitual ou não, dos crimes definidos nesta Lei/);
+    assert.match(migration, /Lei nº 15\.581, de 2025/);
+    assert.match(migration, /Lei nº 15\.358, de 2026/);
+    assert.match(migration, /organização criminosa ultraviolenta/);
+    assert.doesNotMatch(migration, /�|SIS TEMA/);
+    for (const catalogoId of ["000000000002", "000000000003", "000000000005"]) {
+        assert.match(migration, new RegExp(`10000000-0000-4000-8000-${catalogoId}`));
+    }
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "drogas"[\s\S]*?slugs: \["lei-drogas-11343-2006"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"lei-drogas-11343-2006"/);
+    assert.match(html, /chave\.includes\("lei-drogas"\)[\s\S]*?documento\.slug === "lei-drogas-11343-2006"/);
+});
+
+test("o importador da Lei de Drogas mantém a redação mais recente e corrige a estrutura", () => {
+    const normalizados = normalizarDispositivosLeiDrogas([
+        { chave: "art-61", sequencia: 1, caminho: ["LEI DE DROGAS", "TÍTULO II — DO SIS TEMA"], titulo: "Antigo", rotulo: "Art. 61.", conteudo: "Redação anterior" },
+        { chave: "art-61", sequencia: 2, caminho: ["LEI DE DROGAS", "TÍTULO II — DO SIS TEMA"], titulo: "Novo", rotulo: "Art. 61.", conteudo: "prática, habitual ou não" },
+        { chave: "art-40-a", sequencia: 3, caminho: ["LEI DE DROGAS", "CAPÍTULO II — A"], titulo: "Capítulo", rotulo: "Art. 40º-A", conteudo: "Conteúdo" }
+    ]);
+
+    assert.equal(normalizados.length, 2);
+    assert.equal(normalizados[0].conteudo, "prática, habitual ou não");
+    assert.equal(normalizados[0].titulo, "TÍTULO II — DO SISTEMA");
+    assert.equal(normalizados[1].rotulo, "Art. 40-A");
+    assert.equal(normalizados[1].titulo, "CAPÍTULO II-A");
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {

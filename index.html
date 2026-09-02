@@ -3071,7 +3071,8 @@ function documentosJuridicosDaMateria(materia) {
             "estatuto-desarmamento-lei-10826-2003",
             "lei-maria-penha-11340-2006",
             "crimes-hediondos-lei-8072-1990",
-            "tortura-lei-9455-1997"
+            "tortura-lei-9455-1997",
+            "lei-drogas-11343-2006"
         ].includes(documento.slug));
     }
     if (chave.includes("desarmamento") || chave.includes("armas") || chave.includes("armamento")) {
@@ -3085,6 +3086,9 @@ function documentosJuridicosDaMateria(materia) {
     }
     if (chave.includes("lei-tortura") || chave.includes("lei tortura") || chave.includes("crimes-de-tortura") || chave.includes("crimes de tortura")) {
         return documentosJuridicos.filter(documento => documento.slug === "tortura-lei-9455-1997");
+    }
+    if (chave.includes("lei-drogas") || chave.includes("lei drogas") || chave.includes("drogas") || chave.includes("entorpecentes")) {
+        return documentosJuridicos.filter(documento => documento.slug === "lei-drogas-11343-2006");
     }
     return [];
 }
