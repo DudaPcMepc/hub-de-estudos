@@ -504,6 +504,9 @@ function mapearPdfColecaoVade(item) {
         descricao: item.description || "",
         tamanho: Number(item.size_bytes) || 0,
         tipo: item.mime_type,
+        totalPaginas: item.page_count == null ? null : Number(item.page_count),
+        paginaAtual: Number(item.last_page) || 1,
+        ultimaLeituraEm: item.last_read_at || null,
         criadoEm: item.created_at,
         atualizadoEm: item.updated_at
     };
@@ -533,7 +536,7 @@ export async function carregarPdfsColecaoVade(id) {
         "Não foi possível conferir os envios pendentes deste caderno."
     );
     const resposta = await supabase.from("user_vade_files")
-        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, page_count, last_page, last_read_at, created_at, updated_at")
         .eq("collection_id", colecaoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
@@ -581,7 +584,7 @@ export async function enviarPdfColecaoVade(id, arquivo, metadados = {}) {
         throw erroRepositorio("O PDF chegou ao espaço privado, mas a confirmação ficou pendente. Reabra a aba Materiais para recuperá-lo automaticamente.", finalizacao.error);
     }
     const salvo = await supabase.from("user_vade_files")
-        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, page_count, last_page, last_read_at, created_at, updated_at")
         .eq("id", arquivoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
@@ -596,12 +599,18 @@ export async function atualizarPdfColecaoVade(id, alteracoes) {
     const valores = {};
     if (Object.hasOwn(alteracoes, "nome")) valores.display_name = texto(alteracoes.nome, 200, "Nome do PDF", true).trim();
     if (Object.hasOwn(alteracoes, "descricao")) valores.description = texto(alteracoes.descricao, 1000, "Descrição do PDF");
+    if (Object.hasOwn(alteracoes, "paginaAtual")) valores.last_page = numeroLimitado(alteracoes.paginaAtual, "Página atual", 1, 100000, true);
+    if (Object.hasOwn(alteracoes, "totalPaginas")) valores.page_count = numeroLimitado(alteracoes.totalPaginas, "Total de páginas", 1, 100000, true);
+    if (alteracoes.registrarLeitura === true) valores.last_read_at = new Date().toISOString();
+    if (valores.page_count && valores.last_page && valores.last_page > valores.page_count) {
+        throw erroRepositorio("A página atual não pode ser maior que o total de páginas.");
+    }
     if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada para o PDF.");
     const resposta = await supabase.from("user_vade_files").update(valores)
         .eq("id", arquivoId)
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
-        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, created_at, updated_at")
+        .select("id, collection_id, original_name, display_name, description, mime_type, size_bytes, page_count, last_page, last_read_at, created_at, updated_at")
         .maybeSingle();
     return mapearPdfColecaoVade(verificarRegistro(resposta, "Não foi possível atualizar o PDF privado."));
 }

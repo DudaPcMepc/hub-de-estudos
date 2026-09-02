@@ -1032,6 +1032,37 @@ test("cada Caderno jurídico oferece materiais privados e leitor temporário de 
     assert.match(html, /Este caderno possui \$\{arquivos\.length\} PDF\(s\) privado\(s\)/);
 });
 
+test("o progresso de leitura dos PDFs é privado, persistente e retoma na página salva", () => {
+    const migration = readProjectFile("supabase/migrations/202609020001_private_vade_pdf_reading_progress.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /add column page_count integer/i);
+    assert.match(migration, /add column last_page integer not null default 1/i);
+    assert.match(migration, /add column last_read_at timestamptz/i);
+    assert.match(migration, /check \(page_count is null or last_page <= page_count\)/i);
+    assert.match(migration, /grant update \(page_count, last_page, last_read_at\)[\s\S]*?to authenticated/i);
+    assert.doesNotMatch(migration, /grant update on table public\.user_vade_files/i);
+
+    assert.match(repository, /totalPaginas: item\.page_count == null \? null : Number\(item\.page_count\)/);
+    assert.match(repository, /paginaAtual: Number\(item\.last_page\) \|\| 1/);
+    assert.match(repository, /ultimaLeituraEm: item\.last_read_at \|\| null/);
+    assert.match(repository, /valores\.last_page = numeroLimitado\(alteracoes\.paginaAtual/);
+    assert.match(repository, /valores\.page_count = numeroLimitado\(alteracoes\.totalPaginas/);
+    assert.match(repository, /alteracoes\.registrarLeitura === true/);
+
+    assert.match(html, /function percentualLeituraPdf/);
+    assert.match(html, /function urlPdfNaPagina/);
+    assert.match(html, /#page=\$\{Math\.max\(1, Number\(pagina\) \|\| 1\)\}&zoom=page-width/);
+    assert.match(html, /class="legal-notebook-pdf-progress form-progresso-pdf-caderno"/);
+    assert.match(html, /Página atual/);
+    assert.match(html, /Total de páginas/);
+    assert.match(html, /Salvar progresso/);
+    assert.match(html, /function salvarProgressoPdfCaderno/);
+    assert.match(html, /atualizarPdf\(aberto\.id, \{ paginaAtual, totalPaginas, registrarLeitura: true \}\)/);
+    assert.match(html, /arquivo\.ultimaLeituraEm \? "Continuar" : "Abrir"/);
+});
+
 test("as migrations têm identificadores únicos e permanecem em ordem", () => {
     const files = readdirSync(join(projectRoot, "supabase", "migrations"))
         .filter((file) => file.endsWith(".sql"))
