@@ -783,6 +783,8 @@ test("o CTB integral usa fonte oficial, inclui o Anexo I e pertence à Legislaç
     assert.match(migration, /10000000-0000-4000-8000-000000000006/);
     assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
     assert.match(html, /\$\{dispositivos\.length\} item\(ns\)/);
+    assert.match(html, /id: "ctb"[\s\S]*?slugs: \["codigo-de-transito-brasileiro-lei-9503-1997"/);
+    assert.match(html, /chave\.includes\("transito"\) \|\| chave\.includes\("ctb"\)[\s\S]*?documento\.slug === "codigo-de-transito-brasileiro-lei-9503-1997"/);
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
