@@ -3070,7 +3070,8 @@ function documentosJuridicosDaMateria(materia) {
             "estatuto-geral-guardas-municipais-lei-13022-2014",
             "estatuto-desarmamento-lei-10826-2003",
             "lei-maria-penha-11340-2006",
-            "crimes-hediondos-lei-8072-1990"
+            "crimes-hediondos-lei-8072-1990",
+            "tortura-lei-9455-1997"
         ].includes(documento.slug));
     }
     if (chave.includes("desarmamento") || chave.includes("armas") || chave.includes("armamento")) {
@@ -3081,6 +3082,9 @@ function documentosJuridicosDaMateria(materia) {
     }
     if (chave.includes("crimes-hediondos") || chave.includes("crimes hediondos") || chave.includes("hediondos")) {
         return documentosJuridicos.filter(documento => documento.slug === "crimes-hediondos-lei-8072-1990");
+    }
+    if (chave.includes("lei-tortura") || chave.includes("lei tortura") || chave.includes("crimes-de-tortura") || chave.includes("crimes de tortura")) {
+        return documentosJuridicos.filter(documento => documento.slug === "tortura-lei-9455-1997");
     }
     return [];
 }
