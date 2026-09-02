@@ -11,6 +11,7 @@ import {
     prepararHtmlEstatutoDesarmamento
 } from "../scripts/import-disarmament-statute.mjs";
 import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-guards-statute.mjs";
+import { normalizarDispositivosMariaDaPenha } from "../scripts/import-maria-da-penha.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -872,6 +873,43 @@ test("o importador do Estatuto do Desarmamento recompõe palavras e separa o Ane
     assert.equal(anexo.chave, "anexo-tabela-taxas");
     assert.equal(anexo.sequencia, 2);
     assert.match(anexo.conteudo, /I - Registro — 60,00\nII - Renovação — 60,00\nVIII - Expedição/);
+});
+
+test("a Lei Maria da Penha usa a versão oficial atualizada e preserva a estrutura integral", () => {
+    const migration = readProjectFile("supabase/migrations/202609020005_complete_maria_da_penha.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 57);
+    assert.match(migration, /www2\.camara\.leg\.br\/legin\/fed\/lei\/2006\/lei-11340-7-agosto-2006-545133-normaatualizada-pl\.html/);
+    assert.match(migration, /Texto atualizado consultado em 01\/09\/2026/);
+    for (const chave of ["art-10-a", "art-12-d", "art-14-a", "art-16-a", "art-17-a", "art-24-a", "art-38-a", "art-40-a"]) {
+        assert.match(migration, new RegExp(`"chave":"${chave}"`));
+    }
+    assert.match(migration, /"rotulo":"Art\. 12-D"/);
+    assert.match(migration, /Lei nº 15\.455, de 1º\/7\/2026/);
+    assert.match(migration, /Lei nº 15\.411, de 20\/5\/2026/);
+    assert.match(migration, /Lei nº 15\.383, de 9\/4\/2026/);
+    assert.match(migration, /Lei nº 15\.412, de 20\/5\/2026/);
+    for (const catalogoId of ["000000000002", "000000000003", "000000000005", "000000000008"]) {
+        assert.match(migration, new RegExp(`10000000-0000-4000-8000-${catalogoId}`));
+    }
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "maria-penha"[\s\S]*?slugs: \["lei-maria-penha-11340-2006"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"lei-maria-penha-11340-2006"/);
+    assert.match(html, /chave\.includes\("maria-penha"\)[\s\S]*?documento\.slug === "lei-maria-penha-11340-2006"/);
+});
+
+test("o importador da Lei Maria da Penha corrige os rótulos dos artigos acrescidos", () => {
+    const [normalizado] = normalizarDispositivosMariaDaPenha([{
+        chave: "art-12-d",
+        rotulo: "Art. 12º-D",
+        caminho: ["LEI MARIA DA PENHA"],
+        titulo: "LEI MARIA DA PENHA",
+        conteudo: "Conteúdo"
+    }]);
+
+    assert.equal(normalizado.rotulo, "Art. 12-D");
+    assert.equal(normalizado.conteudo, "Conteúdo");
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
