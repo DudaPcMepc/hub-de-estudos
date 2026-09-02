@@ -306,6 +306,24 @@ test("o calendário móvel mostra um dia por vez e cria sessões no período esc
     assert.match(html, /@media \(max-width: 767\.98px\)[\s\S]*?weekly-calendar-grid \{ min-width: 0; grid-template-columns: minmax\(0, 1fr\)/);
 });
 
+test("as sessões do calendário abrem detalhes e exigem uma ação explícita", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="modalDetalhesSessao"/);
+    assert.match(html, /class="calendar-task-main btn-detalhes-tarefa-cal"/);
+    assert.match(html, /class="calendar-task-menu-toggle"/);
+    assert.match(html, /btn-editar-tarefa-cal/);
+    assert.match(html, /btn-concluir-tarefa-cal/);
+    assert.match(html, /btn-excluir-tarefa-cal/);
+    assert.match(html, /function abrirDetalhesSessao\(id\)/);
+    assert.match(html, /function iniciarEdicaoTarefa\(id\)/);
+    assert.match(html, /async function excluirTarefaSincronizada\(id\)/);
+    assert.doesNotMatch(html, /class="calendar-task[^"\n]*btn-tarefa-cal/);
+    assert.match(html, /btn-detalhes-tarefa-cal"\)\.forEach\(el => el\.addEventListener\("click", \(\) => abrirDetalhesSessao/);
+    assert.match(html, /btn-concluir-tarefa-cal"\)\.forEach[\s\S]*?alternarStatusTarefaSincronizada/);
+    assert.match(html, /btn-excluir-tarefa-cal"\)\.forEach[\s\S]*?excluirTarefaSincronizada/);
+});
+
 test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
