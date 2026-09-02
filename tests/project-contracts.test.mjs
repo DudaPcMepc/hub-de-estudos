@@ -15,6 +15,7 @@ import { normalizarDispositivosMariaDaPenha } from "../scripts/import-maria-da-p
 import { normalizarDispositivosCrimesHediondos } from "../scripts/import-heinous-crimes-law.mjs";
 import { normalizarDispositivosLeiTortura } from "../scripts/import-torture-law.mjs";
 import { normalizarDispositivosLeiDrogas } from "../scripts/import-drug-law.mjs";
+import { normalizarDispositivosAbusoAutoridade } from "../scripts/import-authority-abuse-law.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -1039,6 +1040,46 @@ test("o importador da Lei de Drogas mantém a redação mais recente e corrige a
     assert.equal(normalizados[0].titulo, "TÍTULO II — DO SISTEMA");
     assert.equal(normalizados[1].rotulo, "Art. 40-A");
     assert.equal(normalizados[1].titulo, "CAPÍTULO II-A");
+});
+
+test("a Lei de Abuso de Autoridade usa o texto compilado e recompõe as partes promulgadas", () => {
+    const migration = readProjectFile("supabase/migrations/202609020009_complete_authority_abuse_law.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 46);
+    assert.match(migration, /planalto\.gov\.br\/ccivil_03\/_ato2019-2022\/2019\/lei\/l13869\.htm/);
+    assert.match(migration, /Texto compilado consultado em 02\/09\/2026/);
+    for (const chave of ["art-1", "art-3", "art-9", "art-15-a", "art-16", "art-20", "art-30", "art-32", "art-38", "art-43", "art-45"]) {
+        assert.match(migration, new RegExp(`"chave":"${chave}"`));
+    }
+    for (const chave of ["art-3", "art-9", "art-16", "art-20", "art-30", "art-32", "art-38", "art-43"]) {
+        assert.equal([...migration.matchAll(new RegExp(`"chave":"${chave}"`, "g"))].length, 1);
+    }
+    assert.match(migration, /Os crimes previstos nesta Lei são de ação penal pública incondicionada/);
+    assert.match(migration, /Lei nº 14\.321, de 2022/);
+    assert.match(migration, /gerando indevida revitimização/);
+    assert.match(migration, /Constitui crime violar direito ou prerrogativa de advogado/);
+    assert.doesNotMatch(migration, /194\s+0/);
+    for (const catalogoId of ["000000000002", "000000000003", "000000000005"]) {
+        assert.match(migration, new RegExp(`10000000-0000-4000-8000-${catalogoId}`));
+    }
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "abuso-autoridade"[\s\S]*?slugs: \["abuso-autoridade-lei-13869-2019"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"abuso-autoridade-lei-13869-2019"/);
+    assert.match(html, /chave\.includes\("abuso-autoridade"\)[\s\S]*?documento\.slug === "abuso-autoridade-lei-13869-2019"/);
+});
+
+test("o importador da Lei de Abuso de Autoridade prefere a promulgação ao veto original", () => {
+    const normalizados = normalizarDispositivosAbusoAutoridade([
+        { chave: "art-9", sequencia: 1, caminho: ["LEI", "CAPÍTULO VI"], titulo: "Capítulo", rotulo: "Art. 9º", conteudo: "(VETADO)." },
+        { chave: "art-9", sequencia: 2, caminho: ["LEI", "CAPÍTULO VI"], titulo: "Capítulo", rotulo: "Art. 9º", conteudo: "Texto promulgado" },
+        { chave: "art-15-a", sequencia: 3, caminho: ["LEI", "CAPÍTULO VI"], titulo: "Capítulo", rotulo: "Art. 15º-A", conteudo: "Decreto-Lei nº 2.848, de 7 de dezembro de 194 0" }
+    ]);
+
+    assert.equal(normalizados.length, 2);
+    assert.equal(normalizados[0].conteudo, "Texto promulgado");
+    assert.equal(normalizados[1].rotulo, "Art. 15-A");
+    assert.match(normalizados[1].conteudo, /de 1940$/);
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
