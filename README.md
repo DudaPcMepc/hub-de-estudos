@@ -34,6 +34,8 @@ A Fase 4 da Biblioteca Jurídica está concluída e publicada: Constituição, A
 
 O histórico de desempenho também é pessoal. Cada resposta de simulado incrementa acertos e total de forma atômica no banco, evitando perda de pontuação quando há mais de uma sessão aberta. Os resultados são recarregados na entrada e alimentam os indicadores e o gráfico por matéria. A migration `202608290003` foi aplicada e o carregamento autenticado do estado vazio foi validado sem alterar pontuações.
 
+O Cronograma pode vincular uma sessão ao tópico pessoal do Edital, registrar tempo e retenção e calcular a próxima revisão com intervalos configuráveis. O histórico fica isolado pelo usuário, integra a fila “Revisar hoje”, considera peso da prova, erros e flashcards na prioridade e alimenta a visão de atividade do Edital. A migration `202609020010` foi aplicada e validada no banco remoto sem erros de esquema.
+
 Ao entrar, matérias, tópicos, notas, flashcards, materiais, links, sessões do cronograma, edital, caderno de erros e desempenho são recarregados do Supabase sem descartar itens locais ainda pendentes de conferência.
 
 ## Arquitetura multiusuário planejada
@@ -84,7 +86,7 @@ A função aceita apenas contas autenticadas, limita cada pedido a dez questões
 
 ## Banco de dados
 
-As migrations versionadas ficam em `supabase/migrations/`. Elas devem ser revisadas e aplicadas na ordem do nome do arquivo. As migrations `202608280001` e `202608290001` até `202608290005` estão registradas como aplicadas tanto localmente quanto no histórico remoto.
+As migrations versionadas ficam em `supabase/migrations/`. Elas devem ser revisadas e aplicadas na ordem do nome do arquivo. Todas as migrations versionadas até `202609020010` estão registradas no histórico remoto.
 
 A migration inicial:
 
