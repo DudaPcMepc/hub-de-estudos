@@ -310,19 +310,33 @@
     .today-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: 1rem; border-bottom: 1px solid rgba(59, 41, 35, .09); }
     .today-panel-heading h2, .today-side-heading h2 { margin: 0; color: var(--pimentel-cafe); font-size: .95rem; }
     .today-panel-heading p { margin: .15rem 0 0; color: #6a574f; font-size: .72rem; }
-    .today-period { padding: .25rem 1rem 0; }
-    .today-period-label { display: flex; align-items: center; gap: .4rem; padding: .7rem 0 .35rem; color: #806d64; font-size: .64rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
-    .today-session { display: grid; grid-template-columns: .38rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .75rem 0; border-bottom: 1px solid rgba(59, 41, 35, .075); }
-    .today-period:last-child .today-session:last-child { border-bottom: 0; }
-    .today-session-mark { width: .38rem; height: 2.55rem; background: var(--pimentel-vermelho); border-radius: 999px; }
-    .today-session.is-complete .today-session-mark { background: #4f8a67; }
-    .today-session-copy { min-width: 0; }
-    .today-session-copy strong, .today-session-copy > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .today-session-copy strong { color: var(--pimentel-cafe); font-size: .82rem; }
-    .today-session-copy > span { margin-top: .08rem; color: #6f5c53; font-size: .72rem; }
+    .today-period { padding: .3rem 1rem .15rem; }
+    .today-period-label { display: flex; align-items: center; gap: .4rem; padding: .72rem 0 .42rem; color: #806d64; font-size: .64rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
+    .today-session { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .8rem; align-items: center; margin-bottom: .55rem; padding: .82rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-left: 4px solid #a58f84; border-radius: .78rem; box-shadow: 0 .16rem .45rem rgba(59, 41, 35, .035); }
+    .today-session.is-running { background: linear-gradient(115deg, rgba(79, 138, 103, .08), #fffdf9 48%); border-left-color: #4f8a67; box-shadow: 0 .25rem .7rem rgba(79, 138, 103, .11); }
+    .today-session.is-paused { background: linear-gradient(115deg, rgba(190, 119, 23, .075), #fffdf9 48%); border-left-color: #be7717; }
+    .today-session.is-complete { background: rgba(246, 250, 247, .94); border-left-color: #4f8a67; }
+    .today-session-main { min-width: 0; display: block; padding: 0; color: inherit; background: transparent; border: 0; text-align: left; }
+    .today-session-main:hover .today-session-title, .today-session-main:focus-visible .today-session-title { color: var(--pimentel-vermelho-escuro); }
+    .today-session-main:focus-visible { outline: 3px solid rgba(184, 50, 42, .18); outline-offset: 4px; border-radius: .35rem; }
+    .today-session-heading { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+    .today-session-heading strong { min-width: 0; overflow: hidden; color: var(--pimentel-cafe); font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+    .today-session-state { display: inline-flex; align-items: center; gap: .25rem; padding: .16rem .42rem; color: #68564e; background: rgba(91, 67, 58, .075); border-radius: 999px; font-size: .6rem; font-weight: 750; white-space: nowrap; }
+    .today-session.is-running .today-session-state, .today-session.is-complete .today-session-state { color: #326247; background: rgba(79, 138, 103, .12); }
+    .today-session.is-paused .today-session-state { color: #7a5118; background: rgba(190, 119, 23, .13); }
+    .today-session-title { display: block; margin-top: .22rem; overflow: hidden; color: #66534b; font-size: .74rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; transition: color .15s ease; }
     .today-session-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
-    .today-session-meta span { padding: .13rem .36rem; color: #705f57; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .62rem; font-weight: 600; }
-    .today-session-status { display: inline-flex; align-items: center; gap: .3rem; color: #34714f; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .today-session-meta span { padding: .14rem .38rem; color: #705f57; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .62rem; font-weight: 650; }
+    .today-session-meta .is-actual { color: #326247; background: rgba(79, 138, 103, .1); }
+    .today-session-meta .is-exam { color: #6a251f; background: rgba(184, 50, 42, .085); }
+    .today-session-review { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; color: #6c5a52; font-size: .63rem; }
+    .today-session-review span { display: inline-flex; align-items: center; gap: .25rem; }
+    .today-session-controls { display: flex; align-items: center; gap: .35rem; }
+    .today-session-primary { min-width: 105px; border-radius: .62rem; font-size: .68rem; font-weight: 700; }
+    .today-session-menu-toggle { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; color: #6e5b52; background: transparent; border: 1px solid rgba(59, 41, 35, .12); border-radius: .58rem; }
+    .today-session-menu-toggle:hover, .today-session-menu-toggle:focus-visible { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .06); border-color: rgba(184, 50, 42, .2); }
+    .today-session .dropdown-item { display: flex; align-items: center; gap: .5rem; font-size: .74rem; }
+    .today-session .dropdown-item i { width: 1rem; text-align: center; }
     .today-side { display: grid; gap: .75rem; }
     .today-side-block { padding: .9rem; }
     .today-side-heading { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .65rem; }
@@ -336,6 +350,8 @@
     .today-side-copy strong { color: var(--pimentel-cafe); font-size: .76rem; }
     .today-side-copy span { margin-top: .12rem; color: #78665e; font-size: .65rem; line-height: 1.35; }
     .today-side-action { width: 100%; margin-top: .7rem; }
+    .today-priority-actions { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: .4rem; margin-top: .7rem; }
+    .today-priority-actions .btn { min-width: 0; font-size: .66rem; }
     .today-quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
     .today-quick-action { min-width: 0; min-height: 72px; display: grid; place-items: center; align-content: center; gap: .28rem; padding: .5rem .28rem; color: var(--pimentel-cafe); background: linear-gradient(145deg, #fffdf9, #f5ebe2); border: 1px solid rgba(59, 41, 35, .13); border-radius: .72rem; box-shadow: 0 .16rem .42rem rgba(59, 41, 35, .04); font-size: .66rem; font-weight: 700; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
     .today-quick-action i { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .085); border-radius: .55rem; font-size: .95rem; }
@@ -1674,9 +1690,11 @@
         .today-metric { padding: .7rem; }
         .today-panel-heading { align-items: flex-start; flex-direction: column; }
         .today-panel-heading .btn { width: 100%; }
-        .today-session { grid-template-columns: .32rem minmax(0, 1fr); gap: .6rem; }
-        .today-session > .btn, .today-session > .today-session-status { grid-column: 2; justify-self: start; }
-        .today-session > .btn { width: 100%; }
+        .today-session { grid-template-columns: 1fr; gap: .7rem; padding: .75rem; }
+        .today-session-controls { width: 100%; }
+        .today-session-primary { flex: 1; }
+        .today-session-title { white-space: normal; }
+        .today-priority-actions { grid-template-columns: 1fr; }
         .session-detail-grid { grid-template-columns: 1fr; }
         .session-detail-item.is-wide { grid-column: auto; }
         .study-session-form { grid-template-columns: 1fr; }
@@ -3133,12 +3151,31 @@ function renderizarHoje() {
     const htmlTarefa = tarefa => {
         const concluida = tarefa.status === "concluido";
         const temporizando = String(estadoTemporizadorEstudo?.tarefaId || "") === String(tarefa.id);
-        const rotuloAcao = temporizando ? (estadoTemporizadorEstudo.executando ? "Estudando agora" : "Continuar estudo") : "Iniciar estudo";
-        const iconeAcao = temporizando && estadoTemporizadorEstudo.executando ? "bi-stopwatch-fill" : "bi-play-fill";
-        return `<article class="today-session ${concluida ? "is-complete" : ""}">
-            <span class="today-session-mark" aria-hidden="true"></span>
-            <div class="today-session-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)}</span><div class="today-session-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}</div></div>
-            ${concluida ? '<span class="today-session-status"><i class="bi-check-circle-fill"></i>Concluída</span>' : `<button type="button" class="btn btn-sm ${temporizando ? "btn-success" : "btn-primary"} rounded-pill btn-iniciar-hoje" data-id="${esc(tarefa.id)}"><i class="${iconeAcao} me-1"></i>${rotuloAcao}</button>`}
+        const executando = temporizando && estadoTemporizadorEstudo.executando;
+        const pausada = temporizando && !estadoTemporizadorEstudo.executando;
+        const outraSessaoAtiva = Boolean(estadoTemporizadorEstudo) && !temporizando;
+        const estado = concluida
+            ? { classe: "is-complete", rotulo: "Concluída", icone: "bi-check-circle-fill" }
+            : executando
+                ? { classe: "is-running", rotulo: "Em andamento", icone: "bi-stopwatch-fill" }
+                : pausada
+                    ? { classe: "is-paused", rotulo: "Pausada", icone: "bi-pause-circle-fill" }
+                    : { classe: "is-planned", rotulo: "Planejada", icone: "bi-calendar-check" };
+        const registrosDaSessao = registrosHoje.filter(registro => String(registro.tarefaId || "") === String(tarefa.id));
+        const minutosRealizados = registrosDaSessao.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+        const retencoes = { forgot: "Reforçar", partial: "Retenção parcial", good: "Boa retenção", mastered: "Dominado" };
+        const rotuloAcao = concluida ? "Ver resultado" : executando ? "Ver temporizador" : pausada ? "Continuar" : "Iniciar";
+        const iconeAcao = concluida ? "bi-graph-up-arrow" : executando ? "bi-stopwatch-fill" : "bi-play-fill";
+        const classeAcao = concluida ? "btn-outline-success btn-detalhes-hoje" : `${executando ? "btn-success" : pausada ? "btn-outline-warning" : "btn-primary"} btn-iniciar-hoje`;
+        const topicoEdital = tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "";
+        return `<article class="today-session ${estado.classe}">
+            <button type="button" class="today-session-main btn-detalhes-hoje" data-id="${esc(tarefa.id)}" aria-label="Abrir detalhes da sessão ${esc(tarefa.topico)}">
+                <span class="today-session-heading"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span class="today-session-state"><i class="${estado.icone}" aria-hidden="true"></i>${estado.rotulo}</span></span>
+                <span class="today-session-title">${esc(tarefa.topico)}</span>
+                <span class="today-session-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${minutosRealizados ? `<span class="is-actual"><i class="bi-check2-circle me-1"></i>${minutosRealizados} min estudados</span>` : ""}${topicoEdital ? `<span class="is-exam"><i class="bi-link-45deg me-1"></i>${esc(topicoEdital)}</span>` : ""}</span>
+                ${concluida && (tarefa.retencao || tarefa.proximaRevisao) ? `<span class="today-session-review">${tarefa.retencao ? `<span><i class="bi-activity"></i>${esc(retencoes[tarefa.retencao] || "Avaliada")}</span>` : ""}${tarefa.proximaRevisao ? `<span><i class="bi-arrow-repeat"></i>Revisão: ${esc(dataBR(tarefa.proximaRevisao))}</span>` : ""}</span>` : ""}
+            </button>
+            <div class="today-session-controls"><button type="button" class="btn btn-sm ${classeAcao} today-session-primary" data-id="${esc(tarefa.id)}" ${outraSessaoAtiva && !concluida ? 'disabled title="Encerre a sessão em andamento primeiro"' : ""}><i class="${iconeAcao} me-1"></i>${rotuloAcao}</button><div class="dropdown"><button type="button" class="today-session-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Ações da sessão" aria-label="Ações da sessão ${esc(tarefa.topico)}"><i class="bi-three-dots-vertical" aria-hidden="true"></i></button><ul class="dropdown-menu dropdown-menu-end"><li><button type="button" class="dropdown-item btn-editar-hoje" data-id="${esc(tarefa.id)}"><i class="bi-pencil"></i>Editar sessão</button></li><li><button type="button" class="dropdown-item btn-reagendar-sessao-hoje" data-id="${esc(tarefa.id)}"><i class="bi-calendar2-plus"></i>Reagendar</button></li><li><button type="button" class="dropdown-item btn-concluir-hoje" data-id="${esc(tarefa.id)}"><i class="bi-${concluida ? "arrow-repeat" : "check2-circle"}"></i>${concluida ? "Registrar nova revisão" : "Concluir estudo"}</button></li><li><hr class="dropdown-divider"></li><li><button type="button" class="dropdown-item text-danger btn-excluir-hoje" data-id="${esc(tarefa.id)}"><i class="bi-trash"></i>Excluir sessão</button></li></ul></div></div>
         </article>`;
     };
     document.getElementById("agendaCentralHoje").innerHTML = tarefasHoje.length ? periodos.map(periodo => {
@@ -3156,7 +3193,7 @@ function renderizarHoje() {
     painelAtrasos.innerHTML = atrasadas.length ? `<div class="today-side-heading"><h2 class="fw-bold">Sessões atrasadas</h2><span class="today-count is-warning">${atrasadas.length}</span></div>${atrasadas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-calendar2-x"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)} · ${dataBR(tarefa.data)}</span></div></div>`).join("")}<button type="button" class="btn btn-sm btn-outline-warning rounded-pill today-side-action btn-reagendar-hoje-central" data-id="${esc(atrasadas[0].id)}"><i class="bi-calendar2-plus me-1"></i>Reagendar a mais antiga</button>` : "";
 
     const prioridade = prioridadeAtualDoEdital();
-    document.getElementById("prioridadeCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Próxima prioridade</h2><span class="today-count">Edital</span></div>${prioridade ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-bullseye"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(prioridade.item.materiaId))}</strong><span>${esc(prioridade.pendentes[0].titulo)}${prioridade.relevancia ? ` · ${prioridade.relevancia.toFixed(1)}% da prova` : ""}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" data-today-tab="#p-edital">Ver estratégia</button>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2-all"></i></span><div class="today-side-copy"><strong>Sem prioridade pendente</strong><span>Configure o edital ou adicione tópicos ao checklist.</span></div></div>'}`;
+    document.getElementById("prioridadeCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Próxima prioridade</h2><span class="today-count">Edital</span></div>${prioridade ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-bullseye"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(prioridade.item.materiaId))}</strong><span>${esc(prioridade.pendentes[0].titulo)}${prioridade.relevancia ? ` · ${prioridade.relevancia.toFixed(1)}% da prova` : ""}</span></div></div><div class="today-priority-actions"><button type="button" class="btn btn-sm btn-primary rounded-pill" id="btnPlanejarPrioridadeHoje" data-materia-id="${esc(prioridade.item.materiaId)}" data-topico-id="${esc(prioridade.pendentes[0].id)}"><i class="bi-calendar2-plus me-1"></i>Planejar</button><button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-today-tab="#p-edital">Estratégia</button></div>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2-all"></i></span><div class="today-side-copy"><strong>Sem prioridade pendente</strong><span>Configure o edital ou adicione tópicos ao checklist.</span></div></div>'}`;
 
     const leitura = ultimaLeituraJuridicaDisponivel();
     const descricaoLeitura = leitura ? `${leitura.localizado.documento.tituloCurto} · ${leitura.localizado.dispositivo?.rotulo || leitura.localizado.rotulo || "Artigo"}` : "";
@@ -3167,7 +3204,13 @@ function renderizarHoje() {
 
     raiz.querySelectorAll("[data-today-tab]").forEach(botao => botao.addEventListener("click", () => ativarAbaPrincipal(botao.dataset.todayTab)));
     raiz.querySelectorAll(".btn-iniciar-hoje").forEach(botao => botao.addEventListener("click", () => { iniciarTemporizadorEstudo(botao.dataset.id); renderizarHoje(); }));
+    raiz.querySelectorAll(".btn-detalhes-hoje").forEach(botao => botao.addEventListener("click", () => abrirDetalhesSessao(botao.dataset.id)));
+    raiz.querySelectorAll(".btn-editar-hoje").forEach(botao => botao.addEventListener("click", () => editarSessaoPelaCentralHoje(botao.dataset.id)));
+    raiz.querySelectorAll(".btn-reagendar-sessao-hoje").forEach(botao => botao.addEventListener("click", () => editarSessaoPelaCentralHoje(botao.dataset.id, "data")));
+    raiz.querySelectorAll(".btn-concluir-hoje").forEach(botao => botao.addEventListener("click", () => abrirConclusaoEstudo(botao.dataset.id)));
+    raiz.querySelectorAll(".btn-excluir-hoje").forEach(botao => botao.addEventListener("click", async () => { await excluirTarefaSincronizada(botao.dataset.id); }));
     document.getElementById("btnPrimeiraSessaoHoje")?.addEventListener("click", abrirFormularioSessaoHoje);
+    document.getElementById("btnPlanejarPrioridadeHoje")?.addEventListener("click", evento => planejarPrioridadePelaCentralHoje(evento.currentTarget.dataset.materiaId, evento.currentTarget.dataset.topicoId));
     document.getElementById("btnComecarRevisaoHoje")?.addEventListener("click", () => revisoesTarefas.length ? abrirConclusaoEstudo(revisoesTarefas[0].id) : iniciarRevisao(null));
     document.querySelector(".btn-reagendar-hoje-central")?.addEventListener("click", async evento => { await reagendarTarefaParaHoje(evento.currentTarget.dataset.id, evento.currentTarget); });
     document.getElementById("btnRetomarLeituraHoje")?.addEventListener("click", evento => {
@@ -3183,6 +3226,31 @@ function abrirFormularioSessaoHoje() {
         limparEdicaoTarefa();
         document.getElementById("formTarefa")?.scrollIntoView({ behavior: "smooth", block: "center" });
         document.getElementById("tarefaMateria")?.focus({ preventScroll: true });
+    }, 180);
+}
+
+function editarSessaoPelaCentralHoje(id, campoPreferido = "topico") {
+    ativarAbaPrincipal("#p-cronograma");
+    window.setTimeout(() => {
+        iniciarEdicaoTarefa(id);
+        window.setTimeout(() => document.getElementById(campoPreferido === "data" ? "tarefaData" : "tarefaTopico")?.focus({ preventScroll: true }), 240);
+    }, 180);
+}
+
+function planejarPrioridadePelaCentralHoje(materiaId, topicoEditalId) {
+    const topico = obterTopicosEditalDaMateria(materiaId).find(item => String(item.id) === String(topicoEditalId));
+    if (!topico) return;
+    ativarAbaPrincipal("#p-cronograma");
+    window.setTimeout(() => {
+        limparEdicaoTarefa();
+        document.getElementById("tarefaMateria").value = materiaId;
+        popularTopicosEditalCronograma(topico.id);
+        document.getElementById("tarefaTopico").value = topico.titulo;
+        document.getElementById("tarefaTopico").dataset.preenchidoPeloEdital = "true";
+        document.getElementById("tarefaData").value = hojeISO();
+        document.getElementById("tarefaPeriodo").value = periodoEstudoAtual();
+        document.getElementById("formTarefa")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+        window.setTimeout(() => document.getElementById("tarefaMinutos")?.focus({ preventScroll: true }), 240);
     }, 180);
 }
 
@@ -7831,6 +7899,7 @@ function pausarTemporizadorEstudo() {
     salvarEstadoTemporizadorEstudo();
     pararIntervaloTemporizadorEstudo();
     renderizarTemporizadorEstudo();
+    if (document.getElementById("p-hoje")?.classList.contains("active")) renderizarHoje();
 }
 
 function continuarTemporizadorEstudo() {
@@ -7840,6 +7909,7 @@ function continuarTemporizadorEstudo() {
     salvarEstadoTemporizadorEstudo();
     renderizarTemporizadorEstudo();
     iniciarIntervaloTemporizadorEstudo();
+    if (document.getElementById("p-hoje")?.classList.contains("active")) renderizarHoje();
 }
 
 function limparTemporizadorEstudo() {
@@ -7847,6 +7917,7 @@ function limparTemporizadorEstudo() {
     estadoTemporizadorEstudo = null;
     pararIntervaloTemporizadorEstudo();
     renderizarTemporizadorEstudo();
+    if (document.getElementById("p-hoje")?.classList.contains("active")) renderizarHoje();
 }
 
 function cancelarTemporizadorEstudo() {

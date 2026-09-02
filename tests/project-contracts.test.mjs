@@ -250,6 +250,12 @@ test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados"
     assert.match(html, /function ultimaLeituraJuridicaDisponivel\(\)/);
     assert.match(html, /iniciarTemporizadorEstudo\(botao\.dataset\.id\)/);
     assert.match(html, /reagendarTarefaParaHoje/);
+    assert.match(html, /class="today-session-main btn-detalhes-hoje"/);
+    assert.match(html, /class="today-session-state"/);
+    assert.match(html, /minutosRealizados[^\n]*registrosDaSessao\.reduce/);
+    assert.match(html, /btn-reagendar-sessao-hoje/);
+    assert.match(html, /btnPlanejarPrioridadeHoje/);
+    assert.match(html, /function planejarPrioridadePelaCentralHoje\(materiaId, topicoEditalId\)/);
     assert.match(html, /class="navbar navbar-dark bg-dark app-topbar"/);
     assert.match(html, /class="nav nav-tabs app-primary-nav flex-nowrap overflow-auto"/);
     assert.match(html, /#abas\.app-primary-nav \.nav-link\.active::after \{ background: var\(--pimentel-vermelho\); \}/);
@@ -257,7 +263,7 @@ test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados"
     assert.match(html, /class="btn btn-sm today-empty-action" id="btnPrimeiraSessaoHoje"/);
     assert.match(html, />Planejar sessão<\/button>/);
     assert.match(html, /\.today-quick-action \{[^}]*border: 1px solid rgba\(59, 41, 35, \.13\)/);
-    assert.match(html, /@media \(max-width: 575\.98px\)[\s\S]*?\.today-session \{ grid-template-columns: \.32rem minmax\(0, 1fr\)/);
+    assert.match(html, /@media \(max-width: 575\.98px\)[\s\S]*?\.today-session \{ grid-template-columns: 1fr/);
 });
 
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
