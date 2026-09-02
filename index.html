@@ -231,6 +231,26 @@
     .overdue-session-copy strong { color: #4f3b33; font-size: .78rem; }
     .overdue-session-copy small { color: #806a60; font-size: .67rem; }
     .overdue-session-item .btn { flex: 0 0 auto; }
+    .study-timer-bar { position: fixed; right: 1rem; bottom: 1rem; z-index: 1040; width: min(460px, calc(100vw - 2rem)); padding: .85rem; color: #fff; background: linear-gradient(135deg, #4a211e, #7b2d27); border: 1px solid rgba(255, 255, 255, .16); border-radius: 1rem; box-shadow: 0 1rem 2.5rem rgba(38, 18, 16, .28); }
+    .study-timer-bar.is-paused { background: linear-gradient(135deg, #4c403b, #6c5850); }
+    .study-timer-layout { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .8rem; align-items: center; }
+    .study-timer-copy { min-width: 0; }
+    .study-timer-status { display: flex; align-items: center; gap: .38rem; color: rgba(255, 255, 255, .75); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .study-timer-status-dot { width: .48rem; height: .48rem; background: #83d39b; border-radius: 50%; box-shadow: 0 0 0 .22rem rgba(131, 211, 155, .15); }
+    .study-timer-bar.is-paused .study-timer-status-dot { background: #e5b866; box-shadow: 0 0 0 .22rem rgba(229, 184, 102, .14); }
+    .study-timer-subject, .study-timer-topic { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .study-timer-subject { margin-top: .22rem; font-size: .88rem; font-weight: 700; }
+    .study-timer-topic { color: rgba(255, 255, 255, .72); font-size: .72rem; }
+    .study-timer-clock-wrap { text-align: right; }
+    .study-timer-clock { display: block; font-variant-numeric: tabular-nums; font-size: 1.35rem; font-weight: 750; letter-spacing: .025em; line-height: 1; }
+    .study-timer-plan { display: block; margin-top: .2rem; color: rgba(255, 255, 255, .68); font-size: .65rem; }
+    .study-timer-progress { height: .28rem; margin-top: .65rem; overflow: hidden; background: rgba(255, 255, 255, .14); border-radius: 999px; }
+    .study-timer-progress > span { height: 100%; display: block; background: #86d69f; border-radius: inherit; transition: width .3s ease; }
+    .study-timer-bar.is-paused .study-timer-progress > span { background: #e5b866; }
+    .study-timer-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: .45rem; margin-top: .7rem; }
+    .study-timer-actions .btn { min-height: 36px; border-radius: .65rem; font-size: .75rem; font-weight: 650; }
+    .study-timer-actions .btn-light { color: #5f251f; }
+    body.study-timer-visible { padding-bottom: 9.5rem; }
     .review-queue {
         padding: 1rem;
         background: linear-gradient(135deg, rgba(99, 33, 28, .07), rgba(255, 253, 249, .92));
@@ -1415,6 +1435,11 @@
         .weekly-summary-highlight { align-items: flex-start; flex-direction: column; }
         .overdue-session-item { align-items: stretch; flex-direction: column; }
         .overdue-session-item .btn { width: 100%; }
+        .study-timer-bar { right: .55rem; bottom: calc(.55rem + env(safe-area-inset-bottom)); width: calc(100vw - 1.1rem); padding: .75rem; border-radius: .9rem; }
+        .study-timer-layout { gap: .55rem; }
+        .study-timer-clock { font-size: 1.2rem; }
+        .study-timer-actions { grid-template-columns: 1fr 1fr auto; }
+        .study-timer-actions .btn span { display: inline; }
         .review-queue-item { align-items: stretch; flex-direction: column; }
         .study-diary-entry { grid-template-columns: 1fr; }
         .study-diary-entry-actions { justify-content: flex-end; }
@@ -1920,6 +1945,26 @@
 
     </div>
 </div>
+
+<aside class="study-timer-bar d-none" id="temporizadorEstudo" aria-label="Temporizador da sessão de estudo">
+    <div class="study-timer-layout">
+        <div class="study-timer-copy">
+            <span class="study-timer-status"><span class="study-timer-status-dot" aria-hidden="true"></span><span id="statusTemporizadorEstudo">Em andamento</span></span>
+            <div class="study-timer-subject" id="materiaTemporizadorEstudo"></div>
+            <div class="study-timer-topic" id="conteudoTemporizadorEstudo"></div>
+        </div>
+        <div class="study-timer-clock-wrap">
+            <time class="study-timer-clock" id="tempoTemporizadorEstudo">00:00:00</time>
+            <small class="study-timer-plan" id="planejadoTemporizadorEstudo"></small>
+        </div>
+    </div>
+    <div class="study-timer-progress" id="progressoTemporizadorEstudo" role="progressbar" aria-label="Progresso do tempo planejado" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+    <div class="study-timer-actions">
+        <button type="button" class="btn btn-outline-light" id="btnPausarTemporizadorEstudo"><i class="bi-pause-fill me-1" aria-hidden="true"></i><span>Pausar</span></button>
+        <button type="button" class="btn btn-light" id="btnEncerrarTemporizadorEstudo"><i class="bi-check2-circle me-1" aria-hidden="true"></i><span>Encerrar e registrar</span></button>
+        <button type="button" class="btn btn-outline-light" id="btnCancelarTemporizadorEstudo" aria-label="Cancelar temporizador" title="Cancelar temporizador"><i class="bi-x-lg" aria-hidden="true"></i></button>
+    </div>
+</aside>
 
 <!-- ================= MODAIS ================= -->
 
@@ -2513,6 +2558,7 @@
             <div class="d-flex flex-wrap gap-2 justify-content-end">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-outline-primary" id="btnDetalhesEditarSessao"><i class="bi-pencil me-1"></i>Editar</button>
+                <button type="button" class="btn btn-outline-success" id="btnDetalhesIniciarEstudo"><i class="bi-play-fill me-1"></i><span id="textoDetalhesIniciarEstudo">Iniciar estudo</span></button>
                 <button type="button" class="btn btn-primary" id="btnDetalhesConcluirSessao"><i class="bi-check2-circle me-1"></i><span id="textoDetalhesConcluirSessao">Concluir estudo</span></button>
             </div>
         </div>
@@ -6986,6 +7032,9 @@ let tarefaEmEdicaoId = null;
 let tarefaConclusaoId = null;
 let tarefaDetalhesId = null;
 let registroEstudoEmEdicaoId = null;
+let estadoTemporizadorEstudo = null;
+let intervaloTemporizadorEstudo = null;
+const LIMITE_TEMPORIZADOR_ESTUDO_MS = 24 * 60 * 60 * 1000;
 const PERIODOS_ESTUDO = Object.freeze({
     morning: { rotulo: "Manhã", icone: "bi-sunrise" },
     afternoon: { rotulo: "Tarde", icone: "bi-sun" },
@@ -7016,6 +7065,200 @@ function exigirNuvemTarefas() {
 function exigirNuvemDiarioEstudos() {
     if (!window.HUB_CLOUD_STUDY_DIARY) throw new Error("A conexão do Diário de Estudos com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_STUDY_DIARY;
+}
+
+function chaveTemporizadorEstudo() {
+    return USUARIO_ATUAL_ID ? `hub_study_timer_${USUARIO_ATUAL_ID}` : null;
+}
+
+function duracaoTemporizadorEstudo() {
+    if (!estadoTemporizadorEstudo) return 0;
+    const adicional = estadoTemporizadorEstudo.executando && estadoTemporizadorEstudo.iniciadoEm
+        ? Math.max(0, Date.now() - estadoTemporizadorEstudo.iniciadoEm)
+        : 0;
+    return Math.min(LIMITE_TEMPORIZADOR_ESTUDO_MS, Math.max(0, estadoTemporizadorEstudo.acumuladoMs + adicional));
+}
+
+function salvarEstadoTemporizadorEstudo() {
+    const chave = chaveTemporizadorEstudo();
+    if (!chave || !estadoTemporizadorEstudo) return;
+    try { sessionStorage.setItem(chave, JSON.stringify(estadoTemporizadorEstudo)); }
+    catch (erro) { console.warn("Não foi possível preservar o temporizador nesta aba.", erro); }
+}
+
+function removerEstadoPersistidoTemporizadorEstudo() {
+    const chave = chaveTemporizadorEstudo();
+    if (!chave) return;
+    try { sessionStorage.removeItem(chave); }
+    catch (erro) { console.warn("Não foi possível remover o temporizador desta aba.", erro); }
+}
+
+function pararIntervaloTemporizadorEstudo() {
+    if (intervaloTemporizadorEstudo) clearInterval(intervaloTemporizadorEstudo);
+    intervaloTemporizadorEstudo = null;
+}
+
+function formatarTempoTemporizador(ms) {
+    const segundosTotais = Math.max(0, Math.floor(ms / 1000));
+    const horas = Math.floor(segundosTotais / 3600);
+    const minutos = Math.floor((segundosTotais % 3600) / 60);
+    const segundos = segundosTotais % 60;
+    return [horas, minutos, segundos].map(valor => String(valor).padStart(2, "0")).join(":");
+}
+
+function renderizarTemporizadorEstudo() {
+    const painel = document.getElementById("temporizadorEstudo");
+    if (!estadoTemporizadorEstudo) {
+        painel.classList.add("d-none");
+        painel.classList.remove("is-paused");
+        document.body.classList.remove("study-timer-visible");
+        pararIntervaloTemporizadorEstudo();
+        return;
+    }
+    const tarefa = obterTarefas().find(item => String(item.id) === String(estadoTemporizadorEstudo.tarefaId));
+    if (!tarefa) {
+        removerEstadoPersistidoTemporizadorEstudo();
+        estadoTemporizadorEstudo = null;
+        renderizarTemporizadorEstudo();
+        return;
+    }
+    let duracao = duracaoTemporizadorEstudo();
+    if (duracao >= LIMITE_TEMPORIZADOR_ESTUDO_MS && estadoTemporizadorEstudo.executando) {
+        estadoTemporizadorEstudo.acumuladoMs = LIMITE_TEMPORIZADOR_ESTUDO_MS;
+        estadoTemporizadorEstudo.iniciadoEm = null;
+        estadoTemporizadorEstudo.executando = false;
+        duracao = LIMITE_TEMPORIZADOR_ESTUDO_MS;
+        salvarEstadoTemporizadorEstudo();
+        pararIntervaloTemporizadorEstudo();
+    }
+    painel.classList.remove("d-none");
+    painel.classList.toggle("is-paused", !estadoTemporizadorEstudo.executando);
+    document.body.classList.add("study-timer-visible");
+    document.getElementById("statusTemporizadorEstudo").textContent = estadoTemporizadorEstudo.executando ? "Em andamento" : "Pausado";
+    document.getElementById("materiaTemporizadorEstudo").textContent = nomeDaMateria(tarefa.materiaId);
+    document.getElementById("conteudoTemporizadorEstudo").textContent = tarefa.topico;
+    document.getElementById("tempoTemporizadorEstudo").textContent = formatarTempoTemporizador(duracao);
+    const minutosPlanejados = Number(tarefa.minutosPlanejados) || 0;
+    document.getElementById("planejadoTemporizadorEstudo").textContent = minutosPlanejados ? `Planejado: ${formatarDuracao(minutosPlanejados)}` : "Sem tempo planejado";
+    const percentual = minutosPlanejados ? Math.min(100, Math.round((duracao / (minutosPlanejados * 60000)) * 100)) : 0;
+    const progresso = document.getElementById("progressoTemporizadorEstudo");
+    progresso.classList.toggle("d-none", !minutosPlanejados);
+    progresso.setAttribute("aria-valuenow", String(percentual));
+    progresso.querySelector("span").style.width = `${percentual}%`;
+    const botaoPausa = document.getElementById("btnPausarTemporizadorEstudo");
+    botaoPausa.querySelector("i").className = `${estadoTemporizadorEstudo.executando ? "bi-pause-fill" : "bi-play-fill"} me-1`;
+    botaoPausa.querySelector("span").textContent = estadoTemporizadorEstudo.executando ? "Pausar" : "Continuar";
+}
+
+function iniciarIntervaloTemporizadorEstudo() {
+    pararIntervaloTemporizadorEstudo();
+    if (!estadoTemporizadorEstudo?.executando) return;
+    intervaloTemporizadorEstudo = window.setInterval(renderizarTemporizadorEstudo, 1000);
+}
+
+function iniciarTemporizadorEstudo(id) {
+    const tarefa = obterTarefas().find(item => String(item.id) === String(id));
+    if (!tarefa) return;
+    if (estadoTemporizadorEstudo) {
+        if (String(estadoTemporizadorEstudo.tarefaId) !== String(tarefa.id)) {
+            alert("Já existe uma sessão sendo cronometrada. Encerre ou cancele o temporizador atual antes de iniciar outra.");
+            return;
+        }
+        if (!estadoTemporizadorEstudo.executando) continuarTemporizadorEstudo();
+        else renderizarTemporizadorEstudo();
+        return;
+    }
+    estadoTemporizadorEstudo = {
+        tarefaId: tarefa.id,
+        acumuladoMs: 0,
+        iniciadoEm: Date.now(),
+        executando: true,
+        periodo: periodoEstudoAtual()
+    };
+    salvarEstadoTemporizadorEstudo();
+    renderizarTemporizadorEstudo();
+    iniciarIntervaloTemporizadorEstudo();
+}
+
+function pausarTemporizadorEstudo() {
+    if (!estadoTemporizadorEstudo?.executando) return;
+    estadoTemporizadorEstudo.acumuladoMs = duracaoTemporizadorEstudo();
+    estadoTemporizadorEstudo.iniciadoEm = null;
+    estadoTemporizadorEstudo.executando = false;
+    salvarEstadoTemporizadorEstudo();
+    pararIntervaloTemporizadorEstudo();
+    renderizarTemporizadorEstudo();
+}
+
+function continuarTemporizadorEstudo() {
+    if (!estadoTemporizadorEstudo || estadoTemporizadorEstudo.executando) return;
+    estadoTemporizadorEstudo.iniciadoEm = Date.now();
+    estadoTemporizadorEstudo.executando = true;
+    salvarEstadoTemporizadorEstudo();
+    renderizarTemporizadorEstudo();
+    iniciarIntervaloTemporizadorEstudo();
+}
+
+function limparTemporizadorEstudo() {
+    removerEstadoPersistidoTemporizadorEstudo();
+    estadoTemporizadorEstudo = null;
+    pararIntervaloTemporizadorEstudo();
+    renderizarTemporizadorEstudo();
+}
+
+function cancelarTemporizadorEstudo() {
+    if (!estadoTemporizadorEstudo || !confirm("Cancelar este temporizador? A sessão continuará no cronograma.")) return;
+    limparTemporizadorEstudo();
+}
+
+function encerrarTemporizadorEstudo() {
+    if (!estadoTemporizadorEstudo) return;
+    pausarTemporizadorEstudo();
+    const tarefa = obterTarefas().find(item => String(item.id) === String(estadoTemporizadorEstudo?.tarefaId));
+    if (!tarefa) { limparTemporizadorEstudo(); return; }
+    const minutos = Math.max(1, Math.min(1440, Math.ceil(duracaoTemporizadorEstudo() / 60000)));
+    abrirConclusaoEstudo(tarefa.id, {
+        minutosRealizados: minutos,
+        dataEstudo: hojeISO(),
+        periodo: estadoTemporizadorEstudo.periodo,
+        conteudo: tarefa.topico
+    });
+}
+
+function restaurarTemporizadorEstudo() {
+    const chave = chaveTemporizadorEstudo();
+    estadoTemporizadorEstudo = null;
+    pararIntervaloTemporizadorEstudo();
+    if (!chave) { renderizarTemporizadorEstudo(); return; }
+    try {
+        const bruto = sessionStorage.getItem(chave);
+        if (!bruto) { renderizarTemporizadorEstudo(); return; }
+        const salvo = JSON.parse(bruto);
+        const tarefaExiste = obterTarefas().some(tarefa => String(tarefa.id) === String(salvo?.tarefaId));
+        const acumuladoMs = Number(salvo?.acumuladoMs);
+        const iniciadoEm = salvo?.iniciadoEm == null ? null : Number(salvo.iniciadoEm);
+        const executando = salvo?.executando === true;
+        const inicioValido = !executando || (Number.isFinite(iniciadoEm) && iniciadoEm > 0 && iniciadoEm <= Date.now() + 60000);
+        if (!tarefaExiste || !Number.isFinite(acumuladoMs) || acumuladoMs < 0 || acumuladoMs > LIMITE_TEMPORIZADOR_ESTUDO_MS || !inicioValido) {
+            removerEstadoPersistidoTemporizadorEstudo();
+            renderizarTemporizadorEstudo();
+            return;
+        }
+        estadoTemporizadorEstudo = {
+            tarefaId: String(salvo.tarefaId),
+            acumuladoMs,
+            iniciadoEm: executando ? iniciadoEm : null,
+            executando,
+            periodo: normalizarPeriodoEstudo(salvo.periodo, false)
+        };
+        renderizarTemporizadorEstudo();
+        iniciarIntervaloTemporizadorEstudo();
+    } catch (erro) {
+        console.warn("O temporizador salvo nesta aba era inválido e foi descartado.", erro);
+        removerEstadoPersistidoTemporizadorEstudo();
+        estadoTemporizadorEstudo = null;
+        renderizarTemporizadorEstudo();
+    }
 }
 
 function tituloTopicoEdital(id) {
@@ -7057,16 +7300,16 @@ function popularTopicosEditalCronograma(valorPreferido = "") {
     select.title = topicos.length ? "Vincule esta sessão ao checklist pessoal do Edital" : "Esta matéria ainda não possui tópicos no Edital";
 }
 
-function abrirConclusaoEstudo(id) {
+function abrirConclusaoEstudo(id, preenchimento = {}) {
     if (operacaoTarefaEmAndamento) return;
     const tarefa = obterTarefas().find(item => String(item.id) === String(id));
     if (!tarefa) return;
     tarefaConclusaoId = tarefa.id;
     document.getElementById("resumoConcluirEstudo").textContent = `${nomeDaMateria(tarefa.materiaId)} · ${tarefa.topico}`;
-    document.getElementById("estudoMinutosRealizados").value = tarefa.minutosPlanejados || 45;
-    document.getElementById("estudoDataRealizada").value = hojeISO();
-    document.getElementById("estudoPeriodoRealizado").value = normalizarPeriodoEstudo(tarefa.periodo, false);
-    document.getElementById("estudoConteudoRealizado").value = tarefa.topico;
+    document.getElementById("estudoMinutosRealizados").value = preenchimento.minutosRealizados || tarefa.minutosPlanejados || 45;
+    document.getElementById("estudoDataRealizada").value = preenchimento.dataEstudo || hojeISO();
+    document.getElementById("estudoPeriodoRealizado").value = normalizarPeriodoEstudo(preenchimento.periodo || tarefa.periodo, false);
+    document.getElementById("estudoConteudoRealizado").value = preenchimento.conteudo || tarefa.topico;
     document.getElementById("estudoAnotacoes").value = "";
     document.getElementById("retencaoGood").checked = true;
     const intervalos = obterEdital().intervalosRevisao;
@@ -7133,6 +7376,7 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
         const registros = obterRegistrosEstudo();
         if (resultado.registroEstudo?.id) registros.unshift({ ...resultado.registroEstudo, materiaId: tarefa.materiaId, topicoEditalId: tarefa.topicoEditalId || null });
         salvarLote([[LS.tarefas, tarefas], [LS.registrosEstudo, registros], [LS.edital, edital]]);
+        if (String(estadoTemporizadorEstudo?.tarefaId || "") === String(tarefa.id)) limparTemporizadorEstudo();
         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConcluirEstudo")).hide();
         tarefaConclusaoId = null;
         renderizarTudoCronograma();
@@ -7243,6 +7487,7 @@ async function excluirTarefaSincronizada(id) {
             throw erroRemoto;
         }
         if (String(tarefaEmEdicaoId) === String(tarefa.id)) limparEdicaoTarefa();
+        if (String(estadoTemporizadorEstudo?.tarefaId || "") === String(tarefa.id)) limparTemporizadorEstudo();
         bootstrap.Modal.getInstance(document.getElementById("modalDetalhesSessao"))?.hide();
         renderizarTudoCronograma();
         if (materiaAbertaId) renderizarWorkspace();
@@ -7272,11 +7517,23 @@ function abrirDetalhesSessao(id) {
     grupoEdital.classList.toggle("d-none", !tarefa.topicoEditalId);
     document.getElementById("detalhesSessaoEdital").textContent = tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "";
     document.getElementById("textoDetalhesConcluirSessao").textContent = tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir estudo";
+    const botaoIniciar = document.getElementById("btnDetalhesIniciarEstudo");
+    const temporizadorDestaSessao = String(estadoTemporizadorEstudo?.tarefaId || "") === String(tarefa.id);
+    const outraSessaoAtiva = Boolean(estadoTemporizadorEstudo) && !temporizadorDestaSessao;
+    botaoIniciar.disabled = outraSessaoAtiva;
+    botaoIniciar.title = outraSessaoAtiva ? "Encerre ou cancele o temporizador atual antes de iniciar outra sessão" : "";
+    document.getElementById("textoDetalhesIniciarEstudo").textContent = temporizadorDestaSessao ? (estadoTemporizadorEstudo.executando ? "Ver temporizador" : "Continuar estudo") : "Iniciar estudo";
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesSessao")).show();
 }
 
 document.getElementById("btnDetalhesEditarSessao").addEventListener("click", () => {
     if (tarefaDetalhesId) iniciarEdicaoTarefa(tarefaDetalhesId);
+});
+document.getElementById("btnDetalhesIniciarEstudo").addEventListener("click", () => {
+    if (!tarefaDetalhesId) return;
+    const id = tarefaDetalhesId;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesSessao")).hide();
+    window.setTimeout(() => iniciarTemporizadorEstudo(id), 180);
 });
 document.getElementById("btnDetalhesConcluirSessao").addEventListener("click", () => {
     if (!tarefaDetalhesId) return;
@@ -7288,6 +7545,12 @@ document.getElementById("btnDetalhesExcluirSessao").addEventListener("click", as
     if (tarefaDetalhesId) await excluirTarefaSincronizada(tarefaDetalhesId);
 });
 document.getElementById("modalDetalhesSessao").addEventListener("hidden.bs.modal", () => { tarefaDetalhesId = null; });
+document.getElementById("btnPausarTemporizadorEstudo").addEventListener("click", () => {
+    if (estadoTemporizadorEstudo?.executando) pausarTemporizadorEstudo();
+    else continuarTemporizadorEstudo();
+});
+document.getElementById("btnEncerrarTemporizadorEstudo").addEventListener("click", encerrarTemporizadorEstudo);
+document.getElementById("btnCancelarTemporizadorEstudo").addEventListener("click", cancelarTemporizadorEstudo);
 
 function renderizarTarefas() {
     const tarefas = obterTarefas();
@@ -7486,7 +7749,7 @@ function renderizarCalendario() {
     }
     document.getElementById("calendarioSemanal").setAttribute("aria-label", calendarioMobileAtivo() ? "Agenda diária" : "Calendário semanal");
 
-    const cartaoTarefa = tarefa => `<article class="calendar-task calendar-session-card ${tarefa.status === "concluido" ? "is-complete" : ""}"><button type="button" class="calendar-task-main btn-detalhes-tarefa-cal" data-id="${esc(tarefa.id)}" aria-label="Ver detalhes da sessão ${esc(tarefa.topico)}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button><div class="dropdown calendar-task-menu"><button type="button" class="calendar-task-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Ações da sessão ${esc(tarefa.topico)}" title="Ações da sessão"><i class="bi-three-dots-vertical" aria-hidden="true"></i></button><ul class="dropdown-menu dropdown-menu-end"><li><button type="button" class="dropdown-item btn-editar-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-pencil" aria-hidden="true"></i>Editar sessão</button></li><li><button type="button" class="dropdown-item btn-concluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-${tarefa.status === "concluido" ? "arrow-repeat" : "check2-circle"}" aria-hidden="true"></i>${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir estudo"}</button></li><li><hr class="dropdown-divider"></li><li><button type="button" class="dropdown-item text-danger btn-excluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-trash" aria-hidden="true"></i>Excluir sessão</button></li></ul></div></article>`;
+    const cartaoTarefa = tarefa => `<article class="calendar-task calendar-session-card ${tarefa.status === "concluido" ? "is-complete" : ""}"><button type="button" class="calendar-task-main btn-detalhes-tarefa-cal" data-id="${esc(tarefa.id)}" aria-label="Ver detalhes da sessão ${esc(tarefa.topico)}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button><div class="dropdown calendar-task-menu"><button type="button" class="calendar-task-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Ações da sessão ${esc(tarefa.topico)}" title="Ações da sessão"><i class="bi-three-dots-vertical" aria-hidden="true"></i></button><ul class="dropdown-menu dropdown-menu-end"><li><button type="button" class="dropdown-item btn-iniciar-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-play-fill" aria-hidden="true"></i>Iniciar estudo</button></li><li><button type="button" class="dropdown-item btn-editar-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-pencil" aria-hidden="true"></i>Editar sessão</button></li><li><button type="button" class="dropdown-item btn-concluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-${tarefa.status === "concluido" ? "arrow-repeat" : "check2-circle"}" aria-hidden="true"></i>${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir estudo"}</button></li><li><hr class="dropdown-divider"></li><li><button type="button" class="dropdown-item text-danger btn-excluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-trash" aria-hidden="true"></i>Excluir sessão</button></li></ul></div></article>`;
     const cartaoRegistro = registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}" title="Editar este registro do Diário"><span class="calendar-task-subject">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</span><span class="calendar-task-content">${esc(registro.conteudo)}</span><span class="calendar-task-meta"><span><i class="bi-clock me-1"></i>${registro.minutos} min estudados</span>${registro.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}${registro.tipo === "review" ? "<span>Revisão</span>" : ""}</span>${registro.anotacoes ? `<span class="calendar-task-note"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</span>` : ""}</button>`;
 
     document.getElementById("calendarioSemanal").innerHTML = dias.map((d, i) => {
@@ -7520,6 +7783,7 @@ function renderizarCalendario() {
     }).join("");
 
     document.querySelectorAll(".btn-detalhes-tarefa-cal").forEach(el => el.addEventListener("click", () => abrirDetalhesSessao(el.dataset.id)));
+    document.querySelectorAll(".btn-iniciar-tarefa-cal").forEach(el => el.addEventListener("click", () => iniciarTemporizadorEstudo(el.dataset.id)));
     document.querySelectorAll(".btn-editar-tarefa-cal").forEach(el => el.addEventListener("click", () => iniciarEdicaoTarefa(el.dataset.id)));
     document.querySelectorAll(".btn-concluir-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
         await alternarStatusTarefaSincronizada(el.dataset.id);
@@ -8900,6 +9164,7 @@ function iniciar() {
     renderizarMaterias();
     limparEdicaoTarefa();
     renderizarTudoCronograma();
+    restaurarTemporizadorEstudo();
     renderizarEdital();
     renderizarErros();
     renderizarDesempenho();
@@ -8978,6 +9243,10 @@ window.prepararSaidaHub = async () => {
 };
 window.encerrarHub = () => {
     geracaoSessaoHub += 1;
+    pausarTemporizadorEstudo();
+    estadoTemporizadorEstudo = null;
+    pararIntervaloTemporizadorEstudo();
+    renderizarTemporizadorEstudo();
     clearTimeout(timerAutoSave);
     timerAutoSave = null;
     salvamentoNotaPendente = null;
