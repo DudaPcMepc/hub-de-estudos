@@ -270,6 +270,19 @@
     }
     .calendar-task:hover { background: rgba(184, 50, 42, .15); }
     .calendar-task.is-complete { color: #27623d; background: rgba(43, 122, 72, .1); border-color: rgba(43, 122, 72, .18); }
+    .calendar-day-total { display: block; margin-top: .25rem; color: #27623d; font-size: .66rem; font-weight: 700; }
+    .study-diary-panel { padding: 1rem; background: rgba(255, 253, 249, .88); border: 1px solid rgba(59, 41, 35, .11); border-radius: 1rem; }
+    .study-diary-summary { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .study-diary-stat { padding: .45rem .65rem; color: #5b433a; background: rgba(91, 67, 58, .07); border-radius: .7rem; font-size: .75rem; }
+    .study-diary-days { display: grid; gap: .7rem; }
+    .study-diary-day { padding: .85rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; }
+    .study-diary-day-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
+    .study-diary-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .7rem; padding: .65rem 0; border-top: 1px solid rgba(59, 41, 35, .08); }
+    .study-diary-entry:first-of-type { border-top: 0; }
+    .study-diary-entry-notes { margin-top: .3rem; color: #6d5950; font-size: .75rem; white-space: pre-wrap; }
+    .study-diary-entry-actions { display: flex; align-items: center; gap: .2rem; }
+    .study-diary-link { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); }
+    .study-diary-empty { min-height: 110px; display: grid; place-items: center; align-content: center; gap: .3rem; color: var(--pimentel-cafe-claro); text-align: center; }
     .schedule-list-panel {
         padding: 1rem;
         background: rgba(255, 253, 249, .78);
@@ -1321,6 +1334,8 @@
         .study-session-form { grid-template-columns: 1fr; }
         .session-actions { grid-column: auto; grid-template-columns: 1fr; }
         .review-queue-item { align-items: stretch; flex-direction: column; }
+        .study-diary-entry { grid-template-columns: 1fr; }
+        .study-diary-entry-actions { justify-content: flex-end; }
         .retention-options { grid-template-columns: 1fr; }
         .simulation-generator-form { grid-template-columns: 1fr; }
         .simulation-actions { grid-column: auto; }
@@ -1555,6 +1570,14 @@
                     </div>
                 </div>
             </div>
+
+            <section class="study-diary-panel mb-4" aria-labelledby="tituloDiarioEstudos">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div><span class="exam-evolution-kicker">Histórico privado</span><h6 class="fw-bold mb-0" id="tituloDiarioEstudos"><i class="bi-journal-check me-1"></i>Diário da semana</h6></div>
+                    <div class="study-diary-summary" id="resumoDiarioSemana"></div>
+                </div>
+                <div class="study-diary-days" id="listaDiarioSemana"></div>
+            </section>
 
             <section class="review-queue mb-4 d-none" id="filaRevisoes" aria-labelledby="tituloFilaRevisoes">
                 <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
@@ -2347,7 +2370,9 @@
         <form id="formConcluirEstudo">
             <div class="modal-body">
                 <p class="small text-muted mb-3" id="resumoConcluirEstudo"></p>
-                <div class="mb-3"><label class="form-label fw-semibold" for="estudoMinutosRealizados">Tempo realmente estudado</label><div class="input-group"><input type="number" class="form-control" id="estudoMinutosRealizados" min="1" max="1440" inputmode="numeric" required><span class="input-group-text">minutos</span></div></div>
+                <div class="row g-2 mb-3"><div class="col-sm-5"><label class="form-label fw-semibold" for="estudoDataRealizada">Data do estudo</label><input type="date" class="form-control" id="estudoDataRealizada" required></div><div class="col-sm-7"><label class="form-label fw-semibold" for="estudoMinutosRealizados">Tempo realmente estudado</label><div class="input-group"><input type="number" class="form-control" id="estudoMinutosRealizados" min="1" max="1440" inputmode="numeric" required><span class="input-group-text">minutos</span></div></div></div>
+                <div class="mb-3"><label class="form-label fw-semibold" for="estudoConteudoRealizado">Conteúdo estudado</label><textarea class="form-control" id="estudoConteudoRealizado" rows="2" maxlength="5000" required></textarea></div>
+                <div class="mb-3"><label class="form-label fw-semibold" for="estudoAnotacoes">Anotações <span class="text-muted fw-normal">(opcional e privado)</span></label><textarea class="form-control" id="estudoAnotacoes" rows="3" maxlength="20000" placeholder="Entendimento, dificuldade, macete ou ponto para retomar..."></textarea></div>
                 <fieldset><legend class="form-label fw-semibold fs-6">Quanto você conseguiu lembrar?</legend><div class="retention-options">
                     <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoForgot" value="forgot"><label for="retencaoForgot"><strong>Não lembrei</strong><small id="rotuloIntervaloForgot">Revisar amanhã</small></label></div>
                     <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoPartial" value="partial"><label for="retencaoPartial"><strong>Parcialmente</strong><small id="rotuloIntervaloPartial">Revisar em 3 dias</small></label></div>
@@ -2358,6 +2383,19 @@
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary" id="btnConfirmarConclusaoEstudo"><i class="bi-check2-circle me-1"></i>Salvar e agendar revisão</button></div>
         </form>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalEditarRegistroEstudo" tabindex="-1" aria-labelledby="tituloEditarRegistroEstudo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><div><span class="exam-evolution-kicker">Diário privado</span><h5 class="modal-title fw-bold" id="tituloEditarRegistroEstudo">Editar estudo realizado</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <form id="formEditarRegistroEstudo"><div class="modal-body">
+            <p class="small text-muted" id="resumoEditarRegistroEstudo"></p>
+            <div class="row g-2 mb-3"><div class="col-sm-5"><label class="form-label" for="editarRegistroData">Data</label><input type="date" class="form-control" id="editarRegistroData" required></div><div class="col-sm-7"><label class="form-label" for="editarRegistroMinutos">Tempo estudado</label><div class="input-group"><input type="number" class="form-control" id="editarRegistroMinutos" min="1" max="1440" required><span class="input-group-text">minutos</span></div></div></div>
+            <div class="mb-3"><label class="form-label" for="editarRegistroConteudo">Conteúdo estudado</label><textarea class="form-control" id="editarRegistroConteudo" rows="3" maxlength="5000" required></textarea></div>
+            <div class="mb-3"><label class="form-label" for="editarRegistroAnotacoes">Anotações opcionais</label><textarea class="form-control" id="editarRegistroAnotacoes" rows="4" maxlength="20000"></textarea></div>
+            <p class="small text-muted mb-0">A retenção e a próxima revisão permanecem como foram avaliadas no momento do estudo.</p>
+        </div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary" id="btnSalvarRegistroEstudo"><i class="bi-cloud-check me-1"></i>Salvar alterações</button></div></form>
     </div></div>
 </div>
 
@@ -2402,6 +2440,7 @@
 const LS = {
     materias: "hub_materias",
     tarefas: "hub_tarefas",
+    registrosEstudo: "hub_registros_estudo",
     edital: "hub_edital",
     erros: "hub_erros",
     desempenho: "hub_desempenho"
@@ -2425,7 +2464,7 @@ function chaveDoUsuario(chave) {
 }
 
 function possuiDadosLegados() {
-    return [LS.materias, LS.tarefas, LS.edital, LS.erros, LS.desempenho]
+    return [LS.materias, LS.tarefas, LS.registrosEstudo, LS.edital, LS.erros, LS.desempenho]
         .some(chave => localStorage.getItem(chave) !== null);
 }
 
@@ -2465,6 +2504,7 @@ function salvar(chave, valor) {
 
 function obterMaterias() { return carregar(LS.materias, []); }
 function obterTarefas() { return carregar(LS.tarefas, []); }
+function obterRegistrosEstudo() { return carregar(LS.registrosEstudo, []); }
 function obterEdital() {
     const edital = carregar(LS.edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] });
     edital.intervalosRevisao = { forgot: 1, partial: 3, good: 7, mastered: 30, ...(edital.intervalosRevisao || {}) };
@@ -2780,6 +2820,11 @@ function sincronizarListaDeTarefas(tarefasRemotas) {
             historicoRevisoes: Array.isArray(remota.historicoRevisoes) ? remota.historicoRevisoes : []
         }));
     salvar(LS.tarefas, sincronizadas);
+}
+
+function sincronizarRegistrosEstudo(registrosRemotos) {
+    if (!Array.isArray(registrosRemotos)) throw new Error("A lista do Diário de Estudos no Supabase é inválida.");
+    salvar(LS.registrosEstudo, registrosRemotos.map(registro => ({ ...registro })));
 }
 
 function sincronizarListaDeErros(errosRemotos) {
@@ -6806,10 +6851,25 @@ document.getElementById("btnRevisarMateria").addEventListener("click", () => ini
 let operacaoTarefaEmAndamento = false;
 let tarefaEmEdicaoId = null;
 let tarefaConclusaoId = null;
+let registroEstudoEmEdicaoId = null;
 
 function exigirNuvemTarefas() {
     if (!window.HUB_CLOUD_TASKS) throw new Error("A conexão do cronograma com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_TASKS;
+}
+
+function exigirNuvemDiarioEstudos() {
+    if (!window.HUB_CLOUD_STUDY_DIARY) throw new Error("A conexão do Diário de Estudos com o Supabase ainda não está pronta.");
+    return window.HUB_CLOUD_STUDY_DIARY;
+}
+
+function tituloTopicoEdital(id) {
+    if (!id) return "";
+    for (const materia of obterEdital().materias) {
+        const topico = (materia.topicos || []).find(item => String(item.id) === String(id));
+        if (topico) return topico.titulo;
+    }
+    return "Tópico removido do Edital";
 }
 
 function limparEdicaoTarefa() {
@@ -6848,6 +6908,9 @@ function abrirConclusaoEstudo(id) {
     tarefaConclusaoId = tarefa.id;
     document.getElementById("resumoConcluirEstudo").textContent = `${nomeDaMateria(tarefa.materiaId)} · ${tarefa.topico}`;
     document.getElementById("estudoMinutosRealizados").value = tarefa.minutosPlanejados || 45;
+    document.getElementById("estudoDataRealizada").value = hojeISO();
+    document.getElementById("estudoConteudoRealizado").value = tarefa.topico;
+    document.getElementById("estudoAnotacoes").value = "";
     document.getElementById("retencaoGood").checked = true;
     const intervalos = obterEdital().intervalosRevisao;
     const rotulo = dias => dias === 1 ? "Revisar amanhã" : `Revisar em ${dias} dias`;
@@ -6887,14 +6950,19 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
     const tarefa = obterTarefas().find(item => String(item.id) === String(tarefaConclusaoId));
     if (!tarefa) return;
     const minutos = Number(document.getElementById("estudoMinutosRealizados").value);
+    const dataEstudo = document.getElementById("estudoDataRealizada").value;
+    const conteudo = document.getElementById("estudoConteudoRealizado").value.trim();
+    const anotacoes = document.getElementById("estudoAnotacoes").value.trim();
     const retencao = document.querySelector('input[name="nivelRetencao"]:checked')?.value;
-    if (!Number.isInteger(minutos) || minutos < 1 || minutos > 1440 || !retencao) return;
+    if (!Number.isInteger(minutos) || minutos < 1 || minutos > 1440 || !retencao || !dataEstudo || dataEstudo > somarDias(hojeISO(), 1) || !conteudo) return;
     const marcarTopico = Boolean(tarefa.topicoEditalId) && document.getElementById("marcarTopicoEditalConcluido").checked;
     operacaoTarefaEmAndamento = true;
     const botao = document.getElementById("btnConfirmarConclusaoEstudo");
     botao.disabled = true;
     try {
-        const resultado = await exigirNuvemTarefas().registrarRevisao(tarefa.id, minutos, retencao, marcarTopico);
+        const resultado = await exigirNuvemTarefas().registrarRevisao(tarefa.id, minutos, retencao, marcarTopico, {
+            dataEstudo, conteudo, anotacoes, materiaId: tarefa.materiaId, materiaNome: nomeDaMateria(tarefa.materiaId)
+        });
         const tarefas = obterTarefas();
         const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
         if (atual) Object.assign(atual, resultado);
@@ -6904,7 +6972,9 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
                 if (String(topico.id) === String(tarefa.topicoEditalId)) topico.concluido = true;
             }));
         }
-        salvarLote([[LS.tarefas, tarefas], [LS.edital, edital]]);
+        const registros = obterRegistrosEstudo();
+        if (resultado.registroEstudo?.id) registros.unshift({ ...resultado.registroEstudo, materiaId: tarefa.materiaId, topicoEditalId: tarefa.topicoEditalId || null });
+        salvarLote([[LS.tarefas, tarefas], [LS.registrosEstudo, registros], [LS.edital, edital]]);
         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConcluirEstudo")).hide();
         tarefaConclusaoId = null;
         renderizarTudoCronograma();
@@ -6919,6 +6989,64 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
     }
 });
 document.getElementById("modalConcluirEstudo").addEventListener("hidden.bs.modal", () => { tarefaConclusaoId = null; });
+
+function abrirEdicaoRegistroEstudo(id) {
+    const registro = obterRegistrosEstudo().find(item => String(item.id) === String(id));
+    if (!registro) return;
+    registroEstudoEmEdicaoId = registro.id;
+    document.getElementById("resumoEditarRegistroEstudo").textContent = `${registro.materiaNome || nomeDaMateria(registro.materiaId)}${registro.topicoEditalId ? " · " + tituloTopicoEdital(registro.topicoEditalId) : ""}`;
+    document.getElementById("editarRegistroData").value = registro.dataEstudo;
+    document.getElementById("editarRegistroMinutos").value = registro.minutos;
+    document.getElementById("editarRegistroConteudo").value = registro.conteudo;
+    document.getElementById("editarRegistroAnotacoes").value = registro.anotacoes || "";
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEditarRegistroEstudo")).show();
+}
+
+document.getElementById("formEditarRegistroEstudo").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (!registroEstudoEmEdicaoId || operacaoTarefaEmAndamento) return;
+    const alteracoes = {
+        dataEstudo: document.getElementById("editarRegistroData").value,
+        minutos: Number(document.getElementById("editarRegistroMinutos").value),
+        conteudo: document.getElementById("editarRegistroConteudo").value.trim(),
+        anotacoes: document.getElementById("editarRegistroAnotacoes").value.trim()
+    };
+    if (!alteracoes.dataEstudo || alteracoes.dataEstudo > somarDias(hojeISO(), 1) || !alteracoes.conteudo || !Number.isInteger(alteracoes.minutos) || alteracoes.minutos < 1 || alteracoes.minutos > 1440) return;
+    operacaoTarefaEmAndamento = true;
+    const botao = document.getElementById("btnSalvarRegistroEstudo");
+    botao.disabled = true;
+    try {
+        const salvo = await exigirNuvemDiarioEstudos().atualizar(registroEstudoEmEdicaoId, alteracoes);
+        salvar(LS.registrosEstudo, obterRegistrosEstudo().map(item => String(item.id) === String(salvo.id) ? salvo : item));
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEditarRegistroEstudo")).hide();
+        renderizarTudoCronograma();
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao editar registro do Diário", erro);
+        alert("O registro não foi alterado porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoTarefaEmAndamento = false;
+        botao.disabled = false;
+    }
+});
+document.getElementById("modalEditarRegistroEstudo").addEventListener("hidden.bs.modal", () => { registroEstudoEmEdicaoId = null; });
+
+async function excluirRegistroEstudoSincronizado(id) {
+    const registro = obterRegistrosEstudo().find(item => String(item.id) === String(id));
+    if (!registro || operacaoTarefaEmAndamento || !confirm(`Excluir do Diário o estudo “${registro.conteudo}”? A revisão já agendada será mantida.`)) return;
+    operacaoTarefaEmAndamento = true;
+    try {
+        await exigirNuvemDiarioEstudos().excluir(registro.id);
+        salvar(LS.registrosEstudo, obterRegistrosEstudo().filter(item => String(item.id) !== String(registro.id)));
+        renderizarTudoCronograma();
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao excluir registro do Diário", erro);
+        alert("O registro não foi excluído porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoTarefaEmAndamento = false;
+    }
+}
 
 function renderizarTarefas() {
     const tarefas = obterTarefas();
@@ -7123,18 +7251,26 @@ function renderizarCalendario() {
     const dias = obterDiasDaSemana();
     const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
     const tarefas = obterTarefas();
+    const registros = obterRegistrosEstudo();
 
     document.getElementById("calendarioSemanal").innerHTML = dias.map((d, i) => {
         const iso = paraISO(d);
         const doDia = tarefas.filter(t => t.data === iso);
-        const conteudo = doDia.length === 0
+        const estudadosNoDia = registros.filter(registro => registro.dataEstudo === iso);
+        const minutosDoDia = estudadosNoDia.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+        const conteudo = doDia.length === 0 && estudadosNoDia.length === 0
             ? `<div class="calendar-empty"><i class="bi-calendar2" aria-hidden="true"></i><span>Sem sessões</span></div>`
-            : doDia.map(t => `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Revisar novamente" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</button>`).join("");
+            : doDia.map(t => {
+                const realizado = estudadosNoDia.filter(registro => String(registro.tarefaId) === String(t.id)).sort((a, b) => String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")))[0];
+                return `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Revisar novamente" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}${realizado ? `<small class="d-block mt-1">${realizado.minutos} min estudados</small>` : ""}</button>`;
+            }).join("")
+                + estudadosNoDia.filter(registro => !doDia.some(tarefa => String(tarefa.id) === String(registro.tarefaId))).map(registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))} · ${registro.minutos} min</button>`).join("");
         return `
             <article class="calendar-day ${ehHoje(d) ? "is-today" : ""}">
                 <header class="calendar-day-header">
                     <span class="calendar-weekday">${nomesDias[i]}</span>
                     <span class="calendar-date">${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>
+                    ${minutosDoDia ? `<span class="calendar-day-total">${formatarDuracao(minutosDoDia)} estudadas</span>` : ""}
                 </header>
                 <div class="calendar-day-body">${conteudo}</div>
             </article>`;
@@ -7143,6 +7279,48 @@ function renderizarCalendario() {
     document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
         await alternarStatusTarefaSincronizada(el.dataset.id);
     }));
+    document.querySelectorAll(".btn-editar-registro-cal").forEach(el => el.addEventListener("click", () => abrirEdicaoRegistroEstudo(el.dataset.id)));
+}
+
+function formatarDuracao(minutos) {
+    const total = Math.max(0, Number(minutos) || 0);
+    const horas = Math.floor(total / 60);
+    const resto = total % 60;
+    if (!horas) return `${resto} min`;
+    return resto ? `${horas}h${String(resto).padStart(2, "0")}` : `${horas}h`;
+}
+
+function renderizarDiarioSemana() {
+    const dias = obterDiasDaSemana();
+    const datas = new Set(dias.map(paraISO));
+    const registros = obterRegistrosEstudo().filter(registro => datas.has(registro.dataEstudo));
+    const totalMinutos = registros.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+    const porMateria = registros.reduce((mapa, registro) => {
+        const chave = String(registro.materiaId || registro.materiaNome);
+        const atual = mapa.get(chave) || { nome: registro.materiaNome || nomeDaMateria(registro.materiaId), minutos: 0 };
+        atual.minutos += Number(registro.minutos) || 0;
+        mapa.set(chave, atual);
+        return mapa;
+    }, new Map());
+    const principal = [...porMateria.values()].sort((a, b) => b.minutos - a.minutos)[0];
+    document.getElementById("resumoDiarioSemana").innerHTML = [
+        `<span class="study-diary-stat"><strong>${formatarDuracao(totalMinutos)}</strong> estudadas</span>`,
+        `<span class="study-diary-stat"><strong>${registros.length}</strong> ${registros.length === 1 ? "sessão" : "sessões"}</span>`,
+        principal ? `<span class="study-diary-stat">Mais estudada: <strong>${esc(principal.nome)}</strong></span>` : ""
+    ].filter(Boolean).join("");
+
+    const grupos = [...datas].sort().reverse().map(data => ({
+        data,
+        registros: registros.filter(registro => registro.dataEstudo === data)
+    })).filter(grupo => grupo.registros.length);
+    document.getElementById("listaDiarioSemana").innerHTML = grupos.length ? grupos.map(grupo => {
+        const minutos = grupo.registros.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+        const data = new Date(`${grupo.data}T12:00:00`);
+        const retencoes = { forgot: "Reforçar", partial: "Parcial", good: "Boa retenção", mastered: "Dominado" };
+        return `<article class="study-diary-day"><header class="study-diary-day-header"><div><strong>${data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}</strong><small class="d-block text-muted">${grupo.registros.length} ${grupo.registros.length === 1 ? "sessão registrada" : "sessões registradas"}</small></div><span class="badge rounded-pill text-bg-light">${formatarDuracao(minutos)}</span></header>${grupo.registros.map(registro => `<div class="study-diary-entry"><div><div class="d-flex flex-wrap align-items-center gap-2"><strong>${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</strong><span class="task-meta-chip">${registro.minutos} min</span><span class="task-meta-chip">${esc(retencoes[registro.retencao] || "Avaliado")}</span>${registro.tipo === "review" ? '<span class="task-meta-chip is-review">Revisão</span>' : ""}${registro.topicoEditalId ? `<span class="task-meta-chip study-diary-link"><i class="bi-link-45deg"></i>Edital: ${esc(tituloTopicoEdital(registro.topicoEditalId))}</span>` : ""}</div><div class="small mt-1">${esc(registro.conteudo)}</div>${registro.anotacoes ? `<div class="study-diary-entry-notes"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</div>` : ""}</div><div class="study-diary-entry-actions"><button type="button" class="btn btn-sm btn-link text-secondary btn-editar-registro-estudo" data-id="${esc(registro.id)}" aria-label="Editar registro"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-link text-danger btn-excluir-registro-estudo" data-id="${esc(registro.id)}" aria-label="Excluir registro"><i class="bi-trash"></i></button></div></div>`).join("")}</article>`;
+    }).join("") : '<div class="study-diary-empty"><i class="bi-journal-plus fs-3"></i><strong>Nenhum estudo registrado nesta semana.</strong><small>Conclua uma sessão para formar seu Diário de Estudos.</small></div>';
+    document.querySelectorAll(".btn-editar-registro-estudo").forEach(botao => botao.addEventListener("click", () => abrirEdicaoRegistroEstudo(botao.dataset.id)));
+    document.querySelectorAll(".btn-excluir-registro-estudo").forEach(botao => botao.addEventListener("click", () => excluirRegistroEstudoSincronizado(botao.dataset.id)));
 }
 
 document.getElementById("btnSemanaAnterior").addEventListener("click", () => { offsetSemana--; renderizarCalendario(); });
@@ -7153,6 +7331,7 @@ function renderizarTudoCronograma() {
     renderizarTarefas();
     renderizarFilaRevisoes();
     renderizarCalendario();
+    renderizarDiarioSemana();
 }
 
 // ============================================================
@@ -7178,10 +7357,13 @@ function renderizarPainelEvolucaoEdital(edital) {
     const totalPontos = calcularPontosTotais(edital);
     const agora = Date.now();
     const inicioSemana = agora - (7 * 24 * 60 * 60 * 1000);
-    const atividadesPorMateria = obterTarefas().reduce((mapa, tarefa) => {
-        const eventos = Array.isArray(tarefa.historicoRevisoes) ? tarefa.historicoRevisoes : [];
-        if (!mapa.has(String(tarefa.materiaId))) mapa.set(String(tarefa.materiaId), []);
-        mapa.get(String(tarefa.materiaId)).push(...eventos);
+    const atividadesPorMateria = obterRegistrosEstudo().reduce((mapa, registro) => {
+        if (!registro.materiaId) return mapa;
+        if (!mapa.has(String(registro.materiaId))) mapa.set(String(registro.materiaId), []);
+        mapa.get(String(registro.materiaId)).push({
+            studiedAt: `${registro.dataEstudo}T12:00:00`,
+            durationMinutes: registro.minutos
+        });
         return mapa;
     }, new Map());
     const itens = edital.materias.map(item => {
@@ -8043,7 +8225,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 4;
+const VERSAO_BACKUP = 5;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -8167,6 +8349,31 @@ function validarPayloadBackup(payload) {
         };
     });
     garantirIdsUnicos(tarefas, "Tarefas");
+    const idsTarefas = new Set(tarefas.map(tarefa => String(tarefa.id)));
+
+    const registrosEstudo = versao >= 5 ? listaBackup(dados.registrosEstudo || [], "Diário de Estudos", 50000).map((registro, i) => {
+        objetoBackup(registro, `Registro de estudo ${i + 1}`);
+        const materiaId = idBackup(registro.materiaId, "Matéria do registro de estudo");
+        garantirReferenciaMateria(materiaId, idsMaterias, `Registro de estudo ${i + 1}`);
+        const tarefaId = registro.tarefaId == null ? null : idBackup(registro.tarefaId, "Tarefa do registro de estudo");
+        if (tarefaId != null && !idsTarefas.has(String(tarefaId))) throw new Error(`Registro de estudo ${i + 1} referencia uma sessão inexistente.`);
+        const minutos = numeroBackup(registro.minutos, "Tempo do registro de estudo", 1, 1440);
+        if (!Number.isInteger(minutos)) throw new Error(`Tempo do registro de estudo ${i + 1} inválido.`);
+        if (!["forgot", "partial", "good", "mastered"].includes(registro.retencao)) throw new Error(`Retenção do registro de estudo ${i + 1} inválida.`);
+        const materiaNome = textoBackup(registro.materiaNome, "Nome da matéria no registro", 500);
+        const conteudo = textoBackup(registro.conteudo, "Conteúdo estudado", 5000);
+        const dataEstudo = dataBackup(registro.dataEstudo, "Data do estudo");
+        if (!materiaNome.trim() || !conteudo.trim() || !dataEstudo) throw new Error(`Registro de estudo ${i + 1} incompleto.`);
+        return {
+            id: idBackup(registro.id, "ID do registro de estudo"), tarefaId, materiaId,
+            topicoEditalId: registro.topicoEditalId == null ? null : idBackup(registro.topicoEditalId, "Tópico do Edital do registro"),
+            materiaNome, conteudo,
+            anotacoes: textoBackup(registro.anotacoes || "", "Anotações do estudo", 20000),
+            dataEstudo, minutos,
+            retencao: registro.retencao, tipo: registro.tipo === "review" ? "review" : "study"
+        };
+    }) : [];
+    garantirIdsUnicos(registrosEstudo, "Diário de Estudos");
 
     const editalOrigem = objetoBackup(dados.edital, "Edital");
     const intervalosOrigem = versao >= 4 && editalOrigem.intervalosRevisao ? objetoBackup(editalOrigem.intervalosRevisao, "Intervalos de revisão") : {};
@@ -8203,6 +8410,9 @@ function validarPayloadBackup(payload) {
     tarefas.forEach((tarefa, indice) => {
         if (tarefa.topicoEditalId != null && !idsTopicosEdital.has(String(tarefa.topicoEditalId))) throw new Error(`Tarefa ${indice + 1} referencia um tópico inexistente no Edital.`);
     });
+    registrosEstudo.forEach((registro, indice) => {
+        if (registro.topicoEditalId != null && !idsTopicosEdital.has(String(registro.topicoEditalId))) throw new Error(`Registro de estudo ${indice + 1} referencia um tópico inexistente no Edital.`);
+    });
 
     const erros = listaBackup(dados.erros, "Erros", 20000).map((er, i) => {
         objetoBackup(er, `Erro ${i + 1}`);
@@ -8225,12 +8435,12 @@ function validarPayloadBackup(payload) {
         const acertos = numeroBackup(valor.acertos, "Total de acertos", 0, total);
         desempenho[id] = { acertos, total };
     });
-    return { materias, tarefas, edital, erros, desempenho };
+    return { materias, tarefas, registrosEstudo, edital, erros, desempenho };
 }
 
 function aplicarBackupValidado(dados) {
     const itens = [
-        [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.edital, dados.edital],
+        [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.registrosEstudo, dados.registrosEstudo], [LS.edital, dados.edital],
         [LS.erros, dados.erros], [LS.desempenho, dados.desempenho]
     ];
     salvarLote(itens, { permitirRecuperacao: true });
@@ -8242,7 +8452,7 @@ document.getElementById("btnExportar").addEventListener("click", () => {
         versao: VERSAO_BACKUP,
         dataExportacao: new Date().toISOString(),
         dados: {
-            materias: obterMaterias(), tarefas: obterTarefas(), edital: obterEdital(),
+            materias: obterMaterias(), tarefas: obterTarefas(), registrosEstudo: obterRegistrosEstudo(), edital: obterEdital(),
             erros: obterErros(), desempenho: obterDesempenho()
         }
     };
@@ -8330,6 +8540,7 @@ window.obterDadosParaPreviaMigracao = () => {
         dados: {
             materias,
             tarefas: obterTarefas(),
+            registrosEstudo: obterRegistrosEstudo(),
             edital: obterEdital(),
             erros: obterErros(),
             desempenho: obterDesempenho()
@@ -8342,6 +8553,7 @@ window.obterDadosParaPreviaMigracao = () => {
             flashcard_progress: materias.reduce((total, materia) => total + materia.cards.length, 0),
             study_links: materias.reduce((total, materia) => total + materia.links.length, 0),
             study_tasks: obterTarefas().length,
+            study_session_logs: obterRegistrosEstudo().length,
             exam_settings: Object.values(obterEdital()).some(valor => Array.isArray(valor) ? valor.length > 0 : Boolean(valor)) ? 1 : 0,
             exam_subjects: obterEdital().materias.length,
             exam_topics: obterEdital().materias.reduce((total, materia) => total + (materia.topicos?.length || 0), 0),
@@ -8350,7 +8562,7 @@ window.obterDadosParaPreviaMigracao = () => {
         }
     };
 };
-window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }, registrosEstudoRemotos = []) => {
     geracaoSessaoHub += 1;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
@@ -8378,6 +8590,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     sincronizarListaDeFlashcards(flashcardsRemotos);
     sincronizarListaDeLinks(linksRemotos);
     sincronizarListaDeTarefas(tarefasRemotas);
+    sincronizarRegistrosEstudo(registrosEstudoRemotos);
     sincronizarEdital(editalRemoto);
     sincronizarListaDeErros(errosRemotos);
     sincronizarDesempenho(desempenhoRemoto);
@@ -8533,6 +8746,7 @@ window.encerrarHub = () => {
         dados: {
             materias,
             tarefas: Array.isArray(dados.hub_tarefas) ? dados.hub_tarefas : [],
+            registrosEstudo: [],
             edital,
             erros: Array.isArray(dados.hub_erros) ? dados.hub_erros : [],
             desempenho: dados.hub_desempenho && typeof dados.hub_desempenho === "object" && !Array.isArray(dados.hub_desempenho) ? dados.hub_desempenho : {}

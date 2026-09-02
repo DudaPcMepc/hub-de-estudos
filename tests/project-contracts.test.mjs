@@ -247,7 +247,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 4/);
+    assert.match(html, /VERSAO_BACKUP = 5/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -265,6 +265,38 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(migration, /review_interval_mastered integer not null default 30/i);
     assert.match(migration, /revoke all on function public\.record_study_review[^;]*from public, anon/i);
     assert.match(migration, /import_local_hub_core_v2/i);
+});
+
+test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const migration = readProjectFile("supabase/migrations/202609020020_private_study_diary.sql");
+    const hardening = readProjectFile("supabase/migrations/202609020022_harden_study_diary_membership.sql");
+    const dateValidation = readProjectFile("supabase/migrations/202609020023_validate_study_diary_dates.sql");
+
+    assert.match(html, /id="tituloDiarioEstudos"/);
+    assert.match(html, /id="estudoConteudoRealizado"/);
+    assert.match(html, /id="estudoAnotacoes"/);
+    assert.match(html, /id="modalEditarRegistroEstudo"/);
+    assert.match(html, /obterRegistrosEstudo\(\)/);
+    assert.match(html, /topicoEditalId[^\n]*tituloTopicoEdital/);
+    assert.match(html, /registrosEstudo: obterRegistrosEstudo\(\)/);
+    assert.match(repository, /export async function carregarRegistrosEstudo/);
+    assert.match(repository, /export async function atualizarRegistroEstudo/);
+    assert.match(repository, /export async function excluirRegistroEstudo/);
+    assert.match(auth, /HUB_CLOUD_STUDY_DIARY/);
+    assert.match(migration, /create table public\.study_session_logs/i);
+    assert.match(migration, /private_notes text not null default ''/i);
+    assert.match(migration, /study_session_logs_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /create trigger study_session_logs_validate/i);
+    assert.match(migration, /topic\.user_id = new\.user_id/i);
+    assert.match(migration, /insert into public\.study_session_logs/i);
+    assert.match(migration, /payload->'registrosEstudo'/i);
+    assert.match(migration, /import_local_hub_core_v3/i);
+    assert.match(hardening, /study_session_logs_select_self[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(hardening, /study_session_logs_update_self[\s\S]*?with check[\s\S]*?private\.is_workspace_member\(workspace_id\)/i);
+    assert.match(dateValidation, /new\.studied_on > current_date \+ 1/i);
 });
 
 test("o edital destaca as informações essenciais e orienta o primeiro cadastro", () => {
