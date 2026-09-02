@@ -248,7 +248,7 @@ test("o edital destaca as informações essenciais e orienta o primeiro cadastro
     assert.doesNotMatch(html, /Nenhuma matéria na matriz ainda\./);
 });
 
-test("o checklist do edital é retrátil e permite excluir apenas o tópico escolhido", () => {
+test("o checklist do edital é retrátil e gerencia os tópicos da matéria existente", () => {
     const html = readProjectFile("index.html");
     const auth = readProjectFile("src/auth.js");
     const repository = readProjectFile("src/cloud-core-repository.js");
@@ -259,9 +259,16 @@ test("o checklist do edital é retrátil e permite excluir apenas o tópico esco
     assert.match(html, /class="exam-topic-count/);
     assert.match(html, /class="exam-topic-list"/);
     assert.match(html, /class="btn btn-sm btn-link text-danger exam-topic-delete"/);
+    assert.match(html, /class="btn btn-sm btn-link text-secondary exam-topic-edit"/);
+    assert.match(html, /class="btn btn-sm btn-outline-primary btn-adicionar-topico-edital"/);
+    assert.match(html, /class="exam-topic-editor form-topico-edital"/);
+    assert.match(html, /Esse tópico já está no checklist desta matéria\./);
     assert.match(html, /Remover o tópico “\$\{topico\.titulo\}” do seu checklist pessoal\?/);
     assert.match(auth, /excluirTopico: excluirTopicoEdital/);
+    assert.match(auth, /renomearTopico: renomearTopicoEdital/);
     assert.match(repository, /export async function excluirTopicoEdital/);
+    assert.match(repository, /export async function renomearTopicoEdital/);
+    assert.match(repository, /position: Number\.isInteger\(topico\.position\)/);
     assert.match(repository, /from\("exam_topics"\)\.delete\(\)[\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)/);
 });
 

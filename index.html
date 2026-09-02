@@ -369,12 +369,28 @@
     }
     .exam-topic-label { display: flex; align-items: center; gap: .65rem; flex: 1 1 auto; min-width: 0; cursor: pointer; }
     .exam-topic-title { overflow-wrap: anywhere; }
-    .exam-topic-delete { flex: 0 0 auto; padding: .25rem .45rem; border: 0; }
+    .exam-topic-actions { display: inline-flex; align-items: center; gap: .15rem; flex: 0 0 auto; }
+    .exam-topic-edit, .exam-topic-delete { padding: .25rem .45rem; border: 0; }
+    .exam-topic-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
+    .exam-topic-editor {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: .55rem;
+        align-items: center;
+        padding: .65rem;
+        background: rgba(244, 226, 212, .42);
+        border: 1px solid rgba(184, 50, 42, .18);
+        border-radius: .7rem;
+    }
+    .exam-topic-editor-actions { display: inline-flex; gap: .35rem; }
+    .exam-topic-empty { padding: .8rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .65rem; text-align: center; }
     @media (max-width: 575.98px) {
         .exam-topic-panel { padding: .85rem .65rem 1rem; }
         .exam-topic-list { margin-left: .45rem; }
         .exam-topic-item { align-items: flex-start; }
         .exam-topic-item .badge { display: none; }
+        .exam-topic-editor { grid-template-columns: 1fr; }
+        .exam-topic-editor-actions { justify-content: flex-end; }
     }
     .exam-empty {
         min-height: 190px;
@@ -6888,6 +6904,7 @@ function renderizarTudoCronograma() {
 // ============================================================
 let operacaoEditalEmAndamento = false;
 let materiasEditalExpandidas = new Set();
+let editorTopicoEdital = null;
 
 function exigirNuvemEdital() {
     if (!window.HUB_CLOUD_EXAM) throw new Error("A conexão do edital com o Supabase ainda não está pronta.");
@@ -6931,10 +6948,15 @@ function renderizarEdital() {
         const cor = pct > 20 ? "bg-danger" : pct > 10 ? "bg-warning" : "bg-info";
         const topicos = Array.isArray(m.topicos) ? m.topicos : [];
         const dominados = topicos.filter(topico => topico.concluido === true).length;
-        const expandida = topicos.length > 0 && materiasEditalExpandidas.has(String(m.id));
+        const expandida = materiasEditalExpandidas.has(String(m.id));
         const detalheId = `edital-topicos-${String(m.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
         const nomeMateria = nomeDaMateria(m.materiaId);
+        const htmlEditor = topico => `<form class="exam-topic-editor form-topico-edital" data-item-id="${esc(m.id)}" ${topico ? `data-id="${esc(topico.id)}"` : ""}>
+            <input type="text" class="form-control form-control-sm campo-titulo-topico-edital" maxlength="1000" value="${esc(topico?.titulo || "")}" placeholder="Digite o tópico do edital" aria-label="Título do tópico" required>
+            <div class="exam-topic-editor-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-cancelar-topico-edital">Cancelar</button><button type="submit" class="btn btn-sm btn-primary"><i class="bi-check-lg me-1"></i>Salvar</button></div>
+        </form>`;
         const checklist = topicos.length ? topicos.map(topico => {
+            if (String(editorTopicoEdital?.itemId) === String(m.id) && String(editorTopicoEdital?.topicoId) === String(topico.id)) return htmlEditor(topico);
             const info = topico.concluido ? STATUS_TOPICO.dominado : STATUS_TOPICO.nao;
             const inputId = `check-edital-${String(topico.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
             return `<div class="exam-topic-item">
@@ -6943,11 +6965,14 @@ function renderizarEdital() {
                     <span class="small exam-topic-title">${esc(topico.titulo)}</span>
                 </label>
                 <span class="badge text-bg-${info.cor}">${info.rotulo}</span>
-                <button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tópico" aria-label="Remover tópico ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button>
+                <span class="exam-topic-actions"><button type="button" class="btn btn-sm btn-link text-secondary exam-topic-edit" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Editar tópico" aria-label="Editar tópico ${esc(topico.titulo)}"><i class="bi-pencil" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tópico" aria-label="Remover tópico ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button></span>
             </div>`;
         }).join("") : "";
-        const botaoTopicos = topicos.length ? `<button type="button" class="exam-topic-toggle btn-toggle-topicos-edital" data-id="${esc(m.id)}" aria-expanded="${expandida}" aria-controls="${detalheId}" title="${expandida ? "Recolher" : "Mostrar"} tópicos de ${esc(nomeMateria)}"><i class="bi-chevron-${expandida ? "up" : "down"}" aria-hidden="true"></i><span class="visually-hidden">${expandida ? "Recolher" : "Mostrar"} checklist</span></button>` : '<span class="exam-topic-toggle text-muted" aria-hidden="true"><i class="bi-list-check"></i></span>';
-        const linhaTopicos = topicos.length ? `<tr id="${detalheId}" class="exam-topic-detail-row" ${expandida ? "" : "hidden"}><td colspan="6"><div class="exam-topic-panel"><div class="fw-semibold small mb-2"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><div class="exam-topic-list">${checklist}</div></div></td></tr>` : "";
+        const editorAtivoNaMateria = String(editorTopicoEdital?.itemId) === String(m.id);
+        const editorNovo = editorAtivoNaMateria && !editorTopicoEdital?.topicoId ? htmlEditor(null) : "";
+        const conteudoTopicos = `${checklist}${editorNovo}` || '<div class="exam-topic-empty"><i class="bi-list-check me-1"></i>Nenhum tópico cadastrado. Adicione o primeiro quando quiser.</div>';
+        const botaoTopicos = `<button type="button" class="exam-topic-toggle btn-toggle-topicos-edital" data-id="${esc(m.id)}" aria-expanded="${expandida}" aria-controls="${detalheId}" title="${expandida ? "Recolher" : "Mostrar"} tópicos de ${esc(nomeMateria)}"><i class="bi-chevron-${expandida ? "up" : "down"}" aria-hidden="true"></i><span class="visually-hidden">${expandida ? "Recolher" : "Mostrar"} checklist</span></button>`;
+        const linhaTopicos = `<tr id="${detalheId}" class="exam-topic-detail-row" ${expandida ? "" : "hidden"}><td colspan="6"><div class="exam-topic-panel"><div class="exam-topic-panel-heading"><div class="fw-semibold small"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><button type="button" class="btn btn-sm btn-outline-primary btn-adicionar-topico-edital" data-item-id="${esc(m.id)}" ${editorAtivoNaMateria ? "disabled" : ""}><i class="bi-plus-lg me-1"></i>Novo tópico</button></div><div class="exam-topic-list">${conteudoTopicos}</div></div></td></tr>`;
         return `
         <tr class="exam-subject-row ${expandida ? "is-expanded" : ""}" data-id="${esc(m.id)}">
             <td class="fw-semibold"><div class="exam-subject-heading">${botaoTopicos}<div><span>${esc(nomeMateria)}</span><div><span class="exam-topic-count ${topicos.length > 0 && dominados === topicos.length ? "is-complete" : ""}">${topicos.length ? `${dominados}/${topicos.length} tópicos` : "0 tópicos"}</span></div></div></div></td>
@@ -6982,6 +7007,30 @@ function renderizarEdital() {
         const questoes = [...tabela.querySelectorAll(".campo-questoes")].find(input => input.dataset.id === btn.dataset.id);
         const peso = [...tabela.querySelectorAll(".campo-peso")].find(input => input.dataset.id === btn.dataset.id);
         if (questoes && peso) await atualizarCamposEdital(btn.dataset.id, Number(questoes.value), Number(peso.value));
+    }));
+    tabela.querySelectorAll(".btn-adicionar-topico-edital").forEach(btn => btn.addEventListener("click", () => {
+        if (operacaoEditalEmAndamento) return;
+        editorTopicoEdital = { itemId: btn.dataset.itemId, topicoId: null };
+        materiasEditalExpandidas.add(btn.dataset.itemId);
+        renderizarEdital();
+        tabela.querySelector(`.form-topico-edital[data-item-id="${btn.dataset.itemId}"] .campo-titulo-topico-edital`)?.focus();
+    }));
+    tabela.querySelectorAll(".exam-topic-edit").forEach(btn => btn.addEventListener("click", () => {
+        if (operacaoEditalEmAndamento) return;
+        editorTopicoEdital = { itemId: btn.dataset.itemId, topicoId: btn.dataset.id };
+        materiasEditalExpandidas.add(btn.dataset.itemId);
+        renderizarEdital();
+        const campo = tabela.querySelector(`.form-topico-edital[data-id="${btn.dataset.id}"] .campo-titulo-topico-edital`);
+        campo?.focus();
+        campo?.select();
+    }));
+    tabela.querySelectorAll(".btn-cancelar-topico-edital").forEach(btn => btn.addEventListener("click", () => {
+        editorTopicoEdital = null;
+        renderizarEdital();
+    }));
+    tabela.querySelectorAll(".form-topico-edital").forEach(form => form.addEventListener("submit", evento => {
+        evento.preventDefault();
+        salvarFormularioTopicoEdital(form);
     }));
     tabela.querySelectorAll(".check-topico-edital").forEach(input => input.addEventListener("change", async () => {
         if (operacaoEditalEmAndamento) { renderizarEdital(); return; }
@@ -7028,7 +7077,7 @@ function renderizarEdital() {
                 salvar(LS.edital, edital);
                 throw erroRemoto;
             }
-            if (!item.topicos.length) materiasEditalExpandidas.delete(String(item.id));
+            if (String(editorTopicoEdital?.topicoId) === String(topico.id)) editorTopicoEdital = null;
             renderizarEdital();
         } catch (erro) {
             console.error("Falha ao remover tópico do edital", erro);
@@ -7064,6 +7113,61 @@ function renderizarEdital() {
             operacaoEditalEmAndamento = false;
         }
     }));
+}
+
+async function salvarFormularioTopicoEdital(form) {
+    if (operacaoEditalEmAndamento) return;
+    const edital = obterEdital();
+    const item = edital.materias.find(materia => String(materia.id) === form.dataset.itemId);
+    const topico = form.dataset.id ? item?.topicos?.find(atual => String(atual.id) === form.dataset.id) : null;
+    const titulo = form.querySelector(".campo-titulo-topico-edital")?.value.trim() || "";
+    if (!item || (form.dataset.id && !topico)) return;
+    if (!titulo || titulo.length > 1000) {
+        alert("Informe um tópico com até 1.000 caracteres.");
+        return;
+    }
+    const duplicado = item.topicos.some(atual => String(atual.id) !== String(topico?.id || "") && atual.titulo.trim().toLocaleLowerCase("pt-BR") === titulo.toLocaleLowerCase("pt-BR"));
+    if (duplicado) {
+        alert("Esse tópico já está no checklist desta matéria.");
+        return;
+    }
+
+    const botaoSalvar = form.querySelector('button[type="submit"]');
+    botaoSalvar.disabled = true;
+    operacaoEditalEmAndamento = true;
+    try {
+        if (topico) {
+            const tituloAnterior = topico.titulo;
+            await exigirNuvemEdital().renomearTopico(topico.id, titulo);
+            try {
+                topico.titulo = titulo;
+                salvar(LS.edital, edital);
+            } catch (erroLocal) {
+                await exigirNuvemEdital().renomearTopico(topico.id, tituloAnterior);
+                throw erroLocal;
+            }
+        } else {
+            const novoTopico = { id: novoId(), titulo, concluido: false, position: item.topicos.length };
+            await exigirNuvemEdital().adicionarTopicos(item.id, [novoTopico]);
+            try {
+                item.topicos.push(novoTopico);
+                salvar(LS.edital, edital);
+            } catch (erroLocal) {
+                await exigirNuvemEdital().excluirTopico(novoTopico.id);
+                throw erroLocal;
+            }
+        }
+        editorTopicoEdital = null;
+        materiasEditalExpandidas.add(String(item.id));
+        renderizarEdital();
+    } catch (erro) {
+        console.error("Falha ao salvar tópico do edital", erro);
+        alert("O tópico não foi salvo porque o Supabase não confirmou a operação.");
+        renderizarEdital();
+    } finally {
+        operacaoEditalEmAndamento = false;
+        if (botaoSalvar.isConnected) botaoSalvar.disabled = false;
+    }
 }
 
 async function atualizarCamposEdital(id, questoes, peso) {
@@ -7836,6 +7940,7 @@ window.obterDadosParaPreviaMigracao = () => {
 window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }) => {
     geracaoSessaoHub += 1;
     materiasEditalExpandidas.clear();
+    editorTopicoEdital = null;
     definirUsuarioAtual(contexto.userId);
     if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, colecoesVadeRemotas, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
@@ -7888,6 +7993,7 @@ window.encerrarHub = () => {
     tarefaEmEdicaoId = null;
     operacaoEditalEmAndamento = false;
     materiasEditalExpandidas.clear();
+    editorTopicoEdital = null;
     operacaoErroEmAndamento = false;
     window.HUB_MIND_MAPS_UI?.encerrar();
     materiaAbertaId = null;
