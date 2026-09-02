@@ -8,6 +8,7 @@ const CORES = new Set(["primary", "secondary", "success", "danger", "warning", "
 const PRIORIDADES = new Set(["alta", "media", "baixa"]);
 const STATUS_TOPICOS = new Set(["nao", "estudando", "revisar", "dominado"]);
 const STATUS_TAREFAS = new Set(["pendente", "concluido"]);
+const NIVEIS_RETENCAO = new Set(["forgot", "partial", "good", "mastered"]);
 const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
 const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
 const TIPOS_ANOTACAO_VADE = new Set(["note", "summary"]);
@@ -1407,8 +1408,9 @@ export async function carregarLinksRemotos() {
 export async function carregarTarefasRemotas() {
     const contexto = obterContexto();
     const resposta = await supabase.from("study_tasks")
-        .select("id, subject_id, topic, due_date, status, assigned_to")
+        .select("id, subject_id, topic, due_date, status, assigned_to, exam_topic_id, planned_minutes, retention_level, next_review_date, last_studied_at, review_history")
         .eq("workspace_id", contexto.workspaceId)
+        .eq("assigned_to", contexto.userId)
         .order("due_date", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true });
     const tarefas = verificarResposta(resposta, "Não foi possível carregar o cronograma do Supabase.") || [];
@@ -1420,7 +1422,13 @@ export async function carregarTarefasRemotas() {
         topico: tarefa.topic,
         data: tarefa.due_date || "",
         status: STATUS_TAREFAS.has(tarefa.status) ? tarefa.status : "pendente",
-        responsavelId: tarefa.assigned_to || null
+        responsavelId: tarefa.assigned_to || null,
+        topicoEditalId: tarefa.exam_topic_id || null,
+        minutosPlanejados: Number.isInteger(tarefa.planned_minutes) ? tarefa.planned_minutes : null,
+        retencao: NIVEIS_RETENCAO.has(tarefa.retention_level) ? tarefa.retention_level : null,
+        proximaRevisao: tarefa.next_review_date || "",
+        ultimoEstudoEm: tarefa.last_studied_at || null,
+        historicoRevisoes: Array.isArray(tarefa.review_history) ? tarefa.review_history : []
     }));
 }
 
@@ -1466,7 +1474,7 @@ export async function carregarEditalRemoto() {
     const contexto = obterContexto();
     const [configuracaoResposta, materiasResposta, topicosResposta] = await Promise.all([
         supabase.from("exam_settings")
-            .select("exam_name, board_name, vacancies, exam_date, updated_at")
+            .select("exam_name, board_name, vacancies, exam_date, review_interval_forgot, review_interval_partial, review_interval_good, review_interval_mastered, updated_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .maybeSingle(),
@@ -1500,6 +1508,12 @@ export async function carregarEditalRemoto() {
         banca: configuracao?.board_name || "",
         vagas: configuracao?.vacancies || "",
         dataProva: configuracao?.exam_date || "",
+        intervalosRevisao: {
+            forgot: Math.max(1, Number(configuracao?.review_interval_forgot) || 1),
+            partial: Math.max(1, Number(configuracao?.review_interval_partial) || 3),
+            good: Math.max(1, Number(configuracao?.review_interval_good) || 7),
+            mastered: Math.max(1, Number(configuracao?.review_interval_mastered) || 30)
+        },
         materias: materias.map(item => ({
             id: itensLegados?.get(item.id) || item.id,
             materiaId: materiasLegadas?.get(item.subject_id) || item.subject_id,
@@ -1865,6 +1879,10 @@ export async function criarTarefa(tarefa) {
         topic: texto(tarefa.topico, 2000, "Conteúdo da sessão", true),
         due_date: dataIso(tarefa.data, "Data da sessão", true),
         status: STATUS_TAREFAS.has(tarefa.status) ? tarefa.status : "pendente",
+        exam_topic_id: tarefa.topicoEditalId ? resolverId("exam_topic", tarefa.topicoEditalId) : null,
+        planned_minutes: tarefa.minutosPlanejados == null || tarefa.minutosPlanejados === ""
+            ? null
+            : numeroLimitado(tarefa.minutosPlanejados, "Tempo planejado", 1, 1440, true),
         assigned_to: contexto.userId,
         created_by: contexto.userId
     });
@@ -1879,6 +1897,12 @@ export async function atualizarTarefa(idLocal, alteracoes) {
     if (Object.hasOwn(alteracoes, "materiaId")) valores.subject_id = resolverId("subject", alteracoes.materiaId);
     if (Object.hasOwn(alteracoes, "topico")) valores.topic = texto(alteracoes.topico, 2000, "Conteúdo da sessão", true);
     if (Object.hasOwn(alteracoes, "data")) valores.due_date = dataIso(alteracoes.data, "Data da sessão", true);
+    if (Object.hasOwn(alteracoes, "topicoEditalId")) valores.exam_topic_id = alteracoes.topicoEditalId
+        ? resolverId("exam_topic", alteracoes.topicoEditalId)
+        : null;
+    if (Object.hasOwn(alteracoes, "minutosPlanejados")) valores.planned_minutes = alteracoes.minutosPlanejados == null || alteracoes.minutosPlanejados === ""
+        ? null
+        : numeroLimitado(alteracoes.minutosPlanejados, "Tempo planejado", 1, 1440, true);
     if (Object.hasOwn(alteracoes, "status")) {
         if (!STATUS_TAREFAS.has(alteracoes.status)) throw erroRepositorio("Status da sessão inválido.");
         valores.status = alteracoes.status;
@@ -1889,6 +1913,28 @@ export async function atualizarTarefa(idLocal, alteracoes) {
         .eq("workspace_id", contexto.workspaceId)
         .select("id")
         .maybeSingle(), "Não foi possível atualizar a sessão no Supabase.");
+}
+
+export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, marcarTopicoEdital) {
+    exigirContexto();
+    if (!NIVEIS_RETENCAO.has(retencao)) throw erroRepositorio("Nível de retenção inválido.");
+    const resposta = await supabase.rpc("record_study_review", {
+        target_task_id: resolverId("study_task", idLocal),
+        duration_minutes: numeroLimitado(duracaoMinutos, "Tempo estudado", 1, 1440, true),
+        retention: retencao,
+        mark_exam_topic_complete: marcarTopicoEdital === true
+    }).maybeSingle();
+    const registro = verificarRegistro(resposta, "Não foi possível registrar esta revisão no Supabase.");
+    if (registro.linked_exam_topic_id && registro.exam_topic_updated_at) versoesTopicosEdital.set(registro.linked_exam_topic_id, registro.exam_topic_updated_at);
+    return {
+        status: STATUS_TAREFAS.has(registro.status) ? registro.status : "concluido",
+        retencao: NIVEIS_RETENCAO.has(registro.retention_level) ? registro.retention_level : retencao,
+        proximaRevisao: registro.next_review_date || "",
+        ultimoEstudoEm: registro.last_studied_at || null,
+        historicoRevisoes: Array.isArray(registro.review_history) ? registro.review_history : [],
+        topicoEditalId: registro.linked_exam_topic_id || null,
+        topicoEditalConcluido: registro.exam_topic_checked === true
+    };
 }
 
 export async function excluirTarefa(idLocal) {
@@ -1946,6 +1992,10 @@ export async function salvarConfiguracaoEdital(configuracao) {
         board_name: texto(configuracao.banca, 300, "Banca"),
         vacancies: texto(configuracao.vagas, 100, "Vagas"),
         exam_date: dataIso(configuracao.dataProva, "Data da prova"),
+        review_interval_forgot: numeroLimitado(configuracao.intervalosRevisao?.forgot ?? 1, "Intervalo para não lembrei", 1, 3650, true),
+        review_interval_partial: numeroLimitado(configuracao.intervalosRevisao?.partial ?? 3, "Intervalo para lembrança parcial", 1, 3650, true),
+        review_interval_good: numeroLimitado(configuracao.intervalosRevisao?.good ?? 7, "Intervalo para boa lembrança", 1, 3650, true),
+        review_interval_mastered: numeroLimitado(configuracao.intervalosRevisao?.mastered ?? 30, "Intervalo para domínio", 1, 3650, true),
         updated_by: contexto.userId
     };
     let resposta;

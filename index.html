@@ -192,7 +192,7 @@
     }
     .study-session-form {
         display: grid;
-        grid-template-columns: minmax(240px, 1.15fr) minmax(280px, 1.65fr) minmax(170px, .8fr) minmax(145px, .65fr);
+        grid-template-columns: minmax(190px, 1fr) minmax(210px, 1.15fr) minmax(240px, 1.35fr) minmax(145px, .7fr) minmax(105px, .5fr);
         gap: .8rem;
         align-items: end;
     }
@@ -209,7 +209,25 @@
         border-color: rgba(184, 50, 42, .58);
         box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11);
     }
+    .session-actions { grid-column: 4 / -1; grid-template-columns: minmax(145px, 1fr) auto; justify-self: end; width: min(100%, 330px); }
     .session-actions .btn-primary { min-height: 44px; }
+    .review-queue {
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(99, 33, 28, .07), rgba(255, 253, 249, .92));
+        border: 1px solid rgba(99, 33, 28, .13);
+        border-radius: 1rem;
+    }
+    .review-queue-list { display: grid; gap: .55rem; }
+    .review-queue-item { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .7rem .8rem; background: #fffdf9; border-radius: .75rem; }
+    .task-meta-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
+    .task-meta-chip { padding: .16rem .42rem; color: #67534a; background: rgba(91, 67, 58, .075); border-radius: 999px; font-size: .67rem; font-weight: 600; }
+    .task-meta-chip.is-review { color: #6a251f; background: rgba(184, 50, 42, .1); }
+    .retention-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+    .retention-option { position: relative; }
+    .retention-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .retention-option label { width: 100%; min-height: 70px; display: grid; align-content: center; gap: .12rem; padding: .65rem; color: #4b3932; background: #fbf7f2; border: 1px solid rgba(59, 41, 35, .14); border-radius: .75rem; cursor: pointer; }
+    .retention-option input:checked + label { color: #6a251f; background: rgba(184, 50, 42, .08); border-color: rgba(184, 50, 42, .48); box-shadow: 0 0 0 .18rem rgba(184, 50, 42, .08); }
+    .retention-option small { color: #756159; }
     .weekly-calendar-scroll { overflow-x: auto; padding: .2rem .1rem .55rem; }
     .weekly-calendar-grid {
         min-width: 880px;
@@ -420,7 +438,13 @@
     .exam-chart-track { height: .65rem; overflow: hidden; background: rgba(91, 67, 58, .09); border-radius: 999px; }
     .exam-chart-bar { width: var(--exam-chart-value); height: 100%; background: linear-gradient(90deg, #2f7f76, #69aa9f); border-radius: inherit; transition: width .25s ease; }
     .exam-chart-row.is-weight .exam-chart-bar { background: linear-gradient(90deg, #62758a, #91a4b8); }
+    .exam-chart-row.is-activity .exam-chart-bar { background: linear-gradient(90deg, #7b5b9b, #ab91c4); }
     .exam-chart-value { min-width: 95px; color: #654f46; font-size: .75rem; font-weight: 600; text-align: right; }
+    .exam-weekly-trend { margin-top: .35rem; padding-top: 1rem; border-top: 1px solid rgba(59, 41, 35, .1); }
+    .exam-weekly-bars { height: 105px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .45rem; align-items: end; margin-top: .7rem; }
+    .exam-weekly-day { height: 100%; display: grid; grid-template-rows: 1fr auto auto; gap: .2rem; align-items: end; color: #735e55; font-size: .65rem; text-align: center; }
+    .exam-weekly-bar { width: min(28px, 72%); min-height: 3px; height: var(--weekly-value); justify-self: center; background: linear-gradient(180deg, #ab91c4, #7b5b9b); border-radius: .4rem .4rem .15rem .15rem; }
+    .exam-weekly-day strong { color: #4f3c54; font-size: .65rem; }
     .exam-empty-action { color: #4f403a; background: #fff; border: 1px solid rgba(59, 41, 35, .2); }
     .exam-empty-action:hover { color: #30231e; background: #f2e6dc; border-color: rgba(59, 41, 35, .3); }
     .exam-evolution-empty { display: grid; place-items: center; gap: .35rem; min-height: 145px; padding: 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .75rem; text-align: center; }
@@ -1289,13 +1313,15 @@
         .study-stat + .study-stat { border-left: 0; }
         .study-stat:last-child { grid-column: 1 / -1; }
         .study-session-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .session-actions { grid-column: 1 / -1; }
+        .session-actions { grid-column: 1 / -1; justify-self: stretch; width: 100%; }
         .simulation-generator-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .simulation-actions { grid-column: 1 / -1; }
     }
     @media (max-width: 575.98px) {
         .study-session-form { grid-template-columns: 1fr; }
-        .session-actions { grid-column: auto; }
+        .session-actions { grid-column: auto; grid-template-columns: 1fr; }
+        .review-queue-item { align-items: stretch; flex-direction: column; }
+        .retention-options { grid-template-columns: 1fr; }
         .simulation-generator-form { grid-template-columns: 1fr; }
         .simulation-actions { grid-column: auto; }
     }
@@ -1490,6 +1516,10 @@
                             <label class="form-label small">Matéria</label>
                             <select class="form-select" id="tarefaMateria" required></select>
                         </div>
+                        <div class="session-field session-exam-topic">
+                            <label class="form-label small">Tópico do Edital <span class="text-muted fw-normal">(opcional)</span></label>
+                            <select class="form-select" id="tarefaTopicoEdital"><option value="">Sem vínculo com o Edital</option></select>
+                        </div>
                         <div class="session-field session-topic">
                             <label class="form-label small">O que vai estudar</label>
                             <input type="text" class="form-control" id="tarefaTopico" maxlength="2000" placeholder="Ex: Art. 5º, incisos I a X" required>
@@ -1497,6 +1527,10 @@
                         <div class="session-field session-date">
                             <label class="form-label small">Data</label>
                             <input type="date" class="form-control" id="tarefaData" required>
+                        </div>
+                        <div class="session-field session-duration">
+                            <label class="form-label small">Tempo <span class="text-muted fw-normal">(min)</span></label>
+                            <input type="number" class="form-control" id="tarefaMinutos" min="1" max="1440" inputmode="numeric" placeholder="45">
                         </div>
                         <div class="session-actions d-grid gap-1">
                             <button type="submit" class="btn btn-primary w-100" id="btnSalvarTarefa"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarTarefa">Adicionar</span></button>
@@ -1521,6 +1555,14 @@
                     </div>
                 </div>
             </div>
+
+            <section class="review-queue mb-4 d-none" id="filaRevisoes" aria-labelledby="tituloFilaRevisoes">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                    <div><span class="exam-evolution-kicker">Repetição espaçada</span><h6 class="fw-bold mb-0" id="tituloFilaRevisoes"><i class="bi-arrow-repeat me-1"></i>Revisar hoje</h6></div>
+                    <span class="badge rounded-pill text-bg-light" id="contadorFilaRevisoes">0</span>
+                </div>
+                <div class="review-queue-list" id="listaFilaRevisoes"></div>
+            </section>
 
             <div class="row g-3">
                 <div class="col-12">
@@ -1579,7 +1621,7 @@
                     <section class="exam-evolution" id="painelEvolucaoEdital" aria-labelledby="tituloEvolucaoEdital">
                         <header class="exam-evolution-heading">
                             <div><span class="exam-evolution-kicker">Visão estratégica</span><h6 class="fw-bold mb-1" id="tituloEvolucaoEdital"><i class="bi-graph-up-arrow me-1"></i>Evolução por matéria</h6><p class="mb-0">Compare seu avanço no checklist e a relevância de cada matéria na prova.</p></div>
-                            <div class="exam-chart-toggle" role="group" aria-label="Métrica do gráfico"><button type="button" class="btn-metrica-edital" data-metrica="progresso">Progresso</button><button type="button" class="btn-metrica-edital" data-metrica="peso">Peso na prova</button></div>
+                            <div class="exam-chart-toggle" role="group" aria-label="Métrica do gráfico"><button type="button" class="btn-metrica-edital" data-metrica="progresso">Progresso</button><button type="button" class="btn-metrica-edital" data-metrica="peso">Peso na prova</button><button type="button" class="btn-metrica-edital" data-metrica="atividade">Atividade</button></div>
                         </header>
                         <div class="exam-insights" id="insightsEdital"></div>
                         <div class="exam-chart" id="graficoEdital"></div>
@@ -2265,6 +2307,12 @@
                     <div class="col-md-6 mb-3"><label class="form-label">Vagas</label><input type="text" class="form-control" id="inputEditalVagas" maxlength="100"></div>
                     <div class="col-md-6 mb-3"><label class="form-label">Data da prova</label><input type="date" class="form-control" id="inputEditalData"></div>
                 </div>
+                <fieldset class="border rounded-3 p-3 mb-3"><legend class="float-none w-auto px-2 fs-6 fw-semibold">Intervalos de revisão</legend><p class="small text-muted">Defina em quantos dias cada conteúdo deve voltar à fila.</p><div class="row g-2">
+                    <div class="col-6"><label class="form-label small" for="intervaloForgot">Não lembrei</label><div class="input-group input-group-sm"><input type="number" class="form-control" id="intervaloForgot" min="1" max="3650" required><span class="input-group-text">dias</span></div></div>
+                    <div class="col-6"><label class="form-label small" for="intervaloPartial">Parcialmente</label><div class="input-group input-group-sm"><input type="number" class="form-control" id="intervaloPartial" min="1" max="3650" required><span class="input-group-text">dias</span></div></div>
+                    <div class="col-6"><label class="form-label small" for="intervaloGood">Lembrei bem</label><div class="input-group input-group-sm"><input type="number" class="form-control" id="intervaloGood" min="1" max="3650" required><span class="input-group-text">dias</span></div></div>
+                    <div class="col-6"><label class="form-label small" for="intervaloMastered">Dominei</label><div class="input-group input-group-sm"><input type="number" class="form-control" id="intervaloMastered" min="1" max="3650" required><span class="input-group-text">dias</span></div></div>
+                </div></fieldset>
                 <button type="submit" class="btn btn-success w-100 rounded-pill">Salvar</button>
                 <button type="button" class="btn btn-outline-danger w-100 rounded-pill mt-2" id="btnLimparConfigEdital">Limpar configuração</button>
             </form>
@@ -2290,6 +2338,26 @@
                 <button type="submit" class="btn btn-success w-100 rounded-pill">Adicionar</button>
             </form>
         </div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalConcluirEstudo" tabindex="-1" aria-labelledby="tituloConcluirEstudo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><div><span class="exam-evolution-kicker">Registrar aprendizagem</span><h5 class="modal-title fw-bold" id="tituloConcluirEstudo">Como foi esta sessão?</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <form id="formConcluirEstudo">
+            <div class="modal-body">
+                <p class="small text-muted mb-3" id="resumoConcluirEstudo"></p>
+                <div class="mb-3"><label class="form-label fw-semibold" for="estudoMinutosRealizados">Tempo realmente estudado</label><div class="input-group"><input type="number" class="form-control" id="estudoMinutosRealizados" min="1" max="1440" inputmode="numeric" required><span class="input-group-text">minutos</span></div></div>
+                <fieldset><legend class="form-label fw-semibold fs-6">Quanto você conseguiu lembrar?</legend><div class="retention-options">
+                    <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoForgot" value="forgot"><label for="retencaoForgot"><strong>Não lembrei</strong><small id="rotuloIntervaloForgot">Revisar amanhã</small></label></div>
+                    <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoPartial" value="partial"><label for="retencaoPartial"><strong>Parcialmente</strong><small id="rotuloIntervaloPartial">Revisar em 3 dias</small></label></div>
+                    <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoGood" value="good" checked><label for="retencaoGood"><strong>Lembrei bem</strong><small id="rotuloIntervaloGood">Revisar em 7 dias</small></label></div>
+                    <div class="retention-option"><input type="radio" name="nivelRetencao" id="retencaoMastered" value="mastered"><label for="retencaoMastered"><strong>Dominei</strong><small id="rotuloIntervaloMastered">Revisar em 30 dias</small></label></div>
+                </div></fieldset>
+                <div class="form-check mt-3 d-none" id="grupoMarcarTopicoEdital"><input class="form-check-input" type="checkbox" id="marcarTopicoEditalConcluido"><label class="form-check-label" for="marcarTopicoEditalConcluido">Marcar também este tópico como estudado no Edital</label></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary" id="btnConfirmarConclusaoEstudo"><i class="bi-check2-circle me-1"></i>Salvar e agendar revisão</button></div>
+        </form>
     </div></div>
 </div>
 
@@ -2397,7 +2465,11 @@ function salvar(chave, valor) {
 
 function obterMaterias() { return carregar(LS.materias, []); }
 function obterTarefas() { return carregar(LS.tarefas, []); }
-function obterEdital() { return carregar(LS.edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] }); }
+function obterEdital() {
+    const edital = carregar(LS.edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] });
+    edital.intervalosRevisao = { forgot: 1, partial: 3, good: 7, mastered: 30, ...(edital.intervalosRevisao || {}) };
+    return edital;
+}
 function obterErros() { return carregar(LS.erros, []); }
 function obterDesempenho() { return carregar(LS.desempenho, {}); }
 function nomeDaMateria(id) { return (obterMaterias().find(m => String(m.id) === String(id)) || {}).nome || "(matéria removida)"; }
@@ -2699,7 +2771,13 @@ function sincronizarListaDeTarefas(tarefasRemotas) {
             topico: remota.topico,
             data: remota.data,
             status: remota.status,
-            responsavelId: remota.responsavelId || null
+            responsavelId: remota.responsavelId || null,
+            topicoEditalId: remota.topicoEditalId || null,
+            minutosPlanejados: Number.isInteger(remota.minutosPlanejados) ? remota.minutosPlanejados : null,
+            retencao: remota.retencao || null,
+            proximaRevisao: remota.proximaRevisao || "",
+            ultimoEstudoEm: remota.ultimoEstudoEm || null,
+            historicoRevisoes: Array.isArray(remota.historicoRevisoes) ? remota.historicoRevisoes : []
         }));
     salvar(LS.tarefas, sincronizadas);
 }
@@ -2747,6 +2825,7 @@ function sincronizarEdital(editalRemoto) {
         nomeConcurso: configuracao.nomeConcurso || "",
         banca: configuracao.banca || "",
         vagas: configuracao.vagas || "",
+        intervalosRevisao: { forgot: 1, partial: 3, good: 7, mastered: 30, ...(configuracao.intervalosRevisao || {}) },
         dataProva: configuracao.dataProva || "",
         materias
     });
@@ -2945,6 +3024,7 @@ function popularSelects() {
         filtro.innerHTML = `<option value="">Todas as matérias</option>` + opcoes;
         filtro.value = valorAtual;
     }
+    popularTopicosEditalCronograma();
 }
 
 document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
@@ -6725,6 +6805,7 @@ document.getElementById("btnRevisarMateria").addEventListener("click", () => ini
 // ============================================================
 let operacaoTarefaEmAndamento = false;
 let tarefaEmEdicaoId = null;
+let tarefaConclusaoId = null;
 
 function exigirNuvemTarefas() {
     if (!window.HUB_CLOUD_TASKS) throw new Error("A conexão do cronograma com o Supabase ainda não está pronta.");
@@ -6735,58 +6816,140 @@ function limparEdicaoTarefa() {
     tarefaEmEdicaoId = null;
     document.getElementById("formTarefa").reset();
     document.getElementById("tarefaData").value = hojeISO();
+    document.getElementById("tarefaMinutos").value = "";
+    document.getElementById("tarefaTopico").dataset.preenchidoPeloEdital = "false";
+    popularTopicosEditalCronograma();
     document.getElementById("textoBtnSalvarTarefa").textContent = "Adicionar";
     document.querySelector("#btnSalvarTarefa i").className = "bi-plus-lg me-1";
     document.getElementById("btnCancelarEdicaoTarefa").classList.add("d-none");
+}
+
+function obterTopicosEditalDaMateria(materiaId) {
+    const item = obterEdital().materias.find(materia => String(materia.materiaId) === String(materiaId));
+    return Array.isArray(item?.topicos) ? item.topicos : [];
+}
+
+function popularTopicosEditalCronograma(valorPreferido = "") {
+    const select = document.getElementById("tarefaTopicoEdital");
+    if (!select) return;
+    const materiaId = document.getElementById("tarefaMateria").value;
+    const topicos = obterTopicosEditalDaMateria(materiaId);
+    const valorAtual = valorPreferido || select.value;
+    select.innerHTML = '<option value="">Sem vínculo com o Edital</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    select.value = topicos.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
+    select.disabled = topicos.length === 0;
+    select.title = topicos.length ? "Vincule esta sessão ao checklist pessoal do Edital" : "Esta matéria ainda não possui tópicos no Edital";
+}
+
+function abrirConclusaoEstudo(id) {
+    if (operacaoTarefaEmAndamento) return;
+    const tarefa = obterTarefas().find(item => String(item.id) === String(id));
+    if (!tarefa) return;
+    tarefaConclusaoId = tarefa.id;
+    document.getElementById("resumoConcluirEstudo").textContent = `${nomeDaMateria(tarefa.materiaId)} · ${tarefa.topico}`;
+    document.getElementById("estudoMinutosRealizados").value = tarefa.minutosPlanejados || 45;
+    document.getElementById("retencaoGood").checked = true;
+    const intervalos = obterEdital().intervalosRevisao;
+    const rotulo = dias => dias === 1 ? "Revisar amanhã" : `Revisar em ${dias} dias`;
+    document.getElementById("rotuloIntervaloForgot").textContent = rotulo(intervalos.forgot);
+    document.getElementById("rotuloIntervaloPartial").textContent = rotulo(intervalos.partial);
+    document.getElementById("rotuloIntervaloGood").textContent = rotulo(intervalos.good);
+    document.getElementById("rotuloIntervaloMastered").textContent = rotulo(intervalos.mastered);
+    const grupoEdital = document.getElementById("grupoMarcarTopicoEdital");
+    grupoEdital.classList.toggle("d-none", !tarefa.topicoEditalId);
+    document.getElementById("marcarTopicoEditalConcluido").checked = false;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConcluirEstudo")).show();
 }
 
 async function alternarStatusTarefaSincronizada(id) {
     if (operacaoTarefaEmAndamento) return;
     const tarefa = obterTarefas().find(item => String(item.id) === String(id));
     if (!tarefa) return;
-    const statusAnterior = tarefa.status;
-    const novoStatus = statusAnterior === "pendente" ? "concluido" : "pendente";
+    abrirConclusaoEstudo(tarefa.id);
+}
+
+document.getElementById("tarefaMateria").addEventListener("change", () => popularTopicosEditalCronograma());
+document.getElementById("tarefaTopicoEdital").addEventListener("change", evento => {
+    if (!evento.target.value) return;
+    const topico = obterTopicosEditalDaMateria(document.getElementById("tarefaMateria").value)
+        .find(item => String(item.id) === String(evento.target.value));
+    const campo = document.getElementById("tarefaTopico");
+    if (topico && (!campo.value.trim() || campo.dataset.preenchidoPeloEdital === "true")) {
+        campo.value = topico.titulo;
+        campo.dataset.preenchidoPeloEdital = "true";
+    }
+});
+document.getElementById("tarefaTopico").addEventListener("input", evento => { evento.target.dataset.preenchidoPeloEdital = "false"; });
+
+document.getElementById("formConcluirEstudo").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    if (operacaoTarefaEmAndamento || !tarefaConclusaoId) return;
+    const tarefa = obterTarefas().find(item => String(item.id) === String(tarefaConclusaoId));
+    if (!tarefa) return;
+    const minutos = Number(document.getElementById("estudoMinutosRealizados").value);
+    const retencao = document.querySelector('input[name="nivelRetencao"]:checked')?.value;
+    if (!Number.isInteger(minutos) || minutos < 1 || minutos > 1440 || !retencao) return;
+    const marcarTopico = Boolean(tarefa.topicoEditalId) && document.getElementById("marcarTopicoEditalConcluido").checked;
     operacaoTarefaEmAndamento = true;
+    const botao = document.getElementById("btnConfirmarConclusaoEstudo");
+    botao.disabled = true;
     try {
-        await exigirNuvemTarefas().atualizar(tarefa.id, { status: novoStatus });
-        try {
-            const tarefas = obterTarefas();
-            const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
-            if (atual) atual.status = novoStatus;
-            salvar(LS.tarefas, tarefas);
-        } catch (erroLocal) {
-            await exigirNuvemTarefas().atualizar(tarefa.id, { status: statusAnterior });
-            throw erroLocal;
+        const resultado = await exigirNuvemTarefas().registrarRevisao(tarefa.id, minutos, retencao, marcarTopico);
+        const tarefas = obterTarefas();
+        const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
+        if (atual) Object.assign(atual, resultado);
+        const edital = obterEdital();
+        if (marcarTopico && resultado.topicoEditalConcluido) {
+            edital.materias.forEach(materia => materia.topicos?.forEach(topico => {
+                if (String(topico.id) === String(tarefa.topicoEditalId)) topico.concluido = true;
+            }));
         }
+        salvarLote([[LS.tarefas, tarefas], [LS.edital, edital]]);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConcluirEstudo")).hide();
+        tarefaConclusaoId = null;
         renderizarTudoCronograma();
+        renderizarEdital();
         if (materiaAbertaId) renderizarWorkspace();
     } catch (erro) {
-        console.error("Falha ao alterar o estado da sessão", erro);
-        alert("O estado da sessão não foi alterado porque o Supabase não confirmou a operação.");
+        console.error("Falha ao registrar a revisão", erro);
+        alert("A revisão não foi registrada porque o Supabase não confirmou toda a operação.");
     } finally {
         operacaoTarefaEmAndamento = false;
+        botao.disabled = false;
     }
-}
+});
+document.getElementById("modalConcluirEstudo").addEventListener("hidden.bs.modal", () => { tarefaConclusaoId = null; });
 
 function renderizarTarefas() {
     const tarefas = obterTarefas();
     const pendentes = tarefas.filter(t => t.status === "pendente").sort((a, b) => (a.data || "").localeCompare(b.data || ""));
     const concluidas = tarefas.filter(t => t.status === "concluido").reverse();
 
-    const linha = (t, concluida) => `
+    const rotulosRetencao = { forgot: "Reforçar", partial: "Parcial", good: "Boa retenção", mastered: "Dominado" };
+    const linha = (t, concluida) => {
+        const revisoes = Array.isArray(t.historicoRevisoes) ? t.historicoRevisoes.length : 0;
+        const chips = [
+            t.minutosPlanejados ? `<span class="task-meta-chip"><i class="bi-clock me-1"></i>${t.minutosPlanejados} min planejados</span>` : "",
+            revisoes ? `<span class="task-meta-chip"><i class="bi-arrow-repeat me-1"></i>${revisoes} ${revisoes === 1 ? "estudo" : "revisões"}</span>` : "",
+            t.retencao ? `<span class="task-meta-chip">${esc(rotulosRetencao[t.retencao] || "Avaliado")}</span>` : "",
+            t.proximaRevisao ? `<span class="task-meta-chip is-review"><i class="bi-calendar-check me-1"></i>Próxima: ${esc(t.proximaRevisao)}</span>` : ""
+        ].filter(Boolean).join("");
+        return `
         <div class="card border-0 shadow-sm tarefa-item ${concluida ? "concluida" : ""}">
             <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
                 <div>
                     <div class="small text-muted">${esc(nomeDaMateria(t.materiaId))}${t.data ? " · " + esc(t.data) : ""}</div>
                     <div class="tarefa-descricao fw-semibold">${esc(t.topico)}</div>
+                    ${chips ? `<div class="task-meta-chips">${chips}</div>` : ""}
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-secondary btn-editar-tarefa" data-id="${t.id}" title="Editar sessão"><i class="bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-${concluida ? "secondary" : "success"} btn-toggle-tarefa" data-id="${t.id}" title="${concluida ? "Reabrir" : "Concluir"} sessão"><i class="bi-${concluida ? "arrow-counterclockwise" : "check-lg"}"></i></button>
+                    <button class="btn btn-sm btn-outline-${concluida ? "primary" : "success"} btn-toggle-tarefa" data-id="${t.id}" title="${concluida ? "Revisar novamente" : "Concluir"} sessão"><i class="bi-${concluida ? "arrow-repeat" : "check-lg"}"></i></button>
                     <button class="btn btn-sm btn-outline-danger btn-excluir-tarefa" data-id="${t.id}" title="Excluir sessão"><i class="bi-trash"></i></button>
                 </div>
             </div>
         </div>`;
+    };
 
     document.getElementById("contadorPendentes").textContent = pendentes.length;
     document.getElementById("contadorConcluidas").textContent = concluidas.length;
@@ -6803,8 +6966,10 @@ function renderizarTarefas() {
         if (!tarefa) return;
         tarefaEmEdicaoId = tarefa.id;
         document.getElementById("tarefaMateria").value = tarefa.materiaId;
+        popularTopicosEditalCronograma(tarefa.topicoEditalId || "");
         document.getElementById("tarefaTopico").value = tarefa.topico;
         document.getElementById("tarefaData").value = tarefa.data;
+        document.getElementById("tarefaMinutos").value = tarefa.minutosPlanejados || "";
         document.getElementById("textoBtnSalvarTarefa").textContent = "Atualizar";
         document.querySelector("#btnSalvarTarefa i").className = "bi-check-lg me-1";
         document.getElementById("btnCancelarEdicaoTarefa").classList.remove("d-none");
@@ -6847,9 +7012,13 @@ document.getElementById("formTarefa").addEventListener("submit", async e => {
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
     const topico = document.getElementById("tarefaTopico").value.trim();
     const data = document.getElementById("tarefaData").value;
+    const topicoEditalId = document.getElementById("tarefaTopicoEdital").value || null;
+    const minutosInformados = document.getElementById("tarefaMinutos").value;
+    const minutosPlanejados = minutosInformados === "" ? null : Number(minutosInformados);
     if (!topico || !data) return;
+    if (minutosPlanejados != null && (!Number.isInteger(minutosPlanejados) || minutosPlanejados < 1 || minutosPlanejados > 1440)) return;
     if (!tarefaEmEdicaoId) {
-        const tarefa = { id: novoId(), materiaId, topico, data, status: "pendente", responsavelId: window.HUB_SESSION_CONTEXT?.userId || null };
+        const tarefa = { id: novoId(), materiaId, topico, data, status: "pendente", responsavelId: window.HUB_SESSION_CONTEXT?.userId || null, topicoEditalId, minutosPlanejados, retencao: null, proximaRevisao: "", ultimoEstudoEm: null, historicoRevisoes: [] };
         operacaoTarefaEmAndamento = true;
         try {
             await exigirNuvemTarefas().criar(tarefa);
@@ -6871,14 +7040,14 @@ document.getElementById("formTarefa").addEventListener("submit", async e => {
     }
     const tarefa = obterTarefas().find(item => String(item.id) === String(tarefaEmEdicaoId));
     if (!tarefa) { limparEdicaoTarefa(); return; }
-    const anterior = { materiaId: tarefa.materiaId, topico: tarefa.topico, data: tarefa.data };
+    const anterior = { materiaId: tarefa.materiaId, topico: tarefa.topico, data: tarefa.data, topicoEditalId: tarefa.topicoEditalId || null, minutosPlanejados: tarefa.minutosPlanejados || null };
     operacaoTarefaEmAndamento = true;
     try {
-        await exigirNuvemTarefas().atualizar(tarefa.id, { materiaId, topico, data });
+        await exigirNuvemTarefas().atualizar(tarefa.id, { materiaId, topico, data, topicoEditalId, minutosPlanejados });
         try {
             const tarefas = obterTarefas();
             const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
-            if (atual) Object.assign(atual, { materiaId, topico, data });
+            if (atual) Object.assign(atual, { materiaId, topico, data, topicoEditalId, minutosPlanejados });
             salvar(LS.tarefas, tarefas);
         } catch (erroLocal) {
             await exigirNuvemTarefas().atualizar(tarefa.id, anterior);
@@ -6895,6 +7064,35 @@ document.getElementById("formTarefa").addEventListener("submit", async e => {
     }
 });
 document.getElementById("btnCancelarEdicaoTarefa").addEventListener("click", limparEdicaoTarefa);
+
+function renderizarFilaRevisoes() {
+    const painel = document.getElementById("filaRevisoes");
+    const hoje = hojeISO();
+    const edital = obterEdital();
+    const totalPontos = calcularPontosTotais(edital);
+    const erros = obterErros();
+    const pontuar = tarefa => {
+        const itemEdital = edital.materias.find(item => String(item.materiaId) === String(tarefa.materiaId));
+        const relevancia = totalPontos > 0 && itemEdital ? ((Number(itemEdital.questoes) * Number(itemEdital.peso)) / totalPontos) * 100 : 0;
+        const diasAtraso = Math.max(0, Math.floor((Date.parse(`${hoje}T12:00:00`) - Date.parse(`${tarefa.proximaRevisao}T12:00:00`)) / 86400000));
+        const errosMateria = erros.filter(erro => String(erro.materiaId) === String(tarefa.materiaId)).length;
+        const materia = materiaPorId(tarefa.materiaId);
+        const cardsPendentes = materia ? cardsVencidos(materia).length : 0;
+        const dificuldade = tarefa.retencao === "forgot" ? 20 : tarefa.retencao === "partial" ? 10 : 0;
+        return diasAtraso * 10 + relevancia * 2 + Math.min(10, errosMateria) * 3 + Math.min(10, cardsPendentes) * 2 + dificuldade;
+    };
+    const tarefas = obterTarefas().filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje)
+        .map(tarefa => ({ ...tarefa, prioridadeRevisao: pontuar(tarefa) }))
+        .sort((a, b) => b.prioridadeRevisao - a.prioridadeRevisao || a.proximaRevisao.localeCompare(b.proximaRevisao) || nomeDaMateria(a.materiaId).localeCompare(nomeDaMateria(b.materiaId), "pt-BR"));
+    painel.classList.toggle("d-none", tarefas.length === 0);
+    document.getElementById("contadorFilaRevisoes").textContent = tarefas.length;
+    document.getElementById("listaFilaRevisoes").innerHTML = tarefas.map(tarefa => {
+        const atrasada = tarefa.proximaRevisao < hoje;
+        const prioridade = tarefa.prioridadeRevisao >= 45 ? "Prioridade alta" : tarefa.prioridadeRevisao >= 20 ? "Prioridade média" : "Revisão programada";
+        return `<article class="review-queue-item"><div><small class="text-muted">${esc(nomeDaMateria(tarefa.materiaId))} · ${atrasada ? "Revisão atrasada desde" : "Revisão de hoje"} ${esc(tarefa.proximaRevisao)}</small><div class="fw-semibold">${esc(tarefa.topico)}</div><div class="task-meta-chips"><span class="task-meta-chip is-review">${prioridade}</span></div></div><button type="button" class="btn btn-sm btn-primary rounded-pill btn-revisar-tarefa" data-id="${esc(tarefa.id)}"><i class="bi-arrow-repeat me-1"></i>Revisar agora</button></article>`;
+    }).join("");
+    document.querySelectorAll(".btn-revisar-tarefa").forEach(botao => botao.addEventListener("click", () => abrirConclusaoEstudo(botao.dataset.id)));
+}
 
 // ---------- Calendário semanal ----------
 let offsetSemana = 0;
@@ -6931,7 +7129,7 @@ function renderizarCalendario() {
         const doDia = tarefas.filter(t => t.data === iso);
         const conteudo = doDia.length === 0
             ? `<div class="calendar-empty"><i class="bi-calendar2" aria-hidden="true"></i><span>Sem sessões</span></div>`
-            : doDia.map(t => `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Reabrir" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</button>`).join("");
+            : doDia.map(t => `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Revisar novamente" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}</button>`).join("");
         return `
             <article class="calendar-day ${ehHoje(d) ? "is-today" : ""}">
                 <header class="calendar-day-header">
@@ -6953,6 +7151,7 @@ document.getElementById("btnSemanaHoje").addEventListener("click", () => { offse
 
 function renderizarTudoCronograma() {
     renderizarTarefas();
+    renderizarFilaRevisoes();
     renderizarCalendario();
 }
 
@@ -6977,6 +7176,14 @@ function renderizarPainelEvolucaoEdital(edital) {
     const insights = document.getElementById("insightsEdital");
     const grafico = document.getElementById("graficoEdital");
     const totalPontos = calcularPontosTotais(edital);
+    const agora = Date.now();
+    const inicioSemana = agora - (7 * 24 * 60 * 60 * 1000);
+    const atividadesPorMateria = obterTarefas().reduce((mapa, tarefa) => {
+        const eventos = Array.isArray(tarefa.historicoRevisoes) ? tarefa.historicoRevisoes : [];
+        if (!mapa.has(String(tarefa.materiaId))) mapa.set(String(tarefa.materiaId), []);
+        mapa.get(String(tarefa.materiaId)).push(...eventos);
+        return mapa;
+    }, new Map());
     const itens = edital.materias.map(item => {
         const topicos = Array.isArray(item.topicos) ? item.topicos : [];
         const concluidos = topicos.filter(topico => topico.concluido === true).length;
@@ -6984,7 +7191,17 @@ function renderizarPainelEvolucaoEdital(edital) {
         const progresso = topicos.length ? (concluidos / topicos.length) * 100 : 0;
         const pontos = Number(item.questoes) * Number(item.peso);
         const relevancia = totalPontos > 0 ? (pontos / totalPontos) * 100 : 0;
-        return { nome: nomeDaMateria(item.materiaId), concluidos, totalTopicos: topicos.length, pendentes, progresso, pontos, relevancia };
+        const atividades = atividadesPorMateria.get(String(item.materiaId)) || [];
+        const minutos = atividades.reduce((total, evento) => total + Math.max(0, Number(evento.durationMinutes) || 0), 0);
+        const minutosSemana = atividades.reduce((total, evento) => {
+            const instante = Date.parse(evento.studiedAt || "");
+            return total + (Number.isFinite(instante) && instante >= inicioSemana ? Math.max(0, Number(evento.durationMinutes) || 0) : 0);
+        }, 0);
+        const ultimoEstudo = atividades.reduce((maisRecente, evento) => {
+            const instante = Date.parse(evento.studiedAt || "");
+            return Number.isFinite(instante) && instante > maisRecente ? instante : maisRecente;
+        }, 0);
+        return { materiaId: item.materiaId, nome: nomeDaMateria(item.materiaId), concluidos, totalTopicos: topicos.length, pendentes, progresso, pontos, relevancia, minutos, minutosSemana, sessoes: atividades.length, ultimoEstudo };
     });
 
     document.querySelectorAll(".btn-metrica-edital").forEach(botao => {
@@ -7010,26 +7227,61 @@ function renderizarPainelEvolucaoEdital(edital) {
     const pendente = comPendencias[0];
     const relevante = totalPontos > 0 ? porPeso[0] : null;
     const cartao = (icone, rotulo, valor, detalhe) => `<article class="exam-insight"><span class="exam-insight-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div><small>${rotulo}</small><strong title="${esc(valor)}">${esc(valor)}</strong><span>${esc(detalhe)}</span></div></article>`;
-    insights.innerHTML = [
-        cartao("trophy", "Mais avançada", avancada?.nome || "Aguardando tópicos", avancada ? `${avancada.progresso.toFixed(0)}% concluído` : "Cadastre o checklist"),
-        cartao("hourglass-split", "Maior pendência", pendente?.nome || "Tudo em dia", pendente ? `${pendente.pendentes} tópico${pendente.pendentes === 1 ? "" : "s"} pendente${pendente.pendentes === 1 ? "" : "s"}` : "Nenhuma pendência"),
-        cartao("bullseye", "Maior peso", relevante?.nome || "Aguardando pesos", relevante ? `${relevante.relevancia.toFixed(1)}% da prova` : "Configure questões e peso")
-    ].join("");
+    if (metricaPainelEdital === "atividade") {
+        const porAtividade = [...itens].sort((a, b) => b.minutos - a.minutos || a.nome.localeCompare(b.nome, "pt-BR"));
+        const maisEstudada = porAtividade.find(item => item.minutos > 0);
+        const minutosSemana = itens.reduce((total, item) => total + item.minutosSemana, 0);
+        const precisaAtencao = [...itens].sort((a, b) => a.ultimoEstudo - b.ultimoEstudo || b.relevancia - a.relevancia)[0];
+        insights.innerHTML = [
+            cartao("clock-history", "Mais estudada", maisEstudada?.nome || "Sem atividade", maisEstudada ? `${maisEstudada.minutos} min · ${maisEstudada.sessoes} sessão${maisEstudada.sessoes === 1 ? "" : "ões"}` : "Conclua uma sessão"),
+            cartao("calendar-week", "Últimos 7 dias", minutosSemana ? `${minutosSemana} minutos` : "Ainda sem estudo", minutosSemana ? "Tempo registrado nesta semana" : "Sua evolução aparecerá aqui"),
+            cartao("exclamation-circle", "Precisa de atenção", precisaAtencao?.nome || "Aguardando edital", precisaAtencao?.ultimoEstudo ? "Atividade menos recente" : "Nenhum estudo registrado")
+        ].join("");
+    } else {
+        insights.innerHTML = [
+            cartao("trophy", "Mais avançada", avancada?.nome || "Aguardando tópicos", avancada ? `${avancada.progresso.toFixed(0)}% concluído` : "Cadastre o checklist"),
+            cartao("hourglass-split", "Maior pendência", pendente?.nome || "Tudo em dia", pendente ? `${pendente.pendentes} tópico${pendente.pendentes === 1 ? "" : "s"} pendente${pendente.pendentes === 1 ? "" : "s"}` : "Nenhuma pendência"),
+            cartao("bullseye", "Maior peso", relevante?.nome || "Aguardando pesos", relevante ? `${relevante.relevancia.toFixed(1)}% da prova` : "Configure questões e peso")
+        ].join("");
+    }
 
+    const maximoMinutos = Math.max(1, ...itens.map(item => item.minutos));
     const porMetrica = [...itens].sort((a, b) => {
-        const diferenca = metricaPainelEdital === "peso" ? b.relevancia - a.relevancia : b.progresso - a.progresso;
+        const diferenca = metricaPainelEdital === "peso" ? b.relevancia - a.relevancia : metricaPainelEdital === "atividade" ? b.minutos - a.minutos : b.progresso - a.progresso;
         return diferenca || a.nome.localeCompare(b.nome, "pt-BR");
     });
-    grafico.innerHTML = porMetrica.map(item => {
-        const percentual = metricaPainelEdital === "peso" ? item.relevancia : item.progresso;
-        const valor = metricaPainelEdital === "peso" ? `${item.pontos.toFixed(1)} pts · ${item.relevancia.toFixed(1)}%` : `${item.concluidos}/${item.totalTopicos} · ${item.progresso.toFixed(0)}%`;
-        const rotulo = metricaPainelEdital === "peso" ? `Peso de ${item.nome} na prova` : `Progresso de ${item.nome}`;
-        return `<div class="exam-chart-row ${metricaPainelEdital === "peso" ? "is-weight" : ""}"><span class="exam-chart-label" title="${esc(item.nome)}">${esc(item.nome)}</span><div class="exam-chart-track" role="progressbar" aria-label="${esc(rotulo)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentual.toFixed(1)}"><div class="exam-chart-bar" style="--exam-chart-value:${Math.max(0, Math.min(100, percentual)).toFixed(1)}%"></div></div><span class="exam-chart-value">${valor}</span></div>`;
+    const linhasGrafico = porMetrica.map(item => {
+        const percentual = metricaPainelEdital === "peso" ? item.relevancia : metricaPainelEdital === "atividade" ? (item.minutos / maximoMinutos) * 100 : item.progresso;
+        const valor = metricaPainelEdital === "peso" ? `${item.pontos.toFixed(1)} pts · ${item.relevancia.toFixed(1)}%` : metricaPainelEdital === "atividade" ? `${item.minutos} min · ${item.sessoes}x` : `${item.concluidos}/${item.totalTopicos} · ${item.progresso.toFixed(0)}%`;
+        const rotulo = metricaPainelEdital === "peso" ? `Peso de ${item.nome} na prova` : metricaPainelEdital === "atividade" ? `Tempo estudado em ${item.nome}` : `Progresso de ${item.nome}`;
+        const classe = metricaPainelEdital === "peso" ? "is-weight" : metricaPainelEdital === "atividade" ? "is-activity" : "";
+        return `<div class="exam-chart-row ${classe}"><span class="exam-chart-label" title="${esc(item.nome)}">${esc(item.nome)}</span><div class="exam-chart-track" role="progressbar" aria-label="${esc(rotulo)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentual.toFixed(1)}"><div class="exam-chart-bar" style="--exam-chart-value:${Math.max(0, Math.min(100, percentual)).toFixed(1)}%"></div></div><span class="exam-chart-value">${valor}</span></div>`;
     }).join("");
+    if (metricaPainelEdital !== "atividade") {
+        grafico.innerHTML = linhasGrafico;
+        return;
+    }
+    const dias = Array.from({ length: 7 }, (_, indice) => {
+        const data = new Date();
+        data.setHours(12, 0, 0, 0);
+        data.setDate(data.getDate() - (6 - indice));
+        return { iso: paraISO(data), rotulo: data.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", ""), minutos: 0 };
+    });
+    const porDia = new Map(dias.map(dia => [dia.iso, dia]));
+    atividadesPorMateria.forEach(eventos => eventos.forEach(evento => {
+        const data = new Date(evento.studiedAt || "");
+        if (Number.isNaN(data.getTime())) return;
+        const dia = porDia.get(paraISO(data));
+        if (dia) dia.minutos += Math.max(0, Number(evento.durationMinutes) || 0);
+    }));
+    const maximoDia = Math.max(1, ...dias.map(dia => dia.minutos));
+    const barrasSemana = dias.map(dia => `<div class="exam-weekly-day" title="${dia.minutos} minutos"><div class="exam-weekly-bar" style="--weekly-value:${Math.max(3, (dia.minutos / maximoDia) * 100).toFixed(1)}%"></div><strong>${dia.minutos}m</strong><span>${esc(dia.rotulo)}</span></div>`).join("");
+    grafico.innerHTML = `${linhasGrafico}<section class="exam-weekly-trend" aria-label="Tempo estudado nos últimos sete dias"><small class="fw-semibold">Ritmo dos últimos 7 dias</small><div class="exam-weekly-bars">${barrasSemana}</div></section>`;
 }
 
 function renderizarEdital() {
     const edital = obterEdital();
+    popularTopicosEditalCronograma();
     document.getElementById("editalNome").textContent = edital.nomeConcurso || "Aguardando configuração";
     document.getElementById("editalBanca").textContent = edital.banca || "Não informada";
     document.getElementById("editalVagas").textContent = edital.vagas || "A definir";
@@ -7314,13 +7566,20 @@ document.getElementById("formConfigEdital").addEventListener("submit", async e =
     e.preventDefault();
     if (operacaoEditalEmAndamento) return;
     const edital = obterEdital();
-    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva };
+    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva, intervalosRevisao: { ...edital.intervalosRevisao } };
     const configuracao = {
         nomeConcurso: document.getElementById("inputEditalNome").value.trim(),
         banca: document.getElementById("inputEditalBanca").value.trim(),
         vagas: document.getElementById("inputEditalVagas").value.trim(),
-        dataProva: document.getElementById("inputEditalData").value
+        dataProva: document.getElementById("inputEditalData").value,
+        intervalosRevisao: {
+            forgot: Number(document.getElementById("intervaloForgot").value),
+            partial: Number(document.getElementById("intervaloPartial").value),
+            good: Number(document.getElementById("intervaloGood").value),
+            mastered: Number(document.getElementById("intervaloMastered").value)
+        }
     };
+    if (!Object.values(configuracao.intervalosRevisao).every(valor => Number.isInteger(valor) && valor >= 1 && valor <= 3650)) return;
     operacaoEditalEmAndamento = true;
     try {
         await exigirNuvemEdital().salvarConfiguracao(configuracao);
@@ -7346,15 +7605,19 @@ document.getElementById("modalConfigEdital").addEventListener("show.bs.modal", (
     document.getElementById("inputEditalBanca").value = edital.banca || "";
     document.getElementById("inputEditalVagas").value = edital.vagas || "";
     document.getElementById("inputEditalData").value = edital.dataProva || "";
+    document.getElementById("intervaloForgot").value = edital.intervalosRevisao.forgot;
+    document.getElementById("intervaloPartial").value = edital.intervalosRevisao.partial;
+    document.getElementById("intervaloGood").value = edital.intervalosRevisao.good;
+    document.getElementById("intervaloMastered").value = edital.intervalosRevisao.mastered;
     document.getElementById("btnLimparConfigEdital").classList.toggle("d-none", ![edital.nomeConcurso, edital.banca, edital.vagas, edital.dataProva].some(Boolean));
 });
 document.getElementById("btnLimparConfigEdital").addEventListener("click", async () => {
     if (operacaoEditalEmAndamento || !confirm("Limpar a configuração geral do concurso? A matriz de matérias e os tópicos serão preservados.")) return;
     const edital = obterEdital();
-    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva };
+    const anterior = { nomeConcurso: edital.nomeConcurso, banca: edital.banca, vagas: edital.vagas, dataProva: edital.dataProva, intervalosRevisao: { ...edital.intervalosRevisao } };
     operacaoEditalEmAndamento = true;
     try {
-        Object.assign(edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "" });
+        Object.assign(edital, { nomeConcurso: "", banca: "", vagas: "", dataProva: "", intervalosRevisao: { forgot: 1, partial: 3, good: 7, mastered: 30 } });
         salvar(LS.edital, edital);
         try {
             await exigirNuvemEdital().limparConfiguracao();
@@ -7780,7 +8043,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 3;
+const VERSAO_BACKUP = 4;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -7800,6 +8063,12 @@ function dataBackup(valor, campo) {
     const data = textoBackup(valor, campo, 30);
     if (data && !/^\d{4}-\d{2}-\d{2}$/.test(data) && !/^\d{2}\/\d{2}\/\d{4}$/.test(data)) throw new Error(`${campo} inválida.`);
     return data;
+}
+function instanteBackup(valor, campo) {
+    if (valor == null || valor === "") return null;
+    const instante = textoBackup(valor, campo, 50);
+    if (Number.isNaN(Date.parse(instante))) throw new Error(`${campo} inválido.`);
+    return instante;
 }
 function numeroBackup(valor, campo, minimo = 0, maximo = 1000000000, padrao = 0) {
     if (valor == null || valor === "") return padrao;
@@ -7877,14 +8146,40 @@ function validarPayloadBackup(payload) {
         if (!["pendente", "concluido"].includes(t.status)) throw new Error(`Status da tarefa ${i + 1} inválido.`);
         const materiaId = idBackup(t.materiaId, "Matéria da tarefa");
         garantirReferenciaMateria(materiaId, idsMaterias, `Tarefa ${i + 1}`);
-        return { id: idBackup(t.id, "ID da tarefa"), materiaId, topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status };
+        const historicoRevisoes = versao >= 4 ? listaBackup(t.historicoRevisoes || [], "Histórico de revisões", 500).map((evento, indice) => {
+            objetoBackup(evento, `Revisão ${indice + 1}`);
+            if (!["forgot", "partial", "good", "mastered"].includes(evento.retention)) throw new Error(`Retenção da revisão ${indice + 1} inválida.`);
+            const studiedAt = instanteBackup(evento.studiedAt, "Data da revisão");
+            const durationMinutes = numeroBackup(evento.durationMinutes, "Tempo da revisão", 1, 1440);
+            if (!studiedAt || !Number.isInteger(durationMinutes)) throw new Error(`Revisão ${indice + 1} inválida.`);
+            return { studiedAt, durationMinutes, retention: evento.retention };
+        }) : [];
+        const minutosPlanejados = versao >= 4 && t.minutosPlanejados != null ? numeroBackup(t.minutosPlanejados, "Tempo planejado", 1, 1440) : null;
+        if (minutosPlanejados != null && !Number.isInteger(minutosPlanejados)) throw new Error(`Tempo planejado da tarefa ${i + 1} inválido.`);
+        return {
+            id: idBackup(t.id, "ID da tarefa"), materiaId, topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status,
+            topicoEditalId: versao >= 4 && t.topicoEditalId != null ? idBackup(t.topicoEditalId, "Tópico do Edital da tarefa") : null,
+            minutosPlanejados,
+            retencao: versao >= 4 && ["forgot", "partial", "good", "mastered"].includes(t.retencao) ? t.retencao : null,
+            proximaRevisao: versao >= 4 ? dataBackup(t.proximaRevisao || "", "Próxima revisão") : "",
+            ultimoEstudoEm: versao >= 4 ? instanteBackup(t.ultimoEstudoEm, "Último estudo") : null,
+            historicoRevisoes
+        };
     });
     garantirIdsUnicos(tarefas, "Tarefas");
 
     const editalOrigem = objetoBackup(dados.edital, "Edital");
+    const intervalosOrigem = versao >= 4 && editalOrigem.intervalosRevisao ? objetoBackup(editalOrigem.intervalosRevisao, "Intervalos de revisão") : {};
+    const intervalosRevisao = {
+        forgot: numeroBackup(intervalosOrigem.forgot, "Intervalo para não lembrei", 1, 3650, 1),
+        partial: numeroBackup(intervalosOrigem.partial, "Intervalo para lembrança parcial", 1, 3650, 3),
+        good: numeroBackup(intervalosOrigem.good, "Intervalo para boa lembrança", 1, 3650, 7),
+        mastered: numeroBackup(intervalosOrigem.mastered, "Intervalo para domínio", 1, 3650, 30)
+    };
+    if (!Object.values(intervalosRevisao).every(Number.isInteger)) throw new Error("Intervalos de revisão inválidos.");
     const edital = {
         nomeConcurso: textoBackup(editalOrigem.nomeConcurso, "Nome do concurso", 500), banca: textoBackup(editalOrigem.banca, "Banca", 300),
-        vagas: textoBackup(editalOrigem.vagas, "Vagas", 100), dataProva: dataBackup(editalOrigem.dataProva, "Data da prova"),
+        vagas: textoBackup(editalOrigem.vagas, "Vagas", 100), dataProva: dataBackup(editalOrigem.dataProva, "Data da prova"), intervalosRevisao,
         materias: listaBackup(editalOrigem.materias, "Matérias do edital", 500).map((m, i) => {
             objetoBackup(m, `Matéria do edital ${i + 1}`);
             const materiaId = idBackup(m.materiaId, "Matéria do edital");
@@ -7904,6 +8199,10 @@ function validarPayloadBackup(payload) {
         })
     };
     garantirIdsUnicos(edital.materias, "Matérias do edital");
+    const idsTopicosEdital = new Set(edital.materias.flatMap(materia => materia.topicos.map(topico => String(topico.id))));
+    tarefas.forEach((tarefa, indice) => {
+        if (tarefa.topicoEditalId != null && !idsTopicosEdital.has(String(tarefa.topicoEditalId))) throw new Error(`Tarefa ${indice + 1} referencia um tópico inexistente no Edital.`);
+    });
 
     const erros = listaBackup(dados.erros, "Erros", 20000).map((er, i) => {
         objetoBackup(er, `Erro ${i + 1}`);

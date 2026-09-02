@@ -72,6 +72,7 @@ import {
     excluirMapaMental,
     enviarPdfColecaoVade,
     registrarLeituraJuridica,
+    registrarRevisaoTarefa,
     salvarFavoritoJuridico,
     excluirTopico,
     prepararRepositorioRemoto,
@@ -200,6 +201,7 @@ window.HUB_CLOUD_TASKS = Object.freeze({
     atualizar: atualizarTarefa,
     criar: criarTarefa,
     excluir: excluirTarefa,
+    registrarRevisao: registrarRevisaoTarefa,
     listar: carregarTarefasRemotas
 });
 

@@ -222,7 +222,7 @@ test("o cronograma usa formulário responsivo, semana em cartões e estados vazi
     const html = readProjectFile("index.html");
 
     assert.match(html, /id="formTarefa" class="study-session-form"/);
-    assert.match(html, /grid-template-columns: minmax\(240px, 1\.15fr\)/);
+    assert.match(html, /grid-template-columns: minmax\(190px, 1fr\)[^;]*minmax\(105px, \.5fr\)/);
     assert.match(html, /class="weekly-calendar-grid" id="calendarioSemanal"/);
     assert.match(html, /class="calendar-day \$\{ehHoje\(d\) \? "is-today" : ""\}"/);
     assert.match(html, />Sem sessões</);
@@ -231,6 +231,40 @@ test("o cronograma usa formulário responsivo, semana em cartões e estados vazi
     assert.match(html, /id="contadorConcluidas"/);
     assert.match(html, /Tudo em dia por aqui! 🚀/);
     assert.match(html, /class="schedule-list-panel is-complete"/);
+});
+
+test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const migration = readProjectFile("supabase/migrations/202609020010_smart_study_review_cycle.sql");
+
+    assert.match(html, /id="tarefaTopicoEdital"/);
+    assert.match(html, /id="tarefaMinutos"/);
+    assert.match(html, /id="filaRevisoes"/);
+    assert.match(html, /id="modalConcluirEstudo"/);
+    assert.match(html, /name="nivelRetencao"[^>]*value="forgot"/);
+    assert.match(html, /data-metrica="atividade"/);
+    assert.match(html, /Ritmo dos últimos 7 dias/);
+    assert.match(html, /cardsVencidos\(materia\)/);
+    assert.match(html, /VERSAO_BACKUP = 4/);
+    assert.match(html, /historicoRevisoes/);
+    assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
+    assert.match(repository, /export async function registrarRevisaoTarefa/);
+    assert.match(auth, /registrarRevisao: registrarRevisaoTarefa/);
+    assert.match(migration, /add column exam_topic_id uuid references public\.exam_topics\(id\) on delete set null/i);
+    assert.match(migration, /create trigger study_tasks_validate_exam_topic/i);
+    assert.match(migration, /topic\.user_id = new\.assigned_to/i);
+    assert.match(migration, /exam_subject\.subject_id = new\.subject_id/i);
+    assert.match(migration, /study_tasks_select_self[\s\S]*?assigned_to = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /study_tasks_update_self[\s\S]*?assigned_to = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /create or replace function public\.record_study_review/i);
+    assert.match(migration, /security invoker/i);
+    assert.match(migration, /task\.assigned_to = current_user_id/i);
+    assert.match(migration, /task\.review_history \|\| jsonb_build_array\(event\)/i);
+    assert.match(migration, /review_interval_mastered integer not null default 30/i);
+    assert.match(migration, /revoke all on function public\.record_study_review[^;]*from public, anon/i);
+    assert.match(migration, /import_local_hub_core_v2/i);
 });
 
 test("o edital destaca as informações essenciais e orienta o primeiro cadastro", () => {
