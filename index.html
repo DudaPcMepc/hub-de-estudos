@@ -3066,7 +3066,13 @@ function documentosJuridicosDaMateria(materia) {
         return documentosJuridicos.filter(documento => documento.slug === "codigo-de-transito-brasileiro-lei-9503-1997");
     }
     if (chave.includes("guarda") || chave.includes("gcm")) {
-        return documentosJuridicos.filter(documento => documento.slug === "estatuto-geral-guardas-municipais-lei-13022-2014");
+        return documentosJuridicos.filter(documento => [
+            "estatuto-geral-guardas-municipais-lei-13022-2014",
+            "estatuto-desarmamento-lei-10826-2003"
+        ].includes(documento.slug));
+    }
+    if (chave.includes("desarmamento") || chave.includes("armas") || chave.includes("armamento")) {
+        return documentosJuridicos.filter(documento => documento.slug === "estatuto-desarmamento-lei-10826-2003");
     }
     return [];
 }
