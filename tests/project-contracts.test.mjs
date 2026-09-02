@@ -324,6 +324,23 @@ test("as sessões do calendário abrem detalhes e exigem uma ação explícita",
     assert.match(html, /btn-excluir-tarefa-cal"\)\.forEach[\s\S]*?excluirTarefaSincronizada/);
 });
 
+test("o resumo semanal compara planejamento e execução e reage a sessões atrasadas", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="resumoSemanalCronograma"/);
+    assert.match(html, /id="painelSessoesAtrasadas"/);
+    assert.match(html, /function renderizarResumoSemanalCronograma\(\)/);
+    assert.match(html, /const tarefasSemana = tarefas\.filter\(tarefa => datas\.has\(tarefa\.data\)\)/);
+    assert.match(html, /const registrosSemana = registros\.filter\(registro => datas\.has\(registro\.dataEstudo\)\)/);
+    assert.match(html, /const cumprimento = tarefasSemana\.length \? Math\.min\(100, Math\.round/);
+    assert.match(html, /Matéria mais estudada:/);
+    assert.match(html, /function reagendarTarefaParaHoje\(id, botao = null\)/);
+    assert.match(html, /atualizar\(tarefa\.id, \{ data: novaData \}\)/);
+    assert.match(html, /atualizar\(tarefa\.id, \{ data: dataAnterior \}\)/);
+    assert.match(html, /class="[^"]*btn-reagendar-hoje"/);
+    assert.match(html, /renderizarPeriodoCalendario\(\)[\s\S]*?renderizarResumoSemanalCronograma\(\)/);
+});
+
 test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");

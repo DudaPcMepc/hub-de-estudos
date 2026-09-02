@@ -211,6 +211,26 @@
     }
     .session-actions { grid-column: 5 / -1; grid-template-columns: minmax(145px, 1fr) auto; justify-self: end; width: min(100%, 330px); }
     .session-actions .btn-primary { min-height: 44px; }
+    .weekly-study-summary { padding: 1rem; background: linear-gradient(145deg, #fffdf9, #f7efe8); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .055); }
+    .weekly-summary-range { color: var(--pimentel-cafe-claro); font-size: .76rem; font-weight: 600; }
+    .weekly-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .65rem; }
+    .weekly-summary-metric { min-width: 0; padding: .8rem; background: rgba(255, 255, 255, .76); border: 1px solid rgba(59, 41, 35, .075); border-radius: .8rem; }
+    .weekly-summary-metric-header { display: flex; align-items: center; gap: .45rem; color: #79655c; font-size: .69rem; font-weight: 700; }
+    .weekly-summary-metric-header i { color: var(--pimentel-vermelho); font-size: .9rem; }
+    .weekly-summary-value { display: block; margin-top: .35rem; color: var(--pimentel-cafe); font-size: 1.05rem; line-height: 1.1; }
+    .weekly-summary-helper { display: block; margin-top: .22rem; color: #806f67; font-size: .65rem; line-height: 1.25; }
+    .weekly-summary-progress { height: .32rem; margin-top: .45rem; overflow: hidden; background: rgba(91, 67, 58, .1); border-radius: 999px; }
+    .weekly-summary-progress > span { height: 100%; display: block; background: linear-gradient(90deg, #3d7f5c, #65a679); border-radius: inherit; }
+    .weekly-summary-highlight { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; padding: .7rem .8rem; color: #5f4b42; background: rgba(255, 255, 255, .62); border-radius: .75rem; font-size: .75rem; }
+    .overdue-sessions { margin-top: .75rem; padding: .8rem; background: rgba(190, 119, 23, .075); border: 1px solid rgba(190, 119, 23, .16); border-radius: .8rem; }
+    .overdue-sessions-header { display: flex; align-items: center; justify-content: space-between; gap: .65rem; margin-bottom: .55rem; color: #704a18; }
+    .overdue-session-list { display: grid; gap: .42rem; }
+    .overdue-session-item { display: flex; align-items: center; justify-content: space-between; gap: .7rem; padding: .58rem .65rem; background: rgba(255, 253, 249, .9); border-radius: .65rem; }
+    .overdue-session-copy { min-width: 0; }
+    .overdue-session-copy strong, .overdue-session-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .overdue-session-copy strong { color: #4f3b33; font-size: .78rem; }
+    .overdue-session-copy small { color: #806a60; font-size: .67rem; }
+    .overdue-session-item .btn { flex: 0 0 auto; }
     .review-queue {
         padding: 1rem;
         background: linear-gradient(135deg, rgba(99, 33, 28, .07), rgba(255, 253, 249, .92));
@@ -1359,6 +1379,7 @@
         .study-stat:last-child { grid-column: 1 / -1; }
         .study-session-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .session-actions { grid-column: 1 / -1; justify-self: stretch; width: 100%; }
+        .weekly-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .simulation-generator-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .simulation-actions { grid-column: 1 / -1; }
     }
@@ -1387,6 +1408,13 @@
         .session-detail-item.is-wide { grid-column: auto; }
         .study-session-form { grid-template-columns: 1fr; }
         .session-actions { grid-column: auto; grid-template-columns: 1fr; }
+        .weekly-study-summary { padding: .8rem; }
+        .weekly-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+        .weekly-summary-metric { padding: .68rem; }
+        .weekly-summary-metric:last-child { grid-column: 1 / -1; }
+        .weekly-summary-highlight { align-items: flex-start; flex-direction: column; }
+        .overdue-session-item { align-items: stretch; flex-direction: column; }
+        .overdue-session-item .btn { width: 100%; }
         .review-queue-item { align-items: stretch; flex-direction: column; }
         .study-diary-entry { grid-template-columns: 1fr; }
         .study-diary-entry-actions { justify-content: flex-end; }
@@ -1616,6 +1644,19 @@
                     </form>
                 </div>
             </div>
+
+            <section class="weekly-study-summary mb-4" aria-labelledby="tituloResumoSemanalCronograma">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div><span class="exam-evolution-kicker">Planejamento x execução</span><h6 class="fw-bold mb-0" id="tituloResumoSemanalCronograma"><i class="bi-graph-up-arrow me-1"></i>Resumo da semana</h6></div>
+                    <span class="weekly-summary-range" id="periodoResumoSemanal"></span>
+                </div>
+                <div class="weekly-summary-grid" id="resumoSemanalCronograma" aria-live="polite"></div>
+                <div class="weekly-summary-highlight d-none" id="destaqueMateriaSemana"></div>
+                <div class="overdue-sessions d-none" id="painelSessoesAtrasadas">
+                    <div class="overdue-sessions-header"><strong><i class="bi-clock-history me-1"></i>Sessões atrasadas</strong><span class="badge rounded-pill text-bg-warning" id="contadorSessoesAtrasadas">0</span></div>
+                    <div class="overdue-session-list" id="listaSessoesAtrasadas"></div>
+                </div>
+            </section>
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
@@ -7511,6 +7552,95 @@ function formatarDuracao(minutos) {
     return resto ? `${horas}h${String(resto).padStart(2, "0")}` : `${horas}h`;
 }
 
+async function reagendarTarefaParaHoje(id, botao = null) {
+    if (operacaoTarefaEmAndamento) return;
+    const tarefas = obterTarefas();
+    const tarefa = tarefas.find(item => String(item.id) === String(id));
+    const novaData = hojeISO();
+    if (!tarefa || tarefa.status !== "pendente" || !tarefa.data || tarefa.data >= novaData) return;
+    const dataAnterior = tarefa.data;
+    operacaoTarefaEmAndamento = true;
+    if (botao) botao.disabled = true;
+    try {
+        await exigirNuvemTarefas().atualizar(tarefa.id, { data: novaData });
+        try {
+            const atualizadas = obterTarefas();
+            const atual = atualizadas.find(item => String(item.id) === String(tarefa.id));
+            if (atual) atual.data = novaData;
+            salvar(LS.tarefas, atualizadas);
+        } catch (erroLocal) {
+            await exigirNuvemTarefas().atualizar(tarefa.id, { data: dataAnterior });
+            throw erroLocal;
+        }
+        renderizarTudoCronograma();
+        if (materiaAbertaId) renderizarWorkspace();
+    } catch (erro) {
+        console.error("Falha ao reagendar sessão", erro);
+        alert("A sessão não foi reagendada porque o Supabase não confirmou a alteração.");
+        renderizarTudoCronograma();
+    } finally {
+        operacaoTarefaEmAndamento = false;
+        if (botao?.isConnected) botao.disabled = false;
+    }
+}
+
+function renderizarResumoSemanalCronograma() {
+    const dias = obterDiasDiario();
+    const datas = new Set(dias.map(paraISO));
+    const tarefas = obterTarefas();
+    const registros = obterRegistrosEstudo();
+    const tarefasSemana = tarefas.filter(tarefa => datas.has(tarefa.data));
+    const registrosSemana = registros.filter(registro => datas.has(registro.dataEstudo));
+    const idsTarefasEstudadas = new Set(registrosSemana.map(registro => String(registro.tarefaId || "")).filter(Boolean));
+    const minutosPlanejados = tarefasSemana.reduce((total, tarefa) => total + (Number(tarefa.minutosPlanejados) || 0), 0);
+    const minutosEstudados = registrosSemana.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
+    const semEstimativa = tarefasSemana.filter(tarefa => !Number(tarefa.minutosPlanejados)).length;
+    const concluidas = tarefasSemana.filter(tarefa => tarefa.status === "concluido" || idsTarefasEstudadas.has(String(tarefa.id))).length;
+    const pendentes = tarefasSemana.filter(tarefa => tarefa.status === "pendente").length;
+    const cumprimento = tarefasSemana.length ? Math.min(100, Math.round((concluidas / tarefasSemana.length) * 100)) : 0;
+    const hoje = hojeISO();
+    const revisoesVencidas = tarefas.filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao < hoje).length;
+    const revisoesHoje = tarefas.filter(tarefa => tarefa.proximaRevisao === hoje).length;
+    const revisoesDevidas = revisoesVencidas + revisoesHoje;
+    const porMateria = registrosSemana.reduce((mapa, registro) => {
+        const chave = String(registro.materiaId || registro.materiaNome || "");
+        const atual = mapa.get(chave) || { nome: registro.materiaNome || nomeDaMateria(registro.materiaId), minutos: 0 };
+        atual.minutos += Number(registro.minutos) || 0;
+        mapa.set(chave, atual);
+        return mapa;
+    }, new Map());
+    const principal = [...porMateria.values()].sort((a, b) => b.minutos - a.minutos)[0] || null;
+    const primeiroDia = dias[0];
+    const ultimoDia = dias[dias.length - 1];
+    const mesmoMes = primeiroDia.getMonth() === ultimoDia.getMonth();
+    const rotuloInicio = primeiroDia.toLocaleDateString("pt-BR", { day: "2-digit", month: mesmoMes ? undefined : "short" });
+    const rotuloFim = ultimoDia.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: primeiroDia.getFullYear() !== ultimoDia.getFullYear() ? "numeric" : undefined });
+    document.getElementById("periodoResumoSemanal").textContent = `${rotuloInicio} a ${rotuloFim}`;
+
+    const metrica = (icone, titulo, valor, ajuda, progresso = null) => `<article class="weekly-summary-metric"><span class="weekly-summary-metric-header"><i class="${icone}" aria-hidden="true"></i>${titulo}</span><strong class="weekly-summary-value">${valor}</strong><small class="weekly-summary-helper">${ajuda}</small>${progresso == null ? "" : `<div class="weekly-summary-progress" role="progressbar" aria-label="Cumprimento da semana" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progresso}"><span style="width:${progresso}%"></span></div>`}</article>`;
+    document.getElementById("resumoSemanalCronograma").innerHTML = [
+        metrica("bi-calendar2-check", "Planejado", formatarDuracao(minutosPlanejados), semEstimativa ? `${semEstimativa} ${semEstimativa === 1 ? "sessão sem estimativa" : "sessões sem estimativa"}` : `${tarefasSemana.length} ${tarefasSemana.length === 1 ? "sessão na semana" : "sessões na semana"}`),
+        metrica("bi-stopwatch", "Estudado", formatarDuracao(minutosEstudados), `${registrosSemana.length} ${registrosSemana.length === 1 ? "registro real" : "registros reais"}`),
+        metrica("bi-bar-chart-line", "Cumprimento", tarefasSemana.length ? `${cumprimento}%` : "—", tarefasSemana.length ? `${concluidas} de ${tarefasSemana.length} sessões` : "Nenhuma sessão planejada", tarefasSemana.length ? cumprimento : 0),
+        metrica("bi-hourglass-split", "Pendentes", String(pendentes), "sessões desta semana"),
+        metrica("bi-arrow-repeat", "Revisões", String(revisoesDevidas), revisoesDevidas ? `${revisoesVencidas} vencidas · ${revisoesHoje} para hoje` : "nenhuma devida hoje")
+    ].join("");
+
+    const destaque = document.getElementById("destaqueMateriaSemana");
+    destaque.classList.toggle("d-none", !principal);
+    destaque.innerHTML = principal ? `<span><i class="bi-trophy me-1 text-warning" aria-hidden="true"></i>Matéria mais estudada: <strong>${esc(principal.nome)}</strong></span><span class="badge rounded-pill text-bg-light">${formatarDuracao(principal.minutos)}</span>` : "";
+
+    const atrasadas = tarefas.filter(tarefa => tarefa.status === "pendente" && tarefa.data && tarefa.data < hoje)
+        .sort((a, b) => a.data.localeCompare(b.data) || nomeDaMateria(a.materiaId).localeCompare(nomeDaMateria(b.materiaId), "pt-BR"));
+    const painelAtrasadas = document.getElementById("painelSessoesAtrasadas");
+    painelAtrasadas.classList.toggle("d-none", atrasadas.length === 0);
+    document.getElementById("contadorSessoesAtrasadas").textContent = atrasadas.length;
+    document.getElementById("listaSessoesAtrasadas").innerHTML = atrasadas.length ? atrasadas.slice(0, 4).map(tarefa => `<article class="overdue-session-item"><div class="overdue-session-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))} · ${esc(tarefa.topico)}</strong><small>Planejada para ${esc(new Date(`${tarefa.data}T12:00:00`).toLocaleDateString("pt-BR"))}</small></div><button type="button" class="btn btn-sm btn-outline-warning rounded-pill btn-reagendar-hoje" data-id="${esc(tarefa.id)}"><i class="bi-calendar2-plus me-1" aria-hidden="true"></i>Reagendar para hoje</button></article>`).join("") + (atrasadas.length > 4 ? `<small class="d-block mt-2 text-muted">Mais ${atrasadas.length - 4} ${atrasadas.length - 4 === 1 ? "sessão atrasada" : "sessões atrasadas"} na lista de pendentes.</small>` : "") : "";
+    document.querySelectorAll(".btn-reagendar-hoje").forEach(botao => botao.addEventListener("click", async () => {
+        await reagendarTarefaParaHoje(botao.dataset.id, botao);
+    }));
+}
+
 function renderizarDiarioSemana() {
     const dias = obterDiasDiario();
     const datas = new Set(dias.map(paraISO));
@@ -7547,6 +7677,7 @@ function renderizarDiarioSemana() {
 function renderizarPeriodoCalendario() {
     renderizarCalendario();
     renderizarDiarioSemana();
+    renderizarResumoSemanalCronograma();
 }
 
 document.getElementById("btnSemanaAnterior").addEventListener("click", () => { offsetSemana--; renderizarPeriodoCalendario(); });
@@ -7563,6 +7694,7 @@ function renderizarTudoCronograma() {
     renderizarFilaRevisoes();
     renderizarCalendario();
     renderizarDiarioSemana();
+    renderizarResumoSemanalCronograma();
 }
 
 // ============================================================
