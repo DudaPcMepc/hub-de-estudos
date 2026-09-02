@@ -384,6 +384,35 @@
     }
     .exam-topic-editor-actions { display: inline-flex; gap: .35rem; }
     .exam-topic-empty { padding: .8rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .65rem; text-align: center; }
+    .exam-evolution {
+        margin-top: 1.25rem;
+        padding: 1.15rem;
+        background: linear-gradient(145deg, rgba(255, 253, 249, .98), rgba(244, 226, 212, .34));
+        border: 1px solid rgba(59, 41, 35, .1);
+        border-radius: .95rem;
+    }
+    .exam-evolution-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .exam-evolution-heading p { color: var(--pimentel-cafe-claro); font-size: .78rem; }
+    .exam-evolution-kicker { display: block; margin-bottom: .2rem; color: var(--pimentel-vermelho-escuro); font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .exam-chart-toggle { display: inline-flex; padding: .2rem; background: rgba(91, 67, 58, .07); border-radius: .65rem; }
+    .btn-metrica-edital { padding: .38rem .65rem; color: var(--pimentel-cafe-claro); background: transparent; border: 0; border-radius: .48rem; font-size: .72rem; font-weight: 600; white-space: nowrap; }
+    .btn-metrica-edital[aria-pressed="true"] { color: #fff; background: var(--pimentel-vermelho-escuro); box-shadow: 0 2px 8px rgba(99, 33, 28, .16); }
+    .exam-insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
+    .exam-insight { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .6rem; align-items: center; padding: .7rem; background: rgba(255, 255, 255, .76); border: 1px solid rgba(59, 41, 35, .08); border-radius: .75rem; }
+    .exam-insight-icon { width: 2rem; height: 2rem; display: inline-grid; place-items: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: .6rem; }
+    .exam-insight small, .exam-insight span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .exam-insight small { color: var(--pimentel-cafe-claro); font-size: .65rem; }
+    .exam-insight strong { display: block; overflow: hidden; color: var(--pimentel-cafe); font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+    .exam-insight span { color: var(--pimentel-cafe-claro); font-size: .68rem; }
+    .exam-chart { display: grid; gap: .72rem; }
+    .exam-chart-row { display: grid; grid-template-columns: minmax(125px, 1fr) minmax(180px, 2.6fr) auto; gap: .75rem; align-items: center; }
+    .exam-chart-label { overflow: hidden; color: var(--pimentel-cafe); font-size: .76rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .exam-chart-track { height: .65rem; overflow: hidden; background: rgba(91, 67, 58, .09); border-radius: 999px; }
+    .exam-chart-bar { width: var(--exam-chart-value); height: 100%; background: linear-gradient(90deg, var(--pimentel-vermelho), #d78362); border-radius: inherit; transition: width .25s ease; }
+    .exam-chart-row.is-weight .exam-chart-bar { background: linear-gradient(90deg, #725247, #b37d63); }
+    .exam-chart-value { min-width: 95px; color: var(--pimentel-cafe-claro); font-size: .7rem; text-align: right; }
+    .exam-evolution-empty { display: grid; place-items: center; gap: .35rem; min-height: 145px; padding: 1rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .75rem; text-align: center; }
+    .exam-evolution-empty i { font-size: 1.5rem; opacity: .65; }
     @media (max-width: 575.98px) {
         .exam-topic-panel { padding: .85rem .65rem 1rem; }
         .exam-topic-list { margin-left: .45rem; }
@@ -391,6 +420,13 @@
         .exam-topic-item .badge { display: none; }
         .exam-topic-editor { grid-template-columns: 1fr; }
         .exam-topic-editor-actions { justify-content: flex-end; }
+        .exam-evolution { padding: .9rem; }
+        .exam-evolution-heading { align-items: stretch; flex-direction: column; }
+        .exam-chart-toggle { align-self: flex-start; }
+        .exam-insights { grid-template-columns: 1fr; }
+        .exam-chart-row { grid-template-columns: minmax(0, 1fr) auto; gap: .35rem .6rem; }
+        .exam-chart-track { grid-column: 1 / -1; grid-row: 2; }
+        .exam-chart-value { min-width: 0; }
     }
     .exam-empty {
         min-height: 190px;
@@ -1527,6 +1563,14 @@
                             <tbody id="tabelaEdital"></tbody>
                         </table>
                     </div>
+                    <section class="exam-evolution" id="painelEvolucaoEdital" aria-labelledby="tituloEvolucaoEdital">
+                        <header class="exam-evolution-heading">
+                            <div><span class="exam-evolution-kicker">Visão estratégica</span><h6 class="fw-bold mb-1" id="tituloEvolucaoEdital"><i class="bi-graph-up-arrow me-1"></i>Evolução por matéria</h6><p class="mb-0">Compare seu avanço no checklist e a relevância de cada matéria na prova.</p></div>
+                            <div class="exam-chart-toggle" role="group" aria-label="Métrica do gráfico"><button type="button" class="btn-metrica-edital" data-metrica="progresso">Progresso</button><button type="button" class="btn-metrica-edital" data-metrica="peso">Peso na prova</button></div>
+                        </header>
+                        <div class="exam-insights" id="insightsEdital"></div>
+                        <div class="exam-chart" id="graficoEdital"></div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -6905,6 +6949,7 @@ function renderizarTudoCronograma() {
 let operacaoEditalEmAndamento = false;
 let materiasEditalExpandidas = new Set();
 let editorTopicoEdital = null;
+let metricaPainelEdital = "progresso";
 
 function exigirNuvemEdital() {
     if (!window.HUB_CLOUD_EXAM) throw new Error("A conexão do edital com o Supabase ainda não está pronta.");
@@ -6913,6 +6958,61 @@ function exigirNuvemEdital() {
 
 function calcularPontosTotais(edital) {
     return edital.materias.reduce((acc, m) => acc + (Number(m.questoes) * Number(m.peso)), 0);
+}
+
+function renderizarPainelEvolucaoEdital(edital) {
+    const insights = document.getElementById("insightsEdital");
+    const grafico = document.getElementById("graficoEdital");
+    const totalPontos = calcularPontosTotais(edital);
+    const itens = edital.materias.map(item => {
+        const topicos = Array.isArray(item.topicos) ? item.topicos : [];
+        const concluidos = topicos.filter(topico => topico.concluido === true).length;
+        const pendentes = topicos.length - concluidos;
+        const progresso = topicos.length ? (concluidos / topicos.length) * 100 : 0;
+        const pontos = Number(item.questoes) * Number(item.peso);
+        const relevancia = totalPontos > 0 ? (pontos / totalPontos) * 100 : 0;
+        return { nome: nomeDaMateria(item.materiaId), concluidos, totalTopicos: topicos.length, pendentes, progresso, pontos, relevancia };
+    });
+
+    document.querySelectorAll(".btn-metrica-edital").forEach(botao => {
+        const ativa = botao.dataset.metrica === metricaPainelEdital;
+        botao.setAttribute("aria-pressed", String(ativa));
+        botao.onclick = () => {
+            if (botao.dataset.metrica === metricaPainelEdital) return;
+            metricaPainelEdital = botao.dataset.metrica;
+            renderizarPainelEvolucaoEdital(obterEdital());
+        };
+    });
+
+    if (!itens.length) {
+        insights.innerHTML = "";
+        grafico.innerHTML = '<div class="exam-evolution-empty"><i class="bi-bar-chart" aria-hidden="true"></i><strong>Seu painel será construído com o edital.</strong><small>Adicione matérias e tópicos para acompanhar a evolução e a prioridade da prova.</small></div>';
+        return;
+    }
+
+    const comTopicos = itens.filter(item => item.totalTopicos > 0).sort((a, b) => b.progresso - a.progresso || b.concluidos - a.concluidos || a.nome.localeCompare(b.nome, "pt-BR"));
+    const comPendencias = itens.filter(item => item.pendentes > 0).sort((a, b) => b.pendentes - a.pendentes || a.nome.localeCompare(b.nome, "pt-BR"));
+    const porPeso = [...itens].sort((a, b) => b.pontos - a.pontos || a.nome.localeCompare(b.nome, "pt-BR"));
+    const avancada = comTopicos[0];
+    const pendente = comPendencias[0];
+    const relevante = totalPontos > 0 ? porPeso[0] : null;
+    const cartao = (icone, rotulo, valor, detalhe) => `<article class="exam-insight"><span class="exam-insight-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div><small>${rotulo}</small><strong title="${esc(valor)}">${esc(valor)}</strong><span>${esc(detalhe)}</span></div></article>`;
+    insights.innerHTML = [
+        cartao("trophy", "Mais avançada", avancada?.nome || "Aguardando tópicos", avancada ? `${avancada.progresso.toFixed(0)}% concluído` : "Cadastre o checklist"),
+        cartao("hourglass-split", "Maior pendência", pendente?.nome || "Tudo em dia", pendente ? `${pendente.pendentes} tópico${pendente.pendentes === 1 ? "" : "s"} pendente${pendente.pendentes === 1 ? "" : "s"}` : "Nenhuma pendência"),
+        cartao("bullseye", "Maior peso", relevante?.nome || "Aguardando pesos", relevante ? `${relevante.relevancia.toFixed(1)}% da prova` : "Configure questões e peso")
+    ].join("");
+
+    const porMetrica = [...itens].sort((a, b) => {
+        const diferenca = metricaPainelEdital === "peso" ? b.relevancia - a.relevancia : b.progresso - a.progresso;
+        return diferenca || a.nome.localeCompare(b.nome, "pt-BR");
+    });
+    grafico.innerHTML = porMetrica.map(item => {
+        const percentual = metricaPainelEdital === "peso" ? item.relevancia : item.progresso;
+        const valor = metricaPainelEdital === "peso" ? `${item.pontos.toFixed(1)} pts · ${item.relevancia.toFixed(1)}%` : `${item.concluidos}/${item.totalTopicos} · ${item.progresso.toFixed(0)}%`;
+        const rotulo = metricaPainelEdital === "peso" ? `Peso de ${item.nome} na prova` : `Progresso de ${item.nome}`;
+        return `<div class="exam-chart-row ${metricaPainelEdital === "peso" ? "is-weight" : ""}"><span class="exam-chart-label" title="${esc(item.nome)}">${esc(item.nome)}</span><div class="exam-chart-track" role="progressbar" aria-label="${esc(rotulo)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentual.toFixed(1)}"><div class="exam-chart-bar" style="--exam-chart-value:${Math.max(0, Math.min(100, percentual)).toFixed(1)}%"></div></div><span class="exam-chart-value">${valor}</span></div>`;
+    }).join("");
 }
 
 function renderizarEdital() {
@@ -6924,6 +7024,7 @@ function renderizarEdital() {
 
     const total = calcularPontosTotais(edital);
     document.getElementById("editalTotalPontos").textContent = total.toFixed(1) + " pts";
+    renderizarPainelEvolucaoEdital(edital);
 
     const tabela = document.getElementById("tabelaEdital");
     if (edital.materias.length === 0) {
@@ -7941,6 +8042,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     geracaoSessaoHub += 1;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
+    metricaPainelEdital = "progresso";
     definirUsuarioAtual(contexto.userId);
     if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, colecoesVadeRemotas, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
@@ -7994,6 +8096,7 @@ window.encerrarHub = () => {
     operacaoEditalEmAndamento = false;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
+    metricaPainelEdital = "progresso";
     operacaoErroEmAndamento = false;
     window.HUB_MIND_MAPS_UI?.encerrar();
     materiaAbertaId = null;

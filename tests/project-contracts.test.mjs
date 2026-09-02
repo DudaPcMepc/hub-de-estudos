@@ -272,6 +272,23 @@ test("o checklist do edital é retrátil e gerencia os tópicos da matéria exis
     assert.match(repository, /from\("exam_topics"\)\.delete\(\)[\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)/);
 });
 
+test("o edital apresenta evolução real por matéria sem inventar contagem de visualizações", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="painelEvolucaoEdital"/);
+    assert.match(html, /id="insightsEdital"/);
+    assert.match(html, /id="graficoEdital"/);
+    assert.match(html, /data-metrica="progresso"/);
+    assert.match(html, /data-metrica="peso"/);
+    assert.match(html, /"Mais avançada"/);
+    assert.match(html, /"Maior pendência"/);
+    assert.match(html, /"Maior peso"/);
+    assert.match(html, /function renderizarPainelEvolucaoEdital\(edital\)/);
+    assert.match(html, /const progresso = topicos\.length \? \(concluidos \/ topicos\.length\) \* 100 : 0/);
+    assert.match(html, /renderizarPainelEvolucaoEdital\(edital\)/);
+    assert.doesNotMatch(html, /tópicos mais vistos/i);
+});
+
 test("o simulado prioriza a geração, usa aviso neutro e orienta o primeiro resultado", () => {
     const html = readProjectFile("index.html");
 
