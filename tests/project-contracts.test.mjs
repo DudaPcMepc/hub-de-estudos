@@ -291,6 +291,21 @@ test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => 
     assert.match(migration, /payload->'registrosEstudo'/i);
 });
 
+test("o calendário móvel mostra um dia por vez e cria sessões no período escolhido", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="btnDiaAnterior"/);
+    assert.match(html, /id="btnDiaHoje"/);
+    assert.match(html, /id="btnDiaProximo"/);
+    assert.match(html, /function obterDiasVisiveisCalendario\(\)/);
+    assert.match(html, /calendarioMobileAtivo\(\) \? \[obterDiaCalendarioMobile\(\)\]/);
+    assert.match(html, /class="calendar-period-add btn-adicionar-periodo"/);
+    assert.match(html, /function prepararNovaSessaoNoPeriodo\(data, periodo\)/);
+    assert.match(html, /getElementById\("tarefaData"\)\.value = data/);
+    assert.match(html, /getElementById\("tarefaPeriodo"\)\.value = normalizarPeriodoEstudo\(periodo, false\)/);
+    assert.match(html, /@media \(max-width: 767\.98px\)[\s\S]*?weekly-calendar-grid \{ min-width: 0; grid-template-columns: minmax\(0, 1fr\)/);
+});
+
 test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
