@@ -26,11 +26,13 @@
         --bs-body-bg: var(--pimentel-creme);
     }
     body { background-color: var(--pimentel-creme); color: var(--pimentel-texto); }
-    .navbar.bg-dark { background: linear-gradient(100deg, #2f201b 0%, var(--pimentel-cafe) 58%, #54362c 100%) !important; border-bottom: 3px solid var(--pimentel-vermelho); }
+    .navbar.bg-dark { background: linear-gradient(105deg, #493229 0%, #5d4035 58%, #745043 100%) !important; border-bottom: 2px solid rgba(184, 50, 42, .82); }
+    .app-topbar { min-height: 56px; margin-bottom: .7rem !important; box-shadow: 0 .25rem .8rem rgba(59, 41, 35, .12); }
+    .app-topbar .container-fluid { padding-top: .42rem; padding-bottom: .42rem; }
     .navbar-brand { letter-spacing: .01em; min-width: 0; }
     .brand-copy { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
-    .brand-title { font-size: 1.05rem; }
-    .brand-subtitle { color: #e9c9b7; font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; margin-top: .22rem; }
+    .brand-title { font-size: 1rem; }
+    .brand-subtitle { color: #efd8ca; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; margin-top: .18rem; }
     .brand-code-logo {
         display: inline-flex;
         align-items: center;
@@ -70,19 +72,19 @@
     .brand-code-logo .brand-coffee::before { left: .32em; transform: rotate(12deg); }
     .brand-code-logo .brand-coffee::after { left: .65em; top: -.12em; transform: rotate(-10deg); opacity: .72; }
     .brand-code-logo-nav {
-        min-width: 66px;
-        padding: .42rem .5rem;
+        min-width: 58px;
+        padding: .34rem .43rem;
         color: var(--pimentel-creme);
         background: rgba(255, 255, 255, .08);
         border: 1px solid rgba(233, 201, 183, .28);
         border-radius: .7rem;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-        font-size: .88rem;
+        font-size: .8rem;
     }
     .brand-code-logo-nav .code-angle { color: #ef9a7d; }
     .navbar-support-btn {
-        width: 2.15rem;
-        height: 2.15rem;
+        width: 1.95rem;
+        height: 1.95rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -99,6 +101,9 @@
         background: rgba(255, 255, 255, .11);
         border-color: rgba(233, 201, 183, .2);
     }
+    .navbar-user { max-width: 210px; overflow: hidden; color: #fff8f1 !important; font-size: .7rem !important; text-overflow: ellipsis; white-space: nowrap; }
+    .navbar-signout-btn { min-height: 1.95rem; padding: .24rem .62rem; color: #fff8f1; border-color: rgba(255, 248, 241, .38); border-radius: .6rem; font-size: .68rem; }
+    .navbar-signout-btn:hover, .navbar-signout-btn:focus-visible { color: var(--pimentel-cafe); background: #fff8f1; border-color: #fff8f1; }
     .card { border-radius: .9rem; }
     .shadow-sm { box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09) !important; }
     .btn-primary {
@@ -133,6 +138,32 @@
     .nav-tabs .nav-link { color: var(--pimentel-cafe-claro); }
     .nav-tabs .nav-link:hover { color: var(--pimentel-vermelho); border-color: transparent; }
     .nav-tabs .nav-link.active { color: var(--pimentel-vermelho-escuro); background-color: var(--pimentel-papel); border-color: rgba(59, 41, 35, .14) rgba(59, 41, 35, .14) var(--pimentel-papel); }
+    #abas.app-primary-nav {
+        gap: .18rem;
+        margin-bottom: 1rem !important;
+        padding: .24rem .3rem 0;
+        background: rgba(255, 253, 249, .76);
+        border: 1px solid rgba(59, 41, 35, .09);
+        border-radius: .82rem;
+        box-shadow: 0 .18rem .55rem rgba(59, 41, 35, .035);
+        scrollbar-width: thin;
+    }
+    #abas.app-primary-nav .nav-link {
+        position: relative;
+        min-height: 38px;
+        padding: .45rem .68rem .55rem;
+        color: #67534b;
+        background: transparent;
+        border: 0;
+        border-radius: .58rem .58rem 0 0;
+        font-size: .72rem;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+    #abas.app-primary-nav .nav-link::after { content: ""; position: absolute; right: .5rem; bottom: 0; left: .5rem; height: 3px; background: transparent; border-radius: 999px 999px 0 0; }
+    #abas.app-primary-nav .nav-link:hover { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .045); }
+    #abas.app-primary-nav .nav-link.active { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .075); }
+    #abas.app-primary-nav .nav-link.active::after { background: var(--pimentel-vermelho); }
     .modal-content { border: 0; border-radius: 1rem; box-shadow: 0 1rem 3rem rgba(41, 33, 30, .2); }
     .modal-header { border-bottom-color: rgba(59, 41, 35, .12); }
     .alert-warning { --bs-alert-bg: #fff3e8; --bs-alert-border-color: #e7b89f; --bs-alert-color: #6f3525; }
@@ -264,7 +295,7 @@
     .task-meta-chip.is-review { color: #6a251f; background: rgba(184, 50, 42, .1); }
     .today-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
     .today-heading h1 { color: var(--pimentel-cafe); font-size: clamp(1.45rem, 3vw, 2rem); }
-    .today-heading p { color: var(--pimentel-cafe-claro); }
+    .today-heading p { color: #67534b; font-size: .83rem; }
     .today-date { display: inline-flex; align-items: center; gap: .4rem; color: var(--pimentel-cafe-claro); font-size: .78rem; font-weight: 600; white-space: nowrap; }
     .today-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
     .today-metric { min-width: 0; padding: .85rem; background: rgba(255, 253, 249, .92); border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; box-shadow: 0 .2rem .65rem rgba(59, 41, 35, .04); }
@@ -278,7 +309,7 @@
     .today-panel { overflow: hidden; }
     .today-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: 1rem; border-bottom: 1px solid rgba(59, 41, 35, .09); }
     .today-panel-heading h2, .today-side-heading h2 { margin: 0; color: var(--pimentel-cafe); font-size: .95rem; }
-    .today-panel-heading p { margin: .15rem 0 0; color: var(--pimentel-cafe-claro); font-size: .7rem; }
+    .today-panel-heading p { margin: .15rem 0 0; color: #6a574f; font-size: .72rem; }
     .today-period { padding: .25rem 1rem 0; }
     .today-period-label { display: flex; align-items: center; gap: .4rem; padding: .7rem 0 .35rem; color: #806d64; font-size: .64rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
     .today-session { display: grid; grid-template-columns: .38rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .75rem 0; border-bottom: 1px solid rgba(59, 41, 35, .075); }
@@ -306,11 +337,15 @@
     .today-side-copy span { margin-top: .12rem; color: #78665e; font-size: .65rem; line-height: 1.35; }
     .today-side-action { width: 100%; margin-top: .7rem; }
     .today-quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
-    .today-quick-action { min-width: 0; min-height: 68px; display: grid; place-items: center; align-content: center; gap: .25rem; padding: .45rem .25rem; color: var(--pimentel-cafe); background: rgba(91, 67, 58, .065); border: 0; border-radius: .7rem; font-size: .64rem; }
-    .today-quick-action i { color: var(--pimentel-vermelho); font-size: 1rem; }
+    .today-quick-action { min-width: 0; min-height: 72px; display: grid; place-items: center; align-content: center; gap: .28rem; padding: .5rem .28rem; color: var(--pimentel-cafe); background: linear-gradient(145deg, #fffdf9, #f5ebe2); border: 1px solid rgba(59, 41, 35, .13); border-radius: .72rem; box-shadow: 0 .16rem .42rem rgba(59, 41, 35, .04); font-size: .66rem; font-weight: 700; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
+    .today-quick-action i { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .085); border-radius: .55rem; font-size: .95rem; }
+    .today-quick-action:hover { transform: translateY(-2px); color: var(--pimentel-vermelho-escuro); background: #fffdf9; border-color: rgba(184, 50, 42, .28); box-shadow: 0 .35rem .75rem rgba(59, 41, 35, .08); }
+    .today-quick-action:focus-visible { outline: 3px solid rgba(184, 50, 42, .22); outline-offset: 2px; }
     .today-empty { min-height: 220px; display: grid; place-items: center; align-content: center; gap: .35rem; padding: 1.5rem; color: var(--pimentel-cafe-claro); text-align: center; }
     .today-empty i { color: #4f8a67; font-size: 2rem; }
     .today-empty strong { color: var(--pimentel-cafe); }
+    .today-empty span { color: #6b5850; }
+    .today-empty .btn { position: static !important; inset: auto !important; transform: none !important; margin-top: .55rem !important; }
     .today-celebration { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; padding: .8rem 1rem; color: #315a43; background: rgba(79, 138, 103, .1); border: 1px solid rgba(79, 138, 103, .18); border-radius: .85rem; }
     .today-celebration i { font-size: 1.25rem; }
     .retention-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
@@ -1515,6 +1550,11 @@
     .auth-tagline { color: var(--pimentel-cafe-claro); }
     @media (max-width: 575.98px) {
         .navbar .container-fluid { align-items: flex-start; }
+        .app-topbar .container-fluid { gap: .5rem; padding-inline: .8rem !important; }
+        .app-topbar .brand-subtitle, .app-topbar .navbar-user { display: none; }
+        .app-topbar .d-flex { gap: .25rem !important; }
+        #abas.app-primary-nav { margin-inline: -.15rem; border-radius: .7rem; }
+        #abas.app-primary-nav .nav-link { min-height: 36px; padding: .4rem .58rem .5rem; font-size: .68rem; }
         .navbar-brand { max-width: 100%; }
         .brand-code-logo-nav { min-width: 58px; padding-inline: .4rem; font-size: .78rem; }
         .brand-title { font-size: .98rem; }
@@ -1752,21 +1792,21 @@
 </main>
 
 <div id="appShell" class="d-none">
-<nav class="navbar navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-dark bg-dark app-topbar">
     <div class="container-fluid px-4">
         <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
             <span class="brand-code-logo brand-code-logo-nav" role="img" aria-label="Pimenta colorida e café quente entre sinais de código"><span class="code-angle" aria-hidden="true">&lt;</span><span class="brand-pepper" aria-hidden="true">🌶️</span><span class="brand-coffee" aria-hidden="true">☕️</span><span class="code-angle" aria-hidden="true">/&gt;</span></span>
             <span class="brand-copy"><span class="brand-title">Esquema de Estudos</span><span class="brand-subtitle">Concursos com foco e constância</span></span>
         </span>
         <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
-            <span class="text-light small me-1" id="usuarioAtual"></span>
+            <span class="navbar-user me-1" id="usuarioAtual"></span>
             <button class="btn btn-sm navbar-support-btn" id="btnPreviaMigracao" type="button" title="Conferir dados na nuvem" aria-label="Conferir dados na nuvem"><i class="bi-cloud-check"></i><span class="visually-hidden">Nuvem</span></button>
             <button class="btn btn-sm navbar-support-btn" id="btnExportar" type="button" title="Baixar backup" aria-label="Baixar backup"><i class="bi-download"></i><span class="visually-hidden">Backup</span></button>
             <label class="btn btn-sm navbar-support-btn mb-0" title="Restaurar backup" aria-label="Restaurar backup">
                 <i class="bi-upload"></i><span class="visually-hidden">Restaurar backup</span>
                 <input type="file" id="inputImportar" accept=".json" class="d-none">
             </label>
-            <button class="btn btn-sm btn-outline-warning" id="btnSair" type="button"><i class="bi-box-arrow-right me-1"></i>Sair</button>
+            <button class="btn btn-sm navbar-signout-btn" id="btnSair" type="button"><i class="bi-box-arrow-right me-1"></i>Sair</button>
         </div>
     </div>
 </nav>
@@ -1778,7 +1818,7 @@
         Encontramos dados antigos neste navegador. Eles continuam preservados e aguardam a etapa segura de migração para sua conta.
     </div>
 
-    <ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto" id="abas" role="tablist">
+    <ul class="nav nav-tabs app-primary-nav flex-nowrap overflow-auto" id="abas" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-hoje" type="button"><i class="bi-house-heart-fill me-1"></i>Hoje</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-cronograma" type="button"><i class="bi-calendar-week-fill me-1"></i>Cronograma</button></li>
