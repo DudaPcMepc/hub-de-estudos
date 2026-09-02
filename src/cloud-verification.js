@@ -33,7 +33,8 @@ function normalizarDadosLocais(dados) {
             caixa: Number(card.caixa) || 1,
             proxima: card.proxima || "",
             acertos: Number(card.acertos) || 0,
-            erros: Number(card.erros) || 0
+            erros: Number(card.erros) || 0,
+            topicoEditalId: card.topicoEditalId || null
         }))),
         links: ordenarPorId((materia.links || []).map(link => ({
             id: String(link.id),
@@ -132,7 +133,7 @@ async function buscarDadosRemotos(contexto) {
         supabase.from("topics").select("id, subject_id, title, status, review_count, position").eq("workspace_id", workspaceId).order("position"),
         supabase.from("notes").select("id, subject_id, title, content, tags, pinned").eq("workspace_id", workspaceId),
         supabase.from("flashcards").select("id, subject_id, front, back").eq("workspace_id", workspaceId),
-        supabase.from("flashcard_progress").select("flashcard_id, box, next_review, correct_count, error_count").eq("workspace_id", workspaceId).eq("user_id", userId),
+        supabase.from("flashcard_progress").select("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("study_links").select("id, subject_id, title, url").eq("workspace_id", workspaceId),
         supabase.from("study_tasks").select("id, subject_id, topic, due_date, status").eq("workspace_id", workspaceId),
         supabase.from("exam_settings").select("exam_name, board_name, vacancies, exam_date").eq("workspace_id", workspaceId).eq("user_id", userId).maybeSingle(),
@@ -195,7 +196,8 @@ async function buscarDadosRemotos(contexto) {
                     caixa: Number(cardProgress.box) || 1,
                     proxima: cardProgress.next_review || "",
                     acertos: Number(cardProgress.correct_count) || 0,
-                    erros: Number(cardProgress.error_count) || 0
+                    erros: Number(cardProgress.error_count) || 0,
+                    topicoEditalId: cardProgress.exam_topic_id ? idLegado(mapas, "exam_topic", cardProgress.exam_topic_id) : null
                 };
             })),
             links: ordenarPorId((linksBySubject.get(subject.id) || []).map(link => ({

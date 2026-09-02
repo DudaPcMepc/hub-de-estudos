@@ -267,7 +267,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 6/);
+    assert.match(html, /VERSAO_BACKUP = 7/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -302,6 +302,29 @@ test("a biblioteca de flashcards oferece criação confortável, filtros e revis
     assert.match(html, /function mostrarVersoRevisao\(\)/);
     assert.match(html, /nivelPorTecla = \{ "1": "errei", "2": "dificil", "3": "acertei" \}/);
     assert.match(html, /renderizarHoje\(\);[\s\S]*?renderizarCards\(mm\)/);
+});
+
+test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const migration = readProjectFile("supabase/migrations/202609020025_private_flashcard_exam_topics.sql");
+
+    assert.match(html, /id="cardTopicoEdital"/);
+    assert.match(html, /id="filtroTopicoCards"/);
+    assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
+    assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
+    assert.match(html, /VERSAO_BACKUP = 7/);
+    assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
+    assert.match(repository, /export async function atualizarTopicoFlashcard/);
+    assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
+    assert.match(auth, /atualizarTopico: atualizarTopicoFlashcard/);
+    assert.match(migration, /add column exam_topic_id uuid references public\.exam_topics\(id\) on delete set null/i);
+    assert.match(migration, /create trigger flashcard_progress_validate_exam_topic/i);
+    assert.match(migration, /topic\.user_id = new\.user_id/i);
+    assert.match(migration, /exam_subject\.subject_id = card\.subject_id/i);
+    assert.match(migration, /entity_type = 'exam_topic'/i);
+    assert.match(migration, /update public\.flashcard_progress progress[\s\S]*?progress\.user_id = current_user_id/i);
 });
 
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {

@@ -894,7 +894,10 @@
     .flashcard-editor-field { min-width: 0; }
     .flashcard-editor .form-label { color: var(--pimentel-cafe); font-size: .72rem; font-weight: 700; }
     .flashcard-editor textarea { min-height: 128px; resize: vertical; background: #fffdf9; border-color: rgba(59, 41, 35, .18); line-height: 1.5; }
-    .flashcard-editor-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: .5rem; }
+    .flashcard-editor-topic, .flashcard-editor-actions { grid-column: 1 / -1; }
+    .flashcard-editor-topic select { background-color: #fffdf9; border-color: rgba(59, 41, 35, .18); }
+    .flashcard-editor-topic small { display: block; margin-top: .28rem; color: #806f67; font-size: .64rem; }
+    .flashcard-editor-actions { display: flex; justify-content: flex-end; gap: .5rem; }
     .flashcard-editor-actions .btn-primary { min-width: 150px; }
     .flashcard-dashboard { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin: 1rem 0; }
     .flashcard-stat { padding: .7rem .8rem; background: rgba(255, 253, 249, .9); border: 1px solid rgba(59, 41, 35, .085); border-radius: .8rem; }
@@ -902,7 +905,7 @@
     .flashcard-stat span { color: #77645c; font-size: .65rem; font-weight: 700; }
     .flashcard-stat strong { display: block; margin-top: .2rem; color: var(--pimentel-cafe); font-size: 1.05rem; }
     .flashcard-stat small { margin-top: .12rem; color: #806f67; font-size: .62rem; }
-    .flashcard-library-toolbar { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(145px, .46fr); gap: .65rem; align-items: center; margin-bottom: .75rem; }
+    .flashcard-library-toolbar { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(145px, .46fr) minmax(165px, .58fr); gap: .65rem; align-items: center; margin-bottom: .75rem; }
     .flashcard-search { position: relative; }
     .flashcard-search i { position: absolute; top: 50%; left: .75rem; color: #88766d; transform: translateY(-50%); pointer-events: none; }
     .flashcard-search input { padding-left: 2.25rem; }
@@ -2393,6 +2396,7 @@
                         <form id="formCard" class="flashcard-editor">
                             <div class="flashcard-editor-field"><label class="form-label" for="cardFrente">Pergunta / frente</label><textarea class="form-control" id="cardFrente" maxlength="5000" placeholder="Ex.: Quais são os fundamentos da República Federativa do Brasil?" required></textarea></div>
                             <div class="flashcard-editor-field"><label class="form-label" for="cardVerso">Resposta / verso</label><textarea class="form-control" id="cardVerso" maxlength="10000" placeholder="Escreva a resposta que deverá ser lembrada." required></textarea></div>
+                            <div class="flashcard-editor-topic"><label class="form-label" for="cardTopicoEdital">Tópico do Edital <span class="fw-normal text-muted">(opcional)</span></label><select class="form-select" id="cardTopicoEdital"><option value="">Sem tópico</option></select><small>Este vínculo é pessoal: outros usuários podem organizar o mesmo card de outra forma.</small></div>
                             <div class="flashcard-editor-actions">
                                 <button type="button" class="btn btn-outline-secondary d-none" id="btnCancelarEdicaoCard">Cancelar edição</button>
                                 <button type="submit" class="btn btn-primary" id="btnSalvarCard"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarCard">Criar flashcard</span></button>
@@ -2407,6 +2411,7 @@
                     <div class="flashcard-library-toolbar">
                         <label class="flashcard-search"><span class="visually-hidden">Buscar flashcards</span><i class="bi-search" aria-hidden="true"></i><input type="search" class="form-control" id="buscaCards" placeholder="Buscar na pergunta ou resposta..."></label>
                         <label><span class="visually-hidden">Ordenar flashcards</span><select class="form-select" id="ordemCards"><option value="revisao">Próxima revisão</option><option value="recentes">Mais recentes</option><option value="caixa">Caixa de aprendizado</option></select></label>
+                        <label><span class="visually-hidden">Filtrar por tópico do Edital</span><select class="form-select" id="filtroTopicoCards"><option value="todos">Todos os tópicos</option><option value="sem-topico">Sem tópico</option></select></label>
                     </div>
                     <div class="flashcard-filter-row" id="filtrosCards" aria-label="Filtrar flashcards">
                         <button type="button" class="flashcard-filter is-active" data-card-filter="todos">Todos <span class="flashcard-filter-count" data-card-count="todos">0</span></button>
@@ -3270,7 +3275,8 @@ function sincronizarListaDeFlashcards(flashcardsRemotos) {
                 caixa: remoto.caixa,
                 proxima: remoto.proxima,
                 acertos: remoto.acertos,
-                erros: remoto.erros
+                erros: remoto.erros,
+                topicoEditalId: remoto.topicoEditalId || null
             }));
     });
     salvarMaterias(materias);
@@ -3656,6 +3662,7 @@ let cardEmEdicaoId = null;
 let filtroCardsAtual = "todos";
 let buscaCardsTexto = "";
 let ordemCardsAtual = "revisao";
+let filtroTopicoCardsAtual = "todos";
 const respostasCardsAbertas = new Set();
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
@@ -6918,22 +6925,47 @@ function limparFiltrosCards() {
     filtroCardsAtual = "todos";
     buscaCardsTexto = "";
     ordemCardsAtual = "revisao";
+    filtroTopicoCardsAtual = "todos";
     respostasCardsAbertas.clear();
     const busca = document.getElementById("buscaCards");
     const ordem = document.getElementById("ordemCards");
+    const filtroTopico = document.getElementById("filtroTopicoCards");
     if (busca) busca.value = "";
     if (ordem) ordem.value = ordemCardsAtual;
+    if (filtroTopico) filtroTopico.value = filtroTopicoCardsAtual;
 }
 
 function textoBuscaFlashcard(valor) {
     return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 }
 
-async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = false, materiaId = null, propagarErro = false } = {}) {
+function popularTopicosEditalFlashcards(materiaId) {
+    const topicos = obterTopicosEditalDaMateria(materiaId);
+    const selectEditor = document.getElementById("cardTopicoEdital");
+    const valorEditor = selectEditor.value;
+    selectEditor.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    selectEditor.value = topicos.some(topico => String(topico.id) === String(valorEditor)) ? valorEditor : "";
+    selectEditor.disabled = topicos.length === 0;
+    selectEditor.title = topicos.length ? "Organize este card em um tópico do seu Edital" : "Cadastre esta matéria no Edital para vincular seus tópicos";
+
+    const selectFiltro = document.getElementById("filtroTopicoCards");
+    const opcoesValidas = new Set(["todos", "sem-topico", ...topicos.map(topico => String(topico.id))]);
+    if (!opcoesValidas.has(String(filtroTopicoCardsAtual))) filtroTopicoCardsAtual = "todos";
+    selectFiltro.innerHTML = '<option value="todos">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}</option>`).join("");
+    selectFiltro.value = filtroTopicoCardsAtual;
+    selectFiltro.disabled = topicos.length === 0;
+}
+
+function topicoEditalDoFlashcard(materiaId, topicoEditalId) {
+    if (!topicoEditalId) return null;
+    return obterTopicosEditalDaMateria(materiaId).find(topico => String(topico.id) === String(topicoEditalId)) || null;
+}
+
+async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = false, materiaId = null, topicoEditalId = null, propagarErro = false } = {}) {
     if (operacaoCardEmAndamento) return false;
     const materiaIdOperacao = materiaId || materiaAbertaId;
     const sessao = capturarSessaoHubAtual();
-    const card = { id: novoId(), frente: frente.trim(), verso: verso.trim(), caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0 };
+    const card = { id: novoId(), frente: frente.trim(), verso: verso.trim(), caixa: 1, proxima: hojeISO(), acertos: 0, erros: 0, topicoEditalId: topicoEditalId || null };
     if (!materiaIdOperacao || !card.frente || !card.verso) return false;
     operacaoCardEmAndamento = true;
     try {
@@ -6967,6 +6999,7 @@ async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = fal
 }
 
 function renderizarCards(m) {
+    popularTopicosEditalFlashcards(m.id);
     const hoje = hojeISO();
     const venc = cardsVencidos(m).length;
     const emAprendizado = m.cards.filter(card => Number(card.caixa || 1) < 5).length;
@@ -7001,12 +7034,17 @@ function renderizarCards(m) {
         return;
     }
     const termo = textoBuscaFlashcard(buscaCardsTexto);
+    const topicosValidos = new Set(obterTopicosEditalDaMateria(m.id).map(topico => String(topico.id)));
     const posicoes = new Map(m.cards.map((card, indice) => [String(card.id), indice]));
     const filtrados = m.cards.filter(card => {
         if (filtroCardsAtual === "hoje" && String(card.proxima || hoje) > hoje) return false;
         if (filtroCardsAtual === "aprendizado" && Number(card.caixa || 1) >= 5) return false;
         if (filtroCardsAtual === "dominados" && Number(card.caixa || 1) < 5) return false;
-        return !termo || textoBuscaFlashcard(`${card.frente} ${card.verso}`).includes(termo);
+        const topicoId = topicosValidos.has(String(card.topicoEditalId)) ? String(card.topicoEditalId) : "";
+        if (filtroTopicoCardsAtual === "sem-topico" && topicoId) return false;
+        if (!["todos", "sem-topico"].includes(filtroTopicoCardsAtual) && topicoId !== String(filtroTopicoCardsAtual)) return false;
+        const tituloTopico = topicoEditalDoFlashcard(m.id, card.topicoEditalId)?.titulo || "";
+        return !termo || textoBuscaFlashcard(`${card.frente} ${card.verso} ${tituloTopico}`).includes(termo);
     });
     filtrados.sort((a, b) => {
         if (ordemCardsAtual === "recentes") return (posicoes.get(String(b.id)) || 0) - (posicoes.get(String(a.id)) || 0);
@@ -7021,13 +7059,14 @@ function renderizarCards(m) {
     container.innerHTML = filtrados.map(c => {
         const respostaAberta = respostasCardsAbertas.has(String(c.id));
         const vencido = String(c.proxima || hoje) <= hoje;
+        const topicoEdital = topicoEditalDoFlashcard(m.id, c.topicoEditalId);
         return `<article class="flashcard-item">
             <div class="flashcard-item-main">
                 <span class="flashcard-box">Caixa ${Number(c.caixa || 1)}</span>
                 <div class="flex-grow-1 min-w-0">
                     <div class="flashcard-question">${esc(c.frente)}</div>
                     <div class="flashcard-answer${respostaAberta ? "" : " d-none"}" id="resposta-card-${c.id}">${esc(c.verso)}</div>
-                    <div class="flashcard-meta"><span class="${vencido ? "text-warning-emphasis fw-semibold" : ""}"><i class="bi-calendar3 me-1"></i>${vencido ? "Revisar hoje" : `Revisão em ${dataBR(c.proxima)}`}</span><span>${Number(c.acertos || 0)} acertos · ${Number(c.erros || 0)} erros</span></div>
+                    <div class="flashcard-meta">${topicoEdital ? `<span title="Tópico pessoal do Edital"><i class="bi-bookmark me-1"></i>${esc(topicoEdital.titulo)}</span>` : '<span><i class="bi-bookmark me-1"></i>Sem tópico</span>'}<span class="${vencido ? "text-warning-emphasis fw-semibold" : ""}"><i class="bi-calendar3 me-1"></i>${vencido ? "Revisar hoje" : `Revisão em ${dataBR(c.proxima)}`}</span><span>${Number(c.acertos || 0)} acertos · ${Number(c.erros || 0)} erros</span></div>
                 </div>
                 <div class="flashcard-item-actions">
                     <button class="btn btn-sm btn-outline-secondary btn-editar-card" data-id="${c.id}" type="button" title="Editar flashcard" aria-label="Editar flashcard"><i class="bi-pencil"></i></button>
@@ -7050,6 +7089,7 @@ function renderizarCards(m) {
         cardEmEdicaoId = card.id;
         document.getElementById("cardFrente").value = card.frente;
         document.getElementById("cardVerso").value = card.verso;
+        document.getElementById("cardTopicoEdital").value = topicoEditalDoFlashcard(materiaAbertaId, card.topicoEditalId)?.id || "";
         document.getElementById("textoBtnSalvarCard").textContent = "Salvar alterações";
         document.querySelector("#btnSalvarCard i").className = "bi-check-lg me-1";
         document.getElementById("btnCancelarEdicaoCard").classList.remove("d-none");
@@ -7095,6 +7135,11 @@ document.getElementById("ordemCards").addEventListener("change", evento => {
     const materia = materiaPorId(materiaAbertaId);
     if (materia) renderizarCards(materia);
 });
+document.getElementById("filtroTopicoCards").addEventListener("change", evento => {
+    filtroTopicoCardsAtual = evento.target.value;
+    const materia = materiaPorId(materiaAbertaId);
+    if (materia) renderizarCards(materia);
+});
 document.querySelectorAll("[data-card-filter]").forEach(botao => botao.addEventListener("click", () => {
     filtroCardsAtual = botao.dataset.cardFilter;
     const materia = materiaPorId(materiaAbertaId);
@@ -7106,25 +7151,35 @@ document.getElementById("formCard").addEventListener("submit", async e => {
     if (operacaoCardEmAndamento) return;
     const frente = document.getElementById("cardFrente").value.trim();
     const verso = document.getElementById("cardVerso").value.trim();
+    const topicoEditalId = document.getElementById("cardTopicoEdital").value || null;
     if (!frente || !verso) return;
     if (!cardEmEdicaoId) {
-        if (await criarFlashcardSincronizado(frente, verso)) limparEdicaoCard();
+        if (await criarFlashcardSincronizado(frente, verso, { topicoEditalId })) limparEdicaoCard();
         return;
     }
     const materia = materiaPorId(materiaAbertaId);
     const card = materia?.cards.find(item => String(item.id) === String(cardEmEdicaoId));
     if (!card) { limparEdicaoCard(); return; }
-    const anterior = { frente: card.frente, verso: card.verso };
+    const anterior = { frente: card.frente, verso: card.verso, topicoEditalId: card.topicoEditalId || null };
     operacaoCardEmAndamento = true;
     try {
         await exigirNuvemFlashcards().atualizar(card.id, { frente, verso });
         try {
+            await exigirNuvemFlashcards().atualizarTopico(card.id, topicoEditalId);
+        } catch (erroTopico) {
+            await exigirNuvemFlashcards().atualizar(card.id, { frente: anterior.frente, verso: anterior.verso });
+            throw erroTopico;
+        }
+        try {
             atualizarMateria(materiaAbertaId, m => {
                 const atual = m.cards.find(item => String(item.id) === String(card.id));
-                if (atual) Object.assign(atual, { frente, verso });
+                if (atual) Object.assign(atual, { frente, verso, topicoEditalId });
             });
         } catch (erroLocal) {
-            await exigirNuvemFlashcards().atualizar(card.id, anterior);
+            await Promise.allSettled([
+                exigirNuvemFlashcards().atualizar(card.id, { frente: anterior.frente, verso: anterior.verso }),
+                exigirNuvemFlashcards().atualizarTopico(card.id, anterior.topicoEditalId)
+            ]);
             throw erroLocal;
         }
         limparEdicaoCard();
@@ -9284,7 +9339,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 6;
+const VERSAO_BACKUP = 7;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -9363,7 +9418,8 @@ function validarPayloadBackup(payload) {
             return {
                 id: idBackup(c.id, "ID do flashcard"), frente: textoBackup(c.frente, "Frente do flashcard", 5000), verso: textoBackup(c.verso, "Verso do flashcard", 10000),
                 caixa: numeroBackup(c.caixa, "Caixa", 1, 5, 1), proxima: dataBackup(c.proxima, "Próxima revisão"),
-                acertos: numeroBackup(c.acertos, "Acertos", 0, 1000000), erros: numeroBackup(c.erros, "Erros", 0, 1000000)
+                acertos: numeroBackup(c.acertos, "Acertos", 0, 1000000), erros: numeroBackup(c.erros, "Erros", 0, 1000000),
+                topicoEditalId: versao >= 7 && c.topicoEditalId ? idBackup(c.topicoEditalId, "Tópico do Edital do flashcard") : null
             };
         });
         const links = listaBackup(m.links || [], "Links", 5000).map((l, j) => {
@@ -9471,6 +9527,12 @@ function validarPayloadBackup(payload) {
     };
     garantirIdsUnicos(edital.materias, "Matérias do edital");
     const idsTopicosEdital = new Set(edital.materias.flatMap(materia => materia.topicos.map(topico => String(topico.id))));
+    const idsTopicosPorMateria = new Map(edital.materias.map(materia => [String(materia.materiaId), new Set(materia.topicos.map(topico => String(topico.id))) ]));
+    materias.forEach((materia, indiceMateria) => materia.cards.forEach((card, indiceCard) => {
+        if (card.topicoEditalId != null && !idsTopicosPorMateria.get(String(materia.id))?.has(String(card.topicoEditalId))) {
+            throw new Error(`Flashcard ${indiceCard + 1} da matéria ${indiceMateria + 1} referencia um tópico inexistente no Edital.`);
+        }
+    }));
     tarefas.forEach((tarefa, indice) => {
         if (tarefa.topicoEditalId != null && !idsTopicosEdital.has(String(tarefa.topicoEditalId))) throw new Error(`Tarefa ${indice + 1} referencia um tópico inexistente no Edital.`);
     });
