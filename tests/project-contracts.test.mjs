@@ -267,7 +267,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 7/);
+    assert.match(html, /VERSAO_BACKUP = 8/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -314,7 +314,7 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(html, /id="filtroTopicoCards"/);
     assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
     assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
-    assert.match(html, /VERSAO_BACKUP = 7/);
+    assert.match(html, /VERSAO_BACKUP = 8/);
     assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
     assert.match(repository, /export async function atualizarTopicoFlashcard/);
     assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
@@ -325,6 +325,30 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(migration, /exam_subject\.subject_id = card\.subject_id/i);
     assert.match(migration, /entity_type = 'exam_topic'/i);
     assert.match(migration, /update public\.flashcard_progress progress[\s\S]*?progress\.user_id = current_user_id/i);
+});
+
+test("o Caderno de Erros transforma aprendizados em flashcards do tópico correto", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const verification = readProjectFile("src/cloud-verification.js");
+    const migration = readProjectFile("supabase/migrations/202609020026_private_error_exam_topics.sql");
+
+    assert.match(html, /id="erroTopicoEdital"/);
+    assert.match(html, /id="modalCardDoErro"/);
+    assert.match(html, /class="[^"]*btn-criar-card-erro/);
+    assert.match(html, /function abrirCardDoErro\(id\)/);
+    assert.match(html, /criarFlashcardSincronizado[\s\S]*?materiaId: erro\.materiaId[\s\S]*?topicoEditalId:/);
+    assert.match(html, /class="exam-topic-learning"/);
+    assert.match(html, /btn-revisar-topico-edital/);
+    assert.match(html, /btn-ver-erros-topico/);
+    assert.match(html, /VERSAO_BACKUP = 8/);
+    assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id"\)/);
+    assert.match(repository, /exam_topic_id: erro\.topicoEditalId \? resolverId\("exam_topic", erro\.topicoEditalId\) : null/);
+    assert.match(verification, /topicoEditalId: item\.exam_topic_id \? idLegado\(mapas, "exam_topic", item\.exam_topic_id\) : null/);
+    assert.match(migration, /create trigger error_entries_validate_exam_topic/i);
+    assert.match(migration, /topic\.user_id = new\.user_id/i);
+    assert.match(migration, /exam_subject\.subject_id = new\.subject_id/i);
+    assert.match(migration, /update public\.error_entries entry[\s\S]*?entry\.user_id = current_user_id/i);
 });
 
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
@@ -542,7 +566,7 @@ test("o caderno de erros usa cadastro compacto, explicação multilinha e consul
     const html = readProjectFile("index.html");
 
     assert.match(html, /id="formErro" class="error-entry-form"/);
-    assert.match(html, /grid-template-columns: minmax\(220px, \.9fr\) minmax\(300px, 1\.5fr\)/);
+    assert.match(html, /grid-template-columns: minmax\(180px, \.75fr\) minmax\(240px, 1fr\) minmax\(240px, 1fr\)/);
     assert.match(html, /<textarea class="form-control" id="erroObs" rows="4"/);
     assert.doesNotMatch(html, /<input[^>]*id="erroObs"/);
     assert.match(html, /<button type="submit" class="btn btn-primary"><i class="bi-journal-plus me-1"><\/i>Adicionar erro<\/button>/);
