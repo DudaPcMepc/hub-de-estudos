@@ -1002,9 +1002,11 @@ test("os PDFs dos Cadernos jurídicos usam bucket privado, limite e caminho isol
     assert.match(auth, /excluirPdf: excluirPdfColecaoVade/);
 });
 
-test("cada Caderno jurídico oferece materiais privados e leitor temporário de PDF", () => {
+test("os PDFs privados permanecem preservados enquanto sua interface está pausada", () => {
     const html = readProjectFile("index.html");
 
+    assert.match(html, /const interfacePdfsPrivadosAtiva = false/);
+    assert.match(html, /if \(!interfacePdfsPrivadosAtiva && aba === "materiais"\)/);
     assert.match(html, /class="legal-notebook-tab btn-aba-materiais-caderno/);
     assert.match(html, /function htmlPainelPdfsCaderno/);
     assert.match(html, /class="legal-notebook-file-upload form-upload-pdf-caderno"/);
@@ -1024,6 +1026,7 @@ test("cada Caderno jurídico oferece materiais privados e leitor temporário de 
     assert.match(html, /class="legal-notebook-pdf-viewer"/);
     assert.match(html, /referrerpolicy="no-referrer"/);
     assert.match(html, /sandbox="allow-downloads"/);
+    assert.match(html, /PDF\(s\) privado\(s\) preservado\(s\)/);
     assert.match(html, /target="_blank" rel="noopener noreferrer"/);
     assert.match(html, /listarPdfs\(colecao\.id\)/);
     assert.match(html, /enviarPdf\(colecao\.id, arquivo/);

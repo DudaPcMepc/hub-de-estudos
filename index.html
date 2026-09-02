@@ -2978,6 +2978,9 @@ let anotacaoSelecionadaCaderno = new Map();
 let filtrosAnotacoesCadernos = new Map();
 let rascunhoAnotacaoCaderno = null;
 let operacaoAnotacaoCadernoEmAndamento = false;
+// Os PDFs privados permanecem preservados no Supabase durante a substituição
+// do leitor antigo pelo catálogo de normas oficiais estruturadas.
+const interfacePdfsPrivadosAtiva = false;
 let pdfsCadernosVade = new Map();
 let pdfsCarregadosCadernosVade = new Set();
 let pdfsCarregandoCadernosVade = new Set();
@@ -4875,24 +4878,30 @@ function conectarEventosPdfsCaderno(card, colecao) {
 }
 
 function prepararInterfaceAnotacoesCaderno(card, colecao) {
-    const aba = abasCadernosJuridicos.get(colecao.id) || "artigos";
+    let aba = abasCadernosJuridicos.get(colecao.id) || "artigos";
+    if (!interfacePdfsPrivadosAtiva && aba === "materiais") {
+        aba = "artigos";
+        abasCadernosJuridicos.set(colecao.id, aba);
+    }
     const totalAnotacoes = anotacoesCarregadasCadernosVade.has(colecao.id) ? anotacoesDoCaderno(colecao.id).length : "—";
-    const totalPdfs = pdfsCarregadosCadernosVade.has(colecao.id) ? pdfsDoCaderno(colecao.id).length : "—";
-    card.querySelector(".legal-notebook-workspace-header")?.insertAdjacentHTML("afterend", `<nav class="legal-notebook-tabs" aria-label="Conteúdo do caderno"><button type="button" class="legal-notebook-tab btn-aba-artigos-caderno ${aba === "artigos" ? "is-active" : ""}"><i class="bi-bookmark-check"></i>Artigos <span class="legal-notebook-tab-count">${(colecao.artigos || []).length}</span></button><button type="button" class="legal-notebook-tab btn-aba-anotacoes-caderno ${aba === "anotacoes" ? "is-active" : ""}"><i class="bi-journal-text"></i>Anotações <span class="legal-notebook-tab-count">${totalAnotacoes}</span></button><button type="button" class="legal-notebook-tab btn-aba-materiais-caderno ${aba === "materiais" ? "is-active" : ""}"><i class="bi-folder-lock"></i>Materiais <span class="legal-notebook-tab-count">${totalPdfs}</span></button></nav>`);
+    const abaMateriais = interfacePdfsPrivadosAtiva
+        ? `<button type="button" class="legal-notebook-tab btn-aba-materiais-caderno ${aba === "materiais" ? "is-active" : ""}"><i class="bi-folder-lock"></i>Materiais <span class="legal-notebook-tab-count">${pdfsCarregadosCadernosVade.has(colecao.id) ? pdfsDoCaderno(colecao.id).length : "—"}</span></button>`
+        : "";
+    card.querySelector(".legal-notebook-workspace-header")?.insertAdjacentHTML("afterend", `<nav class="legal-notebook-tabs" aria-label="Conteúdo do caderno"><button type="button" class="legal-notebook-tab btn-aba-artigos-caderno ${aba === "artigos" ? "is-active" : ""}"><i class="bi-bookmark-check"></i>Artigos <span class="legal-notebook-tab-count">${(colecao.artigos || []).length}</span></button><button type="button" class="legal-notebook-tab btn-aba-anotacoes-caderno ${aba === "anotacoes" ? "is-active" : ""}"><i class="bi-journal-text"></i>Anotações <span class="legal-notebook-tab-count">${totalAnotacoes}</span></button>${abaMateriais}</nav>`);
     card.querySelector(".btn-aba-artigos-caderno")?.addEventListener("click", () => {
         if (aba === "artigos" || !confirmarDescarteAnotacaoCaderno()) return;
         abasCadernosJuridicos.set(colecao.id, "artigos");
         renderizarVade();
     });
     card.querySelector(".btn-aba-anotacoes-caderno")?.addEventListener("click", () => abrirAnotacoesCaderno(colecao));
-    card.querySelector(".btn-aba-materiais-caderno")?.addEventListener("click", () => abrirMateriaisCaderno(colecao));
+    if (interfacePdfsPrivadosAtiva) card.querySelector(".btn-aba-materiais-caderno")?.addEventListener("click", () => abrirMateriaisCaderno(colecao));
     card.querySelectorAll(".personal-vade-article").forEach(item => {
         const painel = item.querySelector(".legal-notebook-article-menu-panel");
         if (!painel) return;
         painel.insertAdjacentHTML("afterbegin", `<button type="button" class="btn btn-sm btn-outline-secondary btn-anotar-artigo-vade" data-provision-id="${esc(item.dataset.provisionId)}"><i class="bi-journal-plus me-1"></i>Criar anotação deste artigo</button>`);
     });
     card.querySelectorAll(".btn-anotar-artigo-vade").forEach(botao => botao.addEventListener("click", () => abrirAnotacoesCaderno(colecao, botao.dataset.provisionId)));
-    if (!["anotacoes", "materiais"].includes(aba)) return;
+    if (aba !== "anotacoes" && !(interfacePdfsPrivadosAtiva && aba === "materiais")) return;
     card.querySelector(".legal-notebook-workspace-toolbar")?.classList.add("d-none");
     card.querySelector(".legal-notebook-workspace-body")?.classList.add("d-none");
     card.querySelector(".legal-notebook-tabs")?.insertAdjacentHTML("afterend", aba === "anotacoes" ? htmlPainelAnotacoesCaderno(colecao) : htmlPainelPdfsCaderno(colecao));
@@ -5112,10 +5121,7 @@ async function excluirVade(colecao) {
         pdfsCadernosVade.set(colecao.id, arquivos);
         pdfsCarregadosCadernosVade.add(colecao.id);
         if (arquivos.length) {
-            abasCadernosJuridicos.set(colecao.id, "materiais");
-            cadernoVadeAbertoId = colecao.id;
-            renderizarVade();
-            mostrarStatusVade("warning", `Este caderno possui ${arquivos.length} PDF(s) privado(s). Exclua os materiais nesta aba antes de remover o caderno.`);
+            mostrarStatusVade("warning", `Este caderno possui ${arquivos.length} PDF(s) privado(s) preservado(s). A exclusão ficará bloqueada até concluirmos a substituição segura do leitor antigo.`);
             return;
         }
         if (!confirm(`Excluir o caderno “${colecao.nome}”? Seus grifos e anotações nos artigos não serão apagados.`)) {
