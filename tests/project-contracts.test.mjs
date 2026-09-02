@@ -287,6 +287,23 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(migration, /import_local_hub_core_v2/i);
 });
 
+test("a biblioteca de flashcards oferece criação confortável, filtros e revisão guiada", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="cardFrente"[^>]*maxlength="5000"/);
+    assert.match(html, /id="cardVerso"[^>]*maxlength="10000"/);
+    assert.match(html, /id="painelCards"/);
+    assert.match(html, /id="buscaCards"/);
+    assert.match(html, /data-card-filter="hoje"/);
+    assert.match(html, /data-card-filter="dominados"/);
+    assert.match(html, /respostasCardsAbertas/);
+    assert.match(html, /data-revelar-card/);
+    assert.match(html, /id="revisaoProgresso"/);
+    assert.match(html, /function mostrarVersoRevisao\(\)/);
+    assert.match(html, /nivelPorTecla = \{ "1": "errei", "2": "dificil", "3": "acertei" \}/);
+    assert.match(html, /renderizarHoje\(\);[\s\S]*?renderizarCards\(mm\)/);
+});
+
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
