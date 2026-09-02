@@ -3068,11 +3068,15 @@ function documentosJuridicosDaMateria(materia) {
     if (chave.includes("guarda") || chave.includes("gcm")) {
         return documentosJuridicos.filter(documento => [
             "estatuto-geral-guardas-municipais-lei-13022-2014",
-            "estatuto-desarmamento-lei-10826-2003"
+            "estatuto-desarmamento-lei-10826-2003",
+            "lei-maria-penha-11340-2006"
         ].includes(documento.slug));
     }
     if (chave.includes("desarmamento") || chave.includes("armas") || chave.includes("armamento")) {
         return documentosJuridicos.filter(documento => documento.slug === "estatuto-desarmamento-lei-10826-2003");
+    }
+    if (chave.includes("maria-penha") || chave.includes("maria da penha") || chave.includes("violencia-domestica") || chave.includes("violencia domestica")) {
+        return documentosJuridicos.filter(documento => documento.slug === "lei-maria-penha-11340-2006");
     }
     return [];
 }
