@@ -1432,6 +1432,38 @@ export async function carregarTarefasRemotas() {
     }));
 }
 
+function mapearRegistroEstudo(registro) {
+    const materiasLegadas = idsLocaisPorRemotos.get("subject");
+    const tarefasLegadas = idsLocaisPorRemotos.get("study_task");
+    const topicosEditalLegados = idsLocaisPorRemotos.get("exam_topic");
+    return {
+        id: registro.id,
+        tarefaId: registro.task_id ? (tarefasLegadas?.get(registro.task_id) || registro.task_id) : null,
+        materiaId: registro.subject_id ? (materiasLegadas?.get(registro.subject_id) || registro.subject_id) : null,
+        topicoEditalId: registro.exam_topic_id ? (topicosEditalLegados?.get(registro.exam_topic_id) || registro.exam_topic_id) : null,
+        materiaNome: registro.subject_name,
+        conteudo: registro.studied_content,
+        anotacoes: registro.private_notes || "",
+        dataEstudo: registro.studied_on,
+        minutos: registro.duration_minutes,
+        retencao: NIVEIS_RETENCAO.has(registro.retention_level) ? registro.retention_level : "good",
+        tipo: registro.event_kind === "review" ? "review" : "study",
+        criadoEm: registro.created_at,
+        atualizadoEm: registro.updated_at
+    };
+}
+
+export async function carregarRegistrosEstudo() {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("study_session_logs")
+        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, duration_minutes, retention_level, event_kind, created_at, updated_at")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("studied_on", { ascending: false })
+        .order("created_at", { ascending: false });
+    return (verificarResposta(resposta, "Não foi possível carregar o Diário de Estudos.") || []).map(mapearRegistroEstudo);
+}
+
 export async function carregarErrosRemotos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("error_entries")
@@ -1915,14 +1947,17 @@ export async function atualizarTarefa(idLocal, alteracoes) {
         .maybeSingle(), "Não foi possível atualizar a sessão no Supabase.");
 }
 
-export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, marcarTopicoEdital) {
+export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, marcarTopicoEdital, detalhes = {}) {
     exigirContexto();
     if (!NIVEIS_RETENCAO.has(retencao)) throw erroRepositorio("Nível de retenção inválido.");
     const resposta = await supabase.rpc("record_study_review", {
         target_task_id: resolverId("study_task", idLocal),
         duration_minutes: numeroLimitado(duracaoMinutos, "Tempo estudado", 1, 1440, true),
         retention: retencao,
-        mark_exam_topic_complete: marcarTopicoEdital === true
+        mark_exam_topic_complete: marcarTopicoEdital === true,
+        studied_content: texto(detalhes.conteudo, 5000, "Conteúdo estudado", true),
+        private_notes: texto(detalhes.anotacoes || "", 20000, "Anotações da sessão"),
+        studied_on: dataIso(detalhes.dataEstudo, "Data do estudo", true)
     }).maybeSingle();
     const registro = verificarRegistro(resposta, "Não foi possível registrar esta revisão no Supabase.");
     if (registro.linked_exam_topic_id && registro.exam_topic_updated_at) versoesTopicosEdital.set(registro.linked_exam_topic_id, registro.exam_topic_updated_at);
@@ -1933,8 +1968,50 @@ export async function registrarRevisaoTarefa(idLocal, duracaoMinutos, retencao, 
         ultimoEstudoEm: registro.last_studied_at || null,
         historicoRevisoes: Array.isArray(registro.review_history) ? registro.review_history : [],
         topicoEditalId: registro.linked_exam_topic_id || null,
-        topicoEditalConcluido: registro.exam_topic_checked === true
+        topicoEditalConcluido: registro.exam_topic_checked === true,
+        registroEstudo: mapearRegistroEstudo({
+            id: registro.study_log_id,
+            task_id: resolverId("study_task", idLocal),
+            subject_id: resolverId("subject", detalhes.materiaId),
+            exam_topic_id: registro.linked_exam_topic_id,
+            subject_name: detalhes.materiaNome,
+            studied_content: registro.logged_content,
+            private_notes: registro.logged_notes,
+            studied_on: registro.logged_studied_on,
+            duration_minutes: duracaoMinutos,
+            retention_level: retencao,
+            event_kind: registro.logged_event_kind,
+            created_at: registro.last_studied_at,
+            updated_at: registro.last_studied_at
+        })
     };
+}
+
+export async function atualizarRegistroEstudo(id, alteracoes) {
+    const contexto = exigirContexto();
+    const valores = {};
+    if (Object.hasOwn(alteracoes, "conteudo")) valores.studied_content = texto(alteracoes.conteudo, 5000, "Conteúdo estudado", true);
+    if (Object.hasOwn(alteracoes, "anotacoes")) valores.private_notes = texto(alteracoes.anotacoes || "", 20000, "Anotações da sessão");
+    if (Object.hasOwn(alteracoes, "dataEstudo")) valores.studied_on = dataIso(alteracoes.dataEstudo, "Data do estudo", true);
+    if (Object.hasOwn(alteracoes, "minutos")) valores.duration_minutes = numeroLimitado(alteracoes.minutos, "Tempo estudado", 1, 1440, true);
+    if (!Object.keys(valores).length) throw erroRepositorio("Nenhuma alteração válida foi informada.");
+    const resposta = await supabase.from("study_session_logs").update(valores)
+        .eq("id", exigirUuidNovo(id, "Registro do Diário"))
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id, task_id, subject_id, exam_topic_id, subject_name, studied_content, private_notes, studied_on, duration_minutes, retention_level, event_kind, created_at, updated_at")
+        .maybeSingle();
+    return mapearRegistroEstudo(verificarRegistro(resposta, "Não foi possível atualizar o registro do Diário."));
+}
+
+export async function excluirRegistroEstudo(id) {
+    const contexto = exigirContexto();
+    verificarRegistro(await supabase.from("study_session_logs").delete()
+        .eq("id", exigirUuidNovo(id, "Registro do Diário"))
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível excluir o registro do Diário.");
 }
 
 export async function excluirTarefa(idLocal) {

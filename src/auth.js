@@ -10,6 +10,7 @@ import {
     atualizarProgressoFlashcard,
     atualizarLink,
     atualizarTarefa,
+    atualizarRegistroEstudo,
     atualizarMateriaEdital,
     atualizarTopicoEdital,
     atualizarPosicoesMaterias,
@@ -29,6 +30,7 @@ import {
     carregarFlashcardsRemotos,
     carregarLinksRemotos,
     carregarTarefasRemotas,
+    carregarRegistrosEstudo,
     carregarEditalRemoto,
     carregarErrosRemotos,
     carregarDesempenhoRemoto,
@@ -61,6 +63,7 @@ import {
     excluirFlashcard,
     excluirLink,
     excluirTarefa,
+    excluirRegistroEstudo,
     excluirMateriaEdital,
     excluirConfiguracaoEdital,
     excluirErro,
@@ -203,6 +206,12 @@ window.HUB_CLOUD_TASKS = Object.freeze({
     excluir: excluirTarefa,
     registrarRevisao: registrarRevisaoTarefa,
     listar: carregarTarefasRemotas
+});
+
+window.HUB_CLOUD_STUDY_DIARY = Object.freeze({
+    atualizar: atualizarRegistroEstudo,
+    excluir: excluirRegistroEstudo,
+    listar: carregarRegistrosEstudo
 });
 
 window.HUB_CLOUD_EXAM = Object.freeze({
@@ -479,6 +488,7 @@ async function ativarSessao(session) {
             const flashcardsRemotos = await carregarFlashcardsRemotos();
             const linksRemotos = await carregarLinksRemotos();
             const tarefasRemotas = await carregarTarefasRemotas();
+            const registrosEstudoRemotos = await carregarRegistrosEstudo();
             const editalRemoto = await carregarEditalRemoto();
             const errosRemotos = await carregarErrosRemotos();
             const desempenhoRemoto = await carregarDesempenhoRemoto();
@@ -490,7 +500,7 @@ async function ativarSessao(session) {
                 carregarGrifosJuridicos(),
                 carregarEstadoLeituraJuridica()
             ]);
-            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto);
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto, registrosEstudoRemotos);
             iniciarPreviaMigracao(contexto);
             await iniciarAdministracao();
             usuarioAtivoId = session.user.id;
