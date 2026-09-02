@@ -889,7 +889,54 @@
     .topico-item.st-estudando { border-left-color: var(--bs-primary); }
     .topico-item.st-revisar { border-left-color: var(--bs-warning); }
     .topico-item.st-dominado { border-left-color: var(--bs-success); background-color: #f6fff9; }
-    .flashcard-face { min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.25rem; font-size: 1.05rem; }
+    .flashcard-workbench { padding: 1rem; background: linear-gradient(145deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .78)); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; }
+    .flashcard-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+    .flashcard-editor-field { min-width: 0; }
+    .flashcard-editor .form-label { color: var(--pimentel-cafe); font-size: .72rem; font-weight: 700; }
+    .flashcard-editor textarea { min-height: 128px; resize: vertical; background: #fffdf9; border-color: rgba(59, 41, 35, .18); line-height: 1.5; }
+    .flashcard-editor-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: .5rem; }
+    .flashcard-editor-actions .btn-primary { min-width: 150px; }
+    .flashcard-dashboard { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin: 1rem 0; }
+    .flashcard-stat { padding: .7rem .8rem; background: rgba(255, 253, 249, .9); border: 1px solid rgba(59, 41, 35, .085); border-radius: .8rem; }
+    .flashcard-stat span, .flashcard-stat small { display: block; }
+    .flashcard-stat span { color: #77645c; font-size: .65rem; font-weight: 700; }
+    .flashcard-stat strong { display: block; margin-top: .2rem; color: var(--pimentel-cafe); font-size: 1.05rem; }
+    .flashcard-stat small { margin-top: .12rem; color: #806f67; font-size: .62rem; }
+    .flashcard-library-toolbar { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(145px, .46fr); gap: .65rem; align-items: center; margin-bottom: .75rem; }
+    .flashcard-search { position: relative; }
+    .flashcard-search i { position: absolute; top: 50%; left: .75rem; color: #88766d; transform: translateY(-50%); pointer-events: none; }
+    .flashcard-search input { padding-left: 2.25rem; }
+    .flashcard-filter-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+    .flashcard-filter { padding: .35rem .65rem; color: #6c5850; background: rgba(91, 67, 58, .06); border: 1px solid transparent; border-radius: 999px; font-size: .68rem; font-weight: 650; }
+    .flashcard-filter.is-active { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-color: rgba(184, 50, 42, .16); }
+    .flashcard-filter-count { margin-left: .2rem; opacity: .72; }
+    .flashcard-list { display: grid; gap: .65rem; }
+    .flashcard-item { overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .85rem; box-shadow: 0 .2rem .65rem rgba(59, 41, 35, .045); }
+    .flashcard-item-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; align-items: start; padding: .8rem; }
+    .flashcard-box { min-width: 3.2rem; padding: .28rem .45rem; color: #66544b; background: rgba(91, 67, 58, .08); border-radius: .55rem; font-size: .62rem; font-weight: 750; text-align: center; }
+    .flashcard-box.is-mastered { color: #356048; background: rgba(79, 138, 103, .12); }
+    .flashcard-item-copy { min-width: 0; }
+    .flashcard-question { color: var(--pimentel-cafe); font-size: .8rem; font-weight: 700; line-height: 1.45; white-space: pre-wrap; }
+    .flashcard-answer { margin-top: .55rem; padding: .65rem .75rem; color: #53423a; background: rgba(100, 116, 90, .075); border-left: 3px solid var(--pimentel-verde); border-radius: .45rem; font-size: .74rem; line-height: 1.5; white-space: pre-wrap; }
+    .flashcard-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .5rem; }
+    .flashcard-meta span { padding: .16rem .4rem; color: #716057; background: rgba(91, 67, 58, .065); border-radius: 999px; font-size: .61rem; font-weight: 600; }
+    .flashcard-meta .is-due { color: #7b4d10; background: rgba(190, 119, 23, .12); }
+    .flashcard-item-actions { display: flex; gap: .2rem; }
+    .flashcard-item-footer { display: flex; align-items: center; justify-content: space-between; gap: .7rem; padding: .5rem .8rem; background: rgba(91, 67, 58, .035); border-top: 1px solid rgba(59, 41, 35, .065); }
+    .flashcard-reveal { color: var(--pimentel-vermelho-escuro); font-size: .68rem; font-weight: 700; text-decoration: none; }
+    .flashcard-empty { min-height: 170px; display: grid; place-items: center; align-content: center; gap: .35rem; padding: 1.25rem; color: #78665e; background: rgba(255, 253, 249, .72); border: 1px dashed rgba(59, 41, 35, .15); border-radius: .85rem; text-align: center; }
+    .flashcard-empty i { color: var(--pimentel-vermelho); font-size: 1.7rem; }
+    .flashcard-empty strong { color: var(--pimentel-cafe); }
+    .flashcard-review-progress { height: .38rem; overflow: hidden; background: rgba(91, 67, 58, .1); border-radius: 999px; }
+    .flashcard-review-progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--pimentel-vermelho), var(--pimentel-terracota)); border-radius: inherit; transition: width .2s ease; }
+    .flashcard-review-stage { padding: 1rem; background: linear-gradient(145deg, #fffdf9, #f7efe8); border: 1px solid rgba(59, 41, 35, .09); border-radius: 1rem; }
+    .flashcard-review-label { display: block; margin-bottom: .45rem; color: #826e65; font-size: .65rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
+    .flashcard-face { min-height: 170px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.25rem; color: var(--pimentel-cafe); font-size: 1.05rem; line-height: 1.65; white-space: pre-wrap; }
+    .flashcard-review-answer { margin-top: .75rem; background: rgba(100, 116, 90, .09); border: 1px solid rgba(100, 116, 90, .18); border-radius: .8rem; }
+    .flashcard-rating-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+    .flashcard-rating-grid .btn { min-height: 58px; display: grid; place-items: center; align-content: center; gap: .1rem; }
+    .flashcard-rating-grid small { display: block; font-size: .62rem; opacity: .76; }
+    .flashcard-shortcuts { margin-top: .65rem; color: #806f67; font-size: .63rem; text-align: center; }
     .ws-nav .nav-link { border-radius: 2rem; font-size: .9rem; }
     @media (max-width: 767.98px) {
         .subject-workspace-header { min-height: 68px; padding: .65rem .8rem; }
@@ -1476,6 +1523,20 @@
         .calendar-task-meta, .calendar-task-note { font-size: .68rem; }
     }
     @media (max-width: 575.98px) {
+        .flashcard-workbench { padding: .8rem; }
+        .flashcard-editor { grid-template-columns: 1fr; }
+        .flashcard-editor-actions { grid-column: auto; display: grid; grid-template-columns: 1fr; }
+        .flashcard-editor-actions .btn-primary { min-width: 0; }
+        .flashcard-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
+        .flashcard-stat:last-child { grid-column: 1 / -1; }
+        .flashcard-library-toolbar { grid-template-columns: 1fr; }
+        .flashcard-filter-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: .2rem; }
+        .flashcard-filter { flex: 0 0 auto; min-height: 42px; }
+        .flashcard-item-main { grid-template-columns: auto minmax(0, 1fr); }
+        .flashcard-item-actions { grid-column: 2; justify-self: end; }
+        .flashcard-item-footer { align-items: flex-start; flex-direction: column; }
+        .flashcard-rating-grid { grid-template-columns: 1fr; }
+        .flashcard-rating-grid .btn { min-height: 48px; }
         .today-heading { align-items: flex-start; flex-direction: column; gap: .45rem; }
         .today-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
         .today-metric { padding: .7rem; }
@@ -2325,19 +2386,35 @@
                 </div>
 
                 <div class="tab-pane fade" id="ws-cards">
-                    <form id="formCard" class="row g-2 mb-3">
-                        <div class="col-md-5"><input type="text" class="form-control" id="cardFrente" placeholder="Pergunta / frente" required></div>
-                        <div class="col-md-5"><input type="text" class="form-control" id="cardVerso" placeholder="Resposta / verso" required></div>
-                        <div class="col-md-2 d-grid gap-1">
-                            <button type="submit" class="btn btn-primary w-100" id="btnSalvarCard"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarCard">Criar</span></button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicaoCard">Cancelar edição</button>
+                    <section class="flashcard-workbench" aria-labelledby="tituloEditorFlashcard">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div><h6 class="fw-bold mb-1" id="tituloEditorFlashcard"><i class="bi-plus-square me-1"></i>Novo flashcard</h6><p class="small text-muted mb-0">Crie uma pergunta objetiva e uma resposta clara para revisar depois.</p></div>
                         </div>
-                    </form>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small" id="resumoCards"></span>
+                        <form id="formCard" class="flashcard-editor">
+                            <div class="flashcard-editor-field"><label class="form-label" for="cardFrente">Pergunta / frente</label><textarea class="form-control" id="cardFrente" maxlength="5000" placeholder="Ex.: Quais são os fundamentos da República Federativa do Brasil?" required></textarea></div>
+                            <div class="flashcard-editor-field"><label class="form-label" for="cardVerso">Resposta / verso</label><textarea class="form-control" id="cardVerso" maxlength="10000" placeholder="Escreva a resposta que deverá ser lembrada." required></textarea></div>
+                            <div class="flashcard-editor-actions">
+                                <button type="button" class="btn btn-outline-secondary d-none" id="btnCancelarEdicaoCard">Cancelar edição</button>
+                                <button type="submit" class="btn btn-primary" id="btnSalvarCard"><i class="bi-plus-lg me-1"></i><span id="textoBtnSalvarCard">Criar flashcard</span></button>
+                            </div>
+                        </form>
+                    </section>
+                    <section class="flashcard-dashboard" id="painelCards" aria-label="Resumo dos flashcards"></section>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div><h6 class="fw-bold mb-0"><i class="bi-collection me-1"></i>Biblioteca de flashcards</h6><span class="text-muted small" id="resumoCards"></span></div>
                         <button class="btn btn-sm btn-warning rounded-pill" id="btnRevisarMateria"><i class="bi-lightning-charge me-1"></i>Revisar esta matéria</button>
                     </div>
-                    <div id="listaCards" class="d-flex flex-column gap-2"></div>
+                    <div class="flashcard-library-toolbar">
+                        <label class="flashcard-search"><span class="visually-hidden">Buscar flashcards</span><i class="bi-search" aria-hidden="true"></i><input type="search" class="form-control" id="buscaCards" placeholder="Buscar na pergunta ou resposta..."></label>
+                        <label><span class="visually-hidden">Ordenar flashcards</span><select class="form-select" id="ordemCards"><option value="revisao">Próxima revisão</option><option value="recentes">Mais recentes</option><option value="caixa">Caixa de aprendizado</option></select></label>
+                    </div>
+                    <div class="flashcard-filter-row" id="filtrosCards" aria-label="Filtrar flashcards">
+                        <button type="button" class="flashcard-filter is-active" data-card-filter="todos">Todos <span class="flashcard-filter-count" data-card-count="todos">0</span></button>
+                        <button type="button" class="flashcard-filter" data-card-filter="hoje">Revisar hoje <span class="flashcard-filter-count" data-card-count="hoje">0</span></button>
+                        <button type="button" class="flashcard-filter" data-card-filter="aprendizado">Em aprendizado <span class="flashcard-filter-count" data-card-count="aprendizado">0</span></button>
+                        <button type="button" class="flashcard-filter" data-card-filter="dominados">Dominados <span class="flashcard-filter-count" data-card-count="dominados">0</span></button>
+                    </div>
+                    <div id="listaCards" class="flashcard-list"></div>
                 </div>
 
                 <div class="tab-pane fade" id="ws-links">
@@ -2547,24 +2624,29 @@
 <div class="modal fade" id="modalRevisao" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title fw-bold"><i class="bi-lightning-charge-fill text-warning me-2"></i>Revisão</h5>
+            <h5 class="modal-title fw-bold"><i class="bi-lightning-charge-fill text-warning me-2"></i>Revisão de flashcards</h5>
             <span class="ms-3 text-muted small" id="revisaoContador"></span>
             <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+            <div class="flashcard-review-progress mb-3" id="revisaoProgresso" role="progressbar" aria-label="Progresso da revisão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
             <div id="revisaoVazia" class="text-center text-muted py-5 d-none">
                 <i class="bi-emoji-sunglasses fs-1 d-block mb-2"></i>Nada para revisar agora. Volte amanhã.
             </div>
             <div id="revisaoConteudo">
-                <div class="small text-muted mb-1" id="revisaoMateria"></div>
-                <div class="card border-0 shadow-sm mb-2"><div class="card-body flashcard-face fw-semibold" id="revisaoFrente"></div></div>
-                <div class="card border-success border-2 mb-3 d-none" id="revisaoVersoBox"><div class="card-body flashcard-face" id="revisaoVerso"></div></div>
-                <button class="btn btn-outline-primary w-100 mb-3" id="btnMostrarVerso"><i class="bi-eye me-1"></i>Mostrar resposta</button>
-                <div class="row g-2 d-none" id="revisaoBotoes">
-                    <div class="col-4"><button class="btn btn-danger w-100" data-nivel="errei"><i class="bi-x-lg me-1"></i>Errei</button></div>
-                    <div class="col-4"><button class="btn btn-warning w-100" data-nivel="dificil"><i class="bi-hourglass-split me-1"></i>Difícil</button></div>
-                    <div class="col-4"><button class="btn btn-success w-100" data-nivel="acertei"><i class="bi-check-lg me-1"></i>Acertei</button></div>
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2"><div class="small text-muted" id="revisaoMateria"></div><span class="badge rounded-pill text-bg-light" id="revisaoCaixa"></span></div>
+                <section class="flashcard-review-stage">
+                    <span class="flashcard-review-label">Pergunta</span>
+                    <div class="flashcard-face fw-semibold" id="revisaoFrente"></div>
+                    <div class="flashcard-review-answer d-none" id="revisaoVersoBox"><span class="flashcard-review-label px-3 pt-3 mb-0">Resposta</span><div class="flashcard-face" id="revisaoVerso"></div></div>
+                </section>
+                <button class="btn btn-outline-primary w-100 my-3" id="btnMostrarVerso"><i class="bi-eye me-1"></i>Mostrar resposta <span class="opacity-75">(espaço)</span></button>
+                <div class="flashcard-rating-grid d-none" id="revisaoBotoes">
+                    <button class="btn btn-danger" data-nivel="errei"><span><i class="bi-x-lg me-1"></i>Errei</span><small id="intervaloErrei">Revisar amanhã · tecla 1</small></button>
+                    <button class="btn btn-warning" data-nivel="dificil"><span><i class="bi-hourglass-split me-1"></i>Difícil</span><small id="intervaloDificil">Manter a caixa · tecla 2</small></button>
+                    <button class="btn btn-success" data-nivel="acertei"><span><i class="bi-check-lg me-1"></i>Acertei</span><small id="intervaloAcertei">Avançar uma caixa · tecla 3</small></button>
                 </div>
+                <div class="flashcard-shortcuts"><i class="bi-keyboard me-1"></i>Use espaço para revelar e 1, 2 ou 3 para responder.</div>
                 <div class="form-check mt-3">
                     <input class="form-check-input" type="checkbox" id="chkRegistrarErro" checked>
                     <label class="form-check-label small text-muted" for="chkRegistrarErro">Registrar no Caderno de Erros quando eu errar</label>
@@ -3571,6 +3653,10 @@ let operacaoNotaEmAndamento = false;
 let operacaoTopicoEmAndamento = false;
 let operacaoCardEmAndamento = false;
 let cardEmEdicaoId = null;
+let filtroCardsAtual = "todos";
+let buscaCardsTexto = "";
+let ordemCardsAtual = "revisao";
+const respostasCardsAbertas = new Set();
 let operacaoLinkEmAndamento = false;
 let linkEmEdicaoId = null;
 let documentosJuridicos = [];
@@ -6056,6 +6142,7 @@ async function abrirMateria(id) {
     const m = materiaPorId(id);
     if (!m) return;
     limparEdicaoCard();
+    limparFiltrosCards();
     limparEdicaoLink();
     materiaAbertaId = m.id;
     notaSelecionadaId = m.notas.length ? (m.notas.find(n => n.fixada) || m.notas[0]).id : null;
@@ -6822,9 +6909,24 @@ document.getElementById("btnNotaViraCard").addEventListener("click", async () =>
 function limparEdicaoCard() {
     cardEmEdicaoId = null;
     document.getElementById("formCard").reset();
-    document.getElementById("textoBtnSalvarCard").textContent = "Criar";
+    document.getElementById("textoBtnSalvarCard").textContent = "Criar flashcard";
     document.querySelector("#btnSalvarCard i").className = "bi-plus-lg me-1";
     document.getElementById("btnCancelarEdicaoCard").classList.add("d-none");
+}
+
+function limparFiltrosCards() {
+    filtroCardsAtual = "todos";
+    buscaCardsTexto = "";
+    ordemCardsAtual = "revisao";
+    respostasCardsAbertas.clear();
+    const busca = document.getElementById("buscaCards");
+    const ordem = document.getElementById("ordemCards");
+    if (busca) busca.value = "";
+    if (ordem) ordem.value = ordemCardsAtual;
+}
+
+function textoBuscaFlashcard(valor) {
+    return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 }
 
 async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = false, materiaId = null, propagarErro = false } = {}) {
@@ -6865,28 +6967,82 @@ async function criarFlashcardSincronizado(frente, verso, { preservarLeitor = fal
 }
 
 function renderizarCards(m) {
+    const hoje = hojeISO();
     const venc = cardsVencidos(m).length;
-    document.getElementById("resumoCards").innerHTML =
-        `${m.cards.length} flashcards · <strong class="text-warning-emphasis">${venc}</strong> para revisar hoje`;
+    const emAprendizado = m.cards.filter(card => Number(card.caixa || 1) < 5).length;
+    const dominados = m.cards.filter(card => Number(card.caixa || 1) >= 5).length;
+    const acertos = m.cards.reduce((total, card) => total + Number(card.acertos || 0), 0);
+    const erros = m.cards.reduce((total, card) => total + Number(card.erros || 0), 0);
+    const tentativas = acertos + erros;
+    const precisao = tentativas ? Math.round((acertos / tentativas) * 100) : 0;
+    document.getElementById("painelCards").innerHTML = `
+        <article class="flashcard-stat"><i class="bi-collection" aria-hidden="true"></i><div><strong>${m.cards.length}</strong><span>Total de cards</span></div></article>
+        <article class="flashcard-stat"><i class="bi-lightning-charge" aria-hidden="true"></i><div><strong>${venc}</strong><span>Para revisar hoje</span></div></article>
+        <article class="flashcard-stat"><i class="bi-bullseye" aria-hidden="true"></i><div><strong>${precisao}%</strong><span>Taxa de acerto</span></div></article>`;
+    const contagens = { todos: m.cards.length, hoje: venc, aprendizado: emAprendizado, dominados };
+    document.querySelectorAll("[data-card-count]").forEach(elemento => {
+        elemento.textContent = contagens[elemento.dataset.cardCount] ?? 0;
+    });
+    document.querySelectorAll("[data-card-filter]").forEach(botao => {
+        const ativo = botao.dataset.cardFilter === filtroCardsAtual;
+        botao.classList.toggle("is-active", ativo);
+        botao.setAttribute("aria-pressed", String(ativo));
+    });
+    const btnRevisar = document.getElementById("btnRevisarMateria");
+    btnRevisar.disabled = venc === 0;
+    btnRevisar.innerHTML = venc
+        ? `<i class="bi-lightning-charge me-1"></i>Revisar agora (${venc})`
+        : '<i class="bi-check2-circle me-1"></i>Revisões em dia';
+
     const container = document.getElementById("listaCards");
     if (!m.cards.length) {
-        container.innerHTML = `<p class="text-muted fst-italic small mb-0">Nenhum flashcard ainda. Crie acima ou selecione um trecho de uma nota e clique no ícone de card.</p>`;
+        document.getElementById("resumoCards").textContent = "Comece criando seu primeiro cartão de estudo.";
+        container.innerHTML = `<div class="flashcard-empty"><i class="bi-card-heading" aria-hidden="true"></i><strong>Nenhum flashcard ainda</strong><span>Crie uma pergunta acima ou transforme um trecho das suas notas em cartão.</span></div>`;
         return;
     }
-    const ordenados = m.cards.slice().sort((a, b) => String(a.proxima).localeCompare(String(b.proxima)));
-    container.innerHTML = ordenados.map(c => `
-        <div class="card border-0 shadow-sm">
-            <div class="card-body py-2 px-3 d-flex align-items-center gap-2">
-                <span class="badge bg-secondary-subtle text-secondary-emphasis border">Caixa ${c.caixa}</span>
-                <div class="flex-grow-1">
-                    <div class="fw-semibold small">${esc(c.frente)}</div>
-                    <div class="text-muted small">${esc(c.verso)}</div>
-                    <div class="text-muted" style="font-size:.7rem;">Próxima revisão: ${dataBR(c.proxima)} · ${c.acertos} acertos / ${c.erros} erros</div>
+    const termo = textoBuscaFlashcard(buscaCardsTexto);
+    const posicoes = new Map(m.cards.map((card, indice) => [String(card.id), indice]));
+    const filtrados = m.cards.filter(card => {
+        if (filtroCardsAtual === "hoje" && String(card.proxima || hoje) > hoje) return false;
+        if (filtroCardsAtual === "aprendizado" && Number(card.caixa || 1) >= 5) return false;
+        if (filtroCardsAtual === "dominados" && Number(card.caixa || 1) < 5) return false;
+        return !termo || textoBuscaFlashcard(`${card.frente} ${card.verso}`).includes(termo);
+    });
+    filtrados.sort((a, b) => {
+        if (ordemCardsAtual === "recentes") return (posicoes.get(String(b.id)) || 0) - (posicoes.get(String(a.id)) || 0);
+        if (ordemCardsAtual === "caixa") return Number(a.caixa || 1) - Number(b.caixa || 1) || String(a.proxima || hoje).localeCompare(String(b.proxima || hoje));
+        return String(a.proxima || hoje).localeCompare(String(b.proxima || hoje)) || Number(a.caixa || 1) - Number(b.caixa || 1);
+    });
+    document.getElementById("resumoCards").textContent = `${filtrados.length} de ${m.cards.length} flashcards exibidos`;
+    if (!filtrados.length) {
+        container.innerHTML = `<div class="flashcard-empty"><i class="bi-search" aria-hidden="true"></i><strong>Nenhum resultado</strong><span>Tente mudar a busca ou escolher outro filtro.</span></div>`;
+        return;
+    }
+    container.innerHTML = filtrados.map(c => {
+        const respostaAberta = respostasCardsAbertas.has(String(c.id));
+        const vencido = String(c.proxima || hoje) <= hoje;
+        return `<article class="flashcard-item">
+            <div class="flashcard-item-main">
+                <span class="flashcard-box">Caixa ${Number(c.caixa || 1)}</span>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="flashcard-question">${esc(c.frente)}</div>
+                    <div class="flashcard-answer${respostaAberta ? "" : " d-none"}" id="resposta-card-${c.id}">${esc(c.verso)}</div>
+                    <div class="flashcard-meta"><span class="${vencido ? "text-warning-emphasis fw-semibold" : ""}"><i class="bi-calendar3 me-1"></i>${vencido ? "Revisar hoje" : `Revisão em ${dataBR(c.proxima)}`}</span><span>${Number(c.acertos || 0)} acertos · ${Number(c.erros || 0)} erros</span></div>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary btn-editar-card" data-id="${c.id}" title="Editar flashcard"><i class="bi-pencil"></i></button>
-                <button class="btn btn-sm btn-outline-danger btn-excluir-card" data-id="${c.id}" title="Excluir flashcard"><i class="bi-trash"></i></button>
+                <div class="flashcard-item-actions">
+                    <button class="btn btn-sm btn-outline-secondary btn-editar-card" data-id="${c.id}" type="button" title="Editar flashcard" aria-label="Editar flashcard"><i class="bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger btn-excluir-card" data-id="${c.id}" type="button" title="Excluir flashcard" aria-label="Excluir flashcard"><i class="bi-trash"></i></button>
+                </div>
             </div>
-        </div>`).join("");
+            <div class="flashcard-item-footer"><button class="flashcard-reveal" type="button" data-revelar-card="${c.id}" aria-expanded="${respostaAberta}"><i class="bi-${respostaAberta ? "eye-slash" : "eye"} me-1"></i>${respostaAberta ? "Ocultar resposta" : "Revelar resposta"}</button></div>
+        </article>`;
+    }).join("");
+    container.querySelectorAll("[data-revelar-card]").forEach(botao => botao.addEventListener("click", () => {
+        const id = String(botao.dataset.revelarCard);
+        if (respostasCardsAbertas.has(id)) respostasCardsAbertas.delete(id);
+        else respostasCardsAbertas.add(id);
+        renderizarCards(materiaPorId(materiaAbertaId));
+    }));
     container.querySelectorAll(".btn-editar-card").forEach(b => b.addEventListener("click", () => {
         if (operacaoCardEmAndamento) return;
         const card = materiaPorId(materiaAbertaId)?.cards.find(item => String(item.id) === b.dataset.id);
@@ -6894,16 +7050,17 @@ function renderizarCards(m) {
         cardEmEdicaoId = card.id;
         document.getElementById("cardFrente").value = card.frente;
         document.getElementById("cardVerso").value = card.verso;
-        document.getElementById("textoBtnSalvarCard").textContent = "Salvar";
+        document.getElementById("textoBtnSalvarCard").textContent = "Salvar alterações";
         document.querySelector("#btnSalvarCard i").className = "bi-check-lg me-1";
         document.getElementById("btnCancelarEdicaoCard").classList.remove("d-none");
-        document.getElementById("cardFrente").focus();
+        document.querySelector(".flashcard-workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("cardFrente").focus({ preventScroll: true });
     }));
     container.querySelectorAll(".btn-excluir-card").forEach(b => b.addEventListener("click", async () => {
         if (operacaoCardEmAndamento) return;
         const materia = materiaPorId(materiaAbertaId);
         const card = materia?.cards.find(item => String(item.id) === b.dataset.id);
-        if (!card || !confirm(`Excluir o flashcard “${card.frente}” e o progresso relacionado de todos os participantes?`)) return;
+        if (!card || !confirm(`Excluir o flashcard “${card.frente}” e o progresso relacionado?`)) return;
         const cardsAnteriores = materia.cards.slice();
         operacaoCardEmAndamento = true;
         try {
@@ -6927,6 +7084,22 @@ function renderizarCards(m) {
         }
     }));
 }
+
+document.getElementById("buscaCards").addEventListener("input", evento => {
+    buscaCardsTexto = evento.target.value;
+    const materia = materiaPorId(materiaAbertaId);
+    if (materia) renderizarCards(materia);
+});
+document.getElementById("ordemCards").addEventListener("change", evento => {
+    ordemCardsAtual = evento.target.value;
+    const materia = materiaPorId(materiaAbertaId);
+    if (materia) renderizarCards(materia);
+});
+document.querySelectorAll("[data-card-filter]").forEach(botao => botao.addEventListener("click", () => {
+    filtroCardsAtual = botao.dataset.cardFilter;
+    const materia = materiaPorId(materiaAbertaId);
+    if (materia) renderizarCards(materia);
+}));
 
 document.getElementById("formCard").addEventListener("submit", async e => {
     e.preventDefault();
@@ -7170,9 +7343,14 @@ function iniciarRevisao(materiaId) {
 function mostrarCardRevisao() {
     const vazio = document.getElementById("revisaoVazia");
     const conteudo = document.getElementById("revisaoConteudo");
+    const progresso = document.getElementById("revisaoProgresso");
+    const percentual = filaRevisao.length ? Math.round((Math.min(indiceRevisao, filaRevisao.length) / filaRevisao.length) * 100) : 0;
+    progresso.setAttribute("aria-valuenow", String(percentual));
+    progresso.querySelector("span").style.width = `${percentual}%`;
     if (indiceRevisao >= filaRevisao.length) {
         vazio.classList.remove("d-none");
         conteudo.classList.add("d-none");
+        document.getElementById("revisaoContador").textContent = filaRevisao.length ? `${filaRevisao.length} de ${filaRevisao.length}` : "";
         vazio.innerHTML = filaRevisao.length
             ? '<i class="bi-trophy-fill fs-1 d-block mb-2 text-warning"></i>Revisão concluída! ' + filaRevisao.length + " cards revisados."
             : '<i class="bi-emoji-sunglasses fs-1 d-block mb-2"></i>Nada para revisar agora. Volte amanhã.';
@@ -7185,18 +7363,44 @@ function mostrarCardRevisao() {
     const card = m.cards.find(c => String(c.id) === String(item.cardId));
     if (!card) { indiceRevisao++; mostrarCardRevisao(); return; }
     document.getElementById("revisaoContador").textContent = `${indiceRevisao + 1} de ${filaRevisao.length}`;
-    document.getElementById("revisaoMateria").textContent = item.materiaNome + " · caixa " + card.caixa;
+    document.getElementById("revisaoMateria").textContent = item.materiaNome;
+    document.getElementById("revisaoCaixa").textContent = `Caixa ${card.caixa}`;
     document.getElementById("revisaoFrente").textContent = card.frente;
     document.getElementById("revisaoVerso").textContent = card.verso;
+    const caixaAtual = Math.max(1, Math.min(5, Number(card.caixa || 1)));
+    const proximaCaixa = Math.min(5, caixaAtual + 1);
+    document.getElementById("intervaloErrei").textContent = "Amanhã · tecla 1";
+    document.getElementById("intervaloDificil").textContent = `Em ${INTERVALO_CAIXA[caixaAtual]} dia${INTERVALO_CAIXA[caixaAtual] === 1 ? "" : "s"} · tecla 2`;
+    document.getElementById("intervaloAcertei").textContent = `Em ${INTERVALO_CAIXA[proximaCaixa]} dia${INTERVALO_CAIXA[proximaCaixa] === 1 ? "" : "s"} · tecla 3`;
     document.getElementById("revisaoVersoBox").classList.add("d-none");
     document.getElementById("revisaoBotoes").classList.add("d-none");
     document.getElementById("btnMostrarVerso").classList.remove("d-none");
+    requestAnimationFrame(() => document.getElementById("btnMostrarVerso").focus({ preventScroll: true }));
 }
 
-document.getElementById("btnMostrarVerso").addEventListener("click", () => {
+function mostrarVersoRevisao() {
     document.getElementById("revisaoVersoBox").classList.remove("d-none");
     document.getElementById("revisaoBotoes").classList.remove("d-none");
     document.getElementById("btnMostrarVerso").classList.add("d-none");
+    document.querySelector('#revisaoBotoes [data-nivel="dificil"]')?.focus({ preventScroll: true });
+}
+
+document.getElementById("btnMostrarVerso").addEventListener("click", mostrarVersoRevisao);
+
+document.getElementById("modalRevisao").addEventListener("keydown", evento => {
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(evento.target.tagName)) return;
+    const respostaVisivel = !document.getElementById("revisaoVersoBox").classList.contains("d-none");
+    if ((evento.code === "Space" || evento.key === " ") && !respostaVisivel) {
+        evento.preventDefault();
+        mostrarVersoRevisao();
+        return;
+    }
+    if (!respostaVisivel || operacaoCardEmAndamento) return;
+    const nivelPorTecla = { "1": "errei", "2": "dificil", "3": "acertei" };
+    const nivel = nivelPorTecla[evento.key];
+    if (!nivel) return;
+    evento.preventDefault();
+    document.querySelector(`#revisaoBotoes [data-nivel="${nivel}"]`)?.click();
 });
 
 document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEventListener("click", async () => {
@@ -7237,6 +7441,7 @@ document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEvent
         indiceRevisao++;
         mostrarCardRevisao();
         renderizarMaterias();
+        renderizarHoje();
         if (materiaAbertaId) { const mm = materiaPorId(materiaAbertaId); if (mm) renderizarCards(mm); }
     } catch (erro) {
         console.error("Falha ao salvar a revisão do flashcard", erro);
