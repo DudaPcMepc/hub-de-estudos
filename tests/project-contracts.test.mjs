@@ -222,7 +222,7 @@ test("o cronograma usa formulário responsivo, semana em cartões e estados vazi
     const html = readProjectFile("index.html");
 
     assert.match(html, /id="formTarefa" class="study-session-form"/);
-    assert.match(html, /grid-template-columns: minmax\(190px, 1fr\)[^;]*minmax\(105px, \.5fr\)/);
+    assert.match(html, /grid-template-columns: minmax\(170px, 1fr\)[^;]*minmax\(100px, \.48fr\)/);
     assert.match(html, /class="weekly-calendar-grid" id="calendarioSemanal"/);
     assert.match(html, /class="calendar-day \$\{ehHoje\(d\) \? "is-today" : ""\}"/);
     assert.match(html, />Sem sessões</);
@@ -247,7 +247,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 5/);
+    assert.match(html, /VERSAO_BACKUP = 6/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -265,6 +265,30 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(migration, /review_interval_mastered integer not null default 30/i);
     assert.match(migration, /revoke all on function public\.record_study_review[^;]*from public, anon/i);
     assert.match(migration, /import_local_hub_core_v2/i);
+});
+
+test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const migration = readProjectFile("supabase/migrations/202609020024_study_schedule_periods.sql");
+
+    assert.match(html, /id="tarefaPeriodo"/);
+    assert.match(html, /id="estudoPeriodoRealizado"/);
+    assert.match(html, /id="editarRegistroPeriodo"/);
+    assert.match(html, /morning: \{ rotulo: "Manhã"/);
+    assert.match(html, /afternoon: \{ rotulo: "Tarde"/);
+    assert.match(html, /evening: \{ rotulo: "Noite"/);
+    assert.match(html, /class="calendar-period/);
+    assert.match(html, /calendar-task-content/);
+    assert.match(html, /calendar-task-note/);
+    assert.match(repository, /study_period/);
+    assert.match(repository, /study_period: periodoEstudo\(detalhes\.periodo, false\)/);
+    assert.match(migration, /alter table public\.study_tasks[\s\S]*?add column study_period/i);
+    assert.match(migration, /alter table public\.study_session_logs[\s\S]*?add column study_period/i);
+    assert.match(migration, /logged_study_period text/i);
+    assert.match(migration, /task\.assigned_to = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /payload->'tarefas'/i);
+    assert.match(migration, /payload->'registrosEstudo'/i);
 });
 
 test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {

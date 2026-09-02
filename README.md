@@ -36,7 +36,7 @@ O histórico de desempenho também é pessoal. Cada resposta de simulado increme
 
 O Cronograma pode vincular uma sessão ao tópico pessoal do Edital, registrar tempo e retenção e calcular a próxima revisão com intervalos configuráveis. O histórico fica isolado pelo usuário, integra a fila “Revisar hoje”, considera peso da prova, erros e flashcards na prioridade e alimenta a visão de atividade do Edital. A migration `202609020010` foi aplicada e validada no banco remoto sem erros de esquema.
 
-O Diário de Estudos separa o planejamento daquilo que foi realmente realizado. Cada conclusão ou revisão registra data, matéria, conteúdo, duração, retenção e anotação opcional privada, mantendo o vínculo com o tópico pessoal do Edital quando houver. Os registros aparecem no calendário e no resumo semanal, podem ser corrigidos ou excluídos pelo próprio usuário e fazem parte do backup a partir da versão 5. A estrutura e seus reforços estão nas migrations `202609020020` a `202609020023`.
+O Diário de Estudos separa o planejamento daquilo que foi realmente realizado. Cada conclusão ou revisão registra data, período do dia, matéria, conteúdo, duração, retenção e anotação opcional privada, mantendo o vínculo com o tópico pessoal do Edital quando houver. Os registros aparecem no calendário dividido entre manhã, tarde e noite e no resumo semanal, podem ser corrigidos ou excluídos pelo próprio usuário e fazem parte do backup a partir da versão 5. A estrutura e seus reforços estão nas migrations `202609020020` a `202609020024`.
 
 Ao entrar, matérias, tópicos, notas, flashcards, materiais, links, sessões do cronograma, edital, caderno de erros e desempenho são recarregados do Supabase sem descartar itens locais ainda pendentes de conferência.
 
@@ -88,7 +88,7 @@ A função aceita apenas contas autenticadas, limita cada pedido a dez questões
 
 ## Banco de dados
 
-As migrations versionadas ficam em `supabase/migrations/`. Elas devem ser revisadas e aplicadas na ordem do nome do arquivo. Todas as migrations versionadas até `202609020023` estão registradas no histórico remoto.
+As migrations versionadas ficam em `supabase/migrations/`. Elas devem ser revisadas e aplicadas na ordem do nome do arquivo. Todas as migrations versionadas até `202609020024` estão registradas no histórico remoto.
 
 A migration inicial:
 

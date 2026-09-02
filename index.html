@@ -192,7 +192,7 @@
     }
     .study-session-form {
         display: grid;
-        grid-template-columns: minmax(190px, 1fr) minmax(210px, 1.15fr) minmax(240px, 1.35fr) minmax(145px, .7fr) minmax(105px, .5fr);
+        grid-template-columns: minmax(170px, 1fr) minmax(190px, 1.1fr) minmax(220px, 1.3fr) minmax(135px, .68fr) minmax(120px, .58fr) minmax(100px, .48fr);
         gap: .8rem;
         align-items: end;
     }
@@ -209,7 +209,7 @@
         border-color: rgba(184, 50, 42, .58);
         box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11);
     }
-    .session-actions { grid-column: 4 / -1; grid-template-columns: minmax(145px, 1fr) auto; justify-self: end; width: min(100%, 330px); }
+    .session-actions { grid-column: 5 / -1; grid-template-columns: minmax(145px, 1fr) auto; justify-self: end; width: min(100%, 330px); }
     .session-actions .btn-primary { min-height: 44px; }
     .review-queue {
         padding: 1rem;
@@ -230,13 +230,13 @@
     .retention-option small { color: #756159; }
     .weekly-calendar-scroll { overflow-x: auto; padding: .2rem .1rem .55rem; }
     .weekly-calendar-grid {
-        min-width: 880px;
+        min-width: 1190px;
         display: grid;
-        grid-template-columns: repeat(7, minmax(112px, 1fr));
+        grid-template-columns: repeat(7, minmax(160px, 1fr));
         gap: .65rem;
     }
     .calendar-day {
-        min-height: 156px;
+        min-height: 430px;
         overflow: hidden;
         background: #fffdf9;
         border: 1px solid rgba(59, 41, 35, .12);
@@ -252,14 +252,21 @@
     .calendar-weekday { display: block; color: var(--pimentel-cafe); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
     .calendar-date { display: block; margin-top: .12rem; color: var(--pimentel-cafe-claro); font-size: .72rem; }
     .calendar-day.is-today .calendar-weekday { color: var(--pimentel-vermelho-escuro); }
-    .calendar-day-body { min-height: 94px; padding: .65rem; }
-    .calendar-empty { min-height: 76px; display: grid; place-items: center; align-content: center; gap: .3rem; color: rgba(91, 67, 58, .58); font-size: .7rem; text-align: center; }
+    .calendar-day-body { min-height: 350px; padding: .55rem; }
+    .calendar-period { padding: .45rem 0; border-top: 1px solid rgba(59, 41, 35, .07); }
+    .calendar-period:first-child { padding-top: 0; border-top: 0; }
+    .calendar-period-header { display: flex; align-items: center; justify-content: space-between; gap: .35rem; margin-bottom: .35rem; color: #765f55; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .035em; }
+    .calendar-period-header i { color: var(--pimentel-vermelho); }
+    .calendar-period-count { min-width: 1.15rem; padding: .08rem .28rem; color: #70584e; background: rgba(91, 67, 58, .07); border-radius: 999px; text-align: center; }
+    .calendar-period-empty { padding: .35rem .25rem; color: rgba(91, 67, 58, .48); font-size: .65rem; text-align: center; }
+    .calendar-period.is-unspecified { opacity: .82; }
+    .calendar-empty { min-height: 310px; display: grid; place-items: center; align-content: center; gap: .3rem; color: rgba(91, 67, 58, .58); font-size: .7rem; text-align: center; }
     .calendar-empty i { font-size: 1rem; opacity: .65; }
     .calendar-task {
         width: 100%;
         display: block;
         margin-bottom: .4rem;
-        padding: .45rem .5rem;
+        padding: .55rem;
         color: var(--pimentel-vermelho-escuro);
         background: rgba(184, 50, 42, .09);
         border: 1px solid rgba(184, 50, 42, .16);
@@ -270,6 +277,11 @@
     }
     .calendar-task:hover { background: rgba(184, 50, 42, .15); }
     .calendar-task.is-complete { color: #27623d; background: rgba(43, 122, 72, .1); border-color: rgba(43, 122, 72, .18); }
+    .calendar-task-subject { display: block; margin-bottom: .18rem; font-size: .72rem; font-weight: 700; }
+    .calendar-task-content { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: inherit; font-size: .67rem; line-height: 1.32; }
+    .calendar-task-meta { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .38rem; color: #70584e; font-size: .61rem; font-weight: 600; }
+    .calendar-task-note { display: -webkit-box; overflow: hidden; margin-top: .35rem; padding-top: .32rem; border-top: 1px dashed currentColor; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #68564f; font-size: .62rem; font-style: italic; line-height: 1.3; }
+    .calendar-task.is-complete .calendar-task-meta, .calendar-task.is-complete .calendar-task-note { color: #3f674c; }
     .calendar-day-total { display: block; margin-top: .25rem; color: #27623d; font-size: .66rem; font-weight: 700; }
     .study-diary-panel { padding: 1rem; background: rgba(255, 253, 249, .88); border: 1px solid rgba(59, 41, 35, .11); border-radius: 1rem; }
     .study-diary-summary { display: flex; flex-wrap: wrap; gap: .45rem; }
@@ -1543,6 +1555,14 @@
                             <label class="form-label small">Data</label>
                             <input type="date" class="form-control" id="tarefaData" required>
                         </div>
+                        <div class="session-field session-period">
+                            <label class="form-label small">Período</label>
+                            <select class="form-select" id="tarefaPeriodo" required>
+                                <option value="morning">Manhã</option>
+                                <option value="afternoon">Tarde</option>
+                                <option value="evening">Noite</option>
+                            </select>
+                        </div>
                         <div class="session-field session-duration">
                             <label class="form-label small">Tempo <span class="text-muted fw-normal">(min)</span></label>
                             <input type="number" class="form-control" id="tarefaMinutos" min="1" max="1440" inputmode="numeric" placeholder="45">
@@ -2370,7 +2390,7 @@
         <form id="formConcluirEstudo">
             <div class="modal-body">
                 <p class="small text-muted mb-3" id="resumoConcluirEstudo"></p>
-                <div class="row g-2 mb-3"><div class="col-sm-5"><label class="form-label fw-semibold" for="estudoDataRealizada">Data do estudo</label><input type="date" class="form-control" id="estudoDataRealizada" required></div><div class="col-sm-7"><label class="form-label fw-semibold" for="estudoMinutosRealizados">Tempo realmente estudado</label><div class="input-group"><input type="number" class="form-control" id="estudoMinutosRealizados" min="1" max="1440" inputmode="numeric" required><span class="input-group-text">minutos</span></div></div></div>
+                <div class="row g-2 mb-3"><div class="col-sm-4"><label class="form-label fw-semibold" for="estudoDataRealizada">Data do estudo</label><input type="date" class="form-control" id="estudoDataRealizada" required></div><div class="col-sm-4"><label class="form-label fw-semibold" for="estudoPeriodoRealizado">Período</label><select class="form-select" id="estudoPeriodoRealizado" required><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="evening">Noite</option></select></div><div class="col-sm-4"><label class="form-label fw-semibold" for="estudoMinutosRealizados">Tempo estudado</label><div class="input-group"><input type="number" class="form-control" id="estudoMinutosRealizados" min="1" max="1440" inputmode="numeric" required><span class="input-group-text">min</span></div></div></div>
                 <div class="mb-3"><label class="form-label fw-semibold" for="estudoConteudoRealizado">Conteúdo estudado</label><textarea class="form-control" id="estudoConteudoRealizado" rows="2" maxlength="5000" required></textarea></div>
                 <div class="mb-3"><label class="form-label fw-semibold" for="estudoAnotacoes">Anotações <span class="text-muted fw-normal">(opcional e privado)</span></label><textarea class="form-control" id="estudoAnotacoes" rows="3" maxlength="20000" placeholder="Entendimento, dificuldade, macete ou ponto para retomar..."></textarea></div>
                 <fieldset><legend class="form-label fw-semibold fs-6">Quanto você conseguiu lembrar?</legend><div class="retention-options">
@@ -2391,7 +2411,7 @@
         <div class="modal-header"><div><span class="exam-evolution-kicker">Diário privado</span><h5 class="modal-title fw-bold" id="tituloEditarRegistroEstudo">Editar estudo realizado</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
         <form id="formEditarRegistroEstudo"><div class="modal-body">
             <p class="small text-muted" id="resumoEditarRegistroEstudo"></p>
-            <div class="row g-2 mb-3"><div class="col-sm-5"><label class="form-label" for="editarRegistroData">Data</label><input type="date" class="form-control" id="editarRegistroData" required></div><div class="col-sm-7"><label class="form-label" for="editarRegistroMinutos">Tempo estudado</label><div class="input-group"><input type="number" class="form-control" id="editarRegistroMinutos" min="1" max="1440" required><span class="input-group-text">minutos</span></div></div></div>
+            <div class="row g-2 mb-3"><div class="col-sm-4"><label class="form-label" for="editarRegistroData">Data</label><input type="date" class="form-control" id="editarRegistroData" required></div><div class="col-sm-4"><label class="form-label" for="editarRegistroPeriodo">Período</label><select class="form-select" id="editarRegistroPeriodo" required><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="evening">Noite</option><option value="unspecified">Não definido</option></select></div><div class="col-sm-4"><label class="form-label" for="editarRegistroMinutos">Tempo estudado</label><div class="input-group"><input type="number" class="form-control" id="editarRegistroMinutos" min="1" max="1440" required><span class="input-group-text">min</span></div></div></div>
             <div class="mb-3"><label class="form-label" for="editarRegistroConteudo">Conteúdo estudado</label><textarea class="form-control" id="editarRegistroConteudo" rows="3" maxlength="5000" required></textarea></div>
             <div class="mb-3"><label class="form-label" for="editarRegistroAnotacoes">Anotações opcionais</label><textarea class="form-control" id="editarRegistroAnotacoes" rows="4" maxlength="20000"></textarea></div>
             <p class="small text-muted mb-0">A retenção e a próxima revisão permanecem como foram avaliadas no momento do estudo.</p>
@@ -6852,6 +6872,27 @@ let operacaoTarefaEmAndamento = false;
 let tarefaEmEdicaoId = null;
 let tarefaConclusaoId = null;
 let registroEstudoEmEdicaoId = null;
+const PERIODOS_ESTUDO = Object.freeze({
+    morning: { rotulo: "Manhã", icone: "bi-sunrise" },
+    afternoon: { rotulo: "Tarde", icone: "bi-sun" },
+    evening: { rotulo: "Noite", icone: "bi-moon-stars" },
+    unspecified: { rotulo: "Horário não definido", icone: "bi-clock" }
+});
+
+function normalizarPeriodoEstudo(periodo, permitirIndefinido = true) {
+    const valor = String(periodo || "");
+    if (["morning", "afternoon", "evening"].includes(valor)) return valor;
+    return permitirIndefinido ? "unspecified" : periodoEstudoAtual();
+}
+
+function periodoEstudoAtual() {
+    const hora = new Date().getHours();
+    return hora < 12 ? "morning" : hora < 18 ? "afternoon" : "evening";
+}
+
+function rotuloPeriodoEstudo(periodo) {
+    return PERIODOS_ESTUDO[normalizarPeriodoEstudo(periodo)]?.rotulo || PERIODOS_ESTUDO.unspecified.rotulo;
+}
 
 function exigirNuvemTarefas() {
     if (!window.HUB_CLOUD_TASKS) throw new Error("A conexão do cronograma com o Supabase ainda não está pronta.");
@@ -6876,6 +6917,7 @@ function limparEdicaoTarefa() {
     tarefaEmEdicaoId = null;
     document.getElementById("formTarefa").reset();
     document.getElementById("tarefaData").value = hojeISO();
+    document.getElementById("tarefaPeriodo").value = periodoEstudoAtual();
     document.getElementById("tarefaMinutos").value = "";
     document.getElementById("tarefaTopico").dataset.preenchidoPeloEdital = "false";
     popularTopicosEditalCronograma();
@@ -6909,6 +6951,7 @@ function abrirConclusaoEstudo(id) {
     document.getElementById("resumoConcluirEstudo").textContent = `${nomeDaMateria(tarefa.materiaId)} · ${tarefa.topico}`;
     document.getElementById("estudoMinutosRealizados").value = tarefa.minutosPlanejados || 45;
     document.getElementById("estudoDataRealizada").value = hojeISO();
+    document.getElementById("estudoPeriodoRealizado").value = normalizarPeriodoEstudo(tarefa.periodo, false);
     document.getElementById("estudoConteudoRealizado").value = tarefa.topico;
     document.getElementById("estudoAnotacoes").value = "";
     document.getElementById("retencaoGood").checked = true;
@@ -6953,6 +6996,7 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
     const dataEstudo = document.getElementById("estudoDataRealizada").value;
     const conteudo = document.getElementById("estudoConteudoRealizado").value.trim();
     const anotacoes = document.getElementById("estudoAnotacoes").value.trim();
+    const periodo = normalizarPeriodoEstudo(document.getElementById("estudoPeriodoRealizado").value, false);
     const retencao = document.querySelector('input[name="nivelRetencao"]:checked')?.value;
     if (!Number.isInteger(minutos) || minutos < 1 || minutos > 1440 || !retencao || !dataEstudo || dataEstudo > somarDias(hojeISO(), 1) || !conteudo) return;
     const marcarTopico = Boolean(tarefa.topicoEditalId) && document.getElementById("marcarTopicoEditalConcluido").checked;
@@ -6961,7 +7005,7 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
     botao.disabled = true;
     try {
         const resultado = await exigirNuvemTarefas().registrarRevisao(tarefa.id, minutos, retencao, marcarTopico, {
-            dataEstudo, conteudo, anotacoes, materiaId: tarefa.materiaId, materiaNome: nomeDaMateria(tarefa.materiaId)
+            dataEstudo, conteudo, anotacoes, periodo, materiaId: tarefa.materiaId, materiaNome: nomeDaMateria(tarefa.materiaId)
         });
         const tarefas = obterTarefas();
         const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
@@ -6997,6 +7041,7 @@ function abrirEdicaoRegistroEstudo(id) {
     document.getElementById("resumoEditarRegistroEstudo").textContent = `${registro.materiaNome || nomeDaMateria(registro.materiaId)}${registro.topicoEditalId ? " · " + tituloTopicoEdital(registro.topicoEditalId) : ""}`;
     document.getElementById("editarRegistroData").value = registro.dataEstudo;
     document.getElementById("editarRegistroMinutos").value = registro.minutos;
+    document.getElementById("editarRegistroPeriodo").value = normalizarPeriodoEstudo(registro.periodo);
     document.getElementById("editarRegistroConteudo").value = registro.conteudo;
     document.getElementById("editarRegistroAnotacoes").value = registro.anotacoes || "";
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEditarRegistroEstudo")).show();
@@ -7008,6 +7053,7 @@ document.getElementById("formEditarRegistroEstudo").addEventListener("submit", a
     const alteracoes = {
         dataEstudo: document.getElementById("editarRegistroData").value,
         minutos: Number(document.getElementById("editarRegistroMinutos").value),
+        periodo: normalizarPeriodoEstudo(document.getElementById("editarRegistroPeriodo").value),
         conteudo: document.getElementById("editarRegistroConteudo").value.trim(),
         anotacoes: document.getElementById("editarRegistroAnotacoes").value.trim()
     };
@@ -7058,6 +7104,7 @@ function renderizarTarefas() {
         const revisoes = Array.isArray(t.historicoRevisoes) ? t.historicoRevisoes.length : 0;
         const chips = [
             t.minutosPlanejados ? `<span class="task-meta-chip"><i class="bi-clock me-1"></i>${t.minutosPlanejados} min planejados</span>` : "",
+            `<span class="task-meta-chip"><i class="bi-${PERIODOS_ESTUDO[normalizarPeriodoEstudo(t.periodo)].icone.replace("bi-", "")} me-1"></i>${esc(rotuloPeriodoEstudo(t.periodo))}</span>`,
             revisoes ? `<span class="task-meta-chip"><i class="bi-arrow-repeat me-1"></i>${revisoes} ${revisoes === 1 ? "estudo" : "revisões"}</span>` : "",
             t.retencao ? `<span class="task-meta-chip">${esc(rotulosRetencao[t.retencao] || "Avaliado")}</span>` : "",
             t.proximaRevisao ? `<span class="task-meta-chip is-review"><i class="bi-calendar-check me-1"></i>Próxima: ${esc(t.proximaRevisao)}</span>` : ""
@@ -7097,6 +7144,7 @@ function renderizarTarefas() {
         popularTopicosEditalCronograma(tarefa.topicoEditalId || "");
         document.getElementById("tarefaTopico").value = tarefa.topico;
         document.getElementById("tarefaData").value = tarefa.data;
+        document.getElementById("tarefaPeriodo").value = normalizarPeriodoEstudo(tarefa.periodo, false);
         document.getElementById("tarefaMinutos").value = tarefa.minutosPlanejados || "";
         document.getElementById("textoBtnSalvarTarefa").textContent = "Atualizar";
         document.querySelector("#btnSalvarTarefa i").className = "bi-check-lg me-1";
@@ -7143,10 +7191,11 @@ document.getElementById("formTarefa").addEventListener("submit", async e => {
     const topicoEditalId = document.getElementById("tarefaTopicoEdital").value || null;
     const minutosInformados = document.getElementById("tarefaMinutos").value;
     const minutosPlanejados = minutosInformados === "" ? null : Number(minutosInformados);
+    const periodo = normalizarPeriodoEstudo(document.getElementById("tarefaPeriodo").value, false);
     if (!topico || !data) return;
     if (minutosPlanejados != null && (!Number.isInteger(minutosPlanejados) || minutosPlanejados < 1 || minutosPlanejados > 1440)) return;
     if (!tarefaEmEdicaoId) {
-        const tarefa = { id: novoId(), materiaId, topico, data, status: "pendente", responsavelId: window.HUB_SESSION_CONTEXT?.userId || null, topicoEditalId, minutosPlanejados, retencao: null, proximaRevisao: "", ultimoEstudoEm: null, historicoRevisoes: [] };
+        const tarefa = { id: novoId(), materiaId, topico, data, periodo, status: "pendente", responsavelId: window.HUB_SESSION_CONTEXT?.userId || null, topicoEditalId, minutosPlanejados, retencao: null, proximaRevisao: "", ultimoEstudoEm: null, historicoRevisoes: [] };
         operacaoTarefaEmAndamento = true;
         try {
             await exigirNuvemTarefas().criar(tarefa);
@@ -7168,14 +7217,14 @@ document.getElementById("formTarefa").addEventListener("submit", async e => {
     }
     const tarefa = obterTarefas().find(item => String(item.id) === String(tarefaEmEdicaoId));
     if (!tarefa) { limparEdicaoTarefa(); return; }
-    const anterior = { materiaId: tarefa.materiaId, topico: tarefa.topico, data: tarefa.data, topicoEditalId: tarefa.topicoEditalId || null, minutosPlanejados: tarefa.minutosPlanejados || null };
+    const anterior = { materiaId: tarefa.materiaId, topico: tarefa.topico, data: tarefa.data, periodo: normalizarPeriodoEstudo(tarefa.periodo), topicoEditalId: tarefa.topicoEditalId || null, minutosPlanejados: tarefa.minutosPlanejados || null };
     operacaoTarefaEmAndamento = true;
     try {
-        await exigirNuvemTarefas().atualizar(tarefa.id, { materiaId, topico, data, topicoEditalId, minutosPlanejados });
+        await exigirNuvemTarefas().atualizar(tarefa.id, { materiaId, topico, data, periodo, topicoEditalId, minutosPlanejados });
         try {
             const tarefas = obterTarefas();
             const atual = tarefas.find(item => String(item.id) === String(tarefa.id));
-            if (atual) Object.assign(atual, { materiaId, topico, data, topicoEditalId, minutosPlanejados });
+            if (atual) Object.assign(atual, { materiaId, topico, data, periodo, topicoEditalId, minutosPlanejados });
             salvar(LS.tarefas, tarefas);
         } catch (erroLocal) {
             await exigirNuvemTarefas().atualizar(tarefa.id, anterior);
@@ -7252,19 +7301,29 @@ function renderizarCalendario() {
     const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
     const tarefas = obterTarefas();
     const registros = obterRegistrosEstudo();
+    const ordemPeriodos = ["morning", "afternoon", "evening", "unspecified"];
+
+    const cartaoTarefa = tarefa => `<button type="button" class="calendar-task ${tarefa.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(tarefa.id)}" title="${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir sessão"}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button>`;
+    const cartaoRegistro = registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}" title="Editar este registro do Diário"><span class="calendar-task-subject">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</span><span class="calendar-task-content">${esc(registro.conteudo)}</span><span class="calendar-task-meta"><span><i class="bi-clock me-1"></i>${registro.minutos} min estudados</span>${registro.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}${registro.tipo === "review" ? "<span>Revisão</span>" : ""}</span>${registro.anotacoes ? `<span class="calendar-task-note"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</span>` : ""}</button>`;
 
     document.getElementById("calendarioSemanal").innerHTML = dias.map((d, i) => {
         const iso = paraISO(d);
         const doDia = tarefas.filter(t => t.data === iso);
         const estudadosNoDia = registros.filter(registro => registro.dataEstudo === iso);
         const minutosDoDia = estudadosNoDia.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
-        const conteudo = doDia.length === 0 && estudadosNoDia.length === 0
+        const idsTarefasComRegistro = new Set(estudadosNoDia.map(registro => String(registro.tarefaId || "")).filter(Boolean));
+        const itens = [
+            ...doDia.filter(tarefa => tarefa.status !== "concluido" || !idsTarefasComRegistro.has(String(tarefa.id))).map(tarefa => ({ tipo: "tarefa", periodo: normalizarPeriodoEstudo(tarefa.periodo), valor: tarefa })),
+            ...estudadosNoDia.map(registro => ({ tipo: "registro", periodo: normalizarPeriodoEstudo(registro.periodo), valor: registro }))
+        ];
+        const periodosVisiveis = ordemPeriodos.filter(periodo => periodo !== "unspecified" || itens.some(item => item.periodo === "unspecified"));
+        const conteudo = itens.length === 0
             ? `<div class="calendar-empty"><i class="bi-calendar2" aria-hidden="true"></i><span>Sem sessões</span></div>`
-            : doDia.map(t => {
-                const realizado = estudadosNoDia.filter(registro => String(registro.tarefaId) === String(t.id)).sort((a, b) => String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")))[0];
-                return `<button type="button" class="calendar-task ${t.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(t.id)}" title="${t.status === "concluido" ? "Revisar novamente" : "Concluir"} sessão">${esc(nomeDaMateria(t.materiaId))}: ${esc(t.topico)}${realizado ? `<small class="d-block mt-1">${realizado.minutos} min estudados</small>` : ""}</button>`;
-            }).join("")
-                + estudadosNoDia.filter(registro => !doDia.some(tarefa => String(tarefa.id) === String(registro.tarefaId))).map(registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))} · ${registro.minutos} min</button>`).join("");
+            : periodosVisiveis.map(periodo => {
+                const dadosPeriodo = PERIODOS_ESTUDO[periodo];
+                const itensPeriodo = itens.filter(item => item.periodo === periodo);
+                return `<section class="calendar-period ${periodo === "unspecified" ? "is-unspecified" : ""}" aria-label="${esc(dadosPeriodo.rotulo)}"><header class="calendar-period-header"><span><i class="${dadosPeriodo.icone} me-1"></i>${esc(dadosPeriodo.rotulo)}</span><span class="calendar-period-count">${itensPeriodo.length}</span></header>${itensPeriodo.length ? itensPeriodo.map(item => item.tipo === "registro" ? cartaoRegistro(item.valor) : cartaoTarefa(item.valor)).join("") : '<div class="calendar-period-empty">Livre</div>'}</section>`;
+            }).join("");
         return `
             <article class="calendar-day ${ehHoje(d) ? "is-today" : ""}">
                 <header class="calendar-day-header">
@@ -7317,7 +7376,7 @@ function renderizarDiarioSemana() {
         const minutos = grupo.registros.reduce((total, registro) => total + (Number(registro.minutos) || 0), 0);
         const data = new Date(`${grupo.data}T12:00:00`);
         const retencoes = { forgot: "Reforçar", partial: "Parcial", good: "Boa retenção", mastered: "Dominado" };
-        return `<article class="study-diary-day"><header class="study-diary-day-header"><div><strong>${data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}</strong><small class="d-block text-muted">${grupo.registros.length} ${grupo.registros.length === 1 ? "sessão registrada" : "sessões registradas"}</small></div><span class="badge rounded-pill text-bg-light">${formatarDuracao(minutos)}</span></header>${grupo.registros.map(registro => `<div class="study-diary-entry"><div><div class="d-flex flex-wrap align-items-center gap-2"><strong>${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</strong><span class="task-meta-chip">${registro.minutos} min</span><span class="task-meta-chip">${esc(retencoes[registro.retencao] || "Avaliado")}</span>${registro.tipo === "review" ? '<span class="task-meta-chip is-review">Revisão</span>' : ""}${registro.topicoEditalId ? `<span class="task-meta-chip study-diary-link"><i class="bi-link-45deg"></i>Edital: ${esc(tituloTopicoEdital(registro.topicoEditalId))}</span>` : ""}</div><div class="small mt-1">${esc(registro.conteudo)}</div>${registro.anotacoes ? `<div class="study-diary-entry-notes"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</div>` : ""}</div><div class="study-diary-entry-actions"><button type="button" class="btn btn-sm btn-link text-secondary btn-editar-registro-estudo" data-id="${esc(registro.id)}" aria-label="Editar registro"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-link text-danger btn-excluir-registro-estudo" data-id="${esc(registro.id)}" aria-label="Excluir registro"><i class="bi-trash"></i></button></div></div>`).join("")}</article>`;
+        return `<article class="study-diary-day"><header class="study-diary-day-header"><div><strong>${data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}</strong><small class="d-block text-muted">${grupo.registros.length} ${grupo.registros.length === 1 ? "sessão registrada" : "sessões registradas"}</small></div><span class="badge rounded-pill text-bg-light">${formatarDuracao(minutos)}</span></header>${grupo.registros.map(registro => `<div class="study-diary-entry"><div><div class="d-flex flex-wrap align-items-center gap-2"><strong>${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</strong><span class="task-meta-chip">${registro.minutos} min</span><span class="task-meta-chip"><i class="${PERIODOS_ESTUDO[normalizarPeriodoEstudo(registro.periodo)].icone} me-1"></i>${esc(rotuloPeriodoEstudo(registro.periodo))}</span><span class="task-meta-chip">${esc(retencoes[registro.retencao] || "Avaliado")}</span>${registro.tipo === "review" ? '<span class="task-meta-chip is-review">Revisão</span>' : ""}${registro.topicoEditalId ? `<span class="task-meta-chip study-diary-link"><i class="bi-link-45deg"></i>Edital: ${esc(tituloTopicoEdital(registro.topicoEditalId))}</span>` : ""}</div><div class="small mt-1">${esc(registro.conteudo)}</div>${registro.anotacoes ? `<div class="study-diary-entry-notes"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</div>` : ""}</div><div class="study-diary-entry-actions"><button type="button" class="btn btn-sm btn-link text-secondary btn-editar-registro-estudo" data-id="${esc(registro.id)}" aria-label="Editar registro"><i class="bi-pencil"></i></button><button type="button" class="btn btn-sm btn-link text-danger btn-excluir-registro-estudo" data-id="${esc(registro.id)}" aria-label="Excluir registro"><i class="bi-trash"></i></button></div></div>`).join("")}</article>`;
     }).join("") : '<div class="study-diary-empty"><i class="bi-journal-plus fs-3"></i><strong>Nenhum estudo registrado nesta semana.</strong><small>Conclua uma sessão para formar seu Diário de Estudos.</small></div>';
     document.querySelectorAll(".btn-editar-registro-estudo").forEach(botao => botao.addEventListener("click", () => abrirEdicaoRegistroEstudo(botao.dataset.id)));
     document.querySelectorAll(".btn-excluir-registro-estudo").forEach(botao => botao.addEventListener("click", () => excluirRegistroEstudoSincronizado(botao.dataset.id)));
@@ -8225,7 +8284,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 5;
+const VERSAO_BACKUP = 6;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -8338,8 +8397,11 @@ function validarPayloadBackup(payload) {
         }) : [];
         const minutosPlanejados = versao >= 4 && t.minutosPlanejados != null ? numeroBackup(t.minutosPlanejados, "Tempo planejado", 1, 1440) : null;
         if (minutosPlanejados != null && !Number.isInteger(minutosPlanejados)) throw new Error(`Tempo planejado da tarefa ${i + 1} inválido.`);
+        if (versao >= 6 && !["morning", "afternoon", "evening", "unspecified"].includes(t.periodo)) throw new Error(`Período da tarefa ${i + 1} inválido.`);
+        const periodo = versao >= 6 ? t.periodo : "unspecified";
         return {
             id: idBackup(t.id, "ID da tarefa"), materiaId, topico: textoBackup(t.topico, "Tópico da tarefa", 2000), data: dataBackup(t.data, "Data da tarefa"), status: t.status,
+            periodo,
             topicoEditalId: versao >= 4 && t.topicoEditalId != null ? idBackup(t.topicoEditalId, "Tópico do Edital da tarefa") : null,
             minutosPlanejados,
             retencao: versao >= 4 && ["forgot", "partial", "good", "mastered"].includes(t.retencao) ? t.retencao : null,
@@ -8364,12 +8426,14 @@ function validarPayloadBackup(payload) {
         const conteudo = textoBackup(registro.conteudo, "Conteúdo estudado", 5000);
         const dataEstudo = dataBackup(registro.dataEstudo, "Data do estudo");
         if (!materiaNome.trim() || !conteudo.trim() || !dataEstudo) throw new Error(`Registro de estudo ${i + 1} incompleto.`);
+        if (versao >= 6 && !["morning", "afternoon", "evening", "unspecified"].includes(registro.periodo)) throw new Error(`Período do registro de estudo ${i + 1} inválido.`);
+        const periodo = versao >= 6 ? registro.periodo : "unspecified";
         return {
             id: idBackup(registro.id, "ID do registro de estudo"), tarefaId, materiaId,
             topicoEditalId: registro.topicoEditalId == null ? null : idBackup(registro.topicoEditalId, "Tópico do Edital do registro"),
             materiaNome, conteudo,
             anotacoes: textoBackup(registro.anotacoes || "", "Anotações do estudo", 20000),
-            dataEstudo, minutos,
+            dataEstudo, periodo, minutos,
             retencao: registro.retencao, tipo: registro.tipo === "review" ? "review" : "study"
         };
     }) : [];
@@ -8452,7 +8516,10 @@ document.getElementById("btnExportar").addEventListener("click", () => {
         versao: VERSAO_BACKUP,
         dataExportacao: new Date().toISOString(),
         dados: {
-            materias: obterMaterias(), tarefas: obterTarefas(), registrosEstudo: obterRegistrosEstudo(), edital: obterEdital(),
+            materias: obterMaterias(),
+            tarefas: obterTarefas().map(tarefa => ({ ...tarefa, periodo: normalizarPeriodoEstudo(tarefa.periodo) })),
+            registrosEstudo: obterRegistrosEstudo().map(registro => ({ ...registro, periodo: normalizarPeriodoEstudo(registro.periodo) })),
+            edital: obterEdital(),
             erros: obterErros(), desempenho: obterDesempenho()
         }
     };
@@ -8740,7 +8807,7 @@ window.encerrarHub = () => {
         : { nomeConcurso: "", banca: "", vagas: "", dataProva: "", materias: [] };
     const payload = {
         app: "hub-estudos-concursos",
-        versao: VERSAO_BACKUP,
+        versao: 5,
         dataExportacao: new Date().toISOString(),
         origem: "recuperacao-file-local",
         dados: {
