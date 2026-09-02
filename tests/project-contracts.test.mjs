@@ -6,6 +6,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { extrairDispositivos } from "../scripts/import-legal-sources.mjs";
+import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-guards-statute.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -785,6 +786,38 @@ test("o CTB integral usa fonte oficial, inclui o Anexo I e pertence à Legislaç
     assert.match(html, /\$\{dispositivos\.length\} item\(ns\)/);
     assert.match(html, /id: "ctb"[\s\S]*?slugs: \["codigo-de-transito-brasileiro-lei-9503-1997"/);
     assert.match(html, /chave\.includes\("transito"\) \|\| chave\.includes\("ctb"\)[\s\S]*?documento\.slug === "codigo-de-transito-brasileiro-lei-9503-1997"/);
+});
+
+test("o Estatuto das Guardas usa a fonte oficial integral e pertence à Legislação GCM", () => {
+    const migration = readProjectFile("supabase/migrations/202609020003_complete_municipal_guards_statute.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 23);
+    assert.match(migration, /https:\/\/www\.planalto\.gov\.br\/ccivil_03\/_ato2011-2014\/2014\/lei\/l13022\.htm/);
+    assert.match(migration, /Texto oficial consultado em 01\/09\/2026/);
+    assert.match(migration, /"chave":"art-1"/);
+    assert.match(migration, /"chave":"art-5"/);
+    assert.match(migration, /"chave":"art-13"/);
+    assert.match(migration, /"chave":"art-18"/);
+    assert.match(migration, /"chave":"art-23"/);
+    assert.match(migration, /CAPÍTULO III — DAS COMPETÊNCIAS/);
+    assert.doesNotMatch(migration, /COMPETÉNCIAS/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000005/);
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "guardas"[\s\S]*?slugs: \["estatuto-geral-guardas-municipais-lei-13022-2014"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?documento\.slug === "estatuto-geral-guardas-municipais-lei-13022-2014"/);
+});
+
+test("o importador do Estatuto corrige somente a grafia estrutural da fonte oficial", () => {
+    const [normalizado] = normalizarEstruturaEstatutoGuardas([{
+        caminho: ["ESTATUTO GERAL DAS GUARDAS MUNICIPAIS", "CAPÍTULO III — DAS COMPETÉNCIAS"],
+        titulo: "CAPÍTULO III — DAS COMPETÉNCIAS",
+        conteudo: "O conteúdo legal permanece COMPETÉNCIAS quando essa palavra fizer parte do texto."
+    }]);
+
+    assert.deepEqual(normalizado.caminho, ["ESTATUTO GERAL DAS GUARDAS MUNICIPAIS", "CAPÍTULO III — DAS COMPETÊNCIAS"]);
+    assert.equal(normalizado.titulo, "CAPÍTULO III — DAS COMPETÊNCIAS");
+    assert.equal(normalizado.conteudo, "O conteúdo legal permanece COMPETÉNCIAS quando essa palavra fizer parte do texto.");
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {

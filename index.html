@@ -3065,6 +3065,9 @@ function documentosJuridicosDaMateria(materia) {
     if (chave.includes("transito") || chave.includes("ctb")) {
         return documentosJuridicos.filter(documento => documento.slug === "codigo-de-transito-brasileiro-lei-9503-1997");
     }
+    if (chave.includes("guarda") || chave.includes("gcm")) {
+        return documentosJuridicos.filter(documento => documento.slug === "estatuto-geral-guardas-municipais-lei-13022-2014");
+    }
     return [];
 }
 
