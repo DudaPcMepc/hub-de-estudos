@@ -6,6 +6,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { extrairDispositivos } from "../scripts/import-legal-sources.mjs";
+import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const readProjectFile = (relativePath) => readFileSync(join(projectRoot, relativePath), "utf8");
@@ -680,6 +681,31 @@ test("o importador associa a epígrafe ao artigo correto sem contaminar o artigo
     assert.equal(dispositivos[1].conteudo, "Texto do segundo artigo.");
 });
 
+test("o importador do CTB separa o glossário oficial do Anexo I dos artigos", () => {
+    const html = `
+        <p>CAPÍTULO I</p><p>DISPOSIÇÕES PRELIMINARES</p>
+        <p>Art. 1º Regra de trânsito.</p>
+        <p>ANEXO I</p><p>DOS CONCEITOS E DEFINIÇÕES</p>
+        <p>Para efeito deste Código adotam-se as seguintes definições:</p>
+        <p>ACOSTAMENTO - parte da via destinada a emergências.</p>
+        <p>LUZ DE POSIÇÃO (lanterna) - luz que indica a presença do veículo.</p>
+        <p>(Vide Resolução nº 160, de 2004 do CONTRAN)</p>
+    `;
+    const artigos = extrairDispositivos(html, { raiz: "CÓDIGO DE TRÂNSITO BRASILEIRO" });
+    const glossario = extrairGlossarioAnexoI(html, { sequenciaInicial: artigos.length + 1 });
+
+    assert.deepEqual(artigos.map(item => item.chave), ["art-1"]);
+    assert.deepEqual(glossario.map(item => item.chave), [
+        "glossario-acostamento",
+        "glossario-luz-de-posicao-lanterna"
+    ]);
+    assert.equal(glossario[0].sequencia, 2);
+    assert.deepEqual(glossario[0].caminho, [
+        "CÓDIGO DE TRÂNSITO BRASILEIRO",
+        "ANEXO I — DOS CONCEITOS E DEFINIÇÕES"
+    ]);
+});
+
 test("o Código Penal integral usa fonte oficial e é vinculado somente ao catálogo de Direito Penal", () => {
     const migration = readProjectFile("supabase/migrations/202608300007_complete_penal_code.sql");
     const chavesImportadas = [...migration.matchAll(/"chave":"art-/g)];
@@ -737,6 +763,26 @@ test("o núcleo processual mantém CPP e Prisão Temporária completos e separad
     assert.doesNotMatch(migration, /10000000-0000-4000-8000-000000000005/);
     assert.match(html, /\["cpp", "prisao-temporaria"\]\.includes\(item\.id\)/);
     assert.match(html, /if \(chave\.includes\("penal"\)\) return item\.id === "cp"/);
+});
+
+test("o CTB integral usa fonte oficial, inclui o Anexo I e pertence à Legislação de Trânsito", () => {
+    const migration = readProjectFile("supabase/migrations/202609020002_complete_traffic_code.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 390);
+    assert.equal([...migration.matchAll(/"chave":"glossario-/g)].length, 126);
+    assert.match(migration, /https:\/\/www\.planalto\.gov\.br\/ccivil_03\/leis\/l9503compilado\.htm/);
+    assert.match(migration, /Texto compilado consultado em 01\/09\/2026/);
+    assert.match(migration, /"chave":"art-24-a"/);
+    assert.match(migration, /"chave":"art-165-d"/);
+    assert.match(migration, /"chave":"art-326-c"/);
+    assert.match(migration, /"chave":"art-341"/);
+    assert.match(migration, /"chave":"glossario-transito"/);
+    assert.match(migration, /"chave":"glossario-veiculo-automotor"/);
+    assert.match(migration, /ANEXO I — DOS CONCEITOS E DEFINIÇÕES/);
+    assert.match(migration, /10000000-0000-4000-8000-000000000006/);
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /\$\{dispositivos\.length\} item\(ns\)/);
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
