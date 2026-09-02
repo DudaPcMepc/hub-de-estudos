@@ -248,6 +248,23 @@ test("o edital destaca as informações essenciais e orienta o primeiro cadastro
     assert.doesNotMatch(html, /Nenhuma matéria na matriz ainda\./);
 });
 
+test("o checklist do edital é retrátil e permite excluir apenas o tópico escolhido", () => {
+    const html = readProjectFile("index.html");
+    const auth = readProjectFile("src/auth.js");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+
+    assert.match(html, /let materiasEditalExpandidas = new Set\(\)/);
+    assert.match(html, /class="exam-topic-toggle btn-toggle-topicos-edital"/);
+    assert.match(html, /aria-expanded="\$\{expandida\}"/);
+    assert.match(html, /class="exam-topic-count/);
+    assert.match(html, /class="exam-topic-list"/);
+    assert.match(html, /class="btn btn-sm btn-link text-danger exam-topic-delete"/);
+    assert.match(html, /Remover o tópico “\$\{topico\.titulo\}” do seu checklist pessoal\?/);
+    assert.match(auth, /excluirTopico: excluirTopicoEdital/);
+    assert.match(repository, /export async function excluirTopicoEdital/);
+    assert.match(repository, /from\("exam_topics"\)\.delete\(\)[\s\S]*?\.eq\("workspace_id", contexto\.workspaceId\)[\s\S]*?\.eq\("user_id", contexto\.userId\)/);
+});
+
 test("o simulado prioriza a geração, usa aviso neutro e orienta o primeiro resultado", () => {
     const html = readProjectFile("index.html");
 

@@ -2056,3 +2056,16 @@ export async function atualizarTopicoEdital(idLocal, concluido) {
     const registro = verificarRegistro(await consulta.select("updated_at").maybeSingle(), "O checklist mudou em outra sessão. Recarregue antes de salvar novamente.");
     versoesTopicosEdital.set(id, registro.updated_at);
 }
+
+export async function excluirTopicoEdital(idLocal) {
+    const contexto = exigirContexto();
+    const id = resolverId("exam_topic", idLocal);
+    const versao = versoesTopicosEdital.get(id);
+    let consulta = supabase.from("exam_topics").delete()
+        .eq("id", id)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId);
+    if (versao) consulta = consulta.eq("updated_at", versao);
+    verificarRegistro(await consulta.select("id").maybeSingle(), "O checklist mudou em outra sessão. Recarregue antes de excluir.");
+    versoesTopicosEdital.delete(id);
+}
