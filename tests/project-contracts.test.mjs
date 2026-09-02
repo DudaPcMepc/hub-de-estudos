@@ -341,6 +341,25 @@ test("o resumo semanal compara planejamento e execução e reage a sessões atra
     assert.match(html, /renderizarPeriodoCalendario\(\)[\s\S]*?renderizarResumoSemanalCronograma\(\)/);
 });
 
+test("o temporizador de estudo é isolado por usuário e preenche a conclusão", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="temporizadorEstudo"/);
+    assert.match(html, /id="btnPausarTemporizadorEstudo"/);
+    assert.match(html, /id="btnEncerrarTemporizadorEstudo"/);
+    assert.match(html, /id="btnCancelarTemporizadorEstudo"/);
+    assert.match(html, /btn-iniciar-tarefa-cal/);
+    assert.match(html, /function chaveTemporizadorEstudo\(\)[\s\S]*?hub_study_timer_\$\{USUARIO_ATUAL_ID\}/);
+    assert.match(html, /sessionStorage\.setItem\(chave, JSON\.stringify\(estadoTemporizadorEstudo\)\)/);
+    assert.match(html, /function duracaoTemporizadorEstudo\(\)[\s\S]*?Date\.now\(\) - estadoTemporizadorEstudo\.iniciadoEm/);
+    assert.match(html, /function restaurarTemporizadorEstudo\(\)/);
+    assert.match(html, /function abrirConclusaoEstudo\(id, preenchimento = \{\}\)/);
+    assert.match(html, /minutosRealizados: minutos[\s\S]*?dataEstudo: hojeISO\(\)[\s\S]*?periodo: estadoTemporizadorEstudo\.periodo/);
+    assert.match(html, /estadoTemporizadorEstudo\?\.tarefaId[\s\S]*?limparTemporizadorEstudo\(\)/);
+    assert.match(html, /renderizarTudoCronograma\(\);\s*restaurarTemporizadorEstudo\(\);/);
+    assert.match(html, /window\.encerrarHub = \(\) => \{[\s\S]*?pausarTemporizadorEstudo\(\)/);
+});
+
 test("o Diário de Estudos registra conteúdo, tempo e anotações privadas vinculadas ao Edital", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
