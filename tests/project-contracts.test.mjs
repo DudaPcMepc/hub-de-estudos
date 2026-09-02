@@ -13,6 +13,7 @@ import {
 import { normalizarEstruturaEstatutoGuardas } from "../scripts/import-municipal-guards-statute.mjs";
 import { normalizarDispositivosMariaDaPenha } from "../scripts/import-maria-da-penha.mjs";
 import { normalizarDispositivosCrimesHediondos } from "../scripts/import-heinous-crimes-law.mjs";
+import { normalizarDispositivosLeiTortura } from "../scripts/import-torture-law.mjs";
 import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -960,6 +961,44 @@ test("o importador mantém no art. 6º as alterações citadas do Código Penal"
     assert.equal(normalizados.at(-1).sequencia, 13);
     assert.match(normalizados.find(item => item.chave === "art-6").conteudo, /Art\. 159\.[\s\S]*?Art\. 270\./);
     assert.equal(normalizados.find(item => item.chave === "art-7").titulo, "LEI DOS CRIMES HEDIONDOS");
+});
+
+test("a Lei de Tortura usa a versão oficial integral com a alteração de 2026", () => {
+    const migration = readProjectFile("supabase/migrations/202609020007_complete_torture_law.sql");
+    const html = readProjectFile("index.html");
+
+    assert.equal([...migration.matchAll(/"chave":"art-/g)].length, 4);
+    assert.match(migration, /www2\.camara\.leg\.br\/legin\/fed\/lei\/1997\/lei-9455-7-abril-1997-349431-normaatualizada-pl\.html/);
+    assert.match(migration, /Texto atualizado consultado em 01\/09\/2026/);
+    for (const chave of ["art-1", "art-2", "art-3", "art-4"]) {
+        assert.match(migration, new RegExp(`"chave":"${chave}"`));
+    }
+    assert.match(migration, /Lei nº 15\.410, de 20\/5\/2026/);
+    assert.match(migration, /submeter mulher, reiteradamente/);
+    assert.match(migration, /o crime é cometido por agente público/);
+    assert.match(migration, /inafiançável e insuscetível de graça ou anistia/);
+    for (const catalogoId of ["000000000002", "000000000003", "000000000005", "000000000008"]) {
+        assert.match(migration, new RegExp(`10000000-0000-4000-8000-${catalogoId}`));
+    }
+    assert.doesNotMatch(migration, /user_legal_(?:highlights|bookmarks|reading_history)/);
+    assert.match(html, /id: "tortura"[\s\S]*?slugs: \["tortura-lei-9455-1997"/);
+    assert.match(html, /chave\.includes\("guarda"\) \|\| chave\.includes\("gcm"\)[\s\S]*?"tortura-lei-9455-1997"/);
+    assert.match(html, /chave\.includes\("lei-tortura"\)[\s\S]*?documento\.slug === "tortura-lei-9455-1997"/);
+});
+
+test("o importador da Lei de Tortura uniformiza o cabeçalho sem alterar o texto", () => {
+    const [normalizado] = normalizarDispositivosLeiTortura([{
+        chave: "art-1",
+        sequencia: 1,
+        caminho: ["LEI DOS CRIMES DE TORTURA"],
+        titulo: "Faço saber que o Congresso Nacional decreta e eu sanciono a seguinte Lei:",
+        rotulo: "Art. 1º",
+        conteudo: "Constitui crime de tortura"
+    }]);
+
+    assert.deepEqual(normalizado.caminho, ["LEI DOS CRIMES DE TORTURA"]);
+    assert.equal(normalizado.titulo, "LEI DOS CRIMES DE TORTURA");
+    assert.equal(normalizado.conteudo, "Constitui crime de tortura");
 });
 
 test("a biblioteca carrega metadados no login e busca os artigos somente ao abrir uma lei", () => {
