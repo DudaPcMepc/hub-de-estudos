@@ -254,6 +254,8 @@ test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados"
     assert.match(html, /class="nav nav-tabs app-primary-nav flex-nowrap overflow-auto"/);
     assert.match(html, /#abas\.app-primary-nav \.nav-link\.active::after \{ background: var\(--pimentel-vermelho\); \}/);
     assert.match(html, /\.today-empty \.btn \{ position: static !important;/);
+    assert.match(html, /class="btn btn-sm today-empty-action" id="btnPrimeiraSessaoHoje"/);
+    assert.match(html, />Planejar sessão<\/button>/);
     assert.match(html, /\.today-quick-action \{[^}]*border: 1px solid rgba\(59, 41, 35, \.13\)/);
     assert.match(html, /@media \(max-width: 575\.98px\)[\s\S]*?\.today-session \{ grid-template-columns: \.32rem minmax\(0, 1fr\)/);
 });
