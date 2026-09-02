@@ -281,6 +281,20 @@
     }
     .calendar-task:hover { background: rgba(184, 50, 42, .15); }
     .calendar-task.is-complete { color: #27623d; background: rgba(43, 122, 72, .1); border-color: rgba(43, 122, 72, .18); }
+    .calendar-session-card { position: relative; padding: 0; }
+    .calendar-task-main { width: 100%; display: block; padding: .55rem 2.35rem .55rem .55rem; color: inherit; background: transparent; border: 0; border-radius: inherit; text-align: left; }
+    .calendar-task-main:focus-visible { outline: 3px solid rgba(184, 50, 42, .28); outline-offset: 2px; }
+    .calendar-task-menu { position: absolute; top: .35rem; right: .3rem; z-index: 3; }
+    .calendar-task-menu-toggle { width: 1.75rem; height: 1.75rem; display: inline-grid; place-items: center; padding: 0; color: currentColor; background: rgba(255, 255, 255, .72); border: 1px solid rgba(91, 67, 58, .12); border-radius: 50%; line-height: 1; }
+    .calendar-task-menu-toggle:hover, .calendar-task-menu-toggle:focus-visible, .calendar-task-menu-toggle[aria-expanded="true"] { color: var(--pimentel-vermelho-escuro); background: #fff; border-color: rgba(184, 50, 42, .3); }
+    .calendar-task-menu .dropdown-menu { min-width: 11.5rem; padding: .35rem; border-color: rgba(59, 41, 35, .12); border-radius: .75rem; box-shadow: 0 .7rem 1.6rem rgba(59, 41, 35, .14); }
+    .calendar-task-menu .dropdown-item { display: flex; align-items: center; gap: .55rem; padding: .5rem .65rem; border-radius: .5rem; font-size: .78rem; }
+    .calendar-task-menu .dropdown-item i { width: 1rem; text-align: center; }
+    .session-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+    .session-detail-item { padding: .8rem; background: #faf7f2; border-radius: .75rem; }
+    .session-detail-item.is-wide { grid-column: 1 / -1; }
+    .session-detail-label { display: block; margin-bottom: .2rem; color: #806d64; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .035em; }
+    .session-detail-value { color: var(--pimentel-cafe); font-size: .9rem; font-weight: 650; overflow-wrap: anywhere; }
     .calendar-task-subject { display: block; margin-bottom: .18rem; font-size: .72rem; font-weight: 700; }
     .calendar-task-content { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: inherit; font-size: .67rem; line-height: 1.32; }
     .calendar-task-meta { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .38rem; color: #70584e; font-size: .61rem; font-weight: 600; }
@@ -1360,11 +1374,17 @@
         .calendar-period-header { font-size: .72rem; }
         .calendar-period-add { width: 1.8rem; height: 1.8rem; font-size: .85rem; }
         .calendar-task { padding: .7rem; }
+        .calendar-session-card { padding: 0; }
+        .calendar-task-main { min-height: 4.7rem; padding: .7rem 3rem .7rem .7rem; }
+        .calendar-task-menu { top: .55rem; right: .5rem; }
+        .calendar-task-menu-toggle { width: 2.25rem; height: 2.25rem; font-size: 1rem; }
         .calendar-task-subject { font-size: .8rem; }
         .calendar-task-content { font-size: .74rem; -webkit-line-clamp: 4; }
         .calendar-task-meta, .calendar-task-note { font-size: .68rem; }
     }
     @media (max-width: 575.98px) {
+        .session-detail-grid { grid-template-columns: 1fr; }
+        .session-detail-item.is-wide { grid-column: auto; }
         .study-session-form { grid-template-columns: 1fr; }
         .session-actions { grid-column: auto; grid-template-columns: 1fr; }
         .review-queue-item { align-items: stretch; flex-direction: column; }
@@ -2430,6 +2450,31 @@
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary" id="btnConfirmarConclusaoEstudo"><i class="bi-check2-circle me-1"></i>Salvar e agendar revisão</button></div>
         </form>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalDetalhesSessao" tabindex="-1" aria-labelledby="tituloDetalhesSessao" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><div><span class="exam-evolution-kicker">Sessão planejada</span><h5 class="modal-title fw-bold" id="tituloDetalhesSessao">Detalhes da sessão</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <div class="modal-body">
+            <div class="session-detail-grid">
+                <div class="session-detail-item is-wide"><span class="session-detail-label">Matéria</span><div class="session-detail-value" id="detalhesSessaoMateria"></div></div>
+                <div class="session-detail-item is-wide"><span class="session-detail-label">Conteúdo</span><div class="session-detail-value" id="detalhesSessaoConteudo"></div></div>
+                <div class="session-detail-item"><span class="session-detail-label">Data</span><div class="session-detail-value" id="detalhesSessaoData"></div></div>
+                <div class="session-detail-item"><span class="session-detail-label">Período</span><div class="session-detail-value" id="detalhesSessaoPeriodo"></div></div>
+                <div class="session-detail-item"><span class="session-detail-label">Tempo planejado</span><div class="session-detail-value" id="detalhesSessaoTempo"></div></div>
+                <div class="session-detail-item"><span class="session-detail-label">Situação</span><div class="session-detail-value" id="detalhesSessaoStatus"></div></div>
+                <div class="session-detail-item is-wide d-none" id="detalhesSessaoEditalGrupo"><span class="session-detail-label">Vínculo com o Edital</span><div class="session-detail-value" id="detalhesSessaoEdital"></div></div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-outline-danger" id="btnDetalhesExcluirSessao"><i class="bi-trash me-1"></i>Excluir</button>
+            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-outline-primary" id="btnDetalhesEditarSessao"><i class="bi-pencil me-1"></i>Editar</button>
+                <button type="button" class="btn btn-primary" id="btnDetalhesConcluirSessao"><i class="bi-check2-circle me-1"></i><span id="textoDetalhesConcluirSessao">Concluir estudo</span></button>
+            </div>
+        </div>
     </div></div>
 </div>
 
@@ -6898,6 +6943,7 @@ document.getElementById("btnRevisarMateria").addEventListener("click", () => ini
 let operacaoTarefaEmAndamento = false;
 let tarefaEmEdicaoId = null;
 let tarefaConclusaoId = null;
+let tarefaDetalhesId = null;
 let registroEstudoEmEdicaoId = null;
 const PERIODOS_ESTUDO = Object.freeze({
     morning: { rotulo: "Manhã", icone: "bi-sunrise" },
@@ -7121,6 +7167,87 @@ async function excluirRegistroEstudoSincronizado(id) {
     }
 }
 
+function iniciarEdicaoTarefa(id) {
+    if (operacaoTarefaEmAndamento) return;
+    const tarefa = obterTarefas().find(item => String(item.id) === String(id));
+    if (!tarefa) return;
+    tarefaEmEdicaoId = tarefa.id;
+    document.getElementById("tarefaMateria").value = tarefa.materiaId;
+    popularTopicosEditalCronograma(tarefa.topicoEditalId || "");
+    document.getElementById("tarefaTopico").value = tarefa.topico;
+    document.getElementById("tarefaData").value = tarefa.data;
+    document.getElementById("tarefaPeriodo").value = normalizarPeriodoEstudo(tarefa.periodo, false);
+    document.getElementById("tarefaMinutos").value = tarefa.minutosPlanejados || "";
+    document.getElementById("textoBtnSalvarTarefa").textContent = "Atualizar";
+    document.querySelector("#btnSalvarTarefa i").className = "bi-check-lg me-1";
+    document.getElementById("btnCancelarEdicaoTarefa").classList.remove("d-none");
+    bootstrap.Modal.getInstance(document.getElementById("modalDetalhesSessao"))?.hide();
+    const formulario = document.getElementById("formTarefa");
+    formulario.closest(".study-session-card")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    window.setTimeout(() => document.getElementById("tarefaTopico").focus(), 220);
+}
+
+async function excluirTarefaSincronizada(id) {
+    if (operacaoTarefaEmAndamento) return false;
+    const tarefas = obterTarefas();
+    const tarefa = tarefas.find(item => String(item.id) === String(id));
+    if (!tarefa || !confirm(`Excluir a sessão “${tarefa.topico}” do cronograma compartilhado?`)) return false;
+    operacaoTarefaEmAndamento = true;
+    try {
+        salvar(LS.tarefas, tarefas.filter(item => String(item.id) !== String(tarefa.id)));
+        try {
+            await exigirNuvemTarefas().excluir(tarefa.id);
+        } catch (erroRemoto) {
+            salvar(LS.tarefas, tarefas);
+            throw erroRemoto;
+        }
+        if (String(tarefaEmEdicaoId) === String(tarefa.id)) limparEdicaoTarefa();
+        bootstrap.Modal.getInstance(document.getElementById("modalDetalhesSessao"))?.hide();
+        renderizarTudoCronograma();
+        if (materiaAbertaId) renderizarWorkspace();
+        return true;
+    } catch (erro) {
+        console.error("Falha ao excluir sessão de forma sincronizada", erro);
+        alert("A sessão não foi excluída porque o Supabase não confirmou a operação.");
+        renderizarTudoCronograma();
+        return false;
+    } finally {
+        operacaoTarefaEmAndamento = false;
+    }
+}
+
+function abrirDetalhesSessao(id) {
+    const tarefa = obterTarefas().find(item => String(item.id) === String(id));
+    if (!tarefa) return;
+    tarefaDetalhesId = tarefa.id;
+    const data = tarefa.data ? new Date(`${tarefa.data}T12:00:00`) : null;
+    document.getElementById("detalhesSessaoMateria").textContent = nomeDaMateria(tarefa.materiaId);
+    document.getElementById("detalhesSessaoConteudo").textContent = tarefa.topico;
+    document.getElementById("detalhesSessaoData").textContent = data && !Number.isNaN(data.getTime()) ? data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) : "Data não definida";
+    document.getElementById("detalhesSessaoPeriodo").textContent = rotuloPeriodoEstudo(tarefa.periodo);
+    document.getElementById("detalhesSessaoTempo").textContent = tarefa.minutosPlanejados ? `${tarefa.minutosPlanejados} minutos` : "Não informado";
+    document.getElementById("detalhesSessaoStatus").textContent = tarefa.status === "concluido" ? "Concluída" : "Pendente";
+    const grupoEdital = document.getElementById("detalhesSessaoEditalGrupo");
+    grupoEdital.classList.toggle("d-none", !tarefa.topicoEditalId);
+    document.getElementById("detalhesSessaoEdital").textContent = tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "";
+    document.getElementById("textoDetalhesConcluirSessao").textContent = tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir estudo";
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesSessao")).show();
+}
+
+document.getElementById("btnDetalhesEditarSessao").addEventListener("click", () => {
+    if (tarefaDetalhesId) iniciarEdicaoTarefa(tarefaDetalhesId);
+});
+document.getElementById("btnDetalhesConcluirSessao").addEventListener("click", () => {
+    if (!tarefaDetalhesId) return;
+    const id = tarefaDetalhesId;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesSessao")).hide();
+    window.setTimeout(() => abrirConclusaoEstudo(id), 180);
+});
+document.getElementById("btnDetalhesExcluirSessao").addEventListener("click", async () => {
+    if (tarefaDetalhesId) await excluirTarefaSincronizada(tarefaDetalhesId);
+});
+document.getElementById("modalDetalhesSessao").addEventListener("hidden.bs.modal", () => { tarefaDetalhesId = null; });
+
 function renderizarTarefas() {
     const tarefas = obterTarefas();
     const pendentes = tarefas.filter(t => t.status === "pendente").sort((a, b) => (a.data || "").localeCompare(b.data || ""));
@@ -7162,49 +7289,12 @@ function renderizarTarefas() {
         ? concluidas.map(t => linha(t, true)).join("")
         : `<div class="schedule-empty"><i class="bi-stars" aria-hidden="true"></i><strong>Sua próxima conquista começa aqui.</strong><small>As sessões finalizadas ficarão guardadas neste espaço.</small></div>`;
 
-    document.querySelectorAll(".btn-editar-tarefa").forEach(btn => btn.addEventListener("click", () => {
-        if (operacaoTarefaEmAndamento) return;
-        const tarefa = obterTarefas().find(item => String(item.id) === btn.dataset.id);
-        if (!tarefa) return;
-        tarefaEmEdicaoId = tarefa.id;
-        document.getElementById("tarefaMateria").value = tarefa.materiaId;
-        popularTopicosEditalCronograma(tarefa.topicoEditalId || "");
-        document.getElementById("tarefaTopico").value = tarefa.topico;
-        document.getElementById("tarefaData").value = tarefa.data;
-        document.getElementById("tarefaPeriodo").value = normalizarPeriodoEstudo(tarefa.periodo, false);
-        document.getElementById("tarefaMinutos").value = tarefa.minutosPlanejados || "";
-        document.getElementById("textoBtnSalvarTarefa").textContent = "Atualizar";
-        document.querySelector("#btnSalvarTarefa i").className = "bi-check-lg me-1";
-        document.getElementById("btnCancelarEdicaoTarefa").classList.remove("d-none");
-        document.getElementById("tarefaTopico").focus();
-    }));
+    document.querySelectorAll(".btn-editar-tarefa").forEach(btn => btn.addEventListener("click", () => iniciarEdicaoTarefa(btn.dataset.id)));
     document.querySelectorAll(".btn-toggle-tarefa").forEach(btn => btn.addEventListener("click", async () => {
         await alternarStatusTarefaSincronizada(btn.dataset.id);
     }));
     document.querySelectorAll(".btn-excluir-tarefa").forEach(btn => btn.addEventListener("click", async () => {
-        if (operacaoTarefaEmAndamento) return;
-        const tarefas = obterTarefas();
-        const tarefa = tarefas.find(item => String(item.id) === btn.dataset.id);
-        if (!tarefa || !confirm(`Excluir a sessão “${tarefa.topico}” do cronograma compartilhado?`)) return;
-        operacaoTarefaEmAndamento = true;
-        try {
-            salvar(LS.tarefas, tarefas.filter(item => String(item.id) !== String(tarefa.id)));
-            try {
-                await exigirNuvemTarefas().excluir(tarefa.id);
-            } catch (erroRemoto) {
-                salvar(LS.tarefas, tarefas);
-                throw erroRemoto;
-            }
-            if (String(tarefaEmEdicaoId) === String(tarefa.id)) limparEdicaoTarefa();
-            renderizarTudoCronograma();
-            if (materiaAbertaId) renderizarWorkspace();
-        } catch (erro) {
-            console.error("Falha ao excluir sessão de forma sincronizada", erro);
-            alert("A sessão não foi excluída porque o Supabase não confirmou a operação.");
-            renderizarTudoCronograma();
-        } finally {
-            operacaoTarefaEmAndamento = false;
-        }
+        await excluirTarefaSincronizada(btn.dataset.id);
     }));
 }
 
@@ -7355,7 +7445,7 @@ function renderizarCalendario() {
     }
     document.getElementById("calendarioSemanal").setAttribute("aria-label", calendarioMobileAtivo() ? "Agenda diária" : "Calendário semanal");
 
-    const cartaoTarefa = tarefa => `<button type="button" class="calendar-task ${tarefa.status === "concluido" ? "is-complete" : ""} btn-tarefa-cal" data-id="${esc(tarefa.id)}" title="${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir sessão"}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button>`;
+    const cartaoTarefa = tarefa => `<article class="calendar-task calendar-session-card ${tarefa.status === "concluido" ? "is-complete" : ""}"><button type="button" class="calendar-task-main btn-detalhes-tarefa-cal" data-id="${esc(tarefa.id)}" aria-label="Ver detalhes da sessão ${esc(tarefa.topico)}"><span class="calendar-task-subject">${esc(nomeDaMateria(tarefa.materiaId))}</span><span class="calendar-task-content">${esc(tarefa.topico)}</span><span class="calendar-task-meta">${tarefa.minutosPlanejados ? `<span><i class="bi-clock me-1"></i>${tarefa.minutosPlanejados} min planejados</span>` : ""}${tarefa.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}<span>${tarefa.status === "concluido" ? "Concluída" : "Pendente"}</span></span></button><div class="dropdown calendar-task-menu"><button type="button" class="calendar-task-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Ações da sessão ${esc(tarefa.topico)}" title="Ações da sessão"><i class="bi-three-dots-vertical" aria-hidden="true"></i></button><ul class="dropdown-menu dropdown-menu-end"><li><button type="button" class="dropdown-item btn-editar-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-pencil" aria-hidden="true"></i>Editar sessão</button></li><li><button type="button" class="dropdown-item btn-concluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-${tarefa.status === "concluido" ? "arrow-repeat" : "check2-circle"}" aria-hidden="true"></i>${tarefa.status === "concluido" ? "Registrar nova revisão" : "Concluir estudo"}</button></li><li><hr class="dropdown-divider"></li><li><button type="button" class="dropdown-item text-danger btn-excluir-tarefa-cal" data-id="${esc(tarefa.id)}"><i class="bi-trash" aria-hidden="true"></i>Excluir sessão</button></li></ul></div></article>`;
     const cartaoRegistro = registro => `<button type="button" class="calendar-task is-complete btn-editar-registro-cal" data-id="${esc(registro.id)}" title="Editar este registro do Diário"><span class="calendar-task-subject">${esc(registro.materiaNome || nomeDaMateria(registro.materiaId))}</span><span class="calendar-task-content">${esc(registro.conteudo)}</span><span class="calendar-task-meta"><span><i class="bi-clock me-1"></i>${registro.minutos} min estudados</span>${registro.topicoEditalId ? '<span><i class="bi-link-45deg me-1"></i>Edital</span>' : ""}${registro.tipo === "review" ? "<span>Revisão</span>" : ""}</span>${registro.anotacoes ? `<span class="calendar-task-note"><i class="bi-journal-text me-1"></i>${esc(registro.anotacoes)}</span>` : ""}</button>`;
 
     document.getElementById("calendarioSemanal").innerHTML = dias.map((d, i) => {
@@ -7388,8 +7478,13 @@ function renderizarCalendario() {
             </article>`;
     }).join("");
 
-    document.querySelectorAll(".btn-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
+    document.querySelectorAll(".btn-detalhes-tarefa-cal").forEach(el => el.addEventListener("click", () => abrirDetalhesSessao(el.dataset.id)));
+    document.querySelectorAll(".btn-editar-tarefa-cal").forEach(el => el.addEventListener("click", () => iniciarEdicaoTarefa(el.dataset.id)));
+    document.querySelectorAll(".btn-concluir-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
         await alternarStatusTarefaSincronizada(el.dataset.id);
+    }));
+    document.querySelectorAll(".btn-excluir-tarefa-cal").forEach(el => el.addEventListener("click", async () => {
+        await excluirTarefaSincronizada(el.dataset.id);
     }));
     document.querySelectorAll(".btn-editar-registro-cal").forEach(el => el.addEventListener("click", () => abrirEdicaoRegistroEstudo(el.dataset.id)));
     document.querySelectorAll(".btn-adicionar-periodo").forEach(el => el.addEventListener("click", () => prepararNovaSessaoNoPeriodo(el.dataset.date, el.dataset.period)));
@@ -8762,6 +8857,9 @@ window.encerrarHub = () => {
     linkEmEdicaoId = null;
     operacaoTarefaEmAndamento = false;
     tarefaEmEdicaoId = null;
+    tarefaConclusaoId = null;
+    tarefaDetalhesId = null;
+    registroEstudoEmEdicaoId = null;
     operacaoEditalEmAndamento = false;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
@@ -8774,6 +8872,7 @@ window.encerrarHub = () => {
     indiceRevisao = 0;
     quizAtual = [];
     offsetSemana = 0;
+    offsetDiaMobile = 0;
     catalogoMaterias = [];
     widgetsPorMateria = new Map();
     rascunhoWidgets = null;
