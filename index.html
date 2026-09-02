@@ -346,6 +346,26 @@
     .today-empty strong { color: var(--pimentel-cafe); }
     .today-empty span { color: #6b5850; }
     .today-empty .btn { position: static !important; inset: auto !important; transform: none !important; margin-top: .55rem !important; }
+    .today-empty-action {
+        width: auto;
+        min-width: 0;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        justify-self: center;
+        padding: .42rem .82rem;
+        color: var(--pimentel-vermelho-escuro);
+        background: rgba(184, 50, 42, .055);
+        border: 1px solid rgba(184, 50, 42, .22);
+        border-radius: .65rem;
+        box-shadow: none;
+        font-size: .7rem;
+        font-weight: 700;
+        transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+    }
+    .today-empty-action i { font-size: .76rem; }
+    .today-empty-action:hover, .today-empty-action:focus-visible { color: #fff; background: var(--pimentel-vermelho); border-color: var(--pimentel-vermelho); }
     .today-celebration { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; padding: .8rem 1rem; color: #315a43; background: rgba(79, 138, 103, .1); border: 1px solid rgba(79, 138, 103, .18); border-radius: .85rem; }
     .today-celebration i { font-size: 1.25rem; }
     .retention-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
@@ -3126,7 +3146,7 @@ function renderizarHoje() {
         if (!itens.length) return "";
         const config = PERIODOS_ESTUDO[periodo];
         return `<section class="today-period"><div class="today-period-label"><i class="${config.icone}" aria-hidden="true"></i>${config.rotulo}</div>${itens.map(htmlTarefa).join("")}</section>`;
-    }).join("") : '<div class="today-empty"><i class="bi-calendar2-heart" aria-hidden="true"></i><strong>Seu dia ainda está livre.</strong><span>Adicione uma sessão ou use a prioridade do edital para começar.</span><button type="button" class="btn btn-sm btn-primary rounded-pill mt-2" id="btnPrimeiraSessaoHoje"><i class="bi-plus-lg me-1"></i>Planejar primeira sessão</button></div>';
+    }).join("") : '<div class="today-empty"><i class="bi-calendar2-heart" aria-hidden="true"></i><strong>Seu dia ainda está livre.</strong><span>Adicione uma sessão ou use a prioridade do edital para começar.</span><button type="button" class="btn btn-sm today-empty-action" id="btnPrimeiraSessaoHoje"><i class="bi-plus-lg me-1"></i>Planejar sessão</button></div>';
 
     const revisoes = document.getElementById("revisoesCentralHoje");
     revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
