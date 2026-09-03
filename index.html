@@ -278,6 +278,10 @@
     .planner-preview-copy span { margin-top: .15rem; color: #79665e; font-size: .68rem; }
     .planner-preview-reasons { display: flex; flex-wrap: wrap; gap: .28rem; margin-top: .35rem; }
     .planner-preview-reason { padding: .15rem .38rem; color: #6d574f; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .59rem; font-weight: 650; }
+    .planner-preview-change { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; margin-top: .35rem; color: #765f56; font-size: .62rem; }
+    .planner-preview-change .is-before { text-decoration: line-through; opacity: .68; }
+    .planner-preview-change .is-after { color: #2f6e4c; font-weight: 750; }
+    .planner-preview-item.is-replanning { border-left-color: #b8731b; }
     .planner-preview-remove { width: 2rem; height: 2rem; display: inline-grid; place-items: center; padding: 0; }
     .planner-status { min-height: 1.2rem; color: #765e55; font-size: .7rem; }
     .weekly-study-summary { padding: 1rem; background: linear-gradient(145deg, #fffdf9, #f7efe8); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .055); }
@@ -292,7 +296,8 @@
     .weekly-summary-progress > span { height: 100%; display: block; background: linear-gradient(90deg, #3d7f5c, #65a679); border-radius: inherit; }
     .weekly-summary-highlight { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; padding: .7rem .8rem; color: #5f4b42; background: rgba(255, 255, 255, .62); border-radius: .75rem; font-size: .75rem; }
     .overdue-sessions { margin-top: .75rem; padding: .8rem; background: rgba(190, 119, 23, .075); border: 1px solid rgba(190, 119, 23, .16); border-radius: .8rem; }
-    .overdue-sessions-header { display: flex; align-items: center; justify-content: space-between; gap: .65rem; margin-bottom: .55rem; color: #704a18; }
+    .overdue-sessions-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .65rem; margin-bottom: .55rem; color: #704a18; }
+    .overdue-sessions-heading, .overdue-sessions-actions { display: flex; align-items: center; gap: .45rem; }
     .overdue-session-list { display: grid; gap: .42rem; }
     .overdue-session-item { display: flex; align-items: center; justify-content: space-between; gap: .7rem; padding: .58rem .65rem; background: rgba(255, 253, 249, .9); border-radius: .65rem; }
     .overdue-session-copy { min-width: 0; }
@@ -2046,7 +2051,7 @@
                 <div class="weekly-summary-grid" id="resumoSemanalCronograma" aria-live="polite"></div>
                 <div class="weekly-summary-highlight d-none" id="destaqueMateriaSemana"></div>
                 <div class="overdue-sessions d-none" id="painelSessoesAtrasadas">
-                    <div class="overdue-sessions-header"><strong><i class="bi-clock-history me-1"></i>Sessões atrasadas</strong><span class="badge rounded-pill text-bg-warning" id="contadorSessoesAtrasadas">0</span></div>
+                    <div class="overdue-sessions-header"><div class="overdue-sessions-heading"><strong><i class="bi-clock-history me-1"></i>Sessões atrasadas</strong><span class="badge rounded-pill text-bg-warning" id="contadorSessoesAtrasadas">0</span></div><div class="overdue-sessions-actions"><button type="button" class="btn btn-sm btn-warning rounded-pill" id="btnAjustarSemana"><i class="bi-shuffle me-1"></i>Ajustar minha semana</button></div></div>
                     <div class="overdue-session-list" id="listaSessoesAtrasadas"></div>
                 </div>
             </section>
@@ -2937,15 +2942,15 @@
 
 <div class="modal fade" id="modalPlanejadorSemanal" tabindex="-1" aria-labelledby="tituloPlanejadorSemanal" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
-        <div class="modal-header"><div><span class="exam-evolution-kicker">Planejamento inteligente</span><h5 class="modal-title fw-bold" id="tituloPlanejadorSemanal">Montar minha semana</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <div class="modal-header"><div><span class="exam-evolution-kicker" id="rotuloPlanejadorSemanal">Planejamento inteligente</span><h5 class="modal-title fw-bold" id="tituloPlanejadorSemanal">Montar minha semana</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
         <div class="modal-body">
             <div class="smart-planner-steps" aria-label="Etapas do planejamento"><span class="smart-planner-step is-active" id="etapaDisponibilidade"><span>1</span>Disponibilidade</span><span class="smart-planner-step" id="etapaPrevia"><span>2</span>Prévia</span></div>
             <section id="painelDisponibilidadePlanejador">
-                <p class="planner-intro mb-3">Marque os períodos em que você pode estudar nos próximos sete dias e informe o tempo total disponível em cada período. Sessões já planejadas serão preservadas e descontadas desse tempo.</p>
+                <p class="planner-intro mb-3" id="introPlanejadorSemanal">Marque os períodos em que você pode estudar nos próximos sete dias e informe o tempo total disponível em cada período. Sessões já planejadas serão preservadas e descontadas desse tempo.</p>
                 <div class="planner-availability" id="disponibilidadePlanejador"></div>
             </section>
             <section class="d-none" id="painelPreviaPlanejador">
-                <p class="planner-intro mb-3">Revise a sugestão antes de salvar. Você pode remover qualquer sessão; nada será alterado no cronograma até a confirmação.</p>
+                <p class="planner-intro mb-3" id="introPreviaPlanejador">Revise a sugestão antes de salvar. Você pode remover qualquer sessão; nada será alterado no cronograma até a confirmação.</p>
                 <div class="planner-preview-summary" id="resumoPreviaPlanejador"></div>
                 <div class="planner-preview-list" id="listaPreviaPlanejador"></div>
             </section>
@@ -2954,8 +2959,8 @@
         <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btnCancelarPlanejador">Cancelar</button>
             <button type="button" class="btn btn-outline-secondary d-none" id="btnVoltarDisponibilidade"><i class="bi-arrow-left me-1"></i>Voltar</button>
-            <button type="button" class="btn btn-primary" id="btnGerarPlanoSemanal"><i class="bi-stars me-1"></i>Gerar prévia</button>
-            <button type="button" class="btn btn-primary d-none" id="btnConfirmarPlanoSemanal"><i class="bi-calendar2-check me-1"></i>Confirmar planejamento</button>
+            <button type="button" class="btn btn-primary" id="btnGerarPlanoSemanal"><i class="bi-stars me-1"></i><span id="textoGerarPlanoSemanal">Gerar prévia</span></button>
+            <button type="button" class="btn btn-primary d-none" id="btnConfirmarPlanoSemanal"><i class="bi-calendar2-check me-1"></i><span id="textoConfirmarPlanoSemanal">Confirmar planejamento</span></button>
         </div>
     </div></div>
 </div>
@@ -7942,6 +7947,7 @@ function exigirNuvemDiarioEstudos() {
 
 let rascunhoPlanoSemanal = [];
 let operacaoPlanejadorSemanal = false;
+let modoPlanejadorSemanal = "montar";
 
 function diasDoPlanejadorSemanal() {
     return Array.from({ length: 7 }, (_, indice) => somarDias(hojeISO(), indice));
@@ -7976,8 +7982,24 @@ function renderizarDisponibilidadePlanejador() {
     }).join("");
 }
 
-function abrirPlanejadorSemanal() {
+function configurarModoPlanejadorSemanal(modo = "montar") {
+    modoPlanejadorSemanal = modo === "replanejar" ? "replanejar" : "montar";
+    const replanejando = modoPlanejadorSemanal === "replanejar";
+    document.getElementById("rotuloPlanejadorSemanal").textContent = replanejando ? "Recuperação inteligente" : "Planejamento inteligente";
+    document.getElementById("tituloPlanejadorSemanal").textContent = replanejando ? "Ajustar minha semana" : "Montar minha semana";
+    document.getElementById("introPlanejadorSemanal").textContent = replanejando
+        ? "Informe quando você pode estudar nos próximos sete dias. As sessões atrasadas serão redistribuídas sem alterar estudos concluídos nem compromissos futuros."
+        : "Marque os períodos em que você pode estudar nos próximos sete dias e informe o tempo total disponível em cada período. Sessões já planejadas serão preservadas e descontadas desse tempo.";
+    document.getElementById("introPreviaPlanejador").textContent = replanejando
+        ? "Confira a data antiga e o novo horário de cada sessão. Você pode retirar sugestões; nenhuma mudança será salva antes da confirmação."
+        : "Revise a sugestão antes de salvar. Você pode remover qualquer sessão; nada será alterado no cronograma até a confirmação.";
+    document.getElementById("textoGerarPlanoSemanal").textContent = replanejando ? "Calcular ajustes" : "Gerar prévia";
+    document.getElementById("textoConfirmarPlanoSemanal").textContent = replanejando ? "Confirmar ajustes" : "Confirmar planejamento";
+}
+
+function abrirPlanejadorSemanal(modo = "montar") {
     rascunhoPlanoSemanal = [];
+    configurarModoPlanejadorSemanal(modo);
     renderizarDisponibilidadePlanejador();
     mostrarEtapaPlanejadorSemanal("disponibilidade");
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalPlanejadorSemanal")).show();
@@ -7993,11 +8015,87 @@ function coletarDisponibilidadePlanejador() {
     return disponibilidade;
 }
 
+function minutosAdaptativosPlanejador(tarefa) {
+    const base = Math.min(240, Math.max(25, Number(tarefa.minutosPlanejados) || 45));
+    const realizados = obterRegistrosEstudo()
+        .filter(registro => String(registro.materiaId || "") === String(tarefa.materiaId || "") && Number(registro.minutos) > 0)
+        .sort((a, b) => String(b.dataEstudo || "").localeCompare(String(a.dataEstudo || "")))
+        .slice(0, 5);
+    if (!realizados.length) return base;
+    const mediaReal = realizados.reduce((total, registro) => total + Number(registro.minutos), 0) / realizados.length;
+    return Math.min(240, Math.max(25, Math.round(((base + mediaReal) / 2) / 5) * 5));
+}
+
+function gerarRascunhoReplanejamento(disponibilidade) {
+    const hoje = hojeISO();
+    const tarefasExistentes = obterTarefas();
+    const prioridades = new Map(prioridadesInteligentesDoEdital().map(candidato => [String(candidato.topico.id), candidato]));
+    const atrasadas = tarefasExistentes.filter(tarefa => tarefa.status === "pendente" && tarefa.data && tarefa.data < hoje)
+        .map(tarefa => {
+            const prioridade = prioridades.get(String(tarefa.topicoEditalId || ""));
+            return { tarefa, prioridade, duracao: minutosAdaptativosPlanejador(tarefa) };
+        })
+        .sort((a, b) => {
+            const revisaoA = a.tarefa.proximaRevisao && a.tarefa.proximaRevisao <= hoje ? 1 : 0;
+            const revisaoB = b.tarefa.proximaRevisao && b.tarefa.proximaRevisao <= hoje ? 1 : 0;
+            return revisaoB - revisaoA || (b.prioridade?.pontuacao || 0) - (a.prioridade?.pontuacao || 0) || a.tarefa.data.localeCompare(b.tarefa.data);
+        });
+    if (!atrasadas.length) return { plano: [], totalAtrasadas: 0 };
+    const ordemPeriodos = { morning: 0, afternoon: 1, evening: 2 };
+    const slots = [...disponibilidade].sort((a, b) => a.data.localeCompare(b.data) || ordemPeriodos[a.periodo] - ordemPeriodos[b.periodo]);
+    const pendentes = [...atrasadas];
+    const plano = [];
+    let ultimaMateriaId = null;
+    slots.forEach(slot => {
+        const ocupados = tarefasExistentes.filter(tarefa => tarefa.data === slot.data && normalizarPeriodoEstudo(tarefa.periodo) === slot.periodo).reduce((total, tarefa) => total + (Number(tarefa.minutosPlanejados) || 0), 0);
+        let minutosRestantes = Math.max(0, slot.minutos - ocupados);
+        while (minutosRestantes >= 25 && pendentes.length) {
+            let indice = pendentes.findIndex(item => String(item.tarefa.materiaId) !== String(ultimaMateriaId));
+            if (indice < 0) indice = 0;
+            const item = pendentes.splice(indice, 1)[0];
+            let duracao = Math.min(item.duracao, minutosRestantes);
+            if (minutosRestantes - duracao > 0 && minutosRestantes - duracao < 25) duracao = minutosRestantes;
+            const tarefa = item.tarefa;
+            plano.push({
+                ...tarefa,
+                data: slot.data,
+                periodo: slot.periodo,
+                minutosPlanejados: duracao,
+                dataAnteriorPlanejador: tarefa.data,
+                periodoAnteriorPlanejador: normalizarPeriodoEstudo(tarefa.periodo),
+                minutosAnterioresPlanejador: Number(tarefa.minutosPlanejados) || 0,
+                motivosPlanejador: item.prioridade?.motivos || ["sessão atrasada"],
+                nivelPlanejador: item.prioridade?.nivel || "Recuperação",
+                pontuacaoPlanejador: item.prioridade?.pontuacao || 0
+            });
+            ultimaMateriaId = tarefa.materiaId;
+            minutosRestantes -= duracao;
+        }
+    });
+    return { plano, totalAtrasadas: atrasadas.length };
+}
+
 function gerarRascunhoPlanoSemanal() {
     const disponibilidade = coletarDisponibilidadePlanejador();
     const status = document.getElementById("statusPlanejadorSemanal");
     if (!disponibilidade.length) {
         status.textContent = "Escolha pelo menos um período com 25 minutos ou mais.";
+        return;
+    }
+    if (modoPlanejadorSemanal === "replanejar") {
+        const { plano, totalAtrasadas } = gerarRascunhoReplanejamento(disponibilidade);
+        if (!totalAtrasadas) {
+            status.textContent = "Ótimo: não há sessões atrasadas para redistribuir.";
+            return;
+        }
+        if (!plano.length) {
+            status.textContent = "Os períodos escolhidos já estão ocupados. Aumente o tempo disponível ou escolha outros horários.";
+            return;
+        }
+        rascunhoPlanoSemanal = plano;
+        renderizarPreviaPlanoSemanal();
+        mostrarEtapaPlanejadorSemanal("previa");
+        if (plano.length < totalAtrasadas) document.getElementById("statusPlanejadorSemanal").textContent = `${totalAtrasadas - plano.length} sessão(ões) ainda não couberam na disponibilidade informada.`;
         return;
     }
     const tarefasExistentes = obterTarefas();
@@ -8055,17 +8153,46 @@ function gerarRascunhoPlanoSemanal() {
 function renderizarPreviaPlanoSemanal() {
     const totalMinutos = rascunhoPlanoSemanal.reduce((total, tarefa) => total + tarefa.minutosPlanejados, 0);
     const materias = new Set(rascunhoPlanoSemanal.map(tarefa => String(tarefa.materiaId))).size;
-    document.getElementById("resumoPreviaPlanejador").innerHTML = `<div class="planner-preview-metric"><small>Sessões sugeridas</small><strong>${rascunhoPlanoSemanal.length}</strong></div><div class="planner-preview-metric"><small>Tempo planejado</small><strong>${formatarDuracao(totalMinutos)}</strong></div><div class="planner-preview-metric"><small>Matérias alternadas</small><strong>${materias}</strong></div>`;
+    const replanejando = modoPlanejadorSemanal === "replanejar";
+    document.getElementById("resumoPreviaPlanejador").innerHTML = `<div class="planner-preview-metric"><small>${replanejando ? "Sessões ajustadas" : "Sessões sugeridas"}</small><strong>${rascunhoPlanoSemanal.length}</strong></div><div class="planner-preview-metric"><small>Tempo planejado</small><strong>${formatarDuracao(totalMinutos)}</strong></div><div class="planner-preview-metric"><small>Matérias alternadas</small><strong>${materias}</strong></div>`;
     document.getElementById("listaPreviaPlanejador").innerHTML = rascunhoPlanoSemanal.length ? rascunhoPlanoSemanal.map(tarefa => {
         const data = new Date(`${tarefa.data}T12:00:00`);
         const nomeDia = data.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
-        return `<article class="planner-preview-item"><div class="planner-preview-when"><strong>${esc(nomeDia)}</strong>${esc(dataBR(tarefa.data))}<br>${esc(rotuloPeriodoEstudo(tarefa.periodo))}</div><div class="planner-preview-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)} · ${tarefa.minutosPlanejados} min</span><div class="planner-preview-reasons"><span class="planner-preview-reason">${esc(tarefa.nivelPlanejador)} prioridade</span>${tarefa.motivosPlanejador.slice(0, 2).map(motivo => `<span class="planner-preview-reason">${esc(motivo)}</span>`).join("")}</div></div><button type="button" class="btn btn-sm btn-outline-danger rounded-circle planner-preview-remove" data-id="${esc(tarefa.id)}" title="Remover da prévia" aria-label="Remover ${esc(tarefa.topico)} da prévia"><i class="bi-trash"></i></button></article>`;
+        const mudanca = replanejando ? `<div class="planner-preview-change"><span class="is-before">${esc(dataBR(tarefa.dataAnteriorPlanejador))} · ${esc(rotuloPeriodoEstudo(tarefa.periodoAnteriorPlanejador))}${tarefa.minutosAnterioresPlanejador ? ` · ${tarefa.minutosAnterioresPlanejador} min` : ""}</span><i class="bi-arrow-right" aria-hidden="true"></i><span class="is-after">${esc(dataBR(tarefa.data))} · ${esc(rotuloPeriodoEstudo(tarefa.periodo))} · ${tarefa.minutosPlanejados} min</span></div>` : `<div class="planner-preview-reasons"><span class="planner-preview-reason">${esc(tarefa.nivelPlanejador)} prioridade</span>${tarefa.motivosPlanejador.slice(0, 2).map(motivo => `<span class="planner-preview-reason">${esc(motivo)}</span>`).join("")}</div>`;
+        return `<article class="planner-preview-item ${replanejando ? "is-replanning" : ""}"><div class="planner-preview-when"><strong>${esc(nomeDia)}</strong>${esc(dataBR(tarefa.data))}<br>${esc(rotuloPeriodoEstudo(tarefa.periodo))}</div><div class="planner-preview-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)}</span>${mudanca}</div><button type="button" class="btn btn-sm btn-outline-danger rounded-circle planner-preview-remove" data-id="${esc(tarefa.id)}" title="Remover da prévia" aria-label="Remover ${esc(tarefa.topico)} da prévia"><i class="bi-trash"></i></button></article>`;
     }).join("") : '<div class="schedule-empty"><i class="bi-calendar-x" aria-hidden="true"></i><strong>Nenhuma sessão na prévia.</strong><small>Volte e gere uma nova distribuição.</small></div>';
     document.getElementById("btnConfirmarPlanoSemanal").disabled = rascunhoPlanoSemanal.length === 0;
     document.querySelectorAll(".planner-preview-remove").forEach(botao => botao.addEventListener("click", () => {
         rascunhoPlanoSemanal = rascunhoPlanoSemanal.filter(tarefa => String(tarefa.id) !== String(botao.dataset.id));
         renderizarPreviaPlanoSemanal();
     }));
+}
+
+async function confirmarReplanejamentoSemanal() {
+    const status = document.getElementById("statusPlanejadorSemanal");
+    const alteradas = [];
+    let planoSalvo = false;
+    status.textContent = `Atualizando ${rascunhoPlanoSemanal.length} sessões no seu cronograma...`;
+    try {
+        for (const tarefa of rascunhoPlanoSemanal) {
+            await exigirNuvemTarefas().atualizar(tarefa.id, { data: tarefa.data, periodo: tarefa.periodo, minutosPlanejados: tarefa.minutosPlanejados });
+            alteradas.push(tarefa);
+        }
+        const tarefasLocais = obterTarefas();
+        alteradas.forEach(tarefa => {
+            const local = tarefasLocais.find(item => String(item.id) === String(tarefa.id));
+            if (local) Object.assign(local, { data: tarefa.data, periodo: tarefa.periodo, minutosPlanejados: tarefa.minutosPlanejados });
+        });
+        salvar(LS.tarefas, tarefasLocais);
+        planoSalvo = true;
+    } catch (erro) {
+        console.error("Falha ao replanejar a semana", erro);
+        const desfazimentos = await Promise.allSettled(alteradas.reverse().map(tarefa => exigirNuvemTarefas().atualizar(tarefa.id, { data: tarefa.dataAnteriorPlanejador, periodo: tarefa.periodoAnteriorPlanejador, minutosPlanejados: tarefa.minutosAnterioresPlanejador || null })));
+        status.textContent = desfazimentos.every(resultado => resultado.status === "fulfilled")
+            ? "Os ajustes não foram salvos. As sessões alteradas foram restauradas."
+            : "O ajuste ficou incompleto. Atualize a página para recarregar o cronograma confirmado no Supabase.";
+    }
+    return planoSalvo;
 }
 
 async function confirmarPlanoSemanal() {
@@ -8077,6 +8204,19 @@ async function confirmarPlanoSemanal() {
     const criadas = [];
     let planoSalvo = false;
     botao.disabled = true;
+    if (modoPlanejadorSemanal === "replanejar") {
+        try { planoSalvo = await confirmarReplanejamentoSemanal(); }
+        finally {
+            operacaoPlanejadorSemanal = false;
+            botao.disabled = rascunhoPlanoSemanal.length === 0;
+        }
+        if (!planoSalvo) return;
+        rascunhoPlanoSemanal = [];
+        bootstrap.Modal.getInstance(document.getElementById("modalPlanejadorSemanal"))?.hide();
+        renderizarTudoCronograma();
+        renderizarHoje();
+        return;
+    }
     status.textContent = `Salvando ${tarefasNovas.length} sessões no seu cronograma...`;
     try {
         for (const tarefa of tarefasNovas) {
@@ -8103,7 +8243,8 @@ async function confirmarPlanoSemanal() {
     renderizarHoje();
 }
 
-document.getElementById("btnMontarSemana").addEventListener("click", abrirPlanejadorSemanal);
+document.getElementById("btnMontarSemana").addEventListener("click", () => abrirPlanejadorSemanal("montar"));
+document.getElementById("btnAjustarSemana").addEventListener("click", () => abrirPlanejadorSemanal("replanejar"));
 document.getElementById("btnGerarPlanoSemanal").addEventListener("click", gerarRascunhoPlanoSemanal);
 document.getElementById("btnVoltarDisponibilidade").addEventListener("click", () => mostrarEtapaPlanejadorSemanal("disponibilidade"));
 document.getElementById("btnConfirmarPlanoSemanal").addEventListener("click", confirmarPlanoSemanal);

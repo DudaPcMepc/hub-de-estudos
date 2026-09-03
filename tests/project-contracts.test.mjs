@@ -247,6 +247,21 @@ test("o planejador inteligente monta uma prévia semanal antes de salvar", () =>
     assert.match(html, /Promise\.allSettled\(criadas\.map\(tarefa => exigirNuvemTarefas\(\)\.excluir\(tarefa\.id\)\)\)/);
 });
 
+test("o cronograma redistribui sessões atrasadas somente após confirmar a prévia", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="btnAjustarSemana"/);
+    assert.match(html, /function gerarRascunhoReplanejamento\(disponibilidade\)/);
+    assert.match(html, /tarefa\.status === "pendente" && tarefa\.data && tarefa\.data < hoje/);
+    assert.match(html, /function minutosAdaptativosPlanejador\(tarefa\)/);
+    assert.match(html, /dataAnteriorPlanejador: tarefa\.data/);
+    assert.match(html, /class="planner-preview-change"/);
+    assert.match(html, /function confirmarReplanejamentoSemanal\(\)/);
+    assert.match(html, /exigirNuvemTarefas\(\)\.atualizar\(tarefa\.id, \{ data: tarefa\.data, periodo: tarefa\.periodo, minutosPlanejados: tarefa\.minutosPlanejados \}\)/);
+    assert.match(html, /Promise\.allSettled\(alteradas\.reverse\(\)\.map/);
+    assert.match(html, /abrirPlanejadorSemanal\("replanejar"\)/);
+});
+
 test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados", () => {
     const html = readProjectFile("index.html");
 
