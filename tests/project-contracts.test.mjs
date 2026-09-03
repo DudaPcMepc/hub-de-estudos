@@ -301,6 +301,24 @@ test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados"
     assert.match(html, /@media \(max-width: 575\.98px\)[\s\S]*?\.today-session \{ grid-template-columns: 1fr/);
 });
 
+test("a Central de Revisões reúne tópicos, flashcards e reforços do Caderno de Erros", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /data-bs-target="#p-revisoes"[^>]*>[\s\S]*?Revisões<\/button>/);
+    assert.match(html, /class="tab-pane fade" id="p-revisoes"/);
+    assert.match(html, /id="metricasCentralRevisoes"/);
+    assert.match(html, /id="filaCentralRevisoes"/);
+    assert.match(html, /id="errosCentralRevisoes"/);
+    assert.match(html, /function itensDaCentralRevisoes\(\)/);
+    assert.match(html, /tarefa\.proximaRevisao && tarefa\.proximaRevisao <= hoje/);
+    assert.match(html, /cardsVencidos\(materia\)/);
+    assert.match(html, /prioridadesInteligentesDoEdital\(\)/);
+    assert.match(html, /function iniciarFilaFlashcardsCentral\(itens\)/);
+    assert.match(html, /abrirConclusaoEstudo\(item\.id\)/);
+    assert.match(html, /abrirCardDoErro\(botao\.dataset\.id\)/);
+    assert.match(html, /btnComecarRevisaoHoje[^\n]*ativarAbaPrincipal\("#p-revisoes"\)/);
+});
+
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
