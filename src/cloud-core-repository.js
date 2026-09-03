@@ -1481,7 +1481,7 @@ export async function carregarRegistrosEstudo() {
 export async function carregarErrosRemotos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("error_entries")
-        .select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, error_review_events(id, retention_level, reviewed_at, next_review_on)")
+        .select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, source_type, source_fingerprint, question_text, selected_answer, correct_answer, explanation, quiz_topic, quiz_difficulty, board_name, occurrence_count, last_occurred_at, error_review_events(id, retention_level, reviewed_at, next_review_on)")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .order("occurred_on", { ascending: true })
@@ -1503,6 +1503,17 @@ export async function carregarErrosRemotos() {
         ultimaRetencao: erro.last_retention_level || null,
         revisoes: Math.max(0, Number(erro.review_count) || 0),
         reforcadoEm: erro.reinforced_at || null,
+        origem: erro.source_type || "manual",
+        impressaoDigital: erro.source_fingerprint || null,
+        enunciado: erro.question_text || "",
+        respostaEscolhida: erro.selected_answer || "",
+        respostaCorreta: erro.correct_answer || "",
+        explicacao: erro.explanation || "",
+        temaSimulado: erro.quiz_topic || "",
+        dificuldade: erro.quiz_difficulty || "",
+        banca: erro.board_name || "",
+        ocorrencias: Math.max(1, Number(erro.occurrence_count) || 1),
+        ultimaOcorrenciaEm: erro.last_occurred_at || null,
         historicoRevisoes: (erro.error_review_events || [])
             .map(evento => ({ id: evento.id, retention: evento.retention_level, reviewedAt: evento.reviewed_at, nextReview: evento.next_review_on }))
             .sort((a, b) => String(a.reviewedAt).localeCompare(String(b.reviewedAt)))
@@ -2082,6 +2093,26 @@ export async function criarErro(erro) {
     }), "Não foi possível registrar o erro no Supabase.");
     registrarId("error_entry", erro.id, id);
     return id;
+}
+
+export async function registrarErroSimulado(erro) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.rpc("record_quiz_error", {
+        target_workspace_id: contexto.workspaceId,
+        target_subject_id: resolverId("subject", erro.materiaId),
+        target_exam_topic_id: erro.topicoEditalId ? resolverId("exam_topic", erro.topicoEditalId) : null,
+        target_question: texto(erro.enunciado, 4000, "Enunciado da questão", true),
+        target_selected_answer: texto(erro.respostaEscolhida, 2000, "Resposta escolhida"),
+        target_correct_answer: texto(erro.respostaCorreta, 2000, "Resposta correta", true),
+        target_explanation: texto(erro.explicacao, 8000, "Explicação da questão"),
+        target_quiz_topic: texto(erro.temaSimulado, 2000, "Tema do simulado"),
+        target_difficulty: ["Fácil", "Médio", "Difícil"].includes(erro.dificuldade) ? erro.dificuldade : "",
+        target_board_name: texto(erro.banca, 300, "Banca")
+    });
+    const salvo = verificarResposta(resposta, "Não foi possível enviar a questão ao Caderno de Erros.");
+    if (!salvo?.id) throw erroRepositorio("O Caderno de Erros não confirmou o registro da questão.");
+    registrarId("error_entry", salvo.id, salvo.id);
+    return salvo;
 }
 
 export async function registrarRevisaoErro(idLocal, retencao, proximaRevisao) {

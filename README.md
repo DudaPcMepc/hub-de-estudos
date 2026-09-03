@@ -40,6 +40,8 @@ Os flashcards também podem ser organizados pelos tópicos pessoais do Edital. O
 
 O Caderno de Erros possui um ciclo próprio de reforço: cada registro pode ser avaliado como esquecido, lembrado parcialmente ou dominado, recebe uma próxima data e entra na Central de Revisões quando vence. O histórico e a indicação de flashcard criado são privados e sincronizados entre dispositivos. A estrutura está na migration `202609020027`.
 
+Respostas incorretas em simulados com IA entram automaticamente no Caderno de Erros com enunciado completo, alternativa escolhida, resposta correta, explicação, dificuldade, banca e tema. Questões repetidas são reativadas para revisão e aumentam seu contador de ocorrências, sem criar cópias duplicadas nem apagar o histórico anterior. A integração privada e atômica está na migration `202609020028`.
+
 O Diário de Estudos separa o planejamento daquilo que foi realmente realizado. Cada conclusão ou revisão registra data, período do dia, matéria, conteúdo, duração, retenção e anotação opcional privada, mantendo o vínculo com o tópico pessoal do Edital quando houver. Os registros aparecem no calendário dividido entre manhã, tarde e noite e no resumo semanal, podem ser corrigidos ou excluídos pelo próprio usuário e fazem parte do backup a partir da versão 5. A estrutura e seus reforços estão nas migrations `202609020020` a `202609020024`.
 
 Ao entrar, matérias, tópicos, notas, flashcards, materiais, links, sessões do cronograma, edital, caderno de erros e desempenho são recarregados do Supabase sem descartar itens locais ainda pendentes de conferência.

@@ -82,6 +82,17 @@ function normalizarDadosLocais(dados) {
             ultimaRetencao: item.ultimaRetencao || null,
             revisoes: Number(item.revisoes) || 0,
             reforcadoEm: item.reforcadoEm || null,
+            origem: item.origem || "manual",
+            impressaoDigital: item.impressaoDigital || null,
+            enunciado: item.enunciado || "",
+            respostaEscolhida: item.respostaEscolhida || "",
+            respostaCorreta: item.respostaCorreta || "",
+            explicacao: item.explicacao || "",
+            temaSimulado: item.temaSimulado || "",
+            dificuldade: item.dificuldade || "",
+            banca: item.banca || "",
+            ocorrencias: Number(item.ocorrencias) || 1,
+            ultimaOcorrenciaEm: item.ultimaOcorrenciaEm || null,
             historicoRevisoes: ordenarPorId((item.historicoRevisoes || []).map(evento => ({
                 id: String(evento.id), retention: evento.retention, reviewedAt: evento.reviewedAt, nextReview: evento.nextReview
             })))
@@ -149,7 +160,7 @@ async function buscarDadosRemotos(contexto) {
         supabase.from("exam_settings").select("exam_name, board_name, vacancies, exam_date").eq("workspace_id", workspaceId).eq("user_id", userId).maybeSingle(),
         supabase.from("exam_subjects").select("id, subject_id, question_count, weight").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("exam_topics").select("id, exam_subject_id, title, checked, position").eq("workspace_id", workspaceId).eq("user_id", userId).order("position"),
-        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, error_review_events(id, retention_level, reviewed_at, next_review_on)").eq("workspace_id", workspaceId).eq("user_id", userId),
+        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, source_type, source_fingerprint, question_text, selected_answer, correct_answer, explanation, quiz_topic, quiz_difficulty, board_name, occurrence_count, last_occurred_at, error_review_events(id, retention_level, reviewed_at, next_review_on)").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("subject_performance").select("subject_id, correct_answers, total_answers").eq("workspace_id", workspaceId).eq("user_id", userId)
     ]);
 
@@ -253,6 +264,17 @@ async function buscarDadosRemotos(contexto) {
             ultimaRetencao: item.last_retention_level || null,
             revisoes: Number(item.review_count) || 0,
             reforcadoEm: item.reinforced_at || null,
+            origem: item.source_type || "manual",
+            impressaoDigital: item.source_fingerprint || null,
+            enunciado: item.question_text || "",
+            respostaEscolhida: item.selected_answer || "",
+            respostaCorreta: item.correct_answer || "",
+            explicacao: item.explanation || "",
+            temaSimulado: item.quiz_topic || "",
+            dificuldade: item.quiz_difficulty || "",
+            banca: item.board_name || "",
+            ocorrencias: Number(item.occurrence_count) || 1,
+            ultimaOcorrenciaEm: item.last_occurred_at || null,
             historicoRevisoes: ordenarPorId((item.error_review_events || []).map(evento => ({
                 id: String(evento.id), retention: evento.retention_level, reviewedAt: evento.reviewed_at, nextReview: evento.next_review_on
             })))
