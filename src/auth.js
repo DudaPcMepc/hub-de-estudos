@@ -12,6 +12,8 @@ import {
     atualizarLink,
     atualizarTarefa,
     atualizarRegistroEstudo,
+    registrarRevisaoErro,
+    marcarReforcoErro,
     atualizarMateriaEdital,
     atualizarTopicoEdital,
     atualizarPosicoesMaterias,
@@ -231,6 +233,8 @@ window.HUB_CLOUD_EXAM = Object.freeze({
 
 window.HUB_CLOUD_ERRORS = Object.freeze({
     criar: criarErro,
+    revisar: registrarRevisaoErro,
+    marcarReforco: marcarReforcoErro,
     excluir: excluirErro,
     listar: carregarErrosRemotos
 });

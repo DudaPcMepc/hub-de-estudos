@@ -75,7 +75,16 @@ function normalizarDadosLocais(dados) {
             tema: item.tema || "",
             obs: item.obs || "",
             data: item.data || "",
-            topicoEditalId: item.topicoEditalId || null
+            topicoEditalId: item.topicoEditalId || null,
+            estadoRevisao: item.estadoRevisao || "pending",
+            proximaRevisao: item.proximaRevisao || item.data || "",
+            ultimaRevisaoEm: item.ultimaRevisaoEm || null,
+            ultimaRetencao: item.ultimaRetencao || null,
+            revisoes: Number(item.revisoes) || 0,
+            reforcadoEm: item.reforcadoEm || null,
+            historicoRevisoes: ordenarPorId((item.historicoRevisoes || []).map(evento => ({
+                id: String(evento.id), retention: evento.retention, reviewedAt: evento.reviewedAt, nextReview: evento.nextReview
+            })))
         }))),
         desempenho: Object.entries(dados.desempenho || {})
             .map(([materiaId, valor]) => ({
@@ -140,7 +149,7 @@ async function buscarDadosRemotos(contexto) {
         supabase.from("exam_settings").select("exam_name, board_name, vacancies, exam_date").eq("workspace_id", workspaceId).eq("user_id", userId).maybeSingle(),
         supabase.from("exam_subjects").select("id, subject_id, question_count, weight").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("exam_topics").select("id, exam_subject_id, title, checked, position").eq("workspace_id", workspaceId).eq("user_id", userId).order("position"),
-        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id").eq("workspace_id", workspaceId).eq("user_id", userId),
+        supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, error_review_events(id, retention_level, reviewed_at, next_review_on)").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("subject_performance").select("subject_id, correct_answers, total_answers").eq("workspace_id", workspaceId).eq("user_id", userId)
     ]);
 
@@ -237,7 +246,16 @@ async function buscarDadosRemotos(contexto) {
             tema: item.theme,
             obs: item.observation,
             data: item.occurred_on || "",
-            topicoEditalId: item.exam_topic_id ? idLegado(mapas, "exam_topic", item.exam_topic_id) : null
+            topicoEditalId: item.exam_topic_id ? idLegado(mapas, "exam_topic", item.exam_topic_id) : null,
+            estadoRevisao: item.review_state || "pending",
+            proximaRevisao: item.next_review_on || item.occurred_on || "",
+            ultimaRevisaoEm: item.last_reviewed_at || null,
+            ultimaRetencao: item.last_retention_level || null,
+            revisoes: Number(item.review_count) || 0,
+            reforcadoEm: item.reinforced_at || null,
+            historicoRevisoes: ordenarPorId((item.error_review_events || []).map(evento => ({
+                id: String(evento.id), retention: evento.retention_level, reviewedAt: evento.reviewed_at, nextReview: evento.next_review_on
+            })))
         }))),
         desempenho: performance
             .map(item => ({

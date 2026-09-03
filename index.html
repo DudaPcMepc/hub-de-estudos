@@ -414,7 +414,7 @@
     .review-hub-heading p { max-width: 680px; color: rgba(255, 255, 255, .76); font-size: .78rem; }
     .review-hub-heading .btn { flex: 0 0 auto; min-height: 42px; color: #5b2520; background: #fff8f1; border-color: transparent; font-weight: 750; }
     .review-hub-heading .btn:disabled { color: rgba(255, 255, 255, .62); background: rgba(255, 255, 255, .13); }
-    .review-hub-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
+    .review-hub-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: .65rem; margin-bottom: 1rem; }
     .review-hub-metric { display: flex; align-items: center; gap: .65rem; min-width: 0; padding: .82rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: .85rem; }
     .review-hub-metric i { width: 2.1rem; height: 2.1rem; display: grid; flex: 0 0 auto; place-items: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: .65rem; }
     .review-hub-metric strong, .review-hub-metric span { display: block; }
@@ -963,6 +963,22 @@
     .error-entry-actions .btn-primary { border-radius: .65rem; font-size: .7rem; font-weight: 700; }
     .error-entry-actions .btn-outline-danger { width: 2.05rem; height: 2.05rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-color: transparent; border-radius: .6rem; }
     .error-topic-badge { display: inline-flex; align-items: center; padding: .18rem .45rem; color: #6b4c40; background: rgba(184, 50, 42, .08); border-radius: 999px; font-size: .63rem; font-weight: 700; }
+    .error-review-badge { display: inline-flex; align-items: center; gap: .22rem; padding: .18rem .45rem; color: #765a23; background: rgba(190, 119, 23, .1); border-radius: 999px; font-size: .63rem; font-weight: 750; }
+    .error-review-badge.is-scheduled { color: #36586a; background: rgba(54, 106, 134, .1); }
+    .error-review-badge.is-mastered { color: #356048; background: rgba(79, 138, 103, .12); }
+    .error-reinforced-badge { display: inline-flex; align-items: center; gap: .22rem; padding: .18rem .45rem; color: #5b4b73; background: rgba(106, 82, 140, .1); border-radius: 999px; font-size: .63rem; font-weight: 700; }
+    .error-review-action { border-radius: .65rem; font-size: .7rem; font-weight: 700; }
+    .error-review-modal .modal-content { overflow: hidden; border: 0; border-radius: 1rem; }
+    .error-review-modal .modal-header { padding: 1rem 1.15rem; background: linear-gradient(120deg, rgba(244, 226, 212, .65), #fffdf9); }
+    .error-review-copy { padding: 1rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: .85rem; }
+    .error-review-copy h6 { color: var(--pimentel-cafe); font-size: 1rem; }
+    .error-review-copy p { margin: .45rem 0 0; color: #66544c; font-size: .8rem; line-height: 1.55; white-space: pre-line; }
+    .error-review-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: .85rem; }
+    .error-review-options .btn { min-height: 64px; display: grid; place-items: center; align-content: center; gap: .08rem; border-radius: .75rem; }
+    .error-review-options small { display: block; font-size: .61rem; opacity: .76; }
+    .error-review-history { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid rgba(59, 41, 35, .09); }
+    .error-review-history-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .45rem; }
+    .error-review-history-list span { padding: .22rem .45rem; color: #725f56; background: rgba(91, 67, 58, .06); border-radius: 999px; font-size: .62rem; }
     .error-empty {
         min-height: 220px;
         display: grid;
@@ -1011,6 +1027,7 @@
     .error-card-link-copy { min-width: 0; flex: 1; }
     .error-card-link .form-select { max-width: 420px; background-color: #fff; }
     .error-card-modal .modal-footer { padding: .85rem 1.2rem; background: #fff; }
+    @media (max-width: 575.98px) { .error-review-options { grid-template-columns: 1fr; } .error-entry-actions { width: 100%; flex-wrap: wrap; } .error-entry-actions .error-review-action, .error-entry-actions .btn-primary { flex: 1; } }
     .opcao-resposta { cursor: pointer; text-align: left; }
     .opcao-resposta.correta { background-color: #d1e7dd !important; border-color: #badbcc !important; font-weight: 600; }
     .opcao-resposta.incorreta { background-color: #f8d7da !important; border-color: #f5c2c7 !important; }
@@ -2023,18 +2040,18 @@
         <!-- ============================================================ -->
         <div class="tab-pane fade" id="p-revisoes">
             <header class="review-hub-heading">
-                <div><span class="exam-evolution-kicker text-white-50">REVISÃO ORIENTADA</span><h1 class="fw-bold mb-1">Central de Revisões</h1><p class="mb-0">Tópicos e flashcards vencidos em uma única fila, ordenados por atraso, dificuldade e relevância no Edital.</p></div>
+                <div><span class="exam-evolution-kicker text-white-50">REVISÃO ORIENTADA</span><h1 class="fw-bold mb-1">Central de Revisões</h1><p class="mb-0">Tópicos, flashcards e erros vencidos em uma única fila, ordenados por atraso, dificuldade e relevância no Edital.</p></div>
                 <button type="button" class="btn rounded-pill" id="btnIniciarCentralRevisoes"><i class="bi-play-fill me-1"></i>Iniciar revisão</button>
             </header>
             <section class="review-hub-metrics" id="metricasCentralRevisoes" aria-label="Resumo das revisões"></section>
             <div class="review-hub-layout">
                 <section class="review-hub-panel" aria-labelledby="tituloFilaCentralRevisoes">
-                    <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button></div></header>
+                    <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button><button type="button" class="review-hub-filter" data-review-filter="erros">Erros</button></div></header>
                     <div class="review-queue" id="filaCentralRevisoes" aria-live="polite"></div>
                 </section>
                 <aside class="review-hub-side">
                     <section class="review-hub-side-card"><h2><i class="bi-signpost-split me-1"></i>Como a ordem é definida</h2><div class="review-hub-strategy"><span><i class="bi-clock-history"></i>Itens mais atrasados sobem na fila.</span><span><i class="bi-bullseye"></i>O peso do Edital aumenta a prioridade.</span><span><i class="bi-activity"></i>Dificuldades e erros recebem reforço.</span></div></section>
-                    <section class="review-hub-side-card"><div class="d-flex align-items-center justify-content-between gap-2 mb-2"><h2 class="mb-0"><i class="bi-journal-x me-1"></i>Reforçar do Caderno de Erros</h2><span class="badge rounded-pill text-bg-light" id="contadorErrosCentralRevisoes">0</span></div><div class="review-error-list" id="errosCentralRevisoes"></div></section>
+                    <section class="review-hub-side-card"><div class="d-flex align-items-center justify-content-between gap-2 mb-2"><h2 class="mb-0"><i class="bi-journal-x me-1"></i>Caderno de Erros</h2><span class="badge rounded-pill text-bg-light" id="contadorErrosCentralRevisoes">0</span></div><div class="review-error-list" id="errosCentralRevisoes"></div></section>
                 </aside>
             </div>
         </div>
@@ -2348,7 +2365,7 @@
                         <h6 class="error-list-title fw-bold mb-0" id="tituloListaErros"><i class="bi-journal-text me-2"></i>Registros do caderno</h6>
                         <span class="error-list-summary" id="resumoErros"></span>
                     </div>
-                    <div class="error-list-filters"><select class="form-select form-select-sm error-list-filter" id="filtroErroMateria" aria-label="Filtrar erros por matéria"><option value="">Todas as matérias</option></select><select class="form-select form-select-sm error-list-filter" id="filtroErroTopico" aria-label="Filtrar erros por tópico do Edital"><option value="">Todos os tópicos</option></select></div>
+                    <div class="error-list-filters"><select class="form-select form-select-sm error-list-filter" id="filtroErroMateria" aria-label="Filtrar erros por matéria"><option value="">Todas as matérias</option></select><select class="form-select form-select-sm error-list-filter" id="filtroErroTopico" aria-label="Filtrar erros por tópico do Edital"><option value="">Todos os tópicos</option></select><select class="form-select form-select-sm error-list-filter" id="filtroErroRevisao" aria-label="Filtrar erros por revisão"><option value="">Todas as revisões</option><option value="due">Para revisar</option><option value="scheduled">Programados</option><option value="mastered">Dominados</option></select></div>
                 </header>
                 <div class="error-list-content" id="listaErros"></div>
             </section>
@@ -2965,6 +2982,23 @@
     </div></div>
 </div>
 
+<!-- ============ REVISAR ERRO ============ -->
+<div class="modal fade" id="modalRevisaoErro" tabindex="-1" aria-labelledby="tituloModalRevisaoErro" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered error-review-modal"><div class="modal-content">
+        <div class="modal-header"><div><div class="error-card-eyebrow">Caderno de Erros</div><h5 class="modal-title fw-bold" id="tituloModalRevisaoErro"><i class="bi-arrow-repeat me-2"></i>Revisar aprendizado</h5><p class="small text-muted mb-0 mt-1" id="contextoRevisaoErro"></p></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <div class="modal-body">
+            <section class="error-review-copy"><h6 class="fw-bold mb-0" id="temaRevisaoErro"></h6><p id="observacaoRevisaoErro"></p></section>
+            <p class="small fw-semibold mt-3 mb-1">Como você se saiu nesta revisão?</p>
+            <div class="error-review-options">
+                <button type="button" class="btn btn-outline-danger" data-error-retention="forgot"><span><i class="bi-x-circle me-1"></i>Esqueci</span><small id="intervaloErroForgot">Revisar amanhã</small></button>
+                <button type="button" class="btn btn-outline-warning" data-error-retention="partial"><span><i class="bi-circle-half me-1"></i>Parcialmente</span><small id="intervaloErroPartial">Revisar em 3 dias</small></button>
+                <button type="button" class="btn btn-outline-success" data-error-retention="mastered"><span><i class="bi-check2-circle me-1"></i>Dominei</span><small id="intervaloErroMastered">Revisar em 30 dias</small></button>
+            </div>
+            <section class="error-review-history"><strong class="small"><i class="bi-clock-history me-1"></i>Histórico</strong><div class="error-review-history-list" id="historicoRevisaoErro"></div></section>
+        </div>
+    </div></div>
+</div>
+
 <div class="modal fade" id="modalConfigEdital" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
         <div class="modal-header"><h5 class="modal-title fw-bold">Configurar Concurso</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -3207,7 +3241,20 @@ function obterEdital() {
     edital.intervalosRevisao = { forgot: 1, partial: 3, good: 7, mastered: 30, ...(edital.intervalosRevisao || {}) };
     return edital;
 }
-function obterErros() { return carregar(LS.erros, []); }
+function normalizarErroRevisao(erro) {
+    const estado = ["pending", "scheduled", "mastered"].includes(erro.estadoRevisao) ? erro.estadoRevisao : "pending";
+    return {
+        ...erro,
+        estadoRevisao: estado,
+        proximaRevisao: erro.proximaRevisao || erro.data || hojeISO(),
+        ultimaRevisaoEm: erro.ultimaRevisaoEm || null,
+        ultimaRetencao: ["forgot", "partial", "mastered"].includes(erro.ultimaRetencao) ? erro.ultimaRetencao : null,
+        revisoes: Math.max(0, Number(erro.revisoes) || 0),
+        reforcadoEm: erro.reforcadoEm || null,
+        historicoRevisoes: Array.isArray(erro.historicoRevisoes) ? erro.historicoRevisoes : []
+    };
+}
+function obterErros() { return carregar(LS.erros, []).map(normalizarErroRevisao); }
 function obterDesempenho() { return carregar(LS.desempenho, {}); }
 function nomeDaMateria(id) { return (obterMaterias().find(m => String(m.id) === String(id)) || {}).nome || "(matéria removida)"; }
 
@@ -3370,7 +3417,8 @@ function renderizarHoje() {
     const revisoesTarefas = tarefas.filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje)
         .sort((a, b) => a.proximaRevisao.localeCompare(b.proximaRevisao));
     const flashcardsPendentes = materiasNormalizadas().reduce((total, materia) => total + cardsVencidos(materia).length, 0);
-    const totalRevisoes = revisoesTarefas.length + flashcardsPendentes;
+    const errosPendentes = obterErros().filter(erro => erro.estadoRevisao !== "mastered" && erro.proximaRevisao <= hoje);
+    const totalRevisoes = revisoesTarefas.length + flashcardsPendentes + errosPendentes.length;
     const atrasadas = tarefas.filter(tarefa => tarefa.status === "pendente" && tarefa.data && tarefa.data < hoje)
         .sort((a, b) => a.data.localeCompare(b.data));
     const semEstimativa = tarefasHoje.filter(tarefa => !Number(tarefa.minutosPlanejados)).length;
@@ -3379,7 +3427,7 @@ function renderizarHoje() {
         <article class="today-metric"><span class="today-metric-label">Tempo planejado</span><strong class="today-metric-value">${formatarDuracao(minutosPlanejados)}</strong><small class="today-metric-helper">${tarefasHoje.length} ${tarefasHoje.length === 1 ? "sessão" : "sessões"}${semEstimativa ? ` · ${semEstimativa} sem estimativa` : ""}</small></article>
         <article class="today-metric"><span class="today-metric-label">Tempo estudado</span><strong class="today-metric-value">${formatarDuracao(minutosEstudados)}</strong><small class="today-metric-helper">${registrosHoje.length} ${registrosHoje.length === 1 ? "registro real" : "registros reais"}</small></article>
         <article class="today-metric"><span class="today-metric-label">Progresso do dia</span><strong class="today-metric-value">${concluidasHoje} de ${tarefasHoje.length}</strong><div class="today-progress" role="progressbar" aria-label="Progresso das sessões de hoje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cumprimento}"><span style="width:${cumprimento}%"></span></div></article>
-        <article class="today-metric"><span class="today-metric-label">Revisões pendentes</span><strong class="today-metric-value">${totalRevisoes}</strong><small class="today-metric-helper">${revisoesTarefas.filter(tarefa => tarefa.proximaRevisao < hoje).length} atrasadas · ${flashcardsPendentes} flashcards</small></article>`;
+        <article class="today-metric"><span class="today-metric-label">Revisões pendentes</span><strong class="today-metric-value">${totalRevisoes}</strong><small class="today-metric-helper">${revisoesTarefas.filter(tarefa => tarefa.proximaRevisao < hoje).length} tópicos atrasados · ${flashcardsPendentes} cards · ${errosPendentes.length} erros</small></article>`;
 
     const periodos = ["morning", "afternoon", "evening"];
     const htmlTarefa = tarefa => {
@@ -3420,7 +3468,7 @@ function renderizarHoje() {
     }).join("") : '<div class="today-empty"><i class="bi-calendar2-heart" aria-hidden="true"></i><strong>Seu dia ainda está livre.</strong><span>Adicione uma sessão ou use a prioridade do edital para começar.</span><button type="button" class="btn btn-sm today-empty-action" id="btnPrimeiraSessaoHoje"><i class="bi-plus-lg me-1"></i>Planejar sessão</button></div>';
 
     const revisoes = document.getElementById("revisoesCentralHoje");
-    revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
+    revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${errosPendentes.length ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-journal-x"></i></span><div class="today-side-copy"><strong>${errosPendentes.length} erro${errosPendentes.length === 1 ? "" : "s"}</strong><span>Reforço ativo no Caderno de Erros.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
 
     const painelAtrasos = document.getElementById("atrasosCentralHoje");
     painelAtrasos.classList.toggle("d-none", atrasadas.length === 0);
@@ -3521,7 +3569,13 @@ function itensDaCentralRevisoes() {
         const dificuldade = Number(card.erros || 0) * 4 + Math.max(0, 5 - Number(card.caixa || 1)) * 2;
         return { tipo: "card", id: card.id, materiaId: materia.id, materiaNome: materia.nome, titulo: card.frente, data: card.proxima || hoje, atraso, pontos: 45 + atraso * 6 + dificuldade + Math.round((prioridade?.pontuacao || 0) * .5), nivel: `Caixa ${Number(card.caixa || 1)}`, detalhe: topicoEditalDoFlashcard(materia.id, card.topicoEditalId)?.titulo || "Flashcard sem tópico" };
     }));
-    return [...topicos, ...cards].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
+    const erros = obterErros().filter(erro => erro.estadoRevisao !== "mastered" && erro.proximaRevisao <= hoje).map(erro => {
+        const prioridade = prioridades.get(String(erro.topicoEditalId || ""));
+        const atraso = diasDeAtrasoRevisao(erro.proximaRevisao);
+        const reincidencia = Math.min(30, Number(erro.revisoes || 0) * 3);
+        return { tipo: "erro", id: erro.id, materiaId: erro.materiaId, titulo: erro.tema, data: erro.proximaRevisao, atraso, pontos: 80 + atraso * 8 + reincidencia + Math.round((prioridade?.pontuacao || 0) * .7), nivel: erro.revisoes ? `${erro.revisoes} revisão${erro.revisoes === 1 ? "" : "ões"}` : "Primeiro reforço", detalhe: topicoDoErro(erro)?.titulo || "Caderno de Erros" };
+    });
+    return [...topicos, ...cards, ...erros].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
 }
 
 function iniciarFilaFlashcardsCentral(itens) {
@@ -3534,7 +3588,8 @@ function iniciarFilaFlashcardsCentral(itens) {
 function abrirItemCentralRevisoes(item) {
     if (!item) return;
     if (item.tipo === "topico") abrirConclusaoEstudo(item.id);
-    else iniciarFilaFlashcardsCentral([item]);
+    else if (item.tipo === "card") iniciarFilaFlashcardsCentral([item]);
+    else abrirRevisaoErro(item.id);
 }
 
 function iniciarProximaRevisaoCentral() {
@@ -3542,7 +3597,7 @@ function iniciarProximaRevisaoCentral() {
     if (!fila.length) return;
     const primeira = fila[0];
     if (primeira.tipo === "card") iniciarFilaFlashcardsCentral(fila.filter(item => item.tipo === "card"));
-    else abrirConclusaoEstudo(primeira.id);
+    else abrirItemCentralRevisoes(primeira);
 }
 
 function renderizarCentralRevisoes() {
@@ -3551,13 +3606,15 @@ function renderizarCentralRevisoes() {
     const fila = itensDaCentralRevisoes();
     const topicos = fila.filter(item => item.tipo === "topico");
     const cards = fila.filter(item => item.tipo === "card");
+    const errosVencidos = fila.filter(item => item.tipo === "erro");
     const atrasados = fila.filter(item => item.atraso > 0).length;
-    const estimativa = topicos.reduce((total, item) => total + (Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20), 0) + cards.length * 2;
+    const estimativa = topicos.reduce((total, item) => total + (Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20), 0) + cards.length * 2 + errosVencidos.length * 3;
     const erros = [...obterErros()].sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")));
     document.getElementById("metricasCentralRevisoes").innerHTML = [
         ["bi-inboxes", fila.length, "revisões na fila"],
         ["bi-journal-check", topicos.length, "tópicos programados"],
         ["bi-card-heading", cards.length, "flashcards vencidos"],
+        ["bi-journal-x", errosVencidos.length, "erros para reforçar"],
         ["bi-clock", formatarDuracao(estimativa), "tempo estimado"]
     ].map(([icone, valor, rotulo]) => `<article class="review-hub-metric"><i class="${icone}" aria-hidden="true"></i><div><strong>${esc(valor)}</strong><span>${esc(rotulo)}</span></div></article>`).join("");
     const botaoIniciar = document.getElementById("btnIniciarCentralRevisoes");
@@ -3568,15 +3625,20 @@ function renderizarCentralRevisoes() {
         botao.classList.toggle("is-active", ativo);
         botao.setAttribute("aria-pressed", String(ativo));
     });
-    const filtrada = fila.filter(item => filtroCentralRevisoes === "todos" || (filtroCentralRevisoes === "topicos" ? item.tipo === "topico" : item.tipo === "card"));
+    const tipoDoFiltro = { topicos: "topico", cards: "card", erros: "erro" }[filtroCentralRevisoes];
+    const filtrada = fila.filter(item => filtroCentralRevisoes === "todos" || item.tipo === tipoDoFiltro);
     document.getElementById("filaCentralRevisoes").innerHTML = filtrada.length ? filtrada.map((item, indice) => {
         const topico = item.tipo === "topico";
+        const erro = item.tipo === "erro";
         const atraso = item.atraso ? `${item.atraso} ${item.atraso === 1 ? "dia atrasado" : "dias atrasado"}` : "vence hoje";
-        return `<article class="review-queue-item is-${topico ? "topic" : "card"}"><span class="review-queue-icon"><i class="bi-${topico ? "journal-check" : "card-heading"}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : "play-fill"} me-1"></i>${topico ? "Registrar revisão" : "Revisar card"}</button></article>`;
+        const icone = topico ? "journal-check" : erro ? "journal-x" : "card-heading";
+        const rotulo = topico ? "Registrar revisão" : erro ? "Revisar erro" : "Revisar card";
+        return `<article class="review-queue-item is-${topico ? "topic" : "card"}"><span class="review-queue-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : erro ? "Erro" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : "play-fill"} me-1"></i>${rotulo}</button></article>`;
     }).join("") : `<div class="review-hub-empty"><i class="bi-check2-circle" aria-hidden="true"></i><strong class="d-block">${fila.length ? "Nenhum item neste filtro" : "Tudo em dia por aqui"}</strong><small>${fila.length ? "Escolha outro tipo de revisão." : "A próxima revisão aparecerá automaticamente na data certa."}</small></div>`;
     document.querySelectorAll(".review-queue-action").forEach(botao => botao.addEventListener("click", () => abrirItemCentralRevisoes(fila.find(item => item.tipo === botao.dataset.reviewKind && String(item.id) === String(botao.dataset.reviewId)))));
     document.getElementById("contadorErrosCentralRevisoes").textContent = erros.length;
-    document.getElementById("errosCentralRevisoes").innerHTML = erros.length ? erros.slice(0, 4).map(erro => `<article class="review-error-item"><strong>${esc(erro.tema)}</strong><small>${esc(nomeDaMateria(erro.materiaId))}${topicoDoErro(erro) ? ` · ${esc(topicoDoErro(erro).titulo)}` : ""}</small><button type="button" class="btn btn-sm btn-outline-primary rounded-pill btn-reforcar-erro-central" data-id="${esc(erro.id)}"><i class="bi-card-heading me-1"></i>Transformar em flashcard</button></article>`).join("") : '<div class="small text-muted py-2"><i class="bi-check2 me-1"></i>Nenhum erro aguardando reforço.</div>';
+    document.getElementById("errosCentralRevisoes").innerHTML = erros.length ? erros.slice(0, 4).map(erro => `<article class="review-error-item"><strong>${esc(erro.tema)}</strong><small>${esc(nomeDaMateria(erro.materiaId))}${topicoDoErro(erro) ? ` · ${esc(topicoDoErro(erro).titulo)}` : ""}</small><button type="button" class="btn btn-sm btn-outline-primary rounded-pill btn-revisar-erro-central" data-id="${esc(erro.id)}"><i class="bi-arrow-repeat me-1"></i>Revisar</button><button type="button" class="btn btn-sm btn-link btn-reforcar-erro-central" data-id="${esc(erro.id)}"><i class="bi-card-heading me-1"></i>${erro.reforcadoEm ? "Novo flashcard" : "Criar flashcard"}</button></article>`).join("") : '<div class="small text-muted py-2"><i class="bi-check2 me-1"></i>Nenhum erro registrado.</div>';
+    document.querySelectorAll(".btn-revisar-erro-central").forEach(botao => botao.addEventListener("click", () => abrirRevisaoErro(botao.dataset.id)));
     document.querySelectorAll(".btn-reforcar-erro-central").forEach(botao => botao.addEventListener("click", () => abrirCardDoErro(botao.dataset.id)));
     const tituloFila = document.getElementById("tituloFilaCentralRevisoes");
     tituloFila.innerHTML = `<i class="bi-list-check me-1"></i>Fila recomendada${atrasados ? ` <span class="badge rounded-pill text-bg-warning ms-1">${atrasados} atrasada${atrasados === 1 ? "" : "s"}</span>` : ""}`;
@@ -9867,6 +9929,8 @@ document.getElementById("formAddMateriaEdital").addEventListener("submit", async
 // ============================================================
 let operacaoErroEmAndamento = false;
 let erroParaFlashcardId = null;
+let erroEmRevisaoId = null;
+let operacaoRevisaoErroEmAndamento = false;
 
 function exigirNuvemErros() {
     if (!window.HUB_CLOUD_ERRORS) throw new Error("A conexão do caderno de erros com o Supabase ainda não está pronta.");
@@ -9906,10 +9970,69 @@ function topicoDoErro(erro) {
     return obterTopicosEditalDaMateria(erro.materiaId).find(topico => String(topico.id) === String(erro.topicoEditalId)) || null;
 }
 
+function estadoVisualRevisaoErro(erro) {
+    if (erro.estadoRevisao === "mastered") return { classe: "is-mastered", icone: "bi-check2-circle", texto: "Dominado" };
+    if (erro.proximaRevisao <= hojeISO()) return { classe: "", icone: "bi-alarm", texto: erro.revisoes ? "Revisar novamente" : "Pendente" };
+    return { classe: "is-scheduled", icone: "bi-calendar2-check", texto: `Revisão ${dataBR(erro.proximaRevisao)}` };
+}
+
+function abrirRevisaoErro(id) {
+    const erro = obterErros().find(item => String(item.id) === String(id));
+    if (!erro) return;
+    erroEmRevisaoId = erro.id;
+    const intervalos = obterEdital().intervalosRevisao;
+    document.getElementById("contextoRevisaoErro").textContent = `${nomeDaMateria(erro.materiaId)}${topicoDoErro(erro) ? ` · ${topicoDoErro(erro).titulo}` : ""}`;
+    document.getElementById("temaRevisaoErro").textContent = erro.tema;
+    document.getElementById("observacaoRevisaoErro").textContent = erro.obs || "Tente explicar mentalmente a resposta correta antes de avaliar.";
+    document.getElementById("intervaloErroForgot").textContent = `Volta em ${intervalos.forgot} ${intervalos.forgot === 1 ? "dia" : "dias"}`;
+    document.getElementById("intervaloErroPartial").textContent = `Volta em ${intervalos.partial} ${intervalos.partial === 1 ? "dia" : "dias"}`;
+    document.getElementById("intervaloErroMastered").textContent = `Conferir em ${intervalos.mastered} dias`;
+    const nomes = { forgot: "Esqueci", partial: "Parcial", mastered: "Dominei" };
+    document.getElementById("historicoRevisaoErro").innerHTML = erro.historicoRevisoes.length
+        ? [...erro.historicoRevisoes].reverse().slice(0, 6).map(evento => `<span>${esc(nomes[evento.retention] || "Revisado")} · ${esc(new Date(evento.reviewedAt).toLocaleDateString("pt-BR"))}</span>`).join("")
+        : '<span>Primeira revisão</span>';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalRevisaoErro")).show();
+}
+
+async function registrarAvaliacaoErro(retencao, botao) {
+    if (operacaoRevisaoErroEmAndamento) return;
+    const erros = obterErros();
+    const erro = erros.find(item => String(item.id) === String(erroEmRevisaoId));
+    if (!erro) return;
+    const dias = obterEdital().intervalosRevisao[retencao];
+    const proximaRevisao = somarDias(hojeISO(), dias);
+    operacaoRevisaoErroEmAndamento = true;
+    document.querySelectorAll("[data-error-retention]").forEach(item => { item.disabled = true; });
+    try {
+        const resultado = await exigirNuvemErros().revisar(erro.id, retencao, proximaRevisao);
+        const revisadoEm = resultado?.lastReviewedAt || new Date().toISOString();
+        erro.estadoRevisao = resultado?.reviewState || (retencao === "mastered" ? "mastered" : "scheduled");
+        erro.proximaRevisao = resultado?.nextReview || proximaRevisao;
+        erro.ultimaRevisaoEm = revisadoEm;
+        erro.ultimaRetencao = retencao;
+        erro.revisoes = Math.max(1, Number(resultado?.reviewCount) || erro.revisoes + 1);
+        erro.historicoRevisoes.push({ id: resultado?.reviewId || novoId(), retention: retencao, reviewedAt: revisadoEm, nextReview: erro.proximaRevisao });
+        salvar(LS.erros, erros);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalRevisaoErro")).hide();
+        renderizarErros();
+        renderizarCentralRevisoes();
+        renderizarHoje();
+        renderizarMaterias();
+        renderizarEdital();
+    } catch (falha) {
+        console.error("Falha ao revisar erro", falha);
+        alert("A revisão não foi salva porque o Supabase não confirmou a operação.");
+    } finally {
+        operacaoRevisaoErroEmAndamento = false;
+        document.querySelectorAll("[data-error-retention]").forEach(item => { item.disabled = false; });
+        botao?.blur();
+    }
+}
+
 async function registrarErro(materiaId, tema, obs, topicoEditalId = null) {
     const erros = obterErros();
     const topicoValido = obterTopicosEditalDaMateria(materiaId).some(topico => String(topico.id) === String(topicoEditalId));
-    const erro = { id: novoId(), materiaId, tema, obs, data: hojeISO(), topicoEditalId: topicoValido ? topicoEditalId : null };
+    const erro = { id: novoId(), materiaId, tema, obs, data: hojeISO(), topicoEditalId: topicoValido ? topicoEditalId : null, estadoRevisao: "pending", proximaRevisao: hojeISO(), ultimaRevisaoEm: null, ultimaRetencao: null, revisoes: 0, reforcadoEm: null, historicoRevisoes: [] };
     await exigirNuvemErros().criar(erro);
     try {
         erros.push(erro);
@@ -9926,10 +10049,14 @@ function renderizarErros() {
     const erros = obterErros();
     const filtro = document.getElementById("filtroErroMateria").value;
     const filtroTopico = document.getElementById("filtroErroTopico").value;
+    const filtroRevisao = document.getElementById("filtroErroRevisao").value;
     const lista = erros.filter(erro => {
         if (filtro && String(erro.materiaId) !== String(filtro)) return false;
         if (filtroTopico === "sem-topico" && topicoDoErro(erro)) return false;
         if (filtroTopico && filtroTopico !== "sem-topico" && String(erro.topicoEditalId) !== String(filtroTopico)) return false;
+        if (filtroRevisao === "due" && (erro.estadoRevisao === "mastered" || erro.proximaRevisao > hojeISO())) return false;
+        if (filtroRevisao === "scheduled" && (erro.estadoRevisao !== "scheduled" || erro.proximaRevisao <= hojeISO())) return false;
+        if (filtroRevisao === "mastered" && erro.estadoRevisao !== "mastered") return false;
         return true;
     });
     const container = document.getElementById("listaErros");
@@ -9960,19 +10087,21 @@ function renderizarErros() {
             <div class="error-entry-list">
                 ${porMateria[nome].map(er => {
                     const topico = topicoDoErro(er);
+                    const estado = estadoVisualRevisaoErro(er);
                     return `<article class="error-entry-card">
                         <div class="error-entry-main">
-                            <div class="error-entry-meta"><span class="error-entry-date"><i class="bi-calendar3" aria-hidden="true"></i>${esc(exibirDataErro(er.data))}</span>${topico ? `<span class="error-topic-badge"><i class="bi-bookmark" aria-hidden="true"></i>${esc(topico.titulo)}</span>` : ""}</div>
+                            <div class="error-entry-meta"><span class="error-entry-date"><i class="bi-calendar3" aria-hidden="true"></i>${esc(exibirDataErro(er.data))}</span>${topico ? `<span class="error-topic-badge"><i class="bi-bookmark" aria-hidden="true"></i>${esc(topico.titulo)}</span>` : ""}<span class="error-review-badge ${estado.classe}"><i class="${estado.icone}" aria-hidden="true"></i>${esc(estado.texto)}</span>${er.reforcadoEm ? '<span class="error-reinforced-badge"><i class="bi-card-heading" aria-hidden="true"></i>Flashcard criado</span>' : ""}</div>
                             <h6 class="error-entry-title">${esc(er.tema)}</h6>
-                            ${er.obs ? `<p class="error-entry-note">${esc(er.obs)}</p>` : ""}
+                            ${er.obs ? `<p class="error-entry-note">${esc(er.obs)}</p>` : ""}${er.revisoes ? `<small class="d-block mt-2 text-muted"><i class="bi-clock-history me-1"></i>${er.revisoes} ${er.revisoes === 1 ? "revisão registrada" : "revisões registradas"}</small>` : ""}
                         </div>
-                        <div class="error-entry-actions"><button class="btn btn-sm btn-primary btn-criar-card-erro" data-id="${er.id}" type="button" title="Transformar em flashcard"><i class="bi-card-heading me-1" aria-hidden="true"></i><span>Criar flashcard</span></button><button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}" type="button" title="Excluir erro" aria-label="Excluir erro"><i class="bi-trash"></i></button></div>
+                        <div class="error-entry-actions"><button class="btn btn-sm btn-outline-primary error-review-action btn-revisar-erro" data-id="${er.id}" type="button"><i class="bi-arrow-repeat me-1" aria-hidden="true"></i><span>Revisar</span></button><button class="btn btn-sm btn-primary btn-criar-card-erro" data-id="${er.id}" type="button" title="Transformar em flashcard"><i class="bi-card-heading me-1" aria-hidden="true"></i><span>${er.reforcadoEm ? "Novo flashcard" : "Criar flashcard"}</span></button><button class="btn btn-sm btn-outline-danger btn-excluir-erro" data-id="${er.id}" type="button" title="Excluir erro" aria-label="Excluir erro"><i class="bi-trash"></i></button></div>
                     </article>`;
                 }).join("")}
             </div>
         </section>`).join("");
 
     container.querySelectorAll(".btn-criar-card-erro").forEach(btn => btn.addEventListener("click", () => abrirCardDoErro(btn.dataset.id)));
+    container.querySelectorAll(".btn-revisar-erro").forEach(btn => btn.addEventListener("click", () => abrirRevisaoErro(btn.dataset.id)));
 
     container.querySelectorAll(".btn-excluir-erro").forEach(btn => btn.addEventListener("click", async () => {
         if (operacaoErroEmAndamento) return;
@@ -10044,6 +10173,9 @@ document.getElementById("formErro").addEventListener("submit", async (e) => {
 document.getElementById("erroMateria").addEventListener("change", () => popularTopicosErro());
 document.getElementById("filtroErroMateria").addEventListener("change", () => { popularFiltroTopicosErro(); renderizarErros(); });
 document.getElementById("filtroErroTopico").addEventListener("change", renderizarErros);
+document.getElementById("filtroErroRevisao").addEventListener("change", renderizarErros);
+document.querySelectorAll("[data-error-retention]").forEach(botao => botao.addEventListener("click", () => registrarAvaliacaoErro(botao.dataset.errorRetention, botao)));
+document.getElementById("modalRevisaoErro").addEventListener("hidden.bs.modal", () => { erroEmRevisaoId = null; });
 document.getElementById("formCardDoErro").addEventListener("submit", async evento => {
     evento.preventDefault();
     if (operacaoCardEmAndamento) return;
@@ -10054,7 +10186,18 @@ document.getElementById("formCardDoErro").addEventListener("submit", async event
     try {
         const criado = await criarFlashcardSincronizado(document.getElementById("cardErroFrente").value, document.getElementById("cardErroVerso").value, { materiaId: erro.materiaId, topicoEditalId: document.getElementById("cardErroTopicoEdital").value || null });
         if (!criado) return;
+        try {
+            const reforco = await exigirNuvemErros().marcarReforco(erro.id);
+            const erros = obterErros();
+            const atualizado = erros.find(item => String(item.id) === String(erro.id));
+            if (atualizado) atualizado.reforcadoEm = reforco?.reinforced_at || new Date().toISOString();
+            salvar(LS.erros, erros);
+        } catch (falhaReforco) {
+            console.warn("O flashcard foi criado, mas o indicador de reforço não foi sincronizado.", falhaReforco);
+        }
         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCardDoErro")).hide();
+        renderizarErros();
+        renderizarCentralRevisoes();
         renderizarEdital();
     } finally {
         botao.disabled = false;
@@ -10295,7 +10438,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 8;
+const VERSAO_BACKUP = 9;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -10500,7 +10643,29 @@ function validarPayloadBackup(payload) {
         objetoBackup(er, `Erro ${i + 1}`);
         const materiaId = idBackup(er.materiaId, "Matéria do erro");
         garantirReferenciaMateria(materiaId, idsMaterias, `Erro ${i + 1}`);
-        return { id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro"), topicoEditalId: versao >= 8 && er.topicoEditalId ? idBackup(er.topicoEditalId, "Tópico do Edital do erro") : null };
+        const historicoRevisoes = versao >= 9 ? listaBackup(er.historicoRevisoes || [], "Histórico de revisões do erro", 1000).map((evento, indice) => {
+            objetoBackup(evento, `Revisão ${indice + 1} do erro`);
+            if (!["forgot", "partial", "mastered"].includes(evento.retention)) throw new Error(`Retenção da revisão ${indice + 1} do erro inválida.`);
+            const reviewedAt = instanteBackup(evento.reviewedAt, "Data da revisão do erro");
+            const nextReview = dataBackup(evento.nextReview, "Próxima revisão do erro");
+            if (!reviewedAt || !nextReview) throw new Error(`Revisão ${indice + 1} do erro incompleta.`);
+            return { id: idBackup(evento.id, "ID da revisão do erro"), retention: evento.retention, reviewedAt, nextReview };
+        }) : [];
+        garantirIdsUnicos(historicoRevisoes, "Histórico de revisões do erro");
+        const estadoRevisao = versao >= 9 && ["pending", "scheduled", "mastered"].includes(er.estadoRevisao) ? er.estadoRevisao : "pending";
+        const revisoes = versao >= 9 ? numeroBackup(er.revisoes, "Quantidade de revisões do erro", 0, 100000, 0) : 0;
+        if (!Number.isInteger(revisoes)) throw new Error(`Quantidade de revisões do erro ${i + 1} inválida.`);
+        return {
+            id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro"),
+            topicoEditalId: versao >= 8 && er.topicoEditalId ? idBackup(er.topicoEditalId, "Tópico do Edital do erro") : null,
+            estadoRevisao,
+            proximaRevisao: versao >= 9 ? dataBackup(er.proximaRevisao, "Próxima revisão do erro") : dataBackup(er.data, "Data do erro"),
+            ultimaRevisaoEm: versao >= 9 ? instanteBackup(er.ultimaRevisaoEm, "Última revisão do erro") : null,
+            ultimaRetencao: versao >= 9 && ["forgot", "partial", "mastered"].includes(er.ultimaRetencao) ? er.ultimaRetencao : null,
+            revisoes,
+            reforcadoEm: versao >= 9 ? instanteBackup(er.reforcadoEm, "Data do reforço do erro") : null,
+            historicoRevisoes
+        };
     });
     garantirIdsUnicos(erros, "Erros");
     erros.forEach((erro, indice) => {

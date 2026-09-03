@@ -1481,7 +1481,7 @@ export async function carregarRegistrosEstudo() {
 export async function carregarErrosRemotos() {
     const contexto = obterContexto();
     const resposta = await supabase.from("error_entries")
-        .select("id, subject_id, theme, observation, occurred_on, exam_topic_id")
+        .select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, error_review_events(id, retention_level, reviewed_at, next_review_on)")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .order("occurred_on", { ascending: true })
@@ -1496,7 +1496,16 @@ export async function carregarErrosRemotos() {
         tema: erro.theme,
         obs: erro.observation || "",
         data: erro.occurred_on || "",
-        topicoEditalId: erro.exam_topic_id ? (topicosEditalLegados?.get(erro.exam_topic_id) || erro.exam_topic_id) : null
+        topicoEditalId: erro.exam_topic_id ? (topicosEditalLegados?.get(erro.exam_topic_id) || erro.exam_topic_id) : null,
+        estadoRevisao: erro.review_state || "pending",
+        proximaRevisao: erro.next_review_on || erro.occurred_on || "",
+        ultimaRevisaoEm: erro.last_reviewed_at || null,
+        ultimaRetencao: erro.last_retention_level || null,
+        revisoes: Math.max(0, Number(erro.review_count) || 0),
+        reforcadoEm: erro.reinforced_at || null,
+        historicoRevisoes: (erro.error_review_events || [])
+            .map(evento => ({ id: evento.id, retention: evento.retention_level, reviewedAt: evento.reviewed_at, nextReview: evento.next_review_on }))
+            .sort((a, b) => String(a.reviewedAt).localeCompare(String(b.reviewedAt)))
     }));
 }
 
@@ -2067,10 +2076,35 @@ export async function criarErro(erro) {
         theme: texto(erro.tema, 4000, "Tema do erro", true),
         observation: texto(erro.obs, 10000, "Observação do erro"),
         occurred_on: dataIso(erro.data, "Data do erro", true),
-        exam_topic_id: erro.topicoEditalId ? resolverId("exam_topic", erro.topicoEditalId) : null
+        exam_topic_id: erro.topicoEditalId ? resolverId("exam_topic", erro.topicoEditalId) : null,
+        review_state: erro.estadoRevisao || "pending",
+        next_review_on: dataIso(erro.proximaRevisao || erro.data, "Próxima revisão do erro", true)
     }), "Não foi possível registrar o erro no Supabase.");
     registrarId("error_entry", erro.id, id);
     return id;
+}
+
+export async function registrarRevisaoErro(idLocal, retencao, proximaRevisao) {
+    const contexto = exigirContexto();
+    if (!["forgot", "partial", "mastered"].includes(retencao)) throw erroRepositorio("Avaliação da revisão do erro inválida.");
+    const resposta = await supabase.rpc("record_error_review", {
+        target_workspace_id: contexto.workspaceId,
+        target_error_entry_id: resolverId("error_entry", idLocal),
+        target_retention_level: retencao,
+        target_next_review_on: dataIso(proximaRevisao, "Próxima revisão do erro", true)
+    });
+    return verificarResposta(resposta, "Não foi possível registrar a revisão do erro.");
+}
+
+export async function marcarReforcoErro(idLocal) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.from("error_entries").update({ reinforced_at: new Date().toISOString() })
+        .eq("id", resolverId("error_entry", idLocal))
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("reinforced_at")
+        .maybeSingle();
+    return verificarRegistro(resposta, "Não foi possível marcar o reforço do erro.");
 }
 
 export async function excluirErro(idLocal) {

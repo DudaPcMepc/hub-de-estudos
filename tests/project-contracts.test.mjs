@@ -333,7 +333,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 8/);
+    assert.match(html, /VERSAO_BACKUP = 9/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -380,7 +380,7 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(html, /id="filtroTopicoCards"/);
     assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
     assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
-    assert.match(html, /VERSAO_BACKUP = 8/);
+    assert.match(html, /VERSAO_BACKUP = 9/);
     assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
     assert.match(repository, /export async function atualizarTopicoFlashcard/);
     assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
@@ -407,14 +407,45 @@ test("o Caderno de Erros transforma aprendizados em flashcards do tópico corret
     assert.match(html, /class="exam-topic-learning"/);
     assert.match(html, /btn-revisar-topico-edital/);
     assert.match(html, /btn-ver-erros-topico/);
-    assert.match(html, /VERSAO_BACKUP = 8/);
-    assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id"\)/);
+    assert.match(html, /VERSAO_BACKUP = 9/);
+    assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id,/);
     assert.match(repository, /exam_topic_id: erro\.topicoEditalId \? resolverId\("exam_topic", erro\.topicoEditalId\) : null/);
     assert.match(verification, /topicoEditalId: item\.exam_topic_id \? idLegado\(mapas, "exam_topic", item\.exam_topic_id\) : null/);
     assert.match(migration, /create trigger error_entries_validate_exam_topic/i);
     assert.match(migration, /topic\.user_id = new\.user_id/i);
     assert.match(migration, /exam_subject\.subject_id = new\.subject_id/i);
     assert.match(migration, /update public\.error_entries entry[\s\S]*?entry\.user_id = current_user_id/i);
+});
+
+test("o Caderno de Erros possui ciclo privado de revisão integrado à fila", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const verification = readProjectFile("src/cloud-verification.js");
+    const migration = readProjectFile("supabase/migrations/202609020027_error_review_cycle.sql");
+
+    assert.match(html, /id="modalRevisaoErro"/);
+    assert.match(html, /data-error-retention="forgot"/);
+    assert.match(html, /data-error-retention="partial"/);
+    assert.match(html, /data-error-retention="mastered"/);
+    assert.match(html, /data-review-filter="erros"/);
+    assert.match(html, /function abrirRevisaoErro\(id\)/);
+    assert.match(html, /function registrarAvaliacaoErro\(retencao, botao\)/);
+    assert.match(html, /erro\.estadoRevisao !== "mastered" && erro\.proximaRevisao <= hoje/);
+    assert.match(html, /historicoRevisoes\.push/);
+    assert.match(html, /exigirNuvemErros\(\)\.marcarReforco/);
+    assert.match(repository, /export async function registrarRevisaoErro/);
+    assert.match(repository, /supabase\.rpc\("record_error_review"/);
+    assert.match(repository, /export async function marcarReforcoErro/);
+    assert.match(auth, /revisar: registrarRevisaoErro/);
+    assert.match(auth, /marcarReforco: marcarReforcoErro/);
+    assert.match(verification, /error_review_events\(id, retention_level, reviewed_at, next_review_on\)/);
+    assert.match(migration, /create table public\.error_review_events/i);
+    assert.match(migration, /force row level security/i);
+    assert.match(migration, /user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /create or replace function public\.record_error_review/i);
+    assert.match(migration, /update public\.error_entries entry[\s\S]*?insert into public\.error_review_events/i);
+    assert.match(migration, /import_local_hub_core_v6/i);
 });
 
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
