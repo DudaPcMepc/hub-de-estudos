@@ -409,6 +409,54 @@
     .today-quick-action i { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .085); border-radius: .55rem; font-size: .95rem; }
     .today-quick-action:hover { transform: translateY(-2px); color: var(--pimentel-vermelho-escuro); background: #fffdf9; border-color: rgba(184, 50, 42, .28); box-shadow: 0 .35rem .75rem rgba(59, 41, 35, .08); }
     .today-quick-action:focus-visible { outline: 3px solid rgba(184, 50, 42, .22); outline-offset: 2px; }
+    .review-hub-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; padding: 1.2rem; color: #fff; background: linear-gradient(135deg, #4b2420, #7f3029); border-radius: 1.1rem; box-shadow: 0 .8rem 2rem rgba(60, 25, 22, .15); }
+    .review-hub-heading h1 { font-size: clamp(1.25rem, 2vw, 1.7rem); }
+    .review-hub-heading p { max-width: 680px; color: rgba(255, 255, 255, .76); font-size: .78rem; }
+    .review-hub-heading .btn { flex: 0 0 auto; min-height: 42px; color: #5b2520; background: #fff8f1; border-color: transparent; font-weight: 750; }
+    .review-hub-heading .btn:disabled { color: rgba(255, 255, 255, .62); background: rgba(255, 255, 255, .13); }
+    .review-hub-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-bottom: 1rem; }
+    .review-hub-metric { display: flex; align-items: center; gap: .65rem; min-width: 0; padding: .82rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: .85rem; }
+    .review-hub-metric i { width: 2.1rem; height: 2.1rem; display: grid; flex: 0 0 auto; place-items: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); border-radius: .65rem; }
+    .review-hub-metric strong, .review-hub-metric span { display: block; }
+    .review-hub-metric strong { color: var(--pimentel-cafe); font-size: 1.05rem; line-height: 1.1; }
+    .review-hub-metric span { margin-top: .15rem; color: #806d65; font-size: .65rem; }
+    .review-hub-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .7fr); gap: 1rem; align-items: start; }
+    .review-hub-panel { overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .05); }
+    .review-hub-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .65rem; padding: .9rem 1rem; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .review-hub-panel-header h2 { margin: 0; color: var(--pimentel-cafe); font-size: .92rem; }
+    .review-hub-filters { display: flex; gap: .35rem; }
+    .review-hub-filter { padding: .3rem .55rem; color: #78645c; background: transparent; border: 0; border-radius: 999px; font-size: .65rem; font-weight: 700; }
+    .review-hub-filter.is-active { color: #fff; background: var(--pimentel-vermelho); }
+    .review-queue { display: grid; gap: .55rem; padding: .8rem; }
+    .review-queue-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; align-items: center; padding: .75rem; background: #faf5ef; border-left: 4px solid #9d7f72; border-radius: .75rem; }
+    .review-queue-item.is-topic { border-left-color: #b8731b; }
+    .review-queue-item.is-card { border-left-color: #3d7f5c; }
+    .review-queue-icon { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; color: #fff; background: #83665b; border-radius: .65rem; }
+    .review-queue-item.is-topic .review-queue-icon { background: #b8731b; }
+    .review-queue-item.is-card .review-queue-icon { background: #3d7f5c; }
+    .review-queue-copy { min-width: 0; }
+    .review-queue-copy strong, .review-queue-copy span { display: block; }
+    .review-queue-copy strong { overflow: hidden; color: #49352e; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+    .review-queue-copy > span { margin-top: .14rem; color: #7b675f; font-size: .66rem; }
+    .review-queue-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
+    .review-queue-meta span { padding: .16rem .4rem; color: #6d574f; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .58rem; font-weight: 650; }
+    .review-queue-action { white-space: nowrap; }
+    .review-hub-empty { padding: 2.8rem 1rem; color: #78675f; text-align: center; }
+    .review-hub-empty i { display: block; margin-bottom: .55rem; color: #5c8b6d; font-size: 2rem; }
+    .review-hub-side { display: grid; gap: 1rem; }
+    .review-hub-side-card { padding: .9rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .9rem; }
+    .review-hub-side-card h2 { margin-bottom: .65rem; color: var(--pimentel-cafe); font-size: .82rem; }
+    .review-hub-strategy { display: grid; gap: .5rem; }
+    .review-hub-strategy span { display: flex; gap: .45rem; color: #745f56; font-size: .67rem; line-height: 1.4; }
+    .review-hub-strategy i { color: var(--pimentel-vermelho); }
+    .review-error-list { display: grid; gap: .45rem; }
+    .review-error-item { padding: .6rem; background: #f8f0ea; border-radius: .65rem; }
+    .review-error-item strong, .review-error-item small { display: block; }
+    .review-error-item strong { color: #503b33; font-size: .7rem; }
+    .review-error-item small { margin: .12rem 0 .45rem; color: #806b62; font-size: .61rem; }
+    @media (max-width: 991.98px) { .review-hub-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 767.98px) { .review-hub-metrics { grid-template-columns: 1fr 1fr; } .review-hub-heading { align-items: stretch; flex-direction: column; } .review-hub-heading .btn { align-self: flex-start; } }
+    @media (max-width: 575.98px) { .review-hub-metrics { gap: .45rem; } .review-hub-metric { padding: .65rem; } .review-queue-item { grid-template-columns: auto minmax(0, 1fr); } .review-queue-action { grid-column: 1 / -1; width: 100%; } .review-hub-panel-header { align-items: flex-start; flex-direction: column; } }
     .today-empty { min-height: 220px; display: grid; place-items: center; align-content: center; gap: .35rem; padding: 1.5rem; color: var(--pimentel-cafe-claro); text-align: center; }
     .today-empty i { color: #4f8a67; font-size: 2rem; }
     .today-empty strong { color: var(--pimentel-cafe); }
@@ -1920,6 +1968,7 @@
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#p-hoje" type="button"><i class="bi-house-heart-fill me-1"></i>Hoje</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-materias" type="button"><i class="bi-collection-fill me-1"></i>Matérias</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-cronograma" type="button"><i class="bi-calendar-week-fill me-1"></i>Cronograma</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-revisoes" type="button"><i class="bi-arrow-repeat me-1"></i>Revisões</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-edital" type="button"><i class="bi-file-earmark-spreadsheet-fill me-1"></i>Edital &amp; Estratégia</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-simulados" type="button"><i class="bi-fire me-1"></i>Simulados (IA)</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#p-erros" type="button"><i class="bi-journal-x me-1"></i>Caderno de Erros</button></li>
@@ -1965,6 +2014,27 @@
                             <button type="button" class="today-quick-action" data-today-tab="#p-erros"><i class="bi-journal-x" aria-hidden="true"></i><span>Erros</span></button>
                         </div>
                     </section>
+                </aside>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CENTRAL DE REVISÕES -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade" id="p-revisoes">
+            <header class="review-hub-heading">
+                <div><span class="exam-evolution-kicker text-white-50">REVISÃO ORIENTADA</span><h1 class="fw-bold mb-1">Central de Revisões</h1><p class="mb-0">Tópicos e flashcards vencidos em uma única fila, ordenados por atraso, dificuldade e relevância no Edital.</p></div>
+                <button type="button" class="btn rounded-pill" id="btnIniciarCentralRevisoes"><i class="bi-play-fill me-1"></i>Iniciar revisão</button>
+            </header>
+            <section class="review-hub-metrics" id="metricasCentralRevisoes" aria-label="Resumo das revisões"></section>
+            <div class="review-hub-layout">
+                <section class="review-hub-panel" aria-labelledby="tituloFilaCentralRevisoes">
+                    <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button></div></header>
+                    <div class="review-queue" id="filaCentralRevisoes" aria-live="polite"></div>
+                </section>
+                <aside class="review-hub-side">
+                    <section class="review-hub-side-card"><h2><i class="bi-signpost-split me-1"></i>Como a ordem é definida</h2><div class="review-hub-strategy"><span><i class="bi-clock-history"></i>Itens mais atrasados sobem na fila.</span><span><i class="bi-bullseye"></i>O peso do Edital aumenta a prioridade.</span><span><i class="bi-activity"></i>Dificuldades e erros recebem reforço.</span></div></section>
+                    <section class="review-hub-side-card"><div class="d-flex align-items-center justify-content-between gap-2 mb-2"><h2 class="mb-0"><i class="bi-journal-x me-1"></i>Reforçar do Caderno de Erros</h2><span class="badge rounded-pill text-bg-light" id="contadorErrosCentralRevisoes">0</span></div><div class="review-error-list" id="errosCentralRevisoes"></div></section>
                 </aside>
             </div>
         </div>
@@ -3378,7 +3448,7 @@ function renderizarHoje() {
     document.getElementById("btnPrimeiraSessaoHoje")?.addEventListener("click", abrirFormularioSessaoHoje);
     document.getElementById("btnPlanejarPrioridadeHoje")?.addEventListener("click", evento => planejarPrioridadePelaCentralHoje(evento.currentTarget.dataset.materiaId, evento.currentTarget.dataset.topicoId));
     document.getElementById("btnProximaPrioridadeHoje")?.addEventListener("click", avancarPrioridadeHoje);
-    document.getElementById("btnComecarRevisaoHoje")?.addEventListener("click", () => revisoesTarefas.length ? abrirConclusaoEstudo(revisoesTarefas[0].id) : iniciarRevisao(null));
+    document.getElementById("btnComecarRevisaoHoje")?.addEventListener("click", () => ativarAbaPrincipal("#p-revisoes"));
     document.querySelector(".btn-reagendar-hoje-central")?.addEventListener("click", async evento => { await reagendarTarefaParaHoje(evento.currentTarget.dataset.id, evento.currentTarget); });
     document.getElementById("btnRetomarLeituraHoje")?.addEventListener("click", evento => {
         const botao = evento.currentTarget;
@@ -3428,6 +3498,93 @@ document.getElementById("btnFlashcardsHoje").addEventListener("click", () => {
     else ativarAbaPrincipal("#p-materias");
 });
 document.querySelector('[data-bs-target="#p-hoje"]').addEventListener("shown.bs.tab", renderizarHoje);
+
+let filtroCentralRevisoes = "todos";
+
+function diasDeAtrasoRevisao(data) {
+    if (!data) return 0;
+    const diferenca = new Date(`${hojeISO()}T12:00:00`) - new Date(`${data}T12:00:00`);
+    return Math.max(0, Math.floor(diferenca / 86400000));
+}
+
+function itensDaCentralRevisoes() {
+    const hoje = hojeISO();
+    const prioridades = new Map(prioridadesInteligentesDoEdital().map(candidato => [String(candidato.topico.id), candidato]));
+    const topicos = obterTarefas().filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje).map(tarefa => {
+        const prioridade = prioridades.get(String(tarefa.topicoEditalId || ""));
+        const atraso = diasDeAtrasoRevisao(tarefa.proximaRevisao);
+        return { tipo: "topico", id: tarefa.id, materiaId: tarefa.materiaId, titulo: tarefa.topico, data: tarefa.proximaRevisao, atraso, pontos: 70 + atraso * 7 + (prioridade?.pontuacao || 0), nivel: prioridade?.nivel || "Revisão", detalhe: tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "Sessão de estudo" };
+    });
+    const cards = materiasNormalizadas().flatMap(materia => cardsVencidos(materia).map(card => {
+        const prioridade = prioridades.get(String(card.topicoEditalId || ""));
+        const atraso = diasDeAtrasoRevisao(card.proxima || hoje);
+        const dificuldade = Number(card.erros || 0) * 4 + Math.max(0, 5 - Number(card.caixa || 1)) * 2;
+        return { tipo: "card", id: card.id, materiaId: materia.id, materiaNome: materia.nome, titulo: card.frente, data: card.proxima || hoje, atraso, pontos: 45 + atraso * 6 + dificuldade + Math.round((prioridade?.pontuacao || 0) * .5), nivel: `Caixa ${Number(card.caixa || 1)}`, detalhe: topicoEditalDoFlashcard(materia.id, card.topicoEditalId)?.titulo || "Flashcard sem tópico" };
+    }));
+    return [...topicos, ...cards].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
+}
+
+function iniciarFilaFlashcardsCentral(itens) {
+    filaRevisao = itens.filter(item => item.tipo === "card").map(item => ({ materiaId: item.materiaId, materiaNome: item.materiaNome || nomeDaMateria(item.materiaId), cardId: item.id }));
+    indiceRevisao = 0;
+    mostrarCardRevisao();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalRevisao")).show();
+}
+
+function abrirItemCentralRevisoes(item) {
+    if (!item) return;
+    if (item.tipo === "topico") abrirConclusaoEstudo(item.id);
+    else iniciarFilaFlashcardsCentral([item]);
+}
+
+function iniciarProximaRevisaoCentral() {
+    const fila = itensDaCentralRevisoes();
+    if (!fila.length) return;
+    const primeira = fila[0];
+    if (primeira.tipo === "card") iniciarFilaFlashcardsCentral(fila.filter(item => item.tipo === "card"));
+    else abrirConclusaoEstudo(primeira.id);
+}
+
+function renderizarCentralRevisoes() {
+    const raiz = document.getElementById("p-revisoes");
+    if (!raiz || !USUARIO_ATUAL_ID) return;
+    const fila = itensDaCentralRevisoes();
+    const topicos = fila.filter(item => item.tipo === "topico");
+    const cards = fila.filter(item => item.tipo === "card");
+    const atrasados = fila.filter(item => item.atraso > 0).length;
+    const estimativa = topicos.reduce((total, item) => total + (Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20), 0) + cards.length * 2;
+    const erros = [...obterErros()].sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")));
+    document.getElementById("metricasCentralRevisoes").innerHTML = [
+        ["bi-inboxes", fila.length, "revisões na fila"],
+        ["bi-journal-check", topicos.length, "tópicos programados"],
+        ["bi-card-heading", cards.length, "flashcards vencidos"],
+        ["bi-clock", formatarDuracao(estimativa), "tempo estimado"]
+    ].map(([icone, valor, rotulo]) => `<article class="review-hub-metric"><i class="${icone}" aria-hidden="true"></i><div><strong>${esc(valor)}</strong><span>${esc(rotulo)}</span></div></article>`).join("");
+    const botaoIniciar = document.getElementById("btnIniciarCentralRevisoes");
+    botaoIniciar.disabled = fila.length === 0;
+    botaoIniciar.innerHTML = fila.length ? `<i class="bi-play-fill me-1"></i>Iniciar revisão (${fila.length})` : '<i class="bi-check2-circle me-1"></i>Revisões em dia';
+    document.querySelectorAll(".review-hub-filter").forEach(botao => {
+        const ativo = botao.dataset.reviewFilter === filtroCentralRevisoes;
+        botao.classList.toggle("is-active", ativo);
+        botao.setAttribute("aria-pressed", String(ativo));
+    });
+    const filtrada = fila.filter(item => filtroCentralRevisoes === "todos" || (filtroCentralRevisoes === "topicos" ? item.tipo === "topico" : item.tipo === "card"));
+    document.getElementById("filaCentralRevisoes").innerHTML = filtrada.length ? filtrada.map((item, indice) => {
+        const topico = item.tipo === "topico";
+        const atraso = item.atraso ? `${item.atraso} ${item.atraso === 1 ? "dia atrasado" : "dias atrasado"}` : "vence hoje";
+        return `<article class="review-queue-item is-${topico ? "topic" : "card"}"><span class="review-queue-icon"><i class="bi-${topico ? "journal-check" : "card-heading"}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : "play-fill"} me-1"></i>${topico ? "Registrar revisão" : "Revisar card"}</button></article>`;
+    }).join("") : `<div class="review-hub-empty"><i class="bi-check2-circle" aria-hidden="true"></i><strong class="d-block">${fila.length ? "Nenhum item neste filtro" : "Tudo em dia por aqui"}</strong><small>${fila.length ? "Escolha outro tipo de revisão." : "A próxima revisão aparecerá automaticamente na data certa."}</small></div>`;
+    document.querySelectorAll(".review-queue-action").forEach(botao => botao.addEventListener("click", () => abrirItemCentralRevisoes(fila.find(item => item.tipo === botao.dataset.reviewKind && String(item.id) === String(botao.dataset.reviewId)))));
+    document.getElementById("contadorErrosCentralRevisoes").textContent = erros.length;
+    document.getElementById("errosCentralRevisoes").innerHTML = erros.length ? erros.slice(0, 4).map(erro => `<article class="review-error-item"><strong>${esc(erro.tema)}</strong><small>${esc(nomeDaMateria(erro.materiaId))}${topicoDoErro(erro) ? ` · ${esc(topicoDoErro(erro).titulo)}` : ""}</small><button type="button" class="btn btn-sm btn-outline-primary rounded-pill btn-reforcar-erro-central" data-id="${esc(erro.id)}"><i class="bi-card-heading me-1"></i>Transformar em flashcard</button></article>`).join("") : '<div class="small text-muted py-2"><i class="bi-check2 me-1"></i>Nenhum erro aguardando reforço.</div>';
+    document.querySelectorAll(".btn-reforcar-erro-central").forEach(botao => botao.addEventListener("click", () => abrirCardDoErro(botao.dataset.id)));
+    const tituloFila = document.getElementById("tituloFilaCentralRevisoes");
+    tituloFila.innerHTML = `<i class="bi-list-check me-1"></i>Fila recomendada${atrasados ? ` <span class="badge rounded-pill text-bg-warning ms-1">${atrasados} atrasada${atrasados === 1 ? "" : "s"}</span>` : ""}`;
+}
+
+document.getElementById("btnIniciarCentralRevisoes").addEventListener("click", iniciarProximaRevisaoCentral);
+document.querySelectorAll(".review-hub-filter").forEach(botao => botao.addEventListener("click", () => { filtroCentralRevisoes = botao.dataset.reviewFilter; renderizarCentralRevisoes(); }));
+document.querySelector('[data-bs-target="#p-revisoes"]').addEventListener("shown.bs.tab", renderizarCentralRevisoes);
 
 // ---------- Modelo / migração ----------
 function normalizarMateria(m) {
@@ -7889,6 +8046,7 @@ document.querySelectorAll("#revisaoBotoes [data-nivel]").forEach(b => b.addEvent
         mostrarCardRevisao();
         renderizarMaterias();
         renderizarHoje();
+        renderizarCentralRevisoes();
         if (materiaAbertaId) { const mm = materiaPorId(materiaAbertaId); if (mm) renderizarCards(mm); }
     } catch (erro) {
         console.error("Falha ao salvar a revisão do flashcard", erro);
@@ -8569,6 +8727,7 @@ document.getElementById("formConcluirEstudo").addEventListener("submit", async e
         tarefaConclusaoId = null;
         renderizarTudoCronograma();
         renderizarEdital();
+        renderizarCentralRevisoes();
         if (materiaAbertaId) renderizarWorkspace();
     } catch (erro) {
         console.error("Falha ao registrar a revisão", erro);
@@ -9759,6 +9918,7 @@ async function registrarErro(materiaId, tema, obs, topicoEditalId = null) {
         await exigirNuvemErros().excluir(erro.id);
         throw erroLocal;
     }
+    renderizarCentralRevisoes();
     return erro;
 }
 
@@ -9824,6 +9984,7 @@ function renderizarErros() {
             await exigirNuvemErros().excluir(erro.id);
             salvar(LS.erros, erros.filter(item => String(item.id) !== String(erro.id)));
             renderizarErros();
+            renderizarCentralRevisoes();
             renderizarMaterias();
             renderizarEdital();
             if (String(materiaAbertaId) === String(erro.materiaId)) renderizarWorkspace();
@@ -10463,6 +10624,7 @@ function iniciar() {
     renderizarErros();
     renderizarDesempenho();
     renderizarHoje();
+    renderizarCentralRevisoes();
     limparBackdropsOrfaos();
 }
 window.obterDadosParaPreviaMigracao = () => {
