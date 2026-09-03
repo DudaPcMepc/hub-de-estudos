@@ -233,6 +233,20 @@ test("o cronograma usa formulário responsivo, semana em cartões e estados vazi
     assert.match(html, /class="schedule-list-panel is-complete"/);
 });
 
+test("o planejador inteligente monta uma prévia semanal antes de salvar", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="btnMontarSemana"/);
+    assert.match(html, /id="modalPlanejadorSemanal"/);
+    assert.match(html, /function gerarRascunhoPlanoSemanal\(\)/);
+    assert.match(html, /prioridadesInteligentesDoEdital\(\)/);
+    assert.match(html, /Sessões já planejadas serão preservadas e descontadas desse tempo/);
+    assert.match(html, /class="btn btn-sm btn-outline-danger rounded-circle planner-preview-remove"/);
+    assert.match(html, /function confirmarPlanoSemanal\(\)/);
+    assert.match(html, /for \(const tarefa of tarefasNovas\)/);
+    assert.match(html, /Promise\.allSettled\(criadas\.map\(tarefa => exigirNuvemTarefas\(\)\.excluir\(tarefa\.id\)\)\)/);
+});
+
 test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados", () => {
     const html = readProjectFile("index.html");
 
