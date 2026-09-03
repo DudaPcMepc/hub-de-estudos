@@ -242,6 +242,44 @@
     }
     .session-actions { grid-column: 5 / -1; grid-template-columns: minmax(145px, 1fr) auto; justify-self: end; width: min(100%, 330px); }
     .session-actions .btn-primary { min-height: 44px; }
+    .calendar-header-actions { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+    .smart-planner-trigger { white-space: nowrap; }
+    .smart-planner-steps { display: flex; gap: .45rem; margin-bottom: 1rem; }
+    .smart-planner-step { display: inline-flex; align-items: center; gap: .34rem; padding: .34rem .58rem; color: #806c63; background: rgba(91, 67, 58, .065); border-radius: 999px; font-size: .68rem; font-weight: 700; }
+    .smart-planner-step span { width: 1.15rem; height: 1.15rem; display: inline-grid; place-items: center; color: #fff; background: #9b8880; border-radius: 50%; font-size: .6rem; }
+    .smart-planner-step.is-active { color: #742820; background: rgba(184, 50, 42, .11); }
+    .smart-planner-step.is-active span { background: var(--pimentel-vermelho); }
+    .planner-intro { color: #6f5c54; font-size: .78rem; line-height: 1.5; }
+    .planner-availability { display: grid; gap: .5rem; }
+    .planner-day { display: grid; grid-template-columns: minmax(130px, .8fr) minmax(255px, 1.4fr) minmax(110px, .55fr); gap: .7rem; align-items: center; padding: .72rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: .78rem; }
+    .planner-day-date strong, .planner-day-date small { display: block; }
+    .planner-day-date strong { color: var(--pimentel-cafe); font-size: .78rem; text-transform: capitalize; }
+    .planner-day-date small { color: #857169; font-size: .65rem; }
+    .planner-periods { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .planner-period { position: relative; }
+    .planner-period input { position: absolute; opacity: 0; pointer-events: none; }
+    .planner-period label { display: inline-flex; align-items: center; gap: .28rem; padding: .38rem .52rem; color: #756159; background: #f4ece6; border: 1px solid transparent; border-radius: .55rem; font-size: .67rem; font-weight: 700; cursor: pointer; }
+    .planner-period input:checked + label { color: #762820; background: #f9e6e2; border-color: rgba(184, 50, 42, .24); }
+    .planner-period input:focus-visible + label { outline: 3px solid rgba(184, 50, 42, .18); outline-offset: 2px; }
+    .planner-minutes label { color: #806c64; font-size: .64rem; font-weight: 650; }
+    .planner-minutes .input-group-text, .planner-minutes .form-control { min-height: 38px; font-size: .72rem; }
+    .planner-preview-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-bottom: .8rem; }
+    .planner-preview-metric { padding: .65rem; background: #f7efe9; border-radius: .7rem; }
+    .planner-preview-metric small, .planner-preview-metric strong { display: block; }
+    .planner-preview-metric small { color: #7e6a62; font-size: .62rem; }
+    .planner-preview-metric strong { margin-top: .2rem; color: var(--pimentel-cafe); font-size: .95rem; }
+    .planner-preview-list { display: grid; gap: .5rem; }
+    .planner-preview-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; align-items: center; padding: .72rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-left: 4px solid var(--pimentel-vermelho); border-radius: .75rem; }
+    .planner-preview-when { min-width: 74px; color: #745e55; font-size: .64rem; font-weight: 700; text-align: center; }
+    .planner-preview-when strong { display: block; color: var(--pimentel-cafe); font-size: .78rem; text-transform: capitalize; }
+    .planner-preview-copy { min-width: 0; }
+    .planner-preview-copy strong, .planner-preview-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .planner-preview-copy strong { color: var(--pimentel-cafe); font-size: .78rem; }
+    .planner-preview-copy span { margin-top: .15rem; color: #79665e; font-size: .68rem; }
+    .planner-preview-reasons { display: flex; flex-wrap: wrap; gap: .28rem; margin-top: .35rem; }
+    .planner-preview-reason { padding: .15rem .38rem; color: #6d574f; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .59rem; font-weight: 650; }
+    .planner-preview-remove { width: 2rem; height: 2rem; display: inline-grid; place-items: center; padding: 0; }
+    .planner-status { min-height: 1.2rem; color: #765e55; font-size: .7rem; }
     .weekly-study-summary { padding: 1rem; background: linear-gradient(145deg, #fffdf9, #f7efe8); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .055); }
     .weekly-summary-range { color: var(--pimentel-cafe-claro); font-size: .76rem; font-weight: 600; }
     .weekly-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .65rem; }
@@ -1708,6 +1746,14 @@
         .session-detail-item.is-wide { grid-column: auto; }
         .study-session-form { grid-template-columns: 1fr; }
         .session-actions { grid-column: auto; grid-template-columns: 1fr; }
+        .calendar-header-actions { width: 100%; justify-content: space-between; }
+        .smart-planner-trigger { flex: 1; }
+        .planner-day { grid-template-columns: 1fr; gap: .5rem; }
+        .planner-preview-item { grid-template-columns: minmax(0, 1fr) auto; }
+        .planner-preview-when { grid-column: 1 / -1; text-align: left; }
+        .planner-preview-when strong { display: inline; margin-right: .3rem; }
+        .planner-preview-summary { grid-template-columns: 1fr 1fr; }
+        .planner-preview-metric:last-child { grid-column: 1 / -1; }
         .weekly-study-summary { padding: .8rem; }
         .weekly-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
         .weekly-summary-metric { padding: .68rem; }
@@ -2009,15 +2055,18 @@
                 <div class="card-body">
                     <div class="calendar-card-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <h6 class="fw-bold mb-0"><i class="bi-calendar3 me-1"></i><span class="d-none d-md-inline">Calendário semanal</span><span class="d-md-none">Agenda do dia</span></h6>
-                        <div class="btn-group btn-group-sm d-none d-md-flex calendar-week-nav">
-                            <button class="btn btn-outline-secondary" id="btnSemanaAnterior"><i class="bi-chevron-left"></i></button>
-                            <button class="btn btn-outline-secondary" id="btnSemanaHoje">Hoje</button>
-                            <button class="btn btn-outline-secondary" id="btnSemanaProxima"><i class="bi-chevron-right"></i></button>
-                        </div>
-                        <div class="calendar-mobile-nav d-flex d-md-none" aria-label="Navegação diária">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaAnterior" aria-label="Dia anterior"><i class="bi-chevron-left"></i></button>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none calendar-mobile-date" id="btnDiaHoje"><span id="rotuloDiaMobile">Hoje</span></button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaProximo" aria-label="Próximo dia"><i class="bi-chevron-right"></i></button>
+                        <div class="calendar-header-actions">
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill smart-planner-trigger" id="btnMontarSemana"><i class="bi-magic me-1"></i>Montar minha semana</button>
+                            <div class="btn-group btn-group-sm d-none d-md-flex calendar-week-nav">
+                                <button class="btn btn-outline-secondary" id="btnSemanaAnterior"><i class="bi-chevron-left"></i></button>
+                                <button class="btn btn-outline-secondary" id="btnSemanaHoje">Hoje</button>
+                                <button class="btn btn-outline-secondary" id="btnSemanaProxima"><i class="bi-chevron-right"></i></button>
+                            </div>
+                            <div class="calendar-mobile-nav d-flex d-md-none" aria-label="Navegação diária">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaAnterior" aria-label="Dia anterior"><i class="bi-chevron-left"></i></button>
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none calendar-mobile-date" id="btnDiaHoje"><span id="rotuloDiaMobile">Hoje</span></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiaProximo" aria-label="Próximo dia"><i class="bi-chevron-right"></i></button>
+                            </div>
                         </div>
                     </div>
                     <div class="weekly-calendar-scroll">
@@ -2882,6 +2931,31 @@
                 </div>
                 <button type="submit" class="btn btn-success w-100 rounded-pill">Adicionar</button>
             </form>
+        </div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="modalPlanejadorSemanal" tabindex="-1" aria-labelledby="tituloPlanejadorSemanal" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><div><span class="exam-evolution-kicker">Planejamento inteligente</span><h5 class="modal-title fw-bold" id="tituloPlanejadorSemanal">Montar minha semana</h5></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <div class="modal-body">
+            <div class="smart-planner-steps" aria-label="Etapas do planejamento"><span class="smart-planner-step is-active" id="etapaDisponibilidade"><span>1</span>Disponibilidade</span><span class="smart-planner-step" id="etapaPrevia"><span>2</span>Prévia</span></div>
+            <section id="painelDisponibilidadePlanejador">
+                <p class="planner-intro mb-3">Marque os períodos em que você pode estudar nos próximos sete dias e informe o tempo total disponível em cada período. Sessões já planejadas serão preservadas e descontadas desse tempo.</p>
+                <div class="planner-availability" id="disponibilidadePlanejador"></div>
+            </section>
+            <section class="d-none" id="painelPreviaPlanejador">
+                <p class="planner-intro mb-3">Revise a sugestão antes de salvar. Você pode remover qualquer sessão; nada será alterado no cronograma até a confirmação.</p>
+                <div class="planner-preview-summary" id="resumoPreviaPlanejador"></div>
+                <div class="planner-preview-list" id="listaPreviaPlanejador"></div>
+            </section>
+            <div class="planner-status mt-3" id="statusPlanejadorSemanal" role="status" aria-live="polite"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btnCancelarPlanejador">Cancelar</button>
+            <button type="button" class="btn btn-outline-secondary d-none" id="btnVoltarDisponibilidade"><i class="bi-arrow-left me-1"></i>Voltar</button>
+            <button type="button" class="btn btn-primary" id="btnGerarPlanoSemanal"><i class="bi-stars me-1"></i>Gerar prévia</button>
+            <button type="button" class="btn btn-primary d-none" id="btnConfirmarPlanoSemanal"><i class="bi-calendar2-check me-1"></i>Confirmar planejamento</button>
         </div>
     </div></div>
 </div>
@@ -7865,6 +7939,177 @@ function exigirNuvemDiarioEstudos() {
     if (!window.HUB_CLOUD_STUDY_DIARY) throw new Error("A conexão do Diário de Estudos com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_STUDY_DIARY;
 }
+
+let rascunhoPlanoSemanal = [];
+let operacaoPlanejadorSemanal = false;
+
+function diasDoPlanejadorSemanal() {
+    return Array.from({ length: 7 }, (_, indice) => somarDias(hojeISO(), indice));
+}
+
+function mostrarEtapaPlanejadorSemanal(etapa) {
+    const emPrevia = etapa === "previa";
+    document.getElementById("painelDisponibilidadePlanejador").classList.toggle("d-none", emPrevia);
+    document.getElementById("painelPreviaPlanejador").classList.toggle("d-none", !emPrevia);
+    document.getElementById("etapaDisponibilidade").classList.toggle("is-active", !emPrevia);
+    document.getElementById("etapaPrevia").classList.toggle("is-active", emPrevia);
+    document.getElementById("btnGerarPlanoSemanal").classList.toggle("d-none", emPrevia);
+    document.getElementById("btnConfirmarPlanoSemanal").classList.toggle("d-none", !emPrevia);
+    document.getElementById("btnVoltarDisponibilidade").classList.toggle("d-none", !emPrevia);
+    document.getElementById("btnCancelarPlanejador").classList.toggle("d-none", emPrevia);
+    document.getElementById("statusPlanejadorSemanal").textContent = "";
+}
+
+function renderizarDisponibilidadePlanejador() {
+    const hoje = hojeISO();
+    document.getElementById("disponibilidadePlanejador").innerHTML = diasDoPlanejadorSemanal().map((iso, indice) => {
+        const data = new Date(`${iso}T12:00:00`);
+        const fimDeSemana = [0, 6].includes(data.getDay());
+        const periodoInicial = fimDeSemana ? "morning" : "evening";
+        const nomeDia = data.toLocaleDateString("pt-BR", { weekday: "long" });
+        const periodos = ["morning", "afternoon", "evening"].map(periodo => {
+            const config = PERIODOS_ESTUDO[periodo];
+            const id = `planejador-${indice}-${periodo}`;
+            return `<span class="planner-period"><input type="checkbox" id="${id}" value="${periodo}" ${periodo === periodoInicial ? "checked" : ""}><label for="${id}"><i class="${config.icone}" aria-hidden="true"></i>${esc(config.rotulo)}</label></span>`;
+        }).join("");
+        return `<article class="planner-day" data-date="${iso}"><div class="planner-day-date"><strong>${esc(nomeDia)}</strong><small>${iso === hoje ? "Hoje · " : ""}${esc(dataBR(iso))}</small></div><div class="planner-periods" aria-label="Períodos disponíveis em ${esc(nomeDia)}">${periodos}</div><div class="planner-minutes"><label for="minutos-planejador-${indice}">Disponível por período</label><div class="input-group input-group-sm"><input type="number" class="form-control" id="minutos-planejador-${indice}" min="25" max="240" step="5" value="45" inputmode="numeric"><span class="input-group-text">min</span></div></div></article>`;
+    }).join("");
+}
+
+function abrirPlanejadorSemanal() {
+    rascunhoPlanoSemanal = [];
+    renderizarDisponibilidadePlanejador();
+    mostrarEtapaPlanejadorSemanal("disponibilidade");
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalPlanejadorSemanal")).show();
+}
+
+function coletarDisponibilidadePlanejador() {
+    const disponibilidade = [];
+    document.querySelectorAll("#disponibilidadePlanejador .planner-day").forEach(dia => {
+        const minutos = Number(dia.querySelector("input[type='number']").value);
+        if (!Number.isInteger(minutos) || minutos < 25 || minutos > 240) return;
+        dia.querySelectorAll(".planner-period input:checked").forEach(periodo => disponibilidade.push({ data: dia.dataset.date, periodo: periodo.value, minutos }));
+    });
+    return disponibilidade;
+}
+
+function gerarRascunhoPlanoSemanal() {
+    const disponibilidade = coletarDisponibilidadePlanejador();
+    const status = document.getElementById("statusPlanejadorSemanal");
+    if (!disponibilidade.length) {
+        status.textContent = "Escolha pelo menos um período com 25 minutos ou mais.";
+        return;
+    }
+    const tarefasExistentes = obterTarefas();
+    const topicosJaPlanejados = new Set(tarefasExistentes.filter(tarefa => tarefa.status === "pendente" && tarefa.data >= hojeISO() && tarefa.topicoEditalId).map(tarefa => String(tarefa.topicoEditalId)));
+    const candidatos = prioridadesInteligentesDoEdital().filter(candidato => !topicosJaPlanejados.has(String(candidato.topico.id)));
+    if (!candidatos.length) {
+        status.textContent = "Não há tópicos disponíveis. Confira se o Edital possui tópicos pendentes ou revisões vencidas.";
+        return;
+    }
+    const ordemPeriodos = { morning: 0, afternoon: 1, evening: 2 };
+    const slots = disponibilidade.sort((a, b) => a.data.localeCompare(b.data) || ordemPeriodos[a.periodo] - ordemPeriodos[b.periodo]);
+    const disponiveis = [...candidatos];
+    const plano = [];
+    let ultimaMateriaId = null;
+    slots.forEach(slot => {
+        const ocupados = tarefasExistentes.filter(tarefa => tarefa.data === slot.data && normalizarPeriodoEstudo(tarefa.periodo) === slot.periodo).reduce((total, tarefa) => total + (Number(tarefa.minutosPlanejados) || 0), 0);
+        let minutosRestantes = Math.max(0, slot.minutos - ocupados);
+        while (minutosRestantes >= 25 && disponiveis.length) {
+            let indice = disponiveis.findIndex(candidato => String(candidato.item.materiaId) !== String(ultimaMateriaId));
+            if (indice < 0) indice = 0;
+            const candidato = disponiveis.splice(indice, 1)[0];
+            let duracao = Math.min(45, minutosRestantes);
+            if (minutosRestantes - duracao > 0 && minutosRestantes - duracao < 25) duracao = minutosRestantes;
+            plano.push({
+                id: novoId(),
+                materiaId: candidato.item.materiaId,
+                topico: candidato.topico.titulo,
+                data: slot.data,
+                periodo: slot.periodo,
+                status: "pendente",
+                responsavelId: window.HUB_SESSION_CONTEXT?.userId || null,
+                topicoEditalId: candidato.topico.id,
+                minutosPlanejados: duracao,
+                retencao: null,
+                proximaRevisao: "",
+                ultimoEstudoEm: null,
+                historicoRevisoes: [],
+                motivosPlanejador: candidato.motivos,
+                nivelPlanejador: candidato.nivel,
+                pontuacaoPlanejador: candidato.pontuacao
+            });
+            ultimaMateriaId = candidato.item.materiaId;
+            minutosRestantes -= duracao;
+        }
+    });
+    if (!plano.length) {
+        status.textContent = "Os períodos escolhidos já estão ocupados. Aumente o tempo disponível ou selecione outros períodos.";
+        return;
+    }
+    rascunhoPlanoSemanal = plano;
+    renderizarPreviaPlanoSemanal();
+    mostrarEtapaPlanejadorSemanal("previa");
+}
+
+function renderizarPreviaPlanoSemanal() {
+    const totalMinutos = rascunhoPlanoSemanal.reduce((total, tarefa) => total + tarefa.minutosPlanejados, 0);
+    const materias = new Set(rascunhoPlanoSemanal.map(tarefa => String(tarefa.materiaId))).size;
+    document.getElementById("resumoPreviaPlanejador").innerHTML = `<div class="planner-preview-metric"><small>Sessões sugeridas</small><strong>${rascunhoPlanoSemanal.length}</strong></div><div class="planner-preview-metric"><small>Tempo planejado</small><strong>${formatarDuracao(totalMinutos)}</strong></div><div class="planner-preview-metric"><small>Matérias alternadas</small><strong>${materias}</strong></div>`;
+    document.getElementById("listaPreviaPlanejador").innerHTML = rascunhoPlanoSemanal.length ? rascunhoPlanoSemanal.map(tarefa => {
+        const data = new Date(`${tarefa.data}T12:00:00`);
+        const nomeDia = data.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
+        return `<article class="planner-preview-item"><div class="planner-preview-when"><strong>${esc(nomeDia)}</strong>${esc(dataBR(tarefa.data))}<br>${esc(rotuloPeriodoEstudo(tarefa.periodo))}</div><div class="planner-preview-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)} · ${tarefa.minutosPlanejados} min</span><div class="planner-preview-reasons"><span class="planner-preview-reason">${esc(tarefa.nivelPlanejador)} prioridade</span>${tarefa.motivosPlanejador.slice(0, 2).map(motivo => `<span class="planner-preview-reason">${esc(motivo)}</span>`).join("")}</div></div><button type="button" class="btn btn-sm btn-outline-danger rounded-circle planner-preview-remove" data-id="${esc(tarefa.id)}" title="Remover da prévia" aria-label="Remover ${esc(tarefa.topico)} da prévia"><i class="bi-trash"></i></button></article>`;
+    }).join("") : '<div class="schedule-empty"><i class="bi-calendar-x" aria-hidden="true"></i><strong>Nenhuma sessão na prévia.</strong><small>Volte e gere uma nova distribuição.</small></div>';
+    document.getElementById("btnConfirmarPlanoSemanal").disabled = rascunhoPlanoSemanal.length === 0;
+    document.querySelectorAll(".planner-preview-remove").forEach(botao => botao.addEventListener("click", () => {
+        rascunhoPlanoSemanal = rascunhoPlanoSemanal.filter(tarefa => String(tarefa.id) !== String(botao.dataset.id));
+        renderizarPreviaPlanoSemanal();
+    }));
+}
+
+async function confirmarPlanoSemanal() {
+    if (operacaoPlanejadorSemanal || !rascunhoPlanoSemanal.length) return;
+    operacaoPlanejadorSemanal = true;
+    const botao = document.getElementById("btnConfirmarPlanoSemanal");
+    const status = document.getElementById("statusPlanejadorSemanal");
+    const tarefasNovas = rascunhoPlanoSemanal.map(({ motivosPlanejador, nivelPlanejador, pontuacaoPlanejador, ...tarefa }) => tarefa);
+    const criadas = [];
+    let planoSalvo = false;
+    botao.disabled = true;
+    status.textContent = `Salvando ${tarefasNovas.length} sessões no seu cronograma...`;
+    try {
+        for (const tarefa of tarefasNovas) {
+            await exigirNuvemTarefas().criar(tarefa);
+            criadas.push(tarefa);
+        }
+        salvar(LS.tarefas, [...obterTarefas(), ...tarefasNovas]);
+        planoSalvo = true;
+    } catch (erro) {
+        console.error("Falha ao salvar o planejamento semanal", erro);
+        const desfazimentos = await Promise.allSettled(criadas.map(tarefa => exigirNuvemTarefas().excluir(tarefa.id)));
+        const desfeitoCompletamente = desfazimentos.every(resultado => resultado.status === "fulfilled");
+        status.textContent = desfeitoCompletamente
+            ? "O plano não foi salvo. As novas sessões foram desfeitas para preservar seu cronograma."
+            : "O plano não foi concluído e a recuperação automática ficou incompleta. Atualize a página antes de tentar novamente.";
+    } finally {
+        operacaoPlanejadorSemanal = false;
+        botao.disabled = rascunhoPlanoSemanal.length === 0;
+    }
+    if (!planoSalvo) return;
+    rascunhoPlanoSemanal = [];
+    bootstrap.Modal.getInstance(document.getElementById("modalPlanejadorSemanal"))?.hide();
+    renderizarTudoCronograma();
+    renderizarHoje();
+}
+
+document.getElementById("btnMontarSemana").addEventListener("click", abrirPlanejadorSemanal);
+document.getElementById("btnGerarPlanoSemanal").addEventListener("click", gerarRascunhoPlanoSemanal);
+document.getElementById("btnVoltarDisponibilidade").addEventListener("click", () => mostrarEtapaPlanejadorSemanal("disponibilidade"));
+document.getElementById("btnConfirmarPlanoSemanal").addEventListener("click", confirmarPlanoSemanal);
+document.getElementById("modalPlanejadorSemanal").addEventListener("hidden.bs.modal", () => {
+    if (!operacaoPlanejadorSemanal) rascunhoPlanoSemanal = [];
+});
 
 function chaveTemporizadorEstudo() {
     return USUARIO_ATUAL_ID ? `hub_study_timer_${USUARIO_ATUAL_ID}` : null;
