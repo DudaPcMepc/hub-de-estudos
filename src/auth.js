@@ -51,6 +51,7 @@ import {
     excluirTopicoEdital,
     renomearTopicoEdital,
     criarErro,
+    registrarErroSimulado,
     criarGrifoJuridico,
     criarColecaoVade,
     criarAnotacaoColecaoVade,
@@ -233,6 +234,7 @@ window.HUB_CLOUD_EXAM = Object.freeze({
 
 window.HUB_CLOUD_ERRORS = Object.freeze({
     criar: criarErro,
+    registrarSimulado: registrarErroSimulado,
     revisar: registrarRevisaoErro,
     marcarReforco: marcarReforcoErro,
     excluir: excluirErro,

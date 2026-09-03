@@ -973,6 +973,14 @@
     .error-review-copy { padding: 1rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: .85rem; }
     .error-review-copy h6 { color: var(--pimentel-cafe); font-size: 1rem; }
     .error-review-copy p { margin: .45rem 0 0; color: #66544c; font-size: .8rem; line-height: 1.55; white-space: pre-line; }
+    .error-quiz-badge { display: inline-flex; align-items: center; gap: .25rem; padding: .18rem .48rem; color: #6f342d; background: rgba(184, 50, 42, .09); border-radius: 999px; font-size: .62rem; font-weight: 750; }
+    .error-quiz-details { display: grid; gap: .7rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid rgba(59, 41, 35, .08); }
+    .error-quiz-answer { padding: .7rem .8rem; border-radius: .7rem; font-size: .76rem; line-height: 1.45; }
+    .error-quiz-answer strong { display: block; margin-bottom: .22rem; font-size: .65rem; text-transform: uppercase; letter-spacing: .04em; }
+    .error-quiz-answer.is-wrong { color: #842029; background: rgba(220, 53, 69, .08); }
+    .error-quiz-answer.is-correct { color: #245b3b; background: rgba(25, 135, 84, .09); }
+    .error-quiz-explanation { margin: 0; padding-left: .75rem; color: #5d4b43; border-left: 3px solid rgba(184, 50, 42, .25); font-size: .78rem; line-height: 1.6; white-space: pre-line; }
+    .quiz-error-sync { display: inline-flex; align-items: center; gap: .3rem; margin-top: .65rem; color: #2e6544; font-size: .7rem; font-weight: 700; }
     .error-review-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: .85rem; }
     .error-review-options .btn { min-height: 64px; display: grid; place-items: center; align-content: center; gap: .08rem; border-radius: .75rem; }
     .error-review-options small { display: block; font-size: .61rem; opacity: .76; }
@@ -2987,7 +2995,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered error-review-modal"><div class="modal-content">
         <div class="modal-header"><div><div class="error-card-eyebrow">Caderno de Erros</div><h5 class="modal-title fw-bold" id="tituloModalRevisaoErro"><i class="bi-arrow-repeat me-2"></i>Revisar aprendizado</h5><p class="small text-muted mb-0 mt-1" id="contextoRevisaoErro"></p></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
         <div class="modal-body">
-            <section class="error-review-copy"><h6 class="fw-bold mb-0" id="temaRevisaoErro"></h6><p id="observacaoRevisaoErro"></p></section>
+            <section class="error-review-copy"><div class="d-flex flex-wrap align-items-center gap-2 mb-2"><span class="error-quiz-badge d-none" id="origemRevisaoErro"><i class="bi-stars"></i>Simulado com IA</span><span class="small text-muted" id="metaRevisaoErro"></span></div><h6 class="fw-bold mb-0" id="temaRevisaoErro"></h6><p id="observacaoRevisaoErro"></p><div class="error-quiz-details d-none" id="detalhesQuestaoRevisaoErro"><div class="error-quiz-answer is-wrong"><strong>Sua resposta</strong><span id="respostaEscolhidaRevisaoErro"></span></div><div class="error-quiz-answer is-correct"><strong>Resposta correta</strong><span id="respostaCorretaRevisaoErro"></span></div><p class="error-quiz-explanation" id="explicacaoRevisaoErro"></p></div></section>
             <p class="small fw-semibold mt-3 mb-1">Como você se saiu nesta revisão?</p>
             <div class="error-review-options">
                 <button type="button" class="btn btn-outline-danger" data-error-retention="forgot"><span><i class="bi-x-circle me-1"></i>Esqueci</span><small id="intervaloErroForgot">Revisar amanhã</small></button>
@@ -3251,6 +3259,17 @@ function normalizarErroRevisao(erro) {
         ultimaRetencao: ["forgot", "partial", "mastered"].includes(erro.ultimaRetencao) ? erro.ultimaRetencao : null,
         revisoes: Math.max(0, Number(erro.revisoes) || 0),
         reforcadoEm: erro.reforcadoEm || null,
+        origem: erro.origem || "manual",
+        impressaoDigital: erro.impressaoDigital || null,
+        enunciado: erro.enunciado || "",
+        respostaEscolhida: erro.respostaEscolhida || "",
+        respostaCorreta: erro.respostaCorreta || "",
+        explicacao: erro.explicacao || "",
+        temaSimulado: erro.temaSimulado || "",
+        dificuldade: erro.dificuldade || "",
+        banca: erro.banca || "",
+        ocorrencias: Math.max(1, Number(erro.ocorrencias) || 1),
+        ultimaOcorrenciaEm: erro.ultimaOcorrenciaEm || null,
         historicoRevisoes: Array.isArray(erro.historicoRevisoes) ? erro.historicoRevisoes : []
     };
 }
@@ -3929,14 +3948,7 @@ function sincronizarRegistrosEstudo(registrosRemotos) {
 
 function sincronizarListaDeErros(errosRemotos) {
     if (!Array.isArray(errosRemotos)) throw new Error("A lista do caderno de erros no Supabase é inválida.");
-    const sincronizados = errosRemotos.map(remoto => ({
-            id: remoto.id,
-            materiaId: remoto.materiaId,
-            tema: remoto.tema,
-            obs: remoto.obs,
-            data: remoto.data,
-            topicoEditalId: remoto.topicoEditalId || null
-        }));
+    const sincronizados = errosRemotos.map(remoto => normalizarErroRevisao({ ...remoto }));
     salvar(LS.erros, sincronizados);
 }
 
@@ -9982,8 +9994,17 @@ function abrirRevisaoErro(id) {
     erroEmRevisaoId = erro.id;
     const intervalos = obterEdital().intervalosRevisao;
     document.getElementById("contextoRevisaoErro").textContent = `${nomeDaMateria(erro.materiaId)}${topicoDoErro(erro) ? ` · ${topicoDoErro(erro).titulo}` : ""}`;
-    document.getElementById("temaRevisaoErro").textContent = erro.tema;
-    document.getElementById("observacaoRevisaoErro").textContent = erro.obs || "Tente explicar mentalmente a resposta correta antes de avaliar.";
+    const veioDeSimulado = erro.origem === "quiz_ai" && erro.enunciado;
+    document.getElementById("origemRevisaoErro").classList.toggle("d-none", !veioDeSimulado);
+    document.getElementById("metaRevisaoErro").textContent = veioDeSimulado
+        ? [erro.dificuldade, erro.banca, erro.ocorrencias > 1 ? `${erro.ocorrencias} ocorrências` : ""].filter(Boolean).join(" · ")
+        : "";
+    document.getElementById("temaRevisaoErro").textContent = veioDeSimulado ? erro.enunciado : erro.tema;
+    document.getElementById("observacaoRevisaoErro").textContent = veioDeSimulado ? "Tente responder novamente antes de conferir abaixo." : (erro.obs || "Tente explicar mentalmente a resposta correta antes de avaliar.");
+    document.getElementById("detalhesQuestaoRevisaoErro").classList.toggle("d-none", !veioDeSimulado);
+    document.getElementById("respostaEscolhidaRevisaoErro").textContent = erro.respostaEscolhida || "Não informada";
+    document.getElementById("respostaCorretaRevisaoErro").textContent = erro.respostaCorreta || "Não informada";
+    document.getElementById("explicacaoRevisaoErro").textContent = erro.explicacao || "Sem explicação adicional.";
     document.getElementById("intervaloErroForgot").textContent = `Volta em ${intervalos.forgot} ${intervalos.forgot === 1 ? "dia" : "dias"}`;
     document.getElementById("intervaloErroPartial").textContent = `Volta em ${intervalos.partial} ${intervalos.partial === 1 ? "dia" : "dias"}`;
     document.getElementById("intervaloErroMastered").textContent = `Conferir em ${intervalos.mastered} dias`;
@@ -10090,7 +10111,7 @@ function renderizarErros() {
                     const estado = estadoVisualRevisaoErro(er);
                     return `<article class="error-entry-card">
                         <div class="error-entry-main">
-                            <div class="error-entry-meta"><span class="error-entry-date"><i class="bi-calendar3" aria-hidden="true"></i>${esc(exibirDataErro(er.data))}</span>${topico ? `<span class="error-topic-badge"><i class="bi-bookmark" aria-hidden="true"></i>${esc(topico.titulo)}</span>` : ""}<span class="error-review-badge ${estado.classe}"><i class="${estado.icone}" aria-hidden="true"></i>${esc(estado.texto)}</span>${er.reforcadoEm ? '<span class="error-reinforced-badge"><i class="bi-card-heading" aria-hidden="true"></i>Flashcard criado</span>' : ""}</div>
+                            <div class="error-entry-meta"><span class="error-entry-date"><i class="bi-calendar3" aria-hidden="true"></i>${esc(exibirDataErro(er.data))}</span>${er.origem === "quiz_ai" ? '<span class="error-quiz-badge"><i class="bi-stars" aria-hidden="true"></i>Simulado com IA</span>' : ""}${topico ? `<span class="error-topic-badge"><i class="bi-bookmark" aria-hidden="true"></i>${esc(topico.titulo)}</span>` : ""}<span class="error-review-badge ${estado.classe}"><i class="${estado.icone}" aria-hidden="true"></i>${esc(estado.texto)}</span>${er.ocorrencias > 1 ? `<span class="badge rounded-pill text-bg-light">${er.ocorrencias} ocorrências</span>` : ""}${er.reforcadoEm ? '<span class="error-reinforced-badge"><i class="bi-card-heading" aria-hidden="true"></i>Flashcard criado</span>' : ""}</div>
                             <h6 class="error-entry-title">${esc(er.tema)}</h6>
                             ${er.obs ? `<p class="error-entry-note">${esc(er.obs)}</p>` : ""}${er.revisoes ? `<small class="d-block mt-2 text-muted"><i class="bi-clock-history me-1"></i>${er.revisoes} ${er.revisoes === 1 ? "revisão registrada" : "revisões registradas"}</small>` : ""}
                         </div>
@@ -10214,6 +10235,7 @@ function exigirNuvemIA() {
 }
 
 let quizAtual = [];
+let filaRegistroErrosSimulado = Promise.resolve();
 
 function validarQuestoesIA(questoes) {
     if (!Array.isArray(questoes) || questoes.length === 0 || questoes.length > 20) {
@@ -10232,6 +10254,36 @@ function validarQuestoesIA(questoes) {
         const dificuldade = ["Fácil", "Médio", "Difícil"].includes(q.dificuldade) ? q.dificuldade : "Médio";
         return { pergunta, opcoes: q.opcoes.map(op => op.trim()), resposta_correta_index: resposta, explicacao, dificuldade };
     });
+}
+
+function encontrarTopicoDoSimulado(materiaId, tema) {
+    const procurado = textoBuscaFlashcard(tema).trim().replace(/\s+/g, " ");
+    if (!procurado) return null;
+    return obterTopicosEditalDaMateria(materiaId).find(topico => textoBuscaFlashcard(topico.titulo).trim().replace(/\s+/g, " ") === procurado) || null;
+}
+
+function registrarErroAutomaticoDoSimulado(questao, indiceEscolhido) {
+    const operacao = async () => {
+        const topico = encontrarTopicoDoSimulado(questao.materiaId, questao.temaSimulado);
+        await exigirNuvemErros().registrarSimulado({
+            materiaId: questao.materiaId,
+            topicoEditalId: topico?.id || null,
+            enunciado: questao.pergunta,
+            respostaEscolhida: questao.opcoes[indiceEscolhido],
+            respostaCorreta: questao.opcoes[questao.resposta_correta_index],
+            explicacao: questao.explicacao,
+            temaSimulado: questao.temaSimulado,
+            dificuldade: questao.dificuldade,
+            banca: questao.banca
+        });
+        sincronizarListaDeErros(await exigirNuvemErros().listar());
+        renderizarCentralRevisoes();
+        renderizarHoje();
+        renderizarMaterias();
+        renderizarEdital();
+    };
+    filaRegistroErrosSimulado = filaRegistroErrosSimulado.then(operacao, operacao);
+    return filaRegistroErrosSimulado;
 }
 
 document.getElementById("btnIrGeradorSimulado").addEventListener("click", () => {
@@ -10268,7 +10320,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
         if (resultado.quota) {
             document.getElementById("statusCotaIA").textContent = `${resultado.quota.remaining}/${resultado.quota.limit} questões disponíveis hoje`;
         }
-        renderizarQuestoes(resultado.questions, materiaId, materiaNome);
+        renderizarQuestoes(resultado.questions, materiaId, materiaNome, { tema, banca: edital.banca || "" });
     } catch (err) {
         erroDiv.textContent = "Não foi possível gerar as questões: " + err.message;
         erroDiv.classList.remove("d-none");
@@ -10277,8 +10329,8 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     }
 });
 
-function renderizarQuestoes(questoes, materiaId, materiaNome) {
-    quizAtual = validarQuestoesIA(questoes).map(q => ({ ...q, materiaId, materiaNome, respondida: false }));
+function renderizarQuestoes(questoes, materiaId, materiaNome, contexto = {}) {
+    quizAtual = validarQuestoesIA(questoes).map(q => ({ ...q, materiaId, materiaNome, temaSimulado: contexto.tema || "", banca: contexto.banca || "", respondida: false }));
     const area = document.getElementById("areaQuestoes");
     area.innerHTML = "";
 
@@ -10301,7 +10353,7 @@ function renderizarQuestoes(questoes, materiaId, materiaNome) {
                             </button>`).join("")}
                     </div>
                     <div class="collapse mt-2" id="explicacao-${qIndex}">
-                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${esc(q.explicacao)}</div>
+                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${esc(q.explicacao)}<div class="quiz-error-sync d-none" id="erro-sync-${qIndex}"><i class="bi-journal-check"></i><span>Questão e explicação salvas no Caderno de Erros</span></div></div>
                     </div>
                 </div>
             </div>`;
@@ -10325,14 +10377,20 @@ async function onResponder(e) {
     grupo.children[correta].classList.add("correta");
 
     const acertou = oIndex === correta;
+    document.getElementById(`explicacao-${qIndex}`).classList.add("show");
     if (!acertou) {
         grupo.children[oIndex].classList.add("incorreta");
         q.registroPendente = true;
+        const statusErro = document.getElementById(`erro-sync-${qIndex}`);
+        statusErro?.classList.remove("d-none");
+        if (statusErro) statusErro.innerHTML = '<i class="bi-arrow-repeat"></i><span>Salvando automaticamente no Caderno de Erros...</span>';
         try {
-            await registrarErro(q.materiaId, q.pergunta.slice(0, 120), "Errei no simulado gerado por IA. Resposta correta: " + q.opcoes[correta]);
+            await registrarErroAutomaticoDoSimulado(q, oIndex);
             q.erroRegistrado = true;
+            if (statusErro) statusErro.innerHTML = '<i class="bi-journal-check"></i><span>Questão e explicação salvas no Caderno de Erros</span>';
         } catch (falhaErro) {
             q.falhaRegistroErro = true;
+            if (statusErro) statusErro.innerHTML = '<i class="bi-exclamation-triangle"></i><span>Não foi possível salvar esta questão</span>';
             console.error("Falha ao enviar o erro do simulado ao caderno", falhaErro);
             alert("A resposta foi corrigida, mas o erro não entrou no Caderno de Erros. Tente registrá-lo manualmente.");
         } finally {
@@ -10340,7 +10398,6 @@ async function onResponder(e) {
         }
     }
 
-    document.getElementById(`explicacao-${qIndex}`).classList.add("show");
     q.desempenhoPendente = true;
     try {
         await registrarDesempenho(q.materiaId, acertou);
@@ -10438,7 +10495,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 9;
+const VERSAO_BACKUP = 10;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -10655,6 +10712,11 @@ function validarPayloadBackup(payload) {
         const estadoRevisao = versao >= 9 && ["pending", "scheduled", "mastered"].includes(er.estadoRevisao) ? er.estadoRevisao : "pending";
         const revisoes = versao >= 9 ? numeroBackup(er.revisoes, "Quantidade de revisões do erro", 0, 100000, 0) : 0;
         if (!Number.isInteger(revisoes)) throw new Error(`Quantidade de revisões do erro ${i + 1} inválida.`);
+        const origem = versao >= 10 && ["manual", "flashcard", "legal_highlight", "quiz_ai"].includes(er.origem) ? er.origem : "manual";
+        const impressaoDigital = versao >= 10 ? textoBackup(er.impressaoDigital, "Identificador da questão", 64, "") || null : null;
+        if (impressaoDigital && !/^[a-f0-9]{32,64}$/i.test(impressaoDigital)) throw new Error(`Identificador da questão do erro ${i + 1} inválido.`);
+        const ocorrencias = versao >= 10 ? numeroBackup(er.ocorrencias, "Ocorrências do erro", 1, 100000, 1) : 1;
+        if (!Number.isInteger(ocorrencias)) throw new Error(`Ocorrências do erro ${i + 1} inválidas.`);
         return {
             id: idBackup(er.id, "ID do erro"), materiaId, tema: textoBackup(er.tema, "Tema do erro", 4000), obs: textoBackup(er.obs, "Observação do erro", 10000), data: dataBackup(er.data, "Data do erro"),
             topicoEditalId: versao >= 8 && er.topicoEditalId ? idBackup(er.topicoEditalId, "Tópico do Edital do erro") : null,
@@ -10664,6 +10726,17 @@ function validarPayloadBackup(payload) {
             ultimaRetencao: versao >= 9 && ["forgot", "partial", "mastered"].includes(er.ultimaRetencao) ? er.ultimaRetencao : null,
             revisoes,
             reforcadoEm: versao >= 9 ? instanteBackup(er.reforcadoEm, "Data do reforço do erro") : null,
+            origem,
+            impressaoDigital,
+            enunciado: versao >= 10 ? textoBackup(er.enunciado, "Enunciado da questão", 4000) : "",
+            respostaEscolhida: versao >= 10 ? textoBackup(er.respostaEscolhida, "Resposta escolhida", 2000) : "",
+            respostaCorreta: versao >= 10 ? textoBackup(er.respostaCorreta, "Resposta correta", 2000) : "",
+            explicacao: versao >= 10 ? textoBackup(er.explicacao, "Explicação da questão", 8000) : "",
+            temaSimulado: versao >= 10 ? textoBackup(er.temaSimulado, "Tema do simulado", 2000) : "",
+            dificuldade: versao >= 10 && ["Fácil", "Médio", "Difícil"].includes(er.dificuldade) ? er.dificuldade : "",
+            banca: versao >= 10 ? textoBackup(er.banca, "Banca do simulado", 300) : "",
+            ocorrencias,
+            ultimaOcorrenciaEm: versao >= 10 ? instanteBackup(er.ultimaOcorrenciaEm, "Última ocorrência do erro") : null,
             historicoRevisoes
         };
     });

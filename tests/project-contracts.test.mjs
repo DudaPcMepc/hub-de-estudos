@@ -333,7 +333,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 9/);
+    assert.match(html, /VERSAO_BACKUP = 10/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -380,7 +380,7 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(html, /id="filtroTopicoCards"/);
     assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
     assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
-    assert.match(html, /VERSAO_BACKUP = 9/);
+    assert.match(html, /VERSAO_BACKUP = 10/);
     assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
     assert.match(repository, /export async function atualizarTopicoFlashcard/);
     assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
@@ -407,7 +407,7 @@ test("o Caderno de Erros transforma aprendizados em flashcards do tópico corret
     assert.match(html, /class="exam-topic-learning"/);
     assert.match(html, /btn-revisar-topico-edital/);
     assert.match(html, /btn-ver-erros-topico/);
-    assert.match(html, /VERSAO_BACKUP = 9/);
+    assert.match(html, /VERSAO_BACKUP = 10/);
     assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id,/);
     assert.match(repository, /exam_topic_id: erro\.topicoEditalId \? resolverId\("exam_topic", erro\.topicoEditalId\) : null/);
     assert.match(verification, /topicoEditalId: item\.exam_topic_id \? idLegado\(mapas, "exam_topic", item\.exam_topic_id\) : null/);
@@ -446,6 +446,33 @@ test("o Caderno de Erros possui ciclo privado de revisão integrado à fila", ()
     assert.match(migration, /create or replace function public\.record_error_review/i);
     assert.match(migration, /update public\.error_entries entry[\s\S]*?insert into public\.error_review_events/i);
     assert.match(migration, /import_local_hub_core_v6/i);
+});
+
+test("questões erradas do simulado entram completas e sem duplicação no Caderno de Erros", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const verification = readProjectFile("src/cloud-verification.js");
+    const migration = readProjectFile("supabase/migrations/202609020028_quiz_error_integration.sql");
+
+    assert.match(html, /function registrarErroAutomaticoDoSimulado\(questao, indiceEscolhido\)/);
+    assert.match(html, /respostaEscolhida: questao\.opcoes\[indiceEscolhido\]/);
+    assert.match(html, /respostaCorreta: questao\.opcoes\[questao\.resposta_correta_index\]/);
+    assert.match(html, /explicacao: questao\.explicacao/);
+    assert.match(html, /Questão e explicação salvas no Caderno de Erros/);
+    assert.match(html, /id="detalhesQuestaoRevisaoErro"/);
+    assert.match(html, /VERSAO_BACKUP = 10/);
+    assert.match(repository, /export async function registrarErroSimulado/);
+    assert.match(repository, /supabase\.rpc\("record_quiz_error"/);
+    assert.match(auth, /registrarSimulado: registrarErroSimulado/);
+    assert.match(verification, /source_fingerprint/);
+    assert.match(migration, /create unique index error_entries_quiz_fingerprint_idx/i);
+    assert.match(migration, /create or replace function public\.record_quiz_error/i);
+    assert.match(migration, /on conflict \(workspace_id, user_id, subject_id, source_type, source_fingerprint\)/i);
+    assert.match(migration, /review_state = 'pending'/i);
+    assert.match(migration, /occurrence_count = least\(100000/i);
+    assert.match(migration, /private\.is_workspace_member\(target_workspace_id\)/i);
+    assert.match(migration, /import_local_hub_core_v7/i);
 });
 
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
