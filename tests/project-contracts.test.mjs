@@ -247,6 +247,12 @@ test("a tela Hoje reúne agenda, revisões, edital e leitura sem duplicar dados"
     assert.match(html, /obterTarefas\(\)/);
     assert.match(html, /obterRegistrosEstudo\(\)/);
     assert.match(html, /function prioridadeAtualDoEdital\(\)/);
+    assert.match(html, /function prioridadesInteligentesDoEdital\(\)/);
+    assert.match(html, /relevancia: 35, revisao: 25, dificuldade: 20, dominio: 15, inatividade: 5/);
+    assert.match(html, /id="btnProximaPrioridadeHoje"/);
+    assert.match(html, /class="today-priority-reasons"/);
+    assert.match(html, /obterErros\(\)/);
+    assert.match(html, /materiasNormalizadas\(\)/);
     assert.match(html, /function ultimaLeituraJuridicaDisponivel\(\)/);
     assert.match(html, /iniciarTemporizadorEstudo\(botao\.dataset\.id\)/);
     assert.match(html, /reagendarTarefaParaHoje/);

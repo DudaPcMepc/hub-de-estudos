@@ -352,6 +352,15 @@
     .today-side-action { width: 100%; margin-top: .7rem; }
     .today-priority-actions { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: .4rem; margin-top: .7rem; }
     .today-priority-actions .btn { min-width: 0; font-size: .66rem; }
+    .today-priority-summary { margin-top: .58rem; }
+    .today-priority-level { display: inline-flex; align-items: center; gap: .28rem; padding: .24rem .48rem; border-radius: 999px; font-size: .62rem; font-weight: 800; letter-spacing: .01em; }
+    .today-priority-level.is-high { color: #84261f; background: #fbe5e1; }
+    .today-priority-level.is-medium { color: #76530d; background: #fff1cb; }
+    .today-priority-level.is-normal { color: #276044; background: #e2f1e8; }
+    .today-priority-reasons { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .48rem; }
+    .today-priority-reason { display: inline-flex; align-items: center; gap: .22rem; max-width: 100%; padding: .24rem .42rem; color: #6a5750; background: rgba(255, 255, 255, .72); border: 1px solid rgba(59, 41, 35, .1); border-radius: .5rem; font-size: .6rem; line-height: 1.25; }
+    .today-priority-strategy { display: inline-flex; align-items: center; gap: .25rem; margin-top: .48rem; padding: 0; color: #806a62; border: 0; background: transparent; font-size: .61rem; font-weight: 700; }
+    .today-priority-strategy:hover { color: var(--pimentel-vermelho-escuro); }
     .today-quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
     .today-quick-action { min-width: 0; min-height: 72px; display: grid; place-items: center; align-content: center; gap: .28rem; padding: .5rem .28rem; color: var(--pimentel-cafe); background: linear-gradient(145deg, #fffdf9, #f5ebe2); border: 1px solid rgba(59, 41, 35, .13); border-radius: .72rem; box-shadow: 0 .16rem .42rem rgba(59, 41, 35, .04); font-size: .66rem; font-weight: 700; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
     .today-quick-action i { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .085); border-radius: .55rem; font-size: .95rem; }
@@ -3094,17 +3103,93 @@ function ativarAbaPrincipal(alvo) {
     bootstrap.Tab.getOrCreateInstance(botao).show();
 }
 
-function prioridadeAtualDoEdital() {
+let indicePrioridadeHoje = 0;
+
+function prioridadesInteligentesDoEdital() {
     const edital = obterEdital();
     const totalPontos = calcularPontosTotais(edital);
-    return edital.materias.map((item, indice) => {
+    const hoje = hojeISO();
+    const tarefas = obterTarefas();
+    const registros = obterRegistrosEstudo();
+    const erros = obterErros();
+    const materias = materiasNormalizadas();
+    const pesosPrioridade = { relevancia: 35, revisao: 25, dificuldade: 20, dominio: 15, inatividade: 5 };
+    const pontosMaterias = edital.materias.map(item => Math.max(0, Number(item.questoes) || 0) * Math.max(0, Number(item.peso) || 0));
+    const maiorPontuacaoMateria = Math.max(0, ...pontosMaterias);
+    const nivelRetencao = { forgot: 1, partial: .72, good: .32, mastered: 0 };
+    const diasEntre = (inicio, fim) => {
+        const a = new Date(`${inicio}T12:00:00`);
+        const b = new Date(`${fim}T12:00:00`);
+        if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 0;
+        return Math.max(0, Math.floor((b - a) / 86400000));
+    };
+
+    return edital.materias.flatMap((item, indiceMateria) => {
         const topicos = Array.isArray(item.topicos) ? item.topicos : [];
-        const pendentes = topicos.filter(topico => topico.concluido !== true);
         const pontos = Math.max(0, Number(item.questoes) || 0) * Math.max(0, Number(item.peso) || 0);
         const relevancia = totalPontos > 0 ? (pontos / totalPontos) * 100 : 0;
-        return { item, indice, pendentes, pontos, relevancia };
-    }).filter(item => item.pendentes.length)
-        .sort((a, b) => b.pontos - a.pontos || b.pendentes.length - a.pendentes.length || a.indice - b.indice)[0] || null;
+        const materia = materias.find(m => String(m.id) === String(item.materiaId));
+        return topicos.map((topico, indiceTopico) => {
+            const mesmoTopico = registro => String(registro.topicoEditalId || "") === String(topico.id);
+            const tarefasTopico = tarefas.filter(tarefa => String(tarefa.materiaId) === String(item.materiaId) && mesmoTopico(tarefa));
+            const jaPlanejadoHoje = tarefasTopico.some(tarefa => tarefa.data === hoje);
+            const revisoesTarefas = tarefasTopico.filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje);
+            const cardsTopico = (materia?.cards || []).filter(mesmoTopico);
+            const cardsVencidosTopico = cardsTopico.filter(card => card.proxima && card.proxima <= hoje);
+            const errosTopico = erros.filter(erro => String(erro.materiaId) === String(item.materiaId) && mesmoTopico(erro));
+            const totalErrosCards = cardsTopico.reduce((total, card) => total + (Number(card.erros) || 0), 0);
+            const registrosTopico = registros.filter(registro => String(registro.materiaId) === String(item.materiaId) && mesmoTopico(registro));
+            const historicoRetencao = [
+                ...tarefasTopico.filter(tarefa => tarefa.retencao).map(tarefa => ({ data: tarefa.ultimoEstudoEm || tarefa.data || "", valor: tarefa.retencao })),
+                ...registrosTopico.filter(registro => registro.retencao).map(registro => ({ data: registro.dataEstudo || "", valor: registro.retencao }))
+            ].sort((a, b) => String(b.data).localeCompare(String(a.data)));
+            const datasEstudo = [
+                ...tarefasTopico.map(tarefa => String(tarefa.ultimoEstudoEm || "").slice(0, 10)),
+                ...registrosTopico.map(registro => registro.dataEstudo || "")
+            ].filter(Boolean).sort((a, b) => b.localeCompare(a));
+            const maiorAtraso = Math.max(0, ...revisoesTarefas.map(tarefa => diasEntre(tarefa.proximaRevisao, hoje)), ...cardsVencidosTopico.map(card => diasEntre(card.proxima, hoje)));
+            const quantidadeRevisoes = revisoesTarefas.length + cardsVencidosTopico.length;
+            const quantidadeErros = errosTopico.length + totalErrosCards;
+            const fatorRelevancia = maiorPontuacaoMateria > 0 ? pontos / maiorPontuacaoMateria : 0;
+            const fatorRevisao = Math.min(1, quantidadeRevisoes * .28 + maiorAtraso / 20);
+            const fatorDificuldade = Math.min(1, quantidadeErros / 5);
+            const fatorDominio = historicoRetencao.length ? (nivelRetencao[historicoRetencao[0].valor] ?? .65) : (topico.concluido === true ? .2 : 1);
+            const diasSemEstudar = datasEstudo.length ? diasEntre(datasEstudo[0], hoje) : null;
+            const fatorInatividade = diasSemEstudar === null ? 1 : Math.min(1, diasSemEstudar / 30);
+            const componentes = {
+                relevancia: fatorRelevancia * pesosPrioridade.relevancia,
+                revisao: fatorRevisao * pesosPrioridade.revisao,
+                dificuldade: fatorDificuldade * pesosPrioridade.dificuldade,
+                dominio: fatorDominio * pesosPrioridade.dominio,
+                inatividade: fatorInatividade * pesosPrioridade.inatividade
+            };
+            const pontuacao = Math.round(Object.values(componentes).reduce((total, valor) => total + valor, 0));
+            const motivos = [];
+            if (relevancia > 0) motivos.push({ peso: componentes.relevancia, texto: `${relevancia.toFixed(1)}% da prova` });
+            if (quantidadeRevisoes) motivos.push({ peso: componentes.revisao, texto: `${quantidadeRevisoes} ${quantidadeRevisoes === 1 ? "revisão vencida" : "revisões vencidas"}` });
+            if (quantidadeErros) motivos.push({ peso: componentes.dificuldade, texto: `${quantidadeErros} ${quantidadeErros === 1 ? "erro vinculado" : "erros vinculados"}` });
+            if (historicoRetencao[0]?.valor === "forgot") motivos.push({ peso: componentes.dominio, texto: "retenção precisa de reforço" });
+            else if (historicoRetencao[0]?.valor === "partial") motivos.push({ peso: componentes.dominio, texto: "retenção parcial" });
+            else if (!datasEstudo.length) motivos.push({ peso: componentes.dominio, texto: "ainda não estudado" });
+            if (diasSemEstudar !== null && diasSemEstudar >= 7) motivos.push({ peso: componentes.inatividade, texto: `há ${diasSemEstudar} dias sem estudar` });
+            const nivel = pontuacao >= 65 ? "Alta" : pontuacao >= 40 ? "Média" : "Normal";
+            return { item, topico, indiceMateria, indiceTopico, pontos, relevancia, pontuacao, nivel, nivelClasse: nivel === "Alta" ? "is-high" : nivel === "Média" ? "is-medium" : "is-normal", motivos: motivos.sort((a, b) => b.peso - a.peso).slice(0, 3).map(motivo => motivo.texto), componentes, jaPlanejadoHoje, quantidadeRevisoes, quantidadeErros };
+        });
+    }).filter(candidato => !candidato.jaPlanejadoHoje && (candidato.topico.concluido !== true || candidato.quantidadeRevisoes > 0 || candidato.quantidadeErros > 0))
+        .sort((a, b) => b.pontuacao - a.pontuacao || b.pontos - a.pontos || a.indiceMateria - b.indiceMateria || a.indiceTopico - b.indiceTopico);
+}
+
+function prioridadeAtualDoEdital() {
+    const prioridades = prioridadesInteligentesDoEdital();
+    if (!prioridades.length) return null;
+    if (indicePrioridadeHoje >= prioridades.length) indicePrioridadeHoje = 0;
+    return prioridades[indicePrioridadeHoje];
+}
+
+function avancarPrioridadeHoje() {
+    const total = prioridadesInteligentesDoEdital().length;
+    indicePrioridadeHoje = total ? (indicePrioridadeHoje + 1) % total : 0;
+    renderizarHoje();
 }
 
 function ultimaLeituraJuridicaDisponivel() {
@@ -3192,8 +3277,10 @@ function renderizarHoje() {
     painelAtrasos.classList.toggle("d-none", atrasadas.length === 0);
     painelAtrasos.innerHTML = atrasadas.length ? `<div class="today-side-heading"><h2 class="fw-bold">Sessões atrasadas</h2><span class="today-count is-warning">${atrasadas.length}</span></div>${atrasadas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-calendar2-x"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(tarefa.materiaId))}</strong><span>${esc(tarefa.topico)} · ${dataBR(tarefa.data)}</span></div></div>`).join("")}<button type="button" class="btn btn-sm btn-outline-warning rounded-pill today-side-action btn-reagendar-hoje-central" data-id="${esc(atrasadas[0].id)}"><i class="bi-calendar2-plus me-1"></i>Reagendar a mais antiga</button>` : "";
 
-    const prioridade = prioridadeAtualDoEdital();
-    document.getElementById("prioridadeCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Próxima prioridade</h2><span class="today-count">Edital</span></div>${prioridade ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-bullseye"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(prioridade.item.materiaId))}</strong><span>${esc(prioridade.pendentes[0].titulo)}${prioridade.relevancia ? ` · ${prioridade.relevancia.toFixed(1)}% da prova` : ""}</span></div></div><div class="today-priority-actions"><button type="button" class="btn btn-sm btn-primary rounded-pill" id="btnPlanejarPrioridadeHoje" data-materia-id="${esc(prioridade.item.materiaId)}" data-topico-id="${esc(prioridade.pendentes[0].id)}"><i class="bi-calendar2-plus me-1"></i>Planejar</button><button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-today-tab="#p-edital">Estratégia</button></div>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2-all"></i></span><div class="today-side-copy"><strong>Sem prioridade pendente</strong><span>Configure o edital ou adicione tópicos ao checklist.</span></div></div>'}`;
+    const prioridades = prioridadesInteligentesDoEdital();
+    if (indicePrioridadeHoje >= prioridades.length) indicePrioridadeHoje = 0;
+    const prioridade = prioridades[indicePrioridadeHoje] || null;
+    document.getElementById("prioridadeCentralHoje").innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Próxima prioridade</h2><span class="today-count">Edital</span></div>${prioridade ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-bullseye"></i></span><div class="today-side-copy"><strong>${esc(nomeDaMateria(prioridade.item.materiaId))}</strong><span>${esc(prioridade.topico.titulo)}</span></div></div><div class="today-priority-summary"><span class="today-priority-level ${prioridade.nivelClasse}"><i class="bi-activity" aria-hidden="true"></i>${esc(prioridade.nivel)} prioridade · ${prioridade.pontuacao} pontos</span><div class="today-priority-reasons">${prioridade.motivos.map(motivo => `<span class="today-priority-reason"><i class="bi-check2" aria-hidden="true"></i>${esc(motivo)}</span>`).join("")}</div></div><div class="today-priority-actions"><button type="button" class="btn btn-sm btn-primary rounded-pill" id="btnPlanejarPrioridadeHoje" data-materia-id="${esc(prioridade.item.materiaId)}" data-topico-id="${esc(prioridade.topico.id)}"><i class="bi-calendar2-plus me-1"></i>Planejar</button>${prioridades.length > 1 ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="btnProximaPrioridadeHoje"><i class="bi-arrow-right me-1"></i>Próxima</button>' : ""}</div><button type="button" class="today-priority-strategy" data-today-tab="#p-edital"><i class="bi-info-circle" aria-hidden="true"></i>Entender a estratégia</button>` : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2-all"></i></span><div class="today-side-copy"><strong>Sem prioridade pendente</strong><span>Configure o edital ou adicione tópicos ao checklist.</span></div></div>'}`;
 
     const leitura = ultimaLeituraJuridicaDisponivel();
     const descricaoLeitura = leitura ? `${leitura.localizado.documento.tituloCurto} · ${leitura.localizado.dispositivo?.rotulo || leitura.localizado.rotulo || "Artigo"}` : "";
@@ -3211,6 +3298,7 @@ function renderizarHoje() {
     raiz.querySelectorAll(".btn-excluir-hoje").forEach(botao => botao.addEventListener("click", async () => { await excluirTarefaSincronizada(botao.dataset.id); }));
     document.getElementById("btnPrimeiraSessaoHoje")?.addEventListener("click", abrirFormularioSessaoHoje);
     document.getElementById("btnPlanejarPrioridadeHoje")?.addEventListener("click", evento => planejarPrioridadePelaCentralHoje(evento.currentTarget.dataset.materiaId, evento.currentTarget.dataset.topicoId));
+    document.getElementById("btnProximaPrioridadeHoje")?.addEventListener("click", avancarPrioridadeHoje);
     document.getElementById("btnComecarRevisaoHoje")?.addEventListener("click", () => revisoesTarefas.length ? abrirConclusaoEstudo(revisoesTarefas[0].id) : iniciarRevisao(null));
     document.querySelector(".btn-reagendar-hoje-central")?.addEventListener("click", async evento => { await reagendarTarefaParaHoje(evento.currentTarget.dataset.id, evento.currentTarget); });
     document.getElementById("btnRetomarLeituraHoje")?.addEventListener("click", evento => {
