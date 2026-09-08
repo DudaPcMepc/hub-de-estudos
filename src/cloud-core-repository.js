@@ -13,6 +13,9 @@ const PERIODOS_ESTUDO = new Set(["morning", "afternoon", "evening", "unspecified
 const TIPOS_WIDGET = new Set(["legal_library", "personal_vade", "private_documents", "community"]);
 const CORES_GRIFO = new Set(["yellow", "red", "green", "blue", "pink"]);
 const TIPOS_ANOTACAO_VADE = new Set(["note", "summary"]);
+const TIPOS_NO_CADERNO_MATERIA = new Set(["folder", "notebook", "page"]);
+const ESTILOS_CAPA_CADERNO_MATERIA = new Set(["solid", "gradient", "minimal"]);
+const ESTILOS_FOLHA_CADERNO_MATERIA = new Set(["plain", "lined", "grid", "dotted"]);
 const BUCKET_PDFS_VADE = "private-legal-notebook-pdfs";
 const LIMITE_PDF_VADE_BYTES = 25 * 1024 * 1024;
 
@@ -1954,6 +1957,121 @@ export async function excluirNota(idLocal) {
         .select("id")
         .maybeSingle(), "Não foi possível excluir a nota no Supabase.");
     versoesNotas.delete(id);
+}
+
+function mapearNoCadernoMateria(item) {
+    const topicosLegados = idsLocaisPorRemotos.get("topic");
+    return {
+        id: item.id,
+        materiaId: idsLocaisPorRemotos.get("subject")?.get(item.subject_id) || item.subject_id,
+        paiId: item.parent_id || "",
+        topicoId: item.topic_id ? (topicosLegados?.get(item.topic_id) || item.topic_id) : "",
+        tipo: item.node_type,
+        titulo: item.title,
+        conteudo: item.content || "",
+        cor: item.color,
+        estiloCapa: item.cover_style,
+        estiloFolha: item.paper_style,
+        posicao: Number(item.position) || 0,
+        versao: Number(item.version) || 1,
+        criadoEm: item.created_at || "",
+        atualizadoEm: item.updated_at || ""
+    };
+}
+
+export async function carregarCadernosMateria(materiaIdLocal) {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("user_subject_notebook_nodes")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("subject_id", resolverId("subject", materiaIdLocal))
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true });
+    return (verificarResposta(resposta, "Não foi possível carregar os cadernos desta matéria.") || []).map(mapearNoCadernoMateria);
+}
+
+function valoresNoCadernoMateria(no, contexto, incluirIdentidade = false) {
+    const tipo = String(no.tipo || "");
+    if (Object.hasOwn(no, "tipo") && !TIPOS_NO_CADERNO_MATERIA.has(tipo)) throw erroRepositorio("Tipo de item do caderno inválido.");
+    const valores = {};
+    if (incluirIdentidade || Object.hasOwn(no, "paiId")) valores.parent_id = no.paiId ? exigirUuidNovo(no.paiId, "Pasta ou caderno") : null;
+    if (incluirIdentidade || Object.hasOwn(no, "topicoId")) valores.topic_id = no.topicoId ? resolverId("topic", no.topicoId) : null;
+    if (incluirIdentidade || Object.hasOwn(no, "tipo")) valores.node_type = tipo;
+    if (incluirIdentidade || Object.hasOwn(no, "titulo")) valores.title = texto(no.titulo, 240, "Título", true).trim();
+    if (incluirIdentidade || Object.hasOwn(no, "conteudo")) valores.content = texto(no.conteudo, 500000, "Conteúdo");
+    if (incluirIdentidade || Object.hasOwn(no, "cor")) {
+        const cor = String(no.cor || "#b8322a");
+        if (!/^#[0-9a-f]{6}$/i.test(cor)) throw erroRepositorio("Cor do caderno inválida.");
+        valores.color = cor;
+    }
+    if (incluirIdentidade || Object.hasOwn(no, "estiloCapa")) {
+        const estilo = String(no.estiloCapa || "solid");
+        if (!ESTILOS_CAPA_CADERNO_MATERIA.has(estilo)) throw erroRepositorio("Estilo de capa inválido.");
+        valores.cover_style = estilo;
+    }
+    if (incluirIdentidade || Object.hasOwn(no, "estiloFolha")) {
+        const estilo = String(no.estiloFolha || "lined");
+        if (!ESTILOS_FOLHA_CADERNO_MATERIA.has(estilo)) throw erroRepositorio("Estilo de folha inválido.");
+        valores.paper_style = estilo;
+    }
+    if (incluirIdentidade || Object.hasOwn(no, "posicao")) valores.position = numeroLimitado(no.posicao ?? 0, "Posição", 0, 100000, true);
+    if (incluirIdentidade) {
+        valores.workspace_id = contexto.workspaceId;
+        valores.user_id = contexto.userId;
+    }
+    return valores;
+}
+
+export async function criarNoCadernoMateria(materiaIdLocal, no) {
+    const contexto = exigirContexto();
+    const id = exigirUuidNovo(no.id, "Item do caderno");
+    const valores = valoresNoCadernoMateria(no, contexto, true);
+    valores.id = id;
+    valores.subject_id = resolverId("subject", materiaIdLocal);
+    const resposta = await supabase.from("user_subject_notebook_nodes").insert(valores)
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+        .single();
+    return mapearNoCadernoMateria(verificarResposta(resposta, "Não foi possível criar o item no caderno."));
+}
+
+export async function atualizarNoCadernoMateria(id, alteracoes, versaoEsperada) {
+    const contexto = exigirContexto();
+    const noId = exigirUuidNovo(id, "Item do caderno");
+    const versao = numeroLimitado(versaoEsperada, "Versão", 1, 1000000000, true);
+    const valores = valoresNoCadernoMateria(alteracoes, contexto, false);
+    if (!Object.keys(valores).length) return null;
+    const resposta = await supabase.from("user_subject_notebook_nodes").update(valores)
+        .eq("id", noId)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("version", versao)
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+        .maybeSingle();
+    const salvo = verificarResposta(resposta, "Não foi possível atualizar o item do caderno.");
+    if (!salvo) throw erroRepositorio("Este item foi alterado em outra aba. Recarregue antes de salvar novamente.");
+    return mapearNoCadernoMateria(salvo);
+}
+
+export async function excluirNoCadernoMateria(id) {
+    const contexto = exigirContexto();
+    verificarRegistro(await supabase.from("user_subject_notebook_nodes").delete()
+        .eq("id", exigirUuidNovo(id, "Item do caderno"))
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .select("id")
+        .maybeSingle(), "Não foi possível excluir o item do caderno.");
+}
+
+export async function reordenarNosCadernoMateria(materiaIdLocal, paiId, ids) {
+    const contexto = exigirContexto();
+    if (!Array.isArray(ids) || new Set(ids).size !== ids.length) throw erroRepositorio("A ordem dos itens é inválida.");
+    verificarResposta(await supabase.rpc("reorder_subject_notebook_nodes", {
+        p_subject_id: resolverId("subject", materiaIdLocal),
+        p_parent_id: paiId ? exigirUuidNovo(paiId, "Pasta ou caderno") : null,
+        p_node_ids: ids.map(id => exigirUuidNovo(id, "Item do caderno"))
+    }), "Não foi possível reorganizar os itens do caderno.");
+    return carregarCadernosMateria(materiaIdLocal);
 }
 
 export async function criarFlashcard(materiaIdLocal, card) {

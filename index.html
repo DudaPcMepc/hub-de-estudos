@@ -1126,16 +1126,18 @@
         display: inline-flex;
         align-items: center;
         gap: .28rem;
-        padding: .24rem .5rem;
-        color: var(--pimentel-cafe-claro);
-        background: rgba(91, 67, 58, .065);
+        padding: .32rem .58rem;
+        color: #654f46;
+        background: rgba(91, 67, 58, .085);
         border-radius: 999px;
-        font-size: .66rem;
-        font-weight: 650;
+        font-size: .7rem;
+        font-weight: 700;
         line-height: 1;
         white-space: nowrap;
     }
     .subject-workspace-metric:first-child { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .09); }
+    .subject-workspace-metric.is-priority { color: #704c12; background: rgba(190, 135, 40, .15); }
+    .subject-workspace-metric.is-priority-high { color: #8f2922; background: rgba(184, 50, 42, .13); }
     .subject-workspace-export { align-self: center; color: var(--pimentel-cafe-claro); border-color: rgba(59, 41, 35, .14); }
     .subject-workspace-back {
         width: 2.45rem;
@@ -1168,7 +1170,7 @@
         border-radius: .75rem;
         white-space: nowrap;
     }
-    .subject-workspace-sidebar .ws-nav .nav-link.active { color: #fff; background: var(--pimentel-vermelho-escuro); }
+    .subject-workspace-sidebar .ws-nav .nav-link.active { color: var(--pimentel-vermelho-escuro); background: rgba(184, 50, 42, .1); box-shadow: inset 3px 0 0 var(--pimentel-vermelho); }
     .subject-workspace-content { min-width: 0; min-height: 0; overflow-y: auto; padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 2rem; }
     .subject-workspace-content > .tab-content,
     .subject-workspace-content > .tab-content > .tab-pane.active { min-height: 100%; }
@@ -1192,6 +1194,94 @@
     .admin-editorial-item:last-child { border-bottom: 0; }
     @media (max-width: 767.98px) { .admin-editorial-layout { grid-template-columns: 1fr; } }
     .subject-notes-grid { min-height: calc(100dvh - 145px); }
+    .subject-notebook-app { max-width: 1180px; margin: 0 auto; overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: 1.15rem; box-shadow: 0 .5rem 1.5rem rgba(59, 41, 35, .055); }
+    .subject-notebook-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.15rem; border-bottom: 1px solid rgba(59, 41, 35, .08); }
+    .subject-notebook-header p { color: #78675f; font-size: .78rem; }
+    .subject-notebook-eyebrow { color: var(--pimentel-vermelho-escuro); font-size: .65rem; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+    .subject-notebook-header-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .subject-notebook-mobile-tree { display: none; }
+    .subject-notebook-status { min-height: 0; padding: 0 1.15rem; color: #78675f; font-size: .72rem; }
+    .subject-notebook-status:not(:empty) { padding-block: .55rem; background: rgba(100, 116, 90, .07); }
+    .subject-notebook-layout { min-height: 560px; display: grid; grid-template-columns: 275px minmax(0, 1fr); }
+    .subject-notebook-tree-panel { padding: .9rem; background: #f4efe9; box-shadow: inset -1px 0 rgba(59, 41, 35, .07); }
+    .subject-notebook-tree-title { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; padding: 0 .35rem; color: #5b433a; font-size: .7rem; font-weight: 750; }
+    .subject-notebook-tree-title small { color: #8a7770; font-size: .6rem; font-weight: 600; }
+    .subject-notebook-search { position: relative; display: block; margin-bottom: .45rem; }
+    .subject-notebook-search i { position: absolute; top: 50%; left: .65rem; color: #8a7770; font-size: .7rem; transform: translateY(-50%); }
+    .subject-notebook-search input { width: 100%; padding: .48rem .6rem .48rem 1.85rem; color: #4d3932; background: rgba(255,255,255,.68); border: 1px solid rgba(59,41,35,.09); border-radius: .6rem; font-size: .68rem; outline: 0; }
+    .subject-notebook-search input:focus { background: #fff; border-color: rgba(184,50,42,.35); }
+    .subject-notebook-organize-toggle { width: 100%; display: flex; align-items: center; justify-content: center; gap: .4rem; margin-bottom: .55rem; padding: .4rem; color: #715f57; background: transparent; border: 1px dashed rgba(59,41,35,.15); border-radius: .55rem; font-size: .65rem; font-weight: 650; }
+    .subject-notebook-organize-toggle.is-active { color: #fff; background: var(--pimentel-vermelho-escuro); border-style: solid; }
+    .subject-notebook-tree { display: grid; gap: .15rem; }
+    .subject-notebook-tree-row { min-width: 0; display: flex; align-items: center; border-radius: .65rem; }
+    .subject-notebook-tree-row:hover { background: rgba(255, 255, 255, .7); }
+    .subject-notebook-tree-row.is-active { color: var(--pimentel-vermelho-escuro); background: #fffdf9; box-shadow: 0 .15rem .5rem rgba(59, 41, 35, .06); }
+    .subject-notebook-tree-item { min-width: 0; flex: 1; display: flex; align-items: center; gap: .5rem; padding: .52rem .25rem; color: inherit; background: transparent; border: 0; font-size: .72rem; text-align: left; }
+    .subject-notebook-tree-item span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .subject-notebook-tree-disclosure, .subject-notebook-tree-spacer { width: 1.25rem; height: 1.7rem; flex: 0 0 auto; display: grid; place-items: center; color: #8a7770; background: transparent; border: 0; font-size: .55rem; }
+    .subject-notebook-order-actions { display: flex; flex: 0 0 auto; padding-right: .15rem; }
+    .subject-notebook-order-actions button { width: 1.35rem; height: 1.65rem; display: grid; place-items: center; color: #6d5a52; background: transparent; border: 0; font-size: .6rem; }
+    .subject-notebook-order-actions button:disabled { opacity: .22; }
+    .subject-notebook-tree-empty { padding: 2rem .65rem; color: #8a7770; font-size: .7rem; line-height: 1.5; text-align: center; }
+    .subject-notebook-workspace { min-width: 0; width: 100%; max-width: 900px; margin: 0 auto; padding: clamp(1rem, 3vw, 1.7rem); }
+    .subject-notebook-empty { min-height: 440px; display: grid; place-items: center; align-content: center; gap: .5rem; color: #78675f; text-align: center; }
+    .subject-notebook-empty > i { color: var(--pimentel-vermelho); font-size: 2.4rem; opacity: .72; }
+    .subject-notebook-empty h3 { color: #4d3932; }
+    .subject-notebook-empty-actions, .subject-notebook-view-actions { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: center; margin-top: .45rem; }
+    .subject-notebook-view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .subject-notebook-view-header p { color: #806f67; font-size: .74rem; }
+    .subject-notebook-view-toolbar { display: flex; align-items: flex-start; gap: .55rem; }
+    .subject-notebook-breadcrumb { display: flex; align-items: center; gap: .3rem; margin-bottom: .85rem; overflow-x: auto; color: #85736b; white-space: nowrap; }
+    .subject-notebook-breadcrumb button { padding: .1rem; color: inherit; background: transparent; border: 0; font-size: .66rem; }
+    .subject-notebook-breadcrumb button[aria-current="page"] { color: #4d3932; font-weight: 700; }
+    .subject-notebook-breadcrumb i { font-size: .5rem; opacity: .65; }
+    .subject-notebook-more { position: relative; }
+    .subject-notebook-more > summary { width: 2rem; height: 2rem; display: grid; place-items: center; color: #66544c; background: rgba(91,67,58,.06); border-radius: 50%; cursor: pointer; list-style: none; }
+    .subject-notebook-more > summary::-webkit-details-marker { display: none; }
+    .subject-notebook-more > div { position: absolute; z-index: 8; top: 2.25rem; right: 0; min-width: 175px; overflow: hidden; padding: .3rem; background: #fff; border: 1px solid rgba(59,41,35,.1); border-radius: .7rem; box-shadow: 0 .7rem 1.5rem rgba(59,41,35,.16); }
+    .subject-notebook-more > div button { width: 100%; display: flex; align-items: center; gap: .55rem; padding: .5rem .6rem; color: #59463e; background: transparent; border: 0; border-radius: .45rem; font-size: .68rem; text-align: left; }
+    .subject-notebook-more > div button:hover { background: rgba(91,67,58,.06); }
+    .subject-notebook-more > div button.is-danger { color: #a12d26; }
+    .subject-notebook-cover { min-height: 150px; display: flex; flex-direction: column; justify-content: flex-end; padding: 1.2rem; color: #fff; border-radius: 1rem; box-shadow: 0 .55rem 1.2rem rgba(59, 41, 35, .14); }
+    .subject-notebook-cover.is-gradient { background-image: linear-gradient(135deg, var(--notebook-color), #3b2923); }
+    .subject-notebook-cover.is-solid { background: var(--notebook-color); }
+    .subject-notebook-cover.is-minimal { color: #3b2923; background: #fffdf9; border-left: .7rem solid var(--notebook-color); box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09); }
+    .subject-notebook-cover small { opacity: .8; }
+    .subject-notebook-child-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .75rem; margin-top: 1rem; }
+    .subject-notebook-child { min-height: 105px; padding: .85rem; color: #4d3932; background: rgba(244, 239, 233, .66); border: 1px solid rgba(59, 41, 35, .08); border-radius: .8rem; text-align: left; }
+    .subject-notebook-child:hover { border-color: rgba(184, 50, 42, .25); transform: translateY(-1px); }
+    .subject-notebook-child i { color: var(--child-color, var(--pimentel-vermelho)); font-size: 1.15rem; }
+    .subject-notebook-child strong, .subject-notebook-child small { display: block; margin-top: .45rem; }
+    .subject-notebook-child small { color: #806f67; }
+    .subject-notebook-page-editor { min-height: 470px; padding: clamp(1rem, 3vw, 2rem); border-radius: .9rem; }
+    .subject-notebook-page-editor.is-paper-lined { background-color: #fffefb; background-image: repeating-linear-gradient(transparent 0, transparent 31px, rgba(82, 112, 150, .14) 32px); }
+    .subject-notebook-page-editor.is-paper-grid { background-color: #fffefb; background-image: linear-gradient(rgba(82,112,150,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(82,112,150,.1) 1px, transparent 1px); background-size: 24px 24px; }
+    .subject-notebook-page-editor.is-paper-dotted { background-color: #fffefb; background-image: radial-gradient(rgba(82,112,150,.18) 1px, transparent 1px); background-size: 20px 20px; }
+    .subject-notebook-page-editor.is-paper-plain { background: #fffefb; }
+    .subject-notebook-page-title { width: 100%; margin-bottom: .8rem; padding: .2rem 0 .55rem; color: #3b2923; background: transparent; border: 0; border-bottom: 1px solid rgba(59, 41, 35, .12); font-size: 1.25rem; font-weight: 750; outline: 0; }
+    .subject-notebook-page-content { width: 100%; min-height: 360px; padding: 0; color: #4c3d37; background: transparent; border: 0; resize: vertical; outline: 0; line-height: 2rem; }
+    .subject-notebook-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59, 41, 35, .08); }
+    .legacy-notes-panel { max-width: 1180px; margin-inline: auto; padding: .85rem 1rem; background: rgba(244, 239, 233, .5); border-radius: .9rem; }
+    .legacy-notes-panel > summary { color: #66544c; cursor: pointer; font-size: .75rem; font-weight: 700; }
+    .legacy-notes-panel > summary small { margin-left: .35rem; color: #8a7770; font-weight: 500; }
+    .subject-notebook-dialog { width: min(520px, calc(100vw - 2rem)); padding: 0; color: #3b2923; background: #fffdf9; border: 0; border-radius: 1rem; box-shadow: 0 1.2rem 3rem rgba(30, 20, 16, .24); }
+    .subject-notebook-dialog::backdrop { background: rgba(35, 27, 23, .45); backdrop-filter: blur(2px); }
+    .subject-notebook-dialog form { padding: 1.1rem; }
+    .subject-notebook-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .subject-notebook-dialog-header small { color: var(--pimentel-vermelho-escuro); font-weight: 750; text-transform: uppercase; }
+    .subject-notebook-icon { width: 2rem; height: 2rem; display: inline-grid; place-items: center; color: #66544c; background: rgba(91,67,58,.06); border: 0; border-radius: 50%; }
+    .subject-notebook-style-fields { display: grid; grid-template-columns: .55fr 1fr 1fr; gap: .75rem; }
+    .subject-notebook-style-fields label span { display: block; margin-bottom: .35rem; font-size: .72rem; font-weight: 650; }
+    .subject-notebook-style-fields input[type="color"] { width: 100%; height: 31px; padding: .15rem; background: #fff; border: 1px solid #dee2e6; border-radius: .35rem; }
+    .subject-notebook-dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.1rem; }
+    .subject-notebook-toast { position: fixed; z-index: 1095; right: 1rem; bottom: 1rem; width: min(390px, calc(100vw - 2rem)); display: none; align-items: flex-start; gap: .7rem; padding: .8rem .85rem; color: #4d3932; background: #fffdf9; border: 1px solid rgba(59,41,35,.12); border-left: 4px solid var(--pimentel-vermelho); border-radius: .8rem; box-shadow: 0 1rem 2.2rem rgba(35,25,20,.2); }
+    .subject-notebook-toast.is-visible { display: flex; }
+    .subject-notebook-toast > i { color: var(--pimentel-vermelho-escuro); font-size: 1rem; }
+    .subject-notebook-toast-copy { min-width: 0; flex: 1; }
+    .subject-notebook-toast-copy strong, .subject-notebook-toast-copy span { display: block; }
+    .subject-notebook-toast-copy strong { margin-bottom: .12rem; font-size: .72rem; }
+    .subject-notebook-toast-copy span { color: #715f57; font-size: .68rem; line-height: 1.45; }
+    .subject-notebook-toast button { width: 1.7rem; height: 1.7rem; display: grid; place-items: center; color: #715f57; background: transparent; border: 0; border-radius: 50%; }
     .lista-notas { max-height: calc(100dvh - 220px); overflow-y: auto; }
     .nota-item { cursor: pointer; }
     .nota-item.ativa { background-color: #e7f1ff; border-color: #9ec5fe; }
@@ -1264,8 +1354,21 @@
         .subject-workspace-sidebar { width: 100%; min-width: 0; flex: 0 0 auto; padding: .65rem .75rem; overflow-x: auto; overflow-y: hidden; }
         .subject-workspace-sidebar .ws-nav { width: max-content; flex-direction: row; align-items: center; flex-wrap: nowrap; }
         .subject-workspace-sidebar .ws-nav .nav-link { width: auto; padding: .55rem .75rem; }
+        .subject-workspace-sidebar .ws-nav .nav-link.active { box-shadow: inset 0 -3px 0 var(--pimentel-vermelho); }
         .subject-workspace-content { width: 100%; min-width: 0; flex: 1 1 auto; padding: 1rem .8rem 1.5rem; overflow-x: hidden; }
         .subject-notes-grid { min-height: auto; }
+        .subject-notebook-header { align-items: flex-start; flex-direction: column; }
+        .subject-notebook-header-actions { width: 100%; }
+        .subject-notebook-header-actions .btn { flex: 1; }
+        .subject-notebook-mobile-tree { display: inline-flex; }
+        .subject-notebook-layout { min-height: 600px; grid-template-columns: 1fr; }
+        .subject-notebook-tree-panel { display: none; max-height: 300px; overflow-y: auto; }
+        .subject-notebook-tree-panel.is-mobile-open { display: block; }
+        .subject-notebook-workspace { min-height: 390px; }
+        .subject-notebook-view-header { flex-direction: column; }
+        .subject-notebook-view-actions { justify-content: flex-start; }
+        .subject-notebook-view-toolbar { width: 100%; justify-content: space-between; }
+        .subject-notebook-style-fields { grid-template-columns: 1fr 1fr; }
         .lista-notas { max-height: 240px; }
         .editor-nota, .preview-nota { min-height: 52dvh; }
     }
@@ -2666,7 +2769,34 @@
                 </div>
 
                 <div class="tab-pane fade" id="ws-notas">
-                    <div class="row g-3 subject-notes-grid">
+                    <section class="subject-notebook-app" id="subjectNotebookApp" aria-labelledby="subjectNotebookTitle">
+                        <header class="subject-notebook-header">
+                            <div>
+                                <span class="subject-notebook-eyebrow"><i class="bi-journals me-1"></i>Espaço pessoal</span>
+                                <h2 class="h5 fw-bold mb-1" id="subjectNotebookTitle">Cadernos da matéria</h2>
+                                <p class="mb-0">Organize tópicos em pastas, cadernos e páginas com o seu estilo.</p>
+                            </div>
+                            <div class="subject-notebook-header-actions" id="subjectNotebookHeaderActions">
+                                <button class="btn btn-sm btn-light subject-notebook-mobile-tree" id="btnAlternarArvoreCaderno" type="button" aria-expanded="false" aria-controls="subjectNotebookTreePanel"><i class="bi-layout-sidebar-inset me-1"></i>Organização</button>
+                                <button class="btn btn-sm btn-outline-secondary" id="btnNovaPastaMateria" type="button"><i class="bi-folder-plus me-1"></i>Nova pasta</button>
+                                <button class="btn btn-sm btn-primary" id="btnNovoCadernoMateria" type="button"><i class="bi-journal-plus me-1"></i>Novo caderno</button>
+                            </div>
+                        </header>
+                        <div class="subject-notebook-status" id="subjectNotebookStatus" role="status" aria-live="polite"></div>
+                        <div class="subject-notebook-layout">
+                            <aside class="subject-notebook-tree-panel" id="subjectNotebookTreePanel" aria-label="Pastas e cadernos">
+                                <div class="subject-notebook-tree-title"><span>Minha organização</span><small id="subjectNotebookCount">0 itens</small></div>
+                                <label class="subject-notebook-search"><i class="bi-search"></i><input id="subjectNotebookSearch" type="search" placeholder="Buscar caderno ou página" aria-label="Buscar nos cadernos"></label>
+                                <button class="subject-notebook-organize-toggle" id="btnOrganizarCadernoMateria" type="button" aria-pressed="false"><i class="bi-arrow-down-up"></i><span>Organizar itens</span></button>
+                                <div class="subject-notebook-tree" id="subjectNotebookTree"></div>
+                            </aside>
+                            <main class="subject-notebook-workspace" id="subjectNotebookWorkspace"></main>
+                        </div>
+                    </section>
+
+                    <details class="legacy-notes-panel mt-3">
+                        <summary><i class="bi-archive me-2"></i>Notas anteriores <small>seu conteúdo antigo continua preservado</small></summary>
+                        <div class="row g-3 subject-notes-grid mt-1">
                         <div class="col-lg-4">
                             <div class="d-flex gap-2 mb-2">
                                 <input type="text" class="form-control form-control-sm" id="buscaNotas" placeholder="Buscar nota...">
@@ -2702,6 +2832,40 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    </details>
+
+                    <dialog class="subject-notebook-dialog" id="subjectNotebookDialog">
+                        <form id="subjectNotebookForm">
+                            <div class="subject-notebook-dialog-header">
+                                <div><small id="subjectNotebookDialogEyebrow">Novo item</small><h3 class="h5 mb-0" id="subjectNotebookDialogTitle">Criar caderno</h3></div>
+                                <button type="button" class="subject-notebook-icon" data-notebook-dialog-close aria-label="Fechar"><i class="bi-x-lg"></i></button>
+                            </div>
+                            <input type="hidden" id="subjectNotebookItemId">
+                            <input type="hidden" id="subjectNotebookItemType">
+                            <label class="form-label" for="subjectNotebookItemTitle">Nome</label>
+                            <input class="form-control mb-3" id="subjectNotebookItemTitle" maxlength="240" required>
+                            <label class="form-label" for="subjectNotebookItemParent">Local</label>
+                            <select class="form-select mb-3" id="subjectNotebookItemParent"></select>
+                            <div id="subjectNotebookTopicGroup">
+                                <label class="form-label" for="subjectNotebookItemTopic">Tópico relacionado <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select class="form-select mb-3" id="subjectNotebookItemTopic"></select>
+                            </div>
+                            <div class="subject-notebook-style-fields" id="subjectNotebookStyleFields">
+                                <label><span>Cor</span><input type="color" id="subjectNotebookItemColor" value="#b8322a"></label>
+                                <label><span>Capa</span><select class="form-select form-select-sm" id="subjectNotebookItemCover"><option value="solid">Clássica</option><option value="gradient">Degradê</option><option value="minimal">Minimalista</option></select></label>
+                                <label><span>Folha</span><select class="form-select form-select-sm" id="subjectNotebookItemPaper"><option value="lined">Pautada</option><option value="grid">Quadriculada</option><option value="dotted">Pontilhada</option><option value="plain">Lisa</option></select></label>
+                            </div>
+                            <div class="subject-notebook-dialog-actions">
+                                <button type="button" class="btn btn-light" data-notebook-dialog-close>Cancelar</button>
+                                <button type="submit" class="btn btn-primary" id="subjectNotebookDialogSave">Salvar</button>
+                            </div>
+                        </form>
+                    </dialog>
+                    <div class="subject-notebook-toast" id="subjectNotebookToast" role="alert" aria-live="assertive">
+                        <i class="bi-exclamation-circle-fill" aria-hidden="true"></i>
+                        <div class="subject-notebook-toast-copy"><strong>Não foi possível concluir</strong><span id="subjectNotebookToastMessage"></span></div>
+                        <button type="button" id="btnFecharToastCaderno" aria-label="Fechar aviso"><i class="bi-x-lg"></i></button>
                     </div>
                 </div>
 
@@ -6972,6 +7136,7 @@ function ocultarWorkspaceMateria() {
 
 async function fecharMateria() {
     if (!await salvarNotaPendente()) return false;
+    if (window.HUB_SUBJECT_NOTEBOOKS_UI && !await window.HUB_SUBJECT_NOTEBOOKS_UI.salvarPendente()) return false;
     if (window.HUB_MIND_MAPS_UI && !await window.HUB_MIND_MAPS_UI.salvarPendente()) return false;
     ocultarWorkspaceMateria();
     materiaAbertaId = null;
@@ -7013,18 +7178,19 @@ function renderizarWorkspace() {
     renderizarLinks(m);
     renderizarBibliotecaMateria(m);
     renderizarResumoMateria(m);
+    window.HUB_SUBJECT_NOTEBOOKS_UI?.definirMateria(m.id, m.nome, m.topicos);
     window.HUB_MIND_MAPS_UI?.definirMateria(m.id, m.nome);
 }
 
 function renderizarMetricasMateria(materia, progresso = progressoMateria(materia)) {
     const metricas = [
-        ["pie-chart-fill", `${progresso}% dominado`],
-        ["list-check", `${materia.topicos.length} tópicos`],
-        ["journal-text", `${materia.notas.length} notas`],
-        ["card-heading", `${materia.cards.length} flashcards`],
-        ["flag", `Prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`]
+        ["pie-chart-fill", `${progresso}% dominado`, ""],
+        ["list-check", `${materia.topicos.length} tópicos`, ""],
+        ["journal-text", `${materia.notas.length} notas`, ""],
+        ["card-heading", `${materia.cards.length} flashcards`, ""],
+        ["flag", `Prioridade ${PRIORIDADES[materia.prioridade] || "Média"}`, `is-priority ${materia.prioridade === "alta" ? "is-priority-high" : ""}`]
     ];
-    document.getElementById("wsSubtitulo").innerHTML = metricas.map(([icone, texto]) => `<span class="subject-workspace-metric"><i class="bi-${icone}" aria-hidden="true"></i>${esc(texto)}</span>`).join("");
+    document.getElementById("wsSubtitulo").innerHTML = metricas.map(([icone, texto, classe]) => `<span class="subject-workspace-metric ${classe}"><i class="bi-${icone}" aria-hidden="true"></i>${esc(texto)}</span>`).join("");
 }
 
 document.getElementById("btnFecharLeitorPrototipo").addEventListener("click", () => {

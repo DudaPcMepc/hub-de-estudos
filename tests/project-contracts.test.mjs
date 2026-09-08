@@ -2144,3 +2144,45 @@ test("as ações coletivas dos Cadernos jurídicos são atômicas, privadas e ex
     assert.match(html, /Selecionar visíveis/);
     assert.match(html, /Os textos legais, grifos, favoritos, notas e o histórico de leitura serão preservados\./);
 });
+
+test("os cadernos das matérias formam uma árvore privada de pastas, cadernos e páginas", () => {
+    const migration = readProjectFile("supabase/migrations/202609080002_subject_notebook_tree.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const html = readProjectFile("index.html");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+
+    assert.match(migration, /create table public\.user_subject_notebook_nodes/i);
+    assert.match(migration, /node_type text not null check \(node_type in \('folder', 'notebook', 'page'\)\)/i);
+    assert.match(migration, /foreign key \(parent_id, workspace_id, user_id, subject_id\)[\s\S]*?on delete cascade/i);
+    assert.match(migration, /force row level security/i);
+    assert.match(migration, /user_subject_notebook_nodes_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(migration, /new\.node_type = 'page'[\s\S]*?parent_type <> 'notebook'/i);
+    assert.match(migration, /new\.node_type in \('folder', 'notebook'\)[\s\S]*?parent_type <> 'folder'/i);
+    assert.match(migration, /create or replace function public\.reorder_subject_notebook_nodes/i);
+    assert.match(migration, /count\(distinct requested\.id\)[\s\S]*?exatamente os itens desta pasta/i);
+    assert.match(migration, /grant execute on function public\.reorder_subject_notebook_nodes\(uuid, uuid, uuid\[\]\) to authenticated/i);
+    assert.match(repository, /export async function carregarCadernosMateria/);
+    assert.match(repository, /export async function criarNoCadernoMateria/);
+    assert.match(repository, /\.eq\("version", versao\)/);
+    assert.match(repository, /\.rpc\("reorder_subject_notebook_nodes"/);
+    assert.match(auth, /window\.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object\.freeze/);
+    assert.match(auth, /criarCadernosMaterias\(window\.HUB_CLOUD_SUBJECT_NOTEBOOKS\)/);
+    assert.match(html, /id="subjectNotebookTree"/);
+    assert.match(html, /id="subjectNotebookWorkspace"/);
+    assert.match(html, /id="subjectNotebookSearch"/);
+    assert.match(html, /id="btnOrganizarCadernoMateria"/);
+    assert.match(html, /id="subjectNotebookToast"[\s\S]*?role="alert"/);
+    assert.match(html, /\.subject-workspace-metric\.is-priority-high/);
+    assert.match(html, /\.subject-workspace-sidebar \.ws-nav \.nav-link\.active[\s\S]*?rgba\(184, 50, 42, \.1\)/);
+    assert.match(html, /class="legacy-notes-panel/);
+    assert.match(html, /HUB_SUBJECT_NOTEBOOKS_UI\?\.definirMateria/);
+    assert.match(frontend, /data-notebook-create="page"/);
+    assert.match(frontend, /data-notebook-duplicate/);
+    assert.match(frontend, /subject-notebook-breadcrumb/);
+    assert.match(frontend, /pastasFechadas/);
+    assert.match(frontend, /headerActions\.classList\.toggle\("d-none", itens\.length === 0\)/);
+    assert.match(frontend, /exibirToast/);
+    assert.match(frontend, /is-paper-\$\{esc\(item\.estiloFolha\)\}/);
+    assert.match(frontend, /salvarPendente/);
+});

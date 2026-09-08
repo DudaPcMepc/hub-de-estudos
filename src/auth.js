@@ -3,9 +3,11 @@ import { encerrarAdministracao, iniciarAdministracao } from "./admin.js";
 import { encerrarPreviaMigracao, iniciarPreviaMigracao } from "./migration-preview.js";
 import { restaurarBackupRemoto } from "./migration-import.js";
 import { criarEditorMapasMentais } from "./mind-map-editor.js";
+import { criarCadernosMaterias } from "./subject-notebooks.js";
 import {
     atualizarMateria,
     atualizarNota,
+    atualizarNoCadernoMateria,
     atualizarFlashcard,
     atualizarProgressoFlashcard,
     atualizarTopicoFlashcard,
@@ -13,6 +15,7 @@ import {
     atualizarTarefa,
     atualizarRegistroEstudo,
     registrarRevisaoErro,
+    reordenarNosCadernoMateria,
     marcarReforcoErro,
     atualizarMateriaEdital,
     atualizarTopicoEdital,
@@ -31,6 +34,7 @@ import {
     carregarMapasMentais,
     carregarMateriasRemotas,
     carregarNotasRemotas,
+    carregarCadernosMateria,
     carregarFlashcardsRemotos,
     carregarLinksRemotos,
     carregarTarefasRemotas,
@@ -45,6 +49,7 @@ import {
     carregarEstadoLeituraJuridica,
     criarMateria,
     criarNota,
+    criarNoCadernoMateria,
     criarFlashcard,
     criarLink,
     criarTarefa,
@@ -68,6 +73,7 @@ import {
     encerrarRepositorioRemoto,
     excluirMateria,
     excluirNota,
+    excluirNoCadernoMateria,
     excluirFlashcard,
     excluirLink,
     excluirTarefa,
@@ -196,6 +202,16 @@ window.HUB_CLOUD_NOTES = Object.freeze({
     excluir: excluirNota,
     listar: carregarNotasRemotas
 });
+
+window.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object.freeze({
+    atualizar: atualizarNoCadernoMateria,
+    criar: criarNoCadernoMateria,
+    excluir: excluirNoCadernoMateria,
+    listar: carregarCadernosMateria,
+    reordenar: reordenarNosCadernoMateria
+});
+
+window.HUB_SUBJECT_NOTEBOOKS_UI = criarCadernosMaterias(window.HUB_CLOUD_SUBJECT_NOTEBOOKS);
 
 window.HUB_CLOUD_FLASHCARDS = Object.freeze({
     atualizar: atualizarFlashcard,
