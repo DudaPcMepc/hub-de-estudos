@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { runInNewContext } from "node:vm";
+import { runInNewContext, Script } from "node:vm";
 import { extrairDispositivos } from "../scripts/import-legal-sources.mjs";
 import {
     extrairAnexoTaxasEstatutoDesarmamento,
@@ -20,6 +20,14 @@ import { extrairGlossarioAnexoI } from "../scripts/import-traffic-code.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const readProjectFile = (relativePath) => readFileSync(join(projectRoot, relativePath), "utf8");
+
+test("o JavaScript interno da página principal possui sintaxe válida", () => {
+    const html = readProjectFile("index.html");
+    const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+        .map(match => match[1])
+        .filter(source => source.trim());
+    scripts.forEach((source, index) => assert.doesNotThrow(() => new Script(source, { filename: `index-inline-${index + 1}.js` })));
+});
 
 const carregarRenderizadorDeGrifos = () => {
     const html = readProjectFile("index.html");

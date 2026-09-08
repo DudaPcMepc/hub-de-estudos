@@ -5520,6 +5520,20 @@ function abrirFerramentaDoMaterial(acao, material) {
     }
 }
 
+function htmlMaterialEditorial(material) {
+    const href = urlHttpSegura(material.urlExterna);
+    const descricao = material.descricao ? `<p>${esc(material.descricao)}</p>` : "";
+    const conteudo = material.conteudo ? `<details class="small mb-2"><summary class="fw-semibold">Ler conteúdo</summary><div class="mt-2">${renderizarMarkdown(material.conteudo)}</div></details>` : "";
+    const link = href ? `<a class="btn btn-sm btn-primary" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="bi-box-arrow-up-right me-1"></i>Abrir</a>` : "";
+    return `<article class="subject-material-card" data-material-id="${esc(material.id)}"><span class="subject-material-kind"><i class="${iconeMaterialEditorial(material.tipo)} me-1"></i>${rotuloMaterialEditorial(material.tipo)}</span><h4 class="h6 fw-bold">${esc(material.titulo)}</h4>${descricao}${conteudo}<div class="subject-material-actions">${link}<button class="btn btn-sm btn-outline-secondary" data-editorial-action="nota"><i class="bi-journal-plus me-1"></i>Anotar</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="flashcard"><i class="bi-card-heading me-1"></i>Flashcard</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="mapa"><i class="bi-diagram-3 me-1"></i>Mapa</button></div></article>`;
+}
+
+function htmlModuloEditorial(modulo) {
+    const descricao = modulo.descricao ? `<p class="small mb-0">${esc(modulo.descricao)}</p>` : "";
+    const materiais = modulo.materiais.length ? modulo.materiais.map(htmlMaterialEditorial).join("") : '<p class="small text-muted mb-0">Os materiais deste módulo estão sendo preparados.</p>';
+    return `<section class="subject-module"><header class="subject-module-header"><h3 class="h6 fw-bold mb-1">${esc(modulo.titulo)}</h3>${descricao}</header><div class="subject-material-grid">${materiais}</div></section>`;
+}
+
 function montarConteudoEditorial(materia, modulos) {
     const container = document.getElementById("wsConteudoMateria");
     const catalogo = catalogoDaMateria(materia);
@@ -5527,7 +5541,8 @@ function montarConteudoEditorial(materia, modulos) {
         container.innerHTML = `<div class="subject-content-empty"><i class="bi-stars"></i><strong class="d-block mb-1">Matéria personalizada</strong><span>Use Tópicos, Caderno, Mapas mentais, Flashcards e Materiais para construir seu espaço particular.</span></div>`;
         return;
     }
-    container.innerHTML = `<header class="subject-content-intro"><small class="text-uppercase fw-bold">Conteúdo da disciplina</small><h2 class="h4 fw-bold mt-1 mb-2">${esc(catalogo?.nome || materia.nome)}</h2><p class="mb-0">Conteúdo-base publicado pela administração, integrado às suas ferramentas particulares de estudo.</p></header>${modulos.length ? modulos.map(modulo => `<section class="subject-module"><header class="subject-module-header"><h3 class="h6 fw-bold mb-1">${esc(modulo.titulo)}</h3>${modulo.descricao ? `<p class="small mb-0">${esc(modulo.descricao)}</p>` : ""}</header><div class="subject-material-grid">${modulo.materiais.map(material => { const href = urlHttpSegura(material.urlExterna); return `<article class="subject-material-card" data-material-id="${esc(material.id)}"><span class="subject-material-kind"><i class="${iconeMaterialEditorial(material.tipo)} me-1"></i>${rotuloMaterialEditorial(material.tipo)}</span><h4 class="h6 fw-bold">${esc(material.titulo)}</h4>${material.descricao ? `<p>${esc(material.descricao)}</p>` : ""}${material.conteudo ? `<details class="small mb-2"><summary class="fw-semibold">Ler conteúdo</summary><div class="mt-2">${renderizarMarkdown(material.conteudo)}</div></details>` : ""}<div class="subject-material-actions">${href ? `<a class="btn btn-sm btn-primary" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="bi-box-arrow-up-right me-1"></i>Abrir</a>` : ""}<button class="btn btn-sm btn-outline-secondary" data-editorial-action="nota"><i class="bi-journal-plus me-1"></i>Anotar</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="flashcard"><i class="bi-card-heading me-1"></i>Flashcard</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="mapa"><i class="bi-diagram-3 me-1"></i>Mapa</button></div></article>`; }).join("") || '<p class="small text-muted mb-0">Os materiais deste módulo estão sendo preparados.</p>'}</div></section>`).join("") : `<div class="subject-content-empty"><i class="bi-journal-richtext"></i><strong class="d-block mb-1">Conteúdo em preparação</strong><span>Esta disciplina já está vinculada ao catálogo, mas ainda não recebeu módulos publicados.</span></div>`;
+    const conteudo = modulos.length ? modulos.map(htmlModuloEditorial).join("") : `<div class="subject-content-empty"><i class="bi-journal-richtext"></i><strong class="d-block mb-1">Conteúdo em preparação</strong><span>Esta disciplina já está vinculada ao catálogo, mas ainda não recebeu módulos publicados.</span></div>`;
+    container.innerHTML = `<header class="subject-content-intro"><small class="text-uppercase fw-bold">Conteúdo da disciplina</small><h2 class="h4 fw-bold mt-1 mb-2">${esc(catalogo?.nome || materia.nome)}</h2><p class="mb-0">Conteúdo-base publicado pela administração, integrado às suas ferramentas particulares de estudo.</p></header>${conteudo}`;
     container.querySelectorAll("[data-editorial-action]").forEach(button => button.addEventListener("click", () => {
         const materialId = button.closest("[data-material-id]")?.dataset.materialId;
         const material = modulos.flatMap(modulo => modulo.materiais).find(item => item.id === materialId);
