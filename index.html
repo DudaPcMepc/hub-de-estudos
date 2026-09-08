@@ -1204,13 +1204,20 @@
     .subject-notebook-status:not(:empty) { padding-block: .55rem; background: rgba(100, 116, 90, .07); }
     .subject-notebook-layout { min-height: 560px; display: grid; grid-template-columns: 275px minmax(0, 1fr); }
     .subject-notebook-tree-panel { padding: .9rem; background: #f4efe9; box-shadow: inset -1px 0 rgba(59, 41, 35, .07); }
-    .subject-notebook-tree-title { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; padding: 0 .35rem; color: #5b433a; font-size: .7rem; font-weight: 750; }
+    .subject-notebook-tree-title { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; padding: 0 .2rem; color: #5b433a; font-size: .7rem; font-weight: 750; }
     .subject-notebook-tree-title small { color: #8a7770; font-size: .6rem; font-weight: 600; }
+    .subject-notebook-tree-actions { display: flex; align-items: center; gap: .28rem; }
+    .subject-notebook-section-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .25rem; margin-bottom: .55rem; padding: .2rem; background: rgba(91,67,58,.055); border-radius: .65rem; }
+    .subject-notebook-section-nav button { min-width: 0; display: flex; align-items: center; justify-content: center; gap: .35rem; padding: .42rem .45rem; color: #75635b; background: transparent; border: 0; border-radius: .5rem; font-size: .65rem; font-weight: 700; }
+    .subject-notebook-section-nav button:hover { color: #513a32; background: rgba(255,255,255,.62); }
+    .subject-notebook-section-nav button.is-active { color: var(--pimentel-vermelho-escuro); background: #fffdf9; box-shadow: 0 .12rem .35rem rgba(59,41,35,.08); }
+    .subject-notebook-section-nav small { min-width: 1rem; height: 1rem; display: grid; place-items: center; padding: 0 .25rem; color: #fff; background: var(--pimentel-vermelho); border-radius: 999px; font-size: .5rem; line-height: 1; }
     .subject-notebook-search { position: relative; display: block; margin-bottom: .45rem; }
     .subject-notebook-search i { position: absolute; top: 50%; left: .65rem; color: #8a7770; font-size: .7rem; transform: translateY(-50%); }
     .subject-notebook-search input { width: 100%; padding: .48rem .6rem .48rem 1.85rem; color: #4d3932; background: rgba(255,255,255,.68); border: 1px solid rgba(59,41,35,.09); border-radius: .6rem; font-size: .68rem; outline: 0; }
     .subject-notebook-search input:focus { background: #fff; border-color: rgba(184,50,42,.35); }
-    .subject-notebook-organize-toggle { width: 100%; display: flex; align-items: center; justify-content: center; gap: .4rem; margin-bottom: .55rem; padding: .4rem; color: #715f57; background: transparent; border: 1px dashed rgba(59,41,35,.15); border-radius: .55rem; font-size: .65rem; font-weight: 650; }
+    .subject-notebook-organize-toggle { min-height: 1.85rem; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: .3rem; padding: 0 .55rem; color: #715f57; background: rgba(255,255,255,.58); border: 1px solid rgba(59,41,35,.1); border-radius: .55rem; font-size: .62rem; font-weight: 700; }
+    .subject-notebook-organize-toggle:hover { color: var(--pimentel-vermelho-escuro); background: #fff; }
     .subject-notebook-organize-toggle.is-active { color: #fff; background: var(--pimentel-vermelho-escuro); border-style: solid; }
     .subject-notebook-tree { display: grid; gap: .15rem; }
     .subject-notebook-tree-row { min-width: 0; display: flex; align-items: center; border-radius: .65rem; }
@@ -1220,18 +1227,38 @@
     .subject-notebook-tree-item { min-width: 0; flex: 1; display: flex; align-items: center; gap: .5rem; padding: .52rem .25rem; color: inherit; background: transparent; border: 0; font-size: .72rem; text-align: left; }
     .subject-notebook-tree-item span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .subject-notebook-tree-disclosure, .subject-notebook-tree-spacer { width: 1.25rem; height: 1.7rem; flex: 0 0 auto; display: grid; place-items: center; color: #8a7770; background: transparent; border: 0; font-size: .55rem; }
-    .subject-notebook-order-actions { display: flex; flex: 0 0 auto; padding-right: .15rem; }
-    .subject-notebook-order-actions button { width: 1.35rem; height: 1.65rem; display: grid; place-items: center; color: #6d5a52; background: transparent; border: 0; font-size: .6rem; }
-    .subject-notebook-order-actions button:disabled { opacity: .22; }
+    .subject-notebook-drag-handle { width: 1.65rem; height: 1.75rem; flex: 0 0 auto; display: grid; place-items: center; margin-right: .12rem; color: #715f57; background: rgba(255,255,255,.72); border: 1px solid rgba(59,41,35,.08); border-radius: .45rem; cursor: grab; touch-action: none; }
+    .subject-notebook-drag-handle:active { cursor: grabbing; }
+    .subject-notebook-tree-row.is-dragging { opacity: .42; }
+    .subject-notebook-tree-row.is-drop-before { box-shadow: inset 0 2px var(--pimentel-vermelho); }
+    .subject-notebook-tree-row.is-drop-after { box-shadow: inset 0 -2px var(--pimentel-vermelho); }
+    .subject-notebook-tree-row.is-drop-inside { color: var(--pimentel-vermelho-escuro); background: #fff8f1; outline: 2px solid rgba(184,50,42,.42); outline-offset: -2px; }
     .subject-notebook-tree-empty { padding: 2rem .65rem; color: #8a7770; font-size: .7rem; line-height: 1.5; text-align: center; }
     .subject-notebook-workspace { min-width: 0; width: 100%; max-width: 1180px; margin: 0 auto; padding: clamp(.8rem, 2vw, 1.35rem); }
-    .subject-notebook-empty { min-height: 440px; display: grid; place-items: center; align-content: center; gap: .5rem; color: #78675f; text-align: center; }
+    .subject-notebook-empty { width: 100%; min-height: 440px; display: grid; place-items: center; align-content: center; gap: .5rem; padding: 1.5rem; color: #78675f; text-align: center; }
+    .subject-notebook-empty.is-contained { min-height: clamp(280px, 45vh, 420px); }
     .subject-notebook-empty > i { color: var(--pimentel-vermelho); font-size: 2.4rem; opacity: .72; }
     .subject-notebook-empty h3 { color: #4d3932; }
     .subject-notebook-empty-actions, .subject-notebook-view-actions { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: center; margin-top: .45rem; }
+    .subject-notebook-trash-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .subject-notebook-trash-header p { margin: .25rem 0 0; color: #806f67; font-size: .72rem; }
+    .subject-notebook-trash-list { display: grid; gap: .65rem; }
+    .subject-notebook-trash-card { display: flex; align-items: center; gap: .75rem; padding: .85rem; background: #fffdf9; border: 1px solid rgba(59,41,35,.09); border-radius: .8rem; }
+    .subject-notebook-trash-card > i { width: 2.1rem; height: 2.1rem; flex: 0 0 auto; display: grid; place-items: center; color: #806f67; background: rgba(91,67,58,.07); border-radius: .6rem; }
+    .subject-notebook-trash-card-copy { min-width: 0; flex: 1; }
+    .subject-notebook-trash-card-copy strong, .subject-notebook-trash-card-copy small { display: block; }
+    .subject-notebook-trash-card-copy strong { overflow: hidden; color: #4d3932; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+    .subject-notebook-trash-card-copy small { margin-top: .16rem; color: #85736b; font-size: .64rem; }
+    .subject-notebook-trash-card-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .35rem; }
     .subject-notebook-view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
     .subject-notebook-view-header p { color: #806f67; font-size: .74rem; }
     .subject-notebook-view-toolbar { display: flex; align-items: flex-start; gap: .55rem; }
+    .subject-notebook-detail-heading { min-width: 0; flex: 1; }
+    .subject-notebook-detail-heading > small { display: block; margin-bottom: .28rem; color: #806f67; font-size: .66rem; font-weight: 700; letter-spacing: .035em; text-transform: uppercase; }
+    .subject-notebook-detail-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; }
+    .subject-notebook-detail-title-row h3 { min-width: 0; margin: 0; color: #44322c; font-size: clamp(1.15rem, 2vw, 1.45rem); font-weight: 750; line-height: 1.25; overflow-wrap: anywhere; }
+    .subject-notebook-context-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; }
+    .subject-notebook-detail-heading > p { margin: .35rem 0 0; color: #806f67; font-size: .72rem; }
     .subject-notebook-breadcrumb { display: flex; align-items: center; gap: .3rem; margin-bottom: .85rem; overflow-x: auto; color: #85736b; white-space: nowrap; }
     .subject-notebook-breadcrumb button { padding: .1rem; color: inherit; background: transparent; border: 0; font-size: .66rem; }
     .subject-notebook-breadcrumb button[aria-current="page"] { color: #4d3932; font-weight: 700; }
@@ -1249,13 +1276,23 @@
     .subject-notebook-cover.is-minimal { color: #3b2923; background: #fffdf9; border-left: .7rem solid var(--notebook-color); box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .09); }
     .subject-notebook-cover small { opacity: .8; }
     .subject-notebook-child-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .75rem; margin-top: 1rem; }
-    .subject-notebook-child { min-height: 105px; padding: .85rem; color: #4d3932; background: rgba(244, 239, 233, .66); border: 1px solid rgba(59, 41, 35, .08); border-radius: .8rem; text-align: left; }
-    .subject-notebook-child:hover { border-color: rgba(184, 50, 42, .25); transform: translateY(-1px); }
+    .subject-notebook-child-card { position: relative; min-width: 0; border-radius: .8rem; transition: transform .15s ease; }
+    .subject-notebook-child-card:hover { transform: translateY(-1px); }
+    .subject-notebook-child { width: 100%; min-height: 105px; height: 100%; padding: .85rem 2.8rem .85rem .85rem; color: #4d3932; background: rgba(244, 239, 233, .66); border: 1px solid rgba(59, 41, 35, .08); border-radius: .8rem; text-align: left; }
+    .subject-notebook-child:hover { border-color: rgba(184, 50, 42, .25); }
     .subject-notebook-child i { color: var(--child-color, var(--pimentel-vermelho)); font-size: 1.15rem; }
     .subject-notebook-child strong, .subject-notebook-child small { display: block; margin-top: .45rem; }
     .subject-notebook-child small { color: #806f67; }
+    .subject-notebook-child-meta { display: flex; flex-wrap: wrap; gap: .28rem .5rem; margin-top: .6rem; color: #806f67; font-size: .59rem; }
+    .subject-notebook-child-meta span { display: inline-flex; align-items: center; gap: .22rem; min-width: 0; }
+    .subject-notebook-child-meta i { color: #8a7770; font-size: .6rem; }
+    .subject-notebook-last-opened { width: fit-content; display: inline-flex; align-items: center; gap: .25rem; margin-top: .55rem; padding: .18rem .42rem; color: #42624f; background: rgba(100, 116, 90, .11); border-radius: 999px; font-size: .58rem; font-weight: 700; }
+    .subject-notebook-last-opened i { color: currentColor; font-size: .62rem; }
     .subject-notebook-child-open { display: flex; align-items: center; justify-content: flex-end; gap: .2rem; margin-top: .65rem; color: var(--pimentel-vermelho); font-size: .76rem; font-weight: 700; }
     .subject-notebook-child-open i { color: currentColor; font-size: .72rem; }
+    .subject-notebook-child-menu { position: absolute; z-index: 3; top: .55rem; right: .55rem; }
+    .subject-notebook-child-menu .subject-notebook-more > summary { background: rgba(255, 253, 249, .86); box-shadow: 0 .12rem .35rem rgba(59, 41, 35, .08); }
+    .subject-notebook-child-menu .subject-notebook-more[open] > summary { color: var(--pimentel-vermelho-escuro); background: #fff; }
     .subject-notebook-open { min-width: 0; display: grid; grid-template-columns: 172px minmax(0, 1fr); gap: 1rem; }
     .subject-notebook-open.is-pages-collapsed { grid-template-columns: 0 minmax(0, 1fr); gap: 0; }
     .subject-notebook-page-rail { min-width: 0; max-height: 660px; overflow: hidden; display: flex; flex-direction: column; padding: .65rem; background: #f4efe9; border-radius: .9rem; transition: opacity .18s ease; }
@@ -1265,13 +1302,22 @@
     .subject-notebook-page-rail-header small { min-width: 1.25rem; padding: .08rem .3rem; color: #806f67; background: rgba(255,255,255,.65); border-radius: 999px; font-size: .58rem; text-align: center; }
     .subject-notebook-page-rail-header button { width: 1.75rem; height: 1.75rem; display: grid; place-items: center; color: #fff; background: var(--pimentel-vermelho-escuro); border: 0; border-radius: 50%; font-size: .65rem; }
     .subject-notebook-page-thumbnails { min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: .5rem; padding-right: .15rem; }
-    .subject-notebook-page-thumbnail { position: relative; min-height: 108px; padding: .65rem .55rem .55rem 1.85rem; color: #66544c; background: #fffefb; border: 1px solid rgba(59,41,35,.09); border-radius: .65rem; text-align: left; box-shadow: 0 .18rem .5rem rgba(59,41,35,.04); }
+    .subject-notebook-page-thumbnail-card { position: relative; min-width: 0; }
+    .subject-notebook-page-thumbnail { position: relative; width: 100%; min-height: 108px; padding: .65rem 2rem .55rem 1.85rem; color: #66544c; background: #fffefb; border: 1px solid rgba(59,41,35,.09); border-radius: .65rem; text-align: left; box-shadow: 0 .18rem .5rem rgba(59,41,35,.04); }
     .subject-notebook-page-thumbnail:hover { border-color: rgba(184,50,42,.28); }
     .subject-notebook-page-thumbnail.is-active { border-color: rgba(184,50,42,.48); box-shadow: inset 3px 0 var(--pimentel-vermelho), 0 .25rem .7rem rgba(59,41,35,.08); }
     .subject-notebook-page-thumbnail > span { position: absolute; top: .62rem; left: .55rem; width: 1rem; height: 1rem; display: grid; place-items: center; color: #8a7770; background: #f4efe9; border-radius: 50%; font-size: .52rem; }
     .subject-notebook-page-thumbnail strong, .subject-notebook-page-thumbnail small { display: block; overflow: hidden; }
     .subject-notebook-page-thumbnail strong { color: #4d3932; font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
     .subject-notebook-page-thumbnail small { max-height: 2.8em; margin-top: .35rem; color: #8a7770; font-size: .58rem; line-height: 1.4; }
+    .subject-notebook-page-options { position: absolute; z-index: 2; top: .4rem; right: .35rem; width: 1.45rem; height: 1.45rem; display: grid; place-items: center; color: #715f57; background: rgba(244,239,233,.9); border: 0; border-radius: 50%; font-size: .65rem; }
+    .subject-notebook-page-options:hover { color: var(--pimentel-vermelho-escuro); background: #fff; box-shadow: 0 .15rem .4rem rgba(59,41,35,.12); }
+    .subject-notebook-actions-dialog { width: min(340px, calc(100vw - 2rem)); }
+    .subject-notebook-actions-dialog-body { padding: 1rem; }
+    .subject-notebook-actions-list { display: grid; gap: .35rem; }
+    .subject-notebook-actions-list button { width: 100%; display: flex; align-items: center; gap: .65rem; padding: .7rem .75rem; color: #59463e; background: rgba(244,239,233,.58); border: 0; border-radius: .65rem; font-size: .75rem; text-align: left; }
+    .subject-notebook-actions-list button:hover { background: rgba(91,67,58,.09); }
+    .subject-notebook-actions-list button.is-danger { color: #a12d26; background: rgba(184,50,42,.065); }
     .subject-notebook-page-stage { min-width: 0; }
     .subject-notebook-editor-topbar { min-height: 42px; display: flex; align-items: center; gap: .3rem; margin-bottom: .55rem; padding: .35rem .45rem; background: rgba(255,255,255,.72); border: 1px solid rgba(59,41,35,.08); border-radius: .75rem; box-shadow: 0 .2rem .7rem rgba(59,41,35,.04); }
     .subject-notebook-tool { width: 2rem; height: 2rem; display: grid; flex: 0 0 auto; place-items: center; color: #66544c; background: transparent; border: 0; border-radius: .55rem; }
@@ -1290,6 +1336,9 @@
     .subject-notebook-organize-mode p { max-width: 500px; margin: 0; font-size: .75rem; line-height: 1.6; }
     .subject-notebook-organize-icon { width: 3rem; height: 3rem; display: grid; place-items: center; color: var(--pimentel-vermelho-escuro); background: rgba(184,50,42,.09); border-radius: 1rem; font-size: 1.25rem; }
     .subject-notebook-organize-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+    .subject-notebook-organize-banner { display: flex; align-items: center; gap: .65rem; margin-bottom: .85rem; padding: .65rem .75rem; color: #5f4c44; background: rgba(100,116,90,.09); border-radius: .75rem; font-size: .7rem; }
+    .subject-notebook-organize-banner > i { color: #526554; font-size: .9rem; }
+    .subject-notebook-organize-banner span { min-width: 0; flex: 1; }
     .subject-notebook-page-editor { min-height: 470px; padding: clamp(1rem, 3vw, 2rem); border-radius: .9rem; }
     .subject-notebook-page-editor.is-paper-lined { background-color: #fffefb; background-image: repeating-linear-gradient(transparent 0, transparent 31px, rgba(82, 112, 150, .14) 32px); }
     .subject-notebook-page-editor.is-paper-grid { background-color: #fffefb; background-image: linear-gradient(rgba(82,112,150,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(82,112,150,.1) 1px, transparent 1px); background-size: 24px 24px; }
@@ -1314,11 +1363,15 @@
     .subject-notebook-toast { position: fixed; z-index: 1095; right: 1rem; bottom: 1rem; width: min(390px, calc(100vw - 2rem)); display: none; align-items: flex-start; gap: .7rem; padding: .8rem .85rem; color: #4d3932; background: #fffdf9; border: 1px solid rgba(59,41,35,.12); border-left: 4px solid var(--pimentel-vermelho); border-radius: .8rem; box-shadow: 0 1rem 2.2rem rgba(35,25,20,.2); }
     .subject-notebook-toast.is-visible { display: flex; }
     .subject-notebook-toast > i { color: var(--pimentel-vermelho-escuro); font-size: 1rem; }
+    .subject-notebook-toast.is-success { border-left-color: #527c57; }
+    .subject-notebook-toast.is-success > i { color: #527c57; }
     .subject-notebook-toast-copy { min-width: 0; flex: 1; }
     .subject-notebook-toast-copy strong, .subject-notebook-toast-copy span { display: block; }
     .subject-notebook-toast-copy strong { margin-bottom: .12rem; font-size: .72rem; }
     .subject-notebook-toast-copy span { color: #715f57; font-size: .68rem; line-height: 1.45; }
-    .subject-notebook-toast button { width: 1.7rem; height: 1.7rem; display: grid; place-items: center; color: #715f57; background: transparent; border: 0; border-radius: 50%; }
+    .subject-notebook-toast-actions { display: flex; align-items: center; gap: .3rem; }
+    .subject-notebook-toast .subject-notebook-toast-action { width: auto; height: 1.7rem; padding: 0 .55rem; color: var(--pimentel-vermelho-escuro); background: rgba(184,50,42,.08); border: 0; border-radius: .45rem; font-size: .66rem; font-weight: 750; }
+    .subject-notebook-toast .subject-notebook-toast-close { width: 1.7rem; height: 1.7rem; display: grid; place-items: center; color: #715f57; background: transparent; border: 0; border-radius: 50%; }
     .lista-notas { max-height: calc(100dvh - 220px); overflow-y: auto; }
     .nota-item { cursor: pointer; }
     .nota-item.ativa { background-color: #e7f1ff; border-color: #9ec5fe; }
@@ -2821,16 +2874,16 @@
                             </div>
                             <div class="subject-notebook-header-actions" id="subjectNotebookHeaderActions">
                                 <button class="btn btn-sm btn-light subject-notebook-mobile-tree" id="btnAlternarArvoreCaderno" type="button" aria-expanded="false" aria-controls="subjectNotebookTreePanel"><i class="bi-layout-sidebar-inset me-1"></i>Organização</button>
-                                <button class="btn btn-sm btn-outline-secondary" id="btnNovaPastaMateria" type="button"><i class="bi-folder-plus me-1"></i>Nova pasta</button>
-                                <button class="btn btn-sm btn-primary" id="btnNovoCadernoMateria" type="button"><i class="bi-journal-plus me-1"></i>Novo caderno</button>
+                                <button class="btn btn-sm btn-outline-secondary" id="btnNovaPastaMateria" type="button" title="Criar pasta na raiz da matéria"><i class="bi-folder-plus me-1"></i>Pasta na raiz</button>
+                                <button class="btn btn-sm btn-primary" id="btnNovoCadernoMateria" type="button" title="Criar caderno na raiz da matéria"><i class="bi-journal-plus me-1"></i>Caderno na raiz</button>
                             </div>
                         </header>
                         <div class="subject-notebook-status" id="subjectNotebookStatus" role="status" aria-live="polite"></div>
                         <div class="subject-notebook-layout">
                             <aside class="subject-notebook-tree-panel" id="subjectNotebookTreePanel" aria-label="Pastas e cadernos">
-                                <div class="subject-notebook-tree-title"><span>Minha organização</span><small id="subjectNotebookCount">0 itens</small></div>
+                                <div class="subject-notebook-tree-title"><span>Minha organização <small id="subjectNotebookCount">0 itens</small></span><button class="subject-notebook-organize-toggle" id="btnOrganizarCadernoMateria" type="button" aria-pressed="false" title="Organizar itens"><i class="bi-grip-vertical"></i><span>Organizar</span></button></div>
+                                <nav class="subject-notebook-section-nav" aria-label="Seções do caderno"><button class="is-active" id="btnCadernosMateria" type="button" aria-pressed="true"><i class="bi-journals"></i><span>Cadernos</span></button><button id="btnLixeiraCadernoMateria" type="button" aria-pressed="false"><i class="bi-trash3"></i><span>Lixeira</span><small id="subjectNotebookTrashCount" hidden>0</small></button></nav>
                                 <label class="subject-notebook-search"><i class="bi-search"></i><input id="subjectNotebookSearch" type="search" placeholder="Buscar caderno ou página" aria-label="Buscar nos cadernos"></label>
-                                <button class="subject-notebook-organize-toggle" id="btnOrganizarCadernoMateria" type="button" aria-pressed="false"><i class="bi-arrow-down-up"></i><span>Organizar itens</span></button>
                                 <div class="subject-notebook-tree" id="subjectNotebookTree"></div>
                             </aside>
                             <main class="subject-notebook-workspace" id="subjectNotebookWorkspace"></main>
@@ -2886,10 +2939,14 @@
                             </div>
                             <input type="hidden" id="subjectNotebookItemId">
                             <input type="hidden" id="subjectNotebookItemType">
-                            <label class="form-label" for="subjectNotebookItemTitle">Nome</label>
-                            <input class="form-control mb-3" id="subjectNotebookItemTitle" maxlength="240" required>
-                            <label class="form-label" for="subjectNotebookItemParent">Local</label>
-                            <select class="form-select mb-3" id="subjectNotebookItemParent"></select>
+                            <div id="subjectNotebookNameGroup">
+                                <label class="form-label" for="subjectNotebookItemTitle">Nome</label>
+                                <input class="form-control mb-3" id="subjectNotebookItemTitle" maxlength="240" required>
+                            </div>
+                            <div id="subjectNotebookParentGroup">
+                                <label class="form-label" for="subjectNotebookItemParent">Local</label>
+                                <select class="form-select mb-3" id="subjectNotebookItemParent"></select>
+                            </div>
                             <div id="subjectNotebookTopicGroup">
                                 <label class="form-label" for="subjectNotebookItemTopic">Tópico relacionado <span class="text-muted fw-normal">(opcional)</span></label>
                                 <select class="form-select mb-3" id="subjectNotebookItemTopic"></select>
@@ -2905,10 +2962,28 @@
                             </div>
                         </form>
                     </dialog>
-                    <div class="subject-notebook-toast" id="subjectNotebookToast" role="alert" aria-live="assertive">
-                        <i class="bi-exclamation-circle-fill" aria-hidden="true"></i>
-                        <div class="subject-notebook-toast-copy"><strong>Não foi possível concluir</strong><span id="subjectNotebookToastMessage"></span></div>
-                        <button type="button" id="btnFecharToastCaderno" aria-label="Fechar aviso"><i class="bi-x-lg"></i></button>
+                    <dialog class="subject-notebook-dialog subject-notebook-actions-dialog" id="subjectNotebookPageActionsDialog">
+                        <div class="subject-notebook-actions-dialog-body">
+                            <div class="subject-notebook-dialog-header">
+                                <div><small>Página selecionada</small><h3 class="h5 mb-0" id="subjectNotebookPageActionsTitle">Opções da página</h3></div>
+                                <button type="button" class="subject-notebook-icon" data-notebook-page-actions-close aria-label="Fechar"><i class="bi-x-lg"></i></button>
+                            </div>
+                            <input type="hidden" id="subjectNotebookPageActionsId">
+                            <div class="subject-notebook-actions-list">
+                                <button type="button" data-notebook-page-action="rename"><i class="bi-pencil"></i>Renomear página</button>
+                                <button type="button" data-notebook-page-action="move"><i class="bi-folder-symlink"></i>Mover para outro caderno</button>
+                                <button type="button" data-notebook-page-action="duplicate"><i class="bi-copy"></i>Duplicar página</button>
+                                <button class="is-danger" type="button" data-notebook-page-action="delete"><i class="bi-trash"></i>Excluir página</button>
+                            </div>
+                        </div>
+                    </dialog>
+                    <div class="subject-notebook-toast" id="subjectNotebookToast" role="alert" aria-live="polite">
+                        <i class="bi-exclamation-circle-fill" id="subjectNotebookToastIcon" aria-hidden="true"></i>
+                        <div class="subject-notebook-toast-copy"><strong id="subjectNotebookToastTitle">Não foi possível concluir</strong><span id="subjectNotebookToastMessage"></span></div>
+                        <div class="subject-notebook-toast-actions">
+                            <button class="subject-notebook-toast-action" type="button" id="btnDesfazerMovimentoCaderno" hidden>Desfazer</button>
+                            <button class="subject-notebook-toast-close" type="button" id="btnFecharToastCaderno" aria-label="Fechar aviso"><i class="bi-x-lg"></i></button>
+                        </div>
                     </div>
                 </div>
 

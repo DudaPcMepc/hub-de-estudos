@@ -35,6 +35,8 @@ import {
     carregarMateriasRemotas,
     carregarNotasRemotas,
     carregarCadernosMateria,
+    carregarLixeiraCadernosMateria,
+    carregarPosicaoCadernoMateria,
     carregarFlashcardsRemotos,
     carregarLinksRemotos,
     carregarTarefasRemotas,
@@ -74,6 +76,8 @@ import {
     excluirMateria,
     excluirNota,
     excluirNoCadernoMateria,
+    excluirDefinitivamenteCadernoMateria,
+    esvaziarLixeiraCadernoMateria,
     excluirFlashcard,
     excluirLink,
     excluirTarefa,
@@ -91,6 +95,8 @@ import {
     registrarLeituraJuridica,
     registrarRevisaoTarefa,
     salvarFavoritoJuridico,
+    salvarPosicaoCadernoMateria,
+    restaurarDaLixeiraCadernoMateria,
     excluirTopico,
     prepararRepositorioRemoto,
     registrarRespostaDesempenho,
@@ -205,10 +211,16 @@ window.HUB_CLOUD_NOTES = Object.freeze({
 
 window.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object.freeze({
     atualizar: atualizarNoCadernoMateria,
+    carregarPosicao: carregarPosicaoCadernoMateria,
     criar: criarNoCadernoMateria,
     excluir: excluirNoCadernoMateria,
+    excluirDefinitivamente: excluirDefinitivamenteCadernoMateria,
+    esvaziarLixeira: esvaziarLixeiraCadernoMateria,
     listar: carregarCadernosMateria,
-    reordenar: reordenarNosCadernoMateria
+    listarLixeira: carregarLixeiraCadernosMateria,
+    reordenar: reordenarNosCadernoMateria,
+    restaurar: restaurarDaLixeiraCadernoMateria,
+    salvarPosicao: salvarPosicaoCadernoMateria
 });
 
 window.HUB_SUBJECT_NOTEBOOKS_UI = criarCadernosMaterias(window.HUB_CLOUD_SUBJECT_NOTEBOOKS);
