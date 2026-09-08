@@ -2300,3 +2300,67 @@ test("o caderno retoma com segurança a última página aberta em cada matéria"
     assert.match(frontend, /repositorio\.carregarPosicao\(id\)/);
     assert.match(frontend, /ultimaPaginaPorCaderno\.set\(ultimaPagina\.paiId, ultimaPagina\.id\)/);
 });
+
+test("materiais da matéria podem ser vinculados privadamente a uma página do caderno", () => {
+    const migration = readProjectFile("supabase/migrations/202609080005_subject_notebook_material_links.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /create table public\.user_subject_notebook_material_links/i);
+    assert.match(migration, /foreign key \(node_id, workspace_id, user_id, subject_id\)[\s\S]*?references public\.user_subject_notebook_nodes/i);
+    assert.match(migration, /foreign key \(study_link_id, workspace_id\)[\s\S]*?references public\.study_links/i);
+    assert.match(migration, /linked_subject_id is distinct from new\.subject_id/i);
+    assert.match(migration, /linked_node_type is distinct from 'page'/i);
+    assert.match(migration, /force row level security/i);
+    assert.match(migration, /user_subject_notebook_material_links_select_self[\s\S]*?user_id = \(select auth\.uid\(\)\)/i);
+    assert.match(repository, /export async function carregarMateriaisPaginaCaderno/);
+    assert.match(repository, /export async function anexarMaterialPaginaCaderno/);
+    assert.match(repository, /export async function removerMaterialPaginaCaderno/);
+    assert.match(auth, /carregarMateriais: carregarMateriaisPaginaCaderno/);
+    assert.match(auth, /anexarMaterial: anexarMaterialPaginaCaderno/);
+    assert.match(auth, /removerMaterial: removerMaterialPaginaCaderno/);
+    assert.match(html, /id="subjectNotebookMaterialDialog"/);
+    assert.match(html, /id="btnNovoMaterialDaPagina"/);
+    assert.match(frontend, /function htmlMateriaisPagina\(paginaId\)/);
+    assert.match(frontend, /async function abrirMateriaisPagina\(paginaId\)/);
+    assert.match(frontend, /data-notebook-material-toggle/);
+    assert.match(frontend, /data-notebook-material-remove/);
+    assert.match(frontend, /window\.open|target="_blank"/);
+});
+
+test("páginas do caderno oferecem escrita livre persistente no estilo TouchNotes", () => {
+    const migration = readProjectFile("supabase/migrations/202609080006_subject_notebook_page_drawing.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /add column drawing_data jsonb not null/i);
+    assert.match(migration, /jsonb_typeof\(drawing_data\) = 'object'/i);
+    assert.match(migration, /octet_length\(drawing_data::text\) <= 2000000/i);
+    assert.match(repository, /desenho: item\.drawing_data/);
+    assert.match(repository, /valores\.drawing_data = desenho/);
+    assert.match(frontend, /import \{ criarDesenhoPagina \}/);
+    assert.match(frontend, /data-notebook-page-mode="text"/);
+    assert.match(frontend, /data-notebook-page-mode="drawing"/);
+    assert.match(frontend, /function agendarSalvamentoDesenho/);
+    assert.match(frontend, /enfileirarSalvamentoDesenho\(selecionadoId\)/);
+    assert.match(drawing, /data-page-drawing-tool/);
+    assert.match(drawing, /pointerdown/);
+    assert.match(drawing, /highlighter/);
+    assert.match(drawing, /eraser/);
+    assert.match(drawing, /desfazerBotao/);
+    assert.match(drawing, /refazerBotao/);
+    assert.match(frontend, /data-page-drawing-tool="select"/);
+    assert.match(frontend, /data-page-drawing-duplicate/);
+    assert.match(frontend, /data-page-drawing-delete/);
+    assert.match(drawing, /function iniciarSelecao/);
+    assert.match(drawing, /tipo: "lasso"/);
+    assert.match(drawing, /tipo: "resize"/);
+    assert.match(drawing, /tipo: "move"/);
+    assert.match(drawing, /tracos\.forEach\(traco => \{ if \(selecionados\.has\(traco\.id\)\) traco\.color = cor\.value/);
+    assert.match(html, /\.subject-page-drawing-resize-handle/);
+    assert.match(html, /\.subject-page-drawing-stage[\s\S]*?touch-action: none/);
+});

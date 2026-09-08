@@ -1330,6 +1330,11 @@
     .subject-notebook-paper-picker { height: 2rem; display: flex; align-items: center; gap: .35rem; margin-left: .35rem; padding: 0 .45rem; color: #66544c; background: #f4efe9; border-radius: .55rem; font-size: .66rem; }
     .subject-notebook-paper-picker select { max-width: 95px; color: inherit; background: transparent; border: 0; outline: 0; font-size: .64rem; }
     .subject-notebook-page-context .subject-notebook-breadcrumb { margin: .25rem .25rem .55rem; }
+    .subject-notebook-page-context { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: .55rem; }
+    .subject-notebook-page-mode { display: inline-flex; align-items: center; gap: .15rem; padding: .2rem; background: rgba(91,67,58,.065); border-radius: .65rem; }
+    .subject-notebook-page-mode button { min-height: 1.8rem; display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .6rem; color: #75625a; background: transparent; border: 0; border-radius: .48rem; font-size: .66rem; font-weight: 700; }
+    .subject-notebook-page-mode button:hover { color: #4d3932; }
+    .subject-notebook-page-mode button.is-active { color: var(--pimentel-vermelho-escuro); background: #fffdf9; box-shadow: 0 .12rem .35rem rgba(59,41,35,.1); }
     .subject-notebook-organize-mode { min-height: 500px; display: grid; place-items: center; align-content: center; gap: .55rem; padding: clamp(1.2rem, 4vw, 3rem); color: #715f57; background: linear-gradient(145deg, rgba(244,239,233,.72), rgba(255,253,249,.92)); border: 1px dashed rgba(91,67,58,.16); border-radius: 1rem; text-align: center; }
     .subject-notebook-organize-mode > small { color: var(--pimentel-vermelho-escuro); font-size: .65rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
     .subject-notebook-organize-mode h3 { margin: 0; color: #4d3932; font-size: 1.1rem; }
@@ -1346,6 +1351,43 @@
     .subject-notebook-page-editor.is-paper-plain { background: #fffefb; }
     .subject-notebook-page-title { width: 100%; margin-bottom: .8rem; padding: .2rem 0 .55rem; color: #3b2923; background: transparent; border: 0; border-bottom: 1px solid rgba(59, 41, 35, .12); font-size: 1.25rem; font-weight: 750; outline: 0; }
     .subject-notebook-page-content { width: 100%; min-height: 360px; padding: 0; color: #4c3d37; background: transparent; border: 0; resize: vertical; outline: 0; line-height: 2rem; }
+    .subject-page-drawing { min-width: 0; overflow: hidden; background: #fffdf9; border: 1px solid rgba(59,41,35,.09); border-radius: .9rem; box-shadow: 0 .25rem .85rem rgba(59,41,35,.045); }
+    .subject-page-drawing-toolbar { min-height: 44px; display: flex; align-items: center; gap: .3rem; padding: .38rem .5rem; overflow-x: auto; color: #66544c; background: rgba(247,243,238,.94); border-bottom: 1px solid rgba(59,41,35,.08); scrollbar-width: thin; }
+    .subject-page-drawing-tools { display: flex; align-items: center; gap: .2rem; }
+    .subject-page-drawing-toolbar button { min-width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; gap: .32rem; flex: 0 0 auto; padding: 0 .5rem; color: #66544c; background: transparent; border: 0; border-radius: .52rem; font-size: .65rem; font-weight: 700; white-space: nowrap; }
+    .subject-page-drawing-toolbar button:hover:not(:disabled) { color: var(--pimentel-vermelho-escuro); background: rgba(184,50,42,.07); }
+    .subject-page-drawing-toolbar button.is-active { color: #fff; background: #66544c; }
+    .subject-page-drawing-toolbar button.is-danger:hover:not(:disabled) { color: #a52d27; background: rgba(184,50,42,.1); }
+    .subject-page-drawing-toolbar button:disabled { opacity: .3; }
+    .subject-page-drawing-color, .subject-page-drawing-size { height: 2rem; display: inline-flex; align-items: center; gap: .35rem; flex: 0 0 auto; padding: 0 .4rem; background: rgba(255,255,255,.7); border-radius: .5rem; }
+    .subject-page-drawing-color input { width: 1.35rem; height: 1.35rem; padding: 0; background: transparent; border: 0; cursor: pointer; }
+    .subject-page-drawing-size input { width: 82px; accent-color: #66544c; }
+    .subject-page-drawing-size output { min-width: 1.2rem; color: #806f67; font-size: .6rem; text-align: center; }
+    .subject-page-drawing-stage { position: relative; min-height: 500px; overflow: hidden; background-color: #fffefb; }
+    .subject-page-drawing-stage.is-paper-lined { background-image: repeating-linear-gradient(transparent 0, transparent 31px, rgba(82,112,150,.14) 32px); }
+    .subject-page-drawing-stage.is-paper-grid { background-image: linear-gradient(rgba(82,112,150,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(82,112,150,.1) 1px, transparent 1px); background-size: 24px 24px; }
+    .subject-page-drawing-stage.is-paper-dotted { background-image: radial-gradient(rgba(82,112,150,.2) 1px, transparent 1px); background-size: 20px 20px; }
+    .subject-page-drawing-stage svg { width: 100%; min-width: 680px; height: min(66vh, 720px); min-height: 500px; display: block; cursor: crosshair; touch-action: none; }
+    .subject-page-drawing[data-tool="select"] .subject-page-drawing-stage svg { cursor: default; }
+    .subject-page-drawing[data-tool="eraser"] .subject-page-drawing-stage svg { cursor: none; }
+    .subject-page-drawing-stage path.is-selected { filter: drop-shadow(0 0 2px rgba(43,113,187,.55)); }
+    .subject-page-drawing-selection-box { fill: rgba(43,113,187,.035); stroke: #2b71bb; stroke-width: 1.5; stroke-dasharray: 6 4; pointer-events: none; }
+    .subject-page-drawing-resize-handle { fill: #fff; stroke: #2b71bb; stroke-width: 2; cursor: nwse-resize; pointer-events: all; }
+    .subject-page-drawing-lasso { fill: rgba(43,113,187,.07); stroke: #2b71bb; stroke-width: 1.5; stroke-dasharray: 7 4; pointer-events: none; }
+    .subject-page-drawing-eraser-cursor { fill: rgba(255,255,255,.72); stroke: #806f67; stroke-width: 1.5; pointer-events: none; }
+    .subject-page-drawing-hint { position: absolute; right: .65rem; bottom: .55rem; padding: .3rem .48rem; color: #8a7770; background: rgba(255,253,249,.82); border-radius: .45rem; font-size: .58rem; pointer-events: none; }
+    .subject-notebook-attachments { margin-top: 1rem; padding: .8rem; background: rgba(244,239,233,.64); border-radius: .8rem; }
+    .subject-notebook-attachments-header { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .55rem; }
+    .subject-notebook-attachments-header strong { color: #57433b; font-size: .72rem; }
+    .subject-notebook-attachments-header button { color: var(--pimentel-vermelho-escuro); background: transparent; border: 0; font-size: .68rem; font-weight: 700; }
+    .subject-notebook-attachment-list { display: grid; gap: .4rem; }
+    .subject-notebook-attachment { display: flex; align-items: center; gap: .55rem; padding: .55rem .65rem; color: #57433b; background: rgba(255,255,255,.78); border-radius: .6rem; }
+    .subject-notebook-attachment > i { color: #8b5e4c; }
+    .subject-notebook-attachment a { min-width: 0; flex: 1; overflow: hidden; color: #4d3932; font-size: .68rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+    .subject-notebook-attachment a:hover { color: var(--pimentel-vermelho-escuro); text-decoration: underline; }
+    .subject-notebook-attachment button { width: 1.7rem; height: 1.7rem; display: grid; place-items: center; color: #8a7770; background: transparent; border: 0; border-radius: 50%; }
+    .subject-notebook-attachment button:hover { color: #a52d27; background: rgba(184,50,42,.08); }
+    .subject-notebook-attachment-empty { color: #8a7770; font-size: .66rem; }
     .subject-notebook-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59, 41, 35, .08); }
     .legacy-notes-panel { max-width: 1180px; margin-inline: auto; padding: .85rem 1rem; background: rgba(244, 239, 233, .5); border-radius: .9rem; }
     .legacy-notes-panel > summary { color: #66544c; cursor: pointer; font-size: .75rem; font-weight: 700; }
@@ -1360,6 +1402,18 @@
     .subject-notebook-style-fields label span { display: block; margin-bottom: .35rem; font-size: .72rem; font-weight: 650; }
     .subject-notebook-style-fields input[type="color"] { width: 100%; height: 31px; padding: .15rem; background: #fff; border: 1px solid #dee2e6; border-radius: .35rem; }
     .subject-notebook-dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.1rem; }
+    .subject-notebook-material-dialog { width: min(620px, calc(100vw - 2rem)); }
+    .subject-notebook-material-dialog-body { padding: 1.1rem; }
+    .subject-notebook-material-intro { margin: -.35rem 0 .85rem; color: #806f67; font-size: .72rem; }
+    .subject-notebook-material-list { max-height: min(430px, 55vh); display: grid; gap: .5rem; overflow-y: auto; }
+    .subject-notebook-material-option { display: flex; align-items: center; gap: .7rem; padding: .7rem .75rem; background: #f7f3ee; border: 1px solid rgba(59,41,35,.08); border-radius: .72rem; }
+    .subject-notebook-material-option > i { color: #8b5e4c; font-size: 1rem; }
+    .subject-notebook-material-option-copy { min-width: 0; flex: 1; }
+    .subject-notebook-material-option-copy strong, .subject-notebook-material-option-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .subject-notebook-material-option-copy strong { color: #4d3932; font-size: .72rem; }
+    .subject-notebook-material-option-copy small { color: #8a7770; font-size: .62rem; }
+    .subject-notebook-material-option button { min-width: 82px; }
+    .subject-notebook-material-dialog-empty { padding: 1.4rem; color: #806f67; background: #f7f3ee; border-radius: .75rem; text-align: center; font-size: .72rem; }
     .subject-notebook-toast { position: fixed; z-index: 1095; right: 1rem; bottom: 1rem; width: min(390px, calc(100vw - 2rem)); display: none; align-items: flex-start; gap: .7rem; padding: .8rem .85rem; color: #4d3932; background: #fffdf9; border: 1px solid rgba(59,41,35,.12); border-left: 4px solid var(--pimentel-vermelho); border-radius: .8rem; box-shadow: 0 1rem 2.2rem rgba(35,25,20,.2); }
     .subject-notebook-toast.is-visible { display: flex; }
     .subject-notebook-toast > i { color: var(--pimentel-vermelho-escuro); font-size: 1rem; }
@@ -1462,6 +1516,13 @@
         .subject-notebook-page-thumbnails { grid-auto-flow: column; grid-auto-columns: 138px; overflow-x: auto; overflow-y: hidden; }
         .subject-notebook-page-thumbnail { min-height: 88px; }
         .subject-notebook-paper-picker select { max-width: 76px; }
+        .subject-notebook-page-context { align-items: stretch; }
+        .subject-notebook-page-mode { width: 100%; }
+        .subject-notebook-page-mode button { flex: 1; }
+        .subject-page-drawing-toolbar button span { display: none; }
+        .subject-page-drawing-stage { overflow-x: auto; }
+        .subject-page-drawing-stage svg { height: 560px; }
+        .subject-page-drawing-hint { display: none; }
         .subject-notebook-view-actions { justify-content: flex-start; }
         .subject-notebook-view-toolbar { width: 100%; justify-content: space-between; }
         .subject-notebook-style-fields { grid-template-columns: 1fr 1fr; }
@@ -2974,6 +3035,21 @@
                                 <button type="button" data-notebook-page-action="move"><i class="bi-folder-symlink"></i>Mover para outro caderno</button>
                                 <button type="button" data-notebook-page-action="duplicate"><i class="bi-copy"></i>Duplicar página</button>
                                 <button class="is-danger" type="button" data-notebook-page-action="delete"><i class="bi-trash"></i>Excluir página</button>
+                            </div>
+                        </div>
+                    </dialog>
+                    <dialog class="subject-notebook-dialog subject-notebook-material-dialog" id="subjectNotebookMaterialDialog">
+                        <div class="subject-notebook-material-dialog-body">
+                            <div class="subject-notebook-dialog-header">
+                                <div><small>Materiais da matéria</small><h3 class="h5 mb-0" id="subjectNotebookMaterialTitle">Anexar à página</h3></div>
+                                <button type="button" class="subject-notebook-icon" data-notebook-material-close aria-label="Fechar"><i class="bi-x-lg"></i></button>
+                            </div>
+                            <input type="hidden" id="subjectNotebookMaterialPageId">
+                            <p class="subject-notebook-material-intro">Escolha entre os materiais já salvos nesta disciplina. O vínculo é privado e não altera o material original.</p>
+                            <div class="subject-notebook-material-list" id="subjectNotebookMaterialList"></div>
+                            <div class="subject-notebook-dialog-actions">
+                                <button type="button" class="btn btn-light" data-notebook-material-close>Concluir</button>
+                                <button type="button" class="btn btn-outline-primary" id="btnNovoMaterialDaPagina"><i class="bi-plus-lg me-1"></i>Novo material</button>
                             </div>
                         </div>
                     </dialog>
