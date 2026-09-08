@@ -1538,6 +1538,79 @@ export async function carregarDesempenhoRemoto() {
     });
 }
 
+function mapearTentativaSimulado(registro) {
+    const materiasLegadas = idsLocaisPorRemotos.get("subject");
+    const topicosEditalLegados = idsLocaisPorRemotos.get("exam_topic");
+    return {
+        id: registro.id,
+        materiaId: materiasLegadas?.get(registro.subject_id) || registro.subject_id,
+        topicoEditalId: registro.exam_topic_id ? (topicosEditalLegados?.get(registro.exam_topic_id) || registro.exam_topic_id) : null,
+        tema: registro.topic || "",
+        dificuldade: registro.difficulty || "Médio",
+        concurso: registro.exam_name || "",
+        banca: registro.board_name || "",
+        status: registro.status || "em_andamento",
+        total: Math.max(0, Number(registro.total_questions) || 0),
+        acertos: Math.max(0, Number(registro.correct_answers) || 0),
+        iniciadoEm: registro.started_at,
+        concluidoEm: registro.completed_at || null,
+        duracaoSegundos: registro.duration_seconds == null ? null : Math.max(0, Number(registro.duration_seconds) || 0),
+        respostas: (registro.quiz_answers || []).map(resposta => ({
+            id: resposta.id,
+            posicao: Number(resposta.position) || 1,
+            pergunta: resposta.question,
+            opcoes: Array.isArray(resposta.options) ? resposta.options : [],
+            respostaCorretaIndex: Number(resposta.correct_index),
+            respostaEscolhidaIndex: resposta.selected_index == null ? null : Number(resposta.selected_index),
+            explicacao: resposta.explanation || "",
+            correta: resposta.is_correct === true,
+            respondidaEm: resposta.answered_at || null
+        })).sort((a, b) => a.posicao - b.posicao)
+    };
+}
+
+export async function carregarTentativasSimulado() {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("quiz_attempts")
+        .select("id, subject_id, exam_topic_id, topic, difficulty, exam_name, board_name, status, total_questions, correct_answers, started_at, completed_at, duration_seconds, quiz_answers(id, question, options, correct_index, selected_index, explanation, is_correct, answered_at, position)")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("started_at", { ascending: false })
+        .limit(200);
+    return (verificarResposta(resposta, "Não foi possível carregar o histórico de simulados.") || []).map(mapearTentativaSimulado);
+}
+
+export async function criarTentativaSimulado(tentativa) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.rpc("create_quiz_attempt", {
+        target_workspace_id: contexto.workspaceId,
+        target_subject_id: resolverId("subject", tentativa.materiaId),
+        target_exam_topic_id: tentativa.topicoEditalId ? resolverId("exam_topic", tentativa.topicoEditalId) : null,
+        target_topic: texto(tentativa.tema, 2000, "Tema do simulado"),
+        target_difficulty: ["Fácil", "Médio", "Difícil"].includes(tentativa.dificuldade) ? tentativa.dificuldade : "Médio",
+        target_exam_name: texto(tentativa.concurso, 500, "Concurso"),
+        target_board_name: texto(tentativa.banca, 300, "Banca"),
+        target_questions: tentativa.questoes.map(questao => ({
+            question: texto(questao.pergunta, 4000, "Questão", true),
+            options: questao.opcoes.map(opcao => texto(opcao, 2000, "Alternativa", true)),
+            correctIndex: numeroLimitado(questao.resposta_correta_index, "Resposta correta", 0, 3, true),
+            explanation: texto(questao.explicacao, 8000, "Explicação")
+        }))
+    });
+    return verificarResposta(resposta, "Não foi possível iniciar o histórico deste simulado.");
+}
+
+export async function registrarRespostaTentativaSimulado(tentativaId, respostaId, indiceEscolhido) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.rpc("record_quiz_answer", {
+        target_workspace_id: contexto.workspaceId,
+        target_attempt_id: exigirUuidNovo(tentativaId, "Tentativa de simulado"),
+        target_answer_id: exigirUuidNovo(respostaId, "Questão do simulado"),
+        target_selected_index: numeroLimitado(indiceEscolhido, "Resposta escolhida", 0, 3, true)
+    });
+    return verificarResposta(resposta, "Não foi possível registrar a resposta do simulado.");
+}
+
 export async function carregarEditalRemoto() {
     const contexto = obterContexto();
     const [configuracaoResposta, materiasResposta, topicosResposta] = await Promise.all([
@@ -1552,7 +1625,7 @@ export async function carregarEditalRemoto() {
             .eq("user_id", contexto.userId)
             .order("created_at", { ascending: true }),
         supabase.from("exam_topics")
-            .select("id, exam_subject_id, title, checked, position, updated_at")
+            .select("id, exam_subject_id, parent_topic_id, title, checked, position, updated_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .order("position", { ascending: true })
@@ -1590,7 +1663,9 @@ export async function carregarEditalRemoto() {
             topicos: (topicosPorItem.get(item.id) || []).map(topico => ({
                 id: topico.id,
                 titulo: topico.title,
-                concluido: topico.checked === true
+                concluido: topico.checked === true,
+                paiId: topico.parent_topic_id || null,
+                position: Number(topico.position) || 0
             }))
         }))
     };
@@ -2262,6 +2337,7 @@ export async function criarTopicosEdital(itemIdLocal, topicos) {
         workspace_id: contexto.workspaceId,
         user_id: contexto.userId,
         exam_subject_id: itemId,
+        parent_topic_id: topico.paiId ? resolverId("exam_topic", topico.paiId) : null,
         title: texto(topico.titulo, 1000, "Título do tópico", true),
         checked: topico.concluido === true,
         position: Number.isInteger(topico.position) && topico.position >= 0 && topico.position <= 100000 ? topico.position : position
@@ -2299,6 +2375,11 @@ export async function renomearTopicoEdital(idLocal, titulo) {
 export async function excluirTopicoEdital(idLocal) {
     const contexto = exigirContexto();
     const id = resolverId("exam_topic", idLocal);
+    const filhos = verificarResposta(await supabase.from("exam_topics")
+        .select("id")
+        .eq("parent_topic_id", id)
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId), "Não foi possível conferir os subtópicos vinculados.") || [];
     const versao = versoesTopicosEdital.get(id);
     let consulta = supabase.from("exam_topics").delete()
         .eq("id", id)
@@ -2307,4 +2388,12 @@ export async function excluirTopicoEdital(idLocal) {
     if (versao) consulta = consulta.eq("updated_at", versao);
     verificarRegistro(await consulta.select("id").maybeSingle(), "O checklist mudou em outra sessão. Recarregue antes de excluir.");
     versoesTopicosEdital.delete(id);
+    if (filhos.length) {
+        const atualizados = verificarResposta(await supabase.from("exam_topics")
+            .select("id, updated_at")
+            .in("id", filhos.map(filho => filho.id))
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId), "O tema foi removido, mas não foi possível atualizar as versões dos subtópicos.") || [];
+        atualizados.forEach(filho => versoesTopicosEdital.set(filho.id, filho.updated_at));
+    }
 }

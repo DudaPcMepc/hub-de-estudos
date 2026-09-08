@@ -103,7 +103,20 @@ function normalizarDadosLocais(dados) {
                 acertos: Number(valor.acertos) || 0,
                 total: Number(valor.total) || 0
             }))
-            .sort((a, b) => a.materiaId.localeCompare(b.materiaId, "pt-BR"))
+            .sort((a, b) => a.materiaId.localeCompare(b.materiaId, "pt-BR")),
+        simulados: ordenarPorId((dados.simulados || []).map(tentativa => ({
+            id: String(tentativa.id), materiaId: String(tentativa.materiaId), topicoEditalId: tentativa.topicoEditalId || null,
+            tema: tentativa.tema || "", dificuldade: tentativa.dificuldade || "Médio", concurso: tentativa.concurso || "", banca: tentativa.banca || "",
+            status: tentativa.status || "em_andamento", total: Number(tentativa.total) || 0, acertos: Number(tentativa.acertos) || 0,
+            iniciadoEm: tentativa.iniciadoEm, concluidoEm: tentativa.concluidoEm || null,
+            duracaoSegundos: tentativa.duracaoSegundos == null ? null : Number(tentativa.duracaoSegundos),
+            respostas: (tentativa.respostas || []).map((resposta, indice) => ({
+                id: String(resposta.id), posicao: Number(resposta.posicao) || indice + 1, pergunta: resposta.pergunta || "",
+                opcoes: Array.isArray(resposta.opcoes) ? resposta.opcoes : [], respostaCorretaIndex: Number(resposta.respostaCorretaIndex),
+                respostaEscolhidaIndex: resposta.respostaEscolhidaIndex == null ? null : Number(resposta.respostaEscolhidaIndex),
+                explicacao: resposta.explicacao || "", correta: resposta.correta === true, respondidaEm: resposta.respondidaEm || null
+            })).sort((a, b) => a.posicao - b.posicao)
+        })))
     };
 }
 
@@ -161,7 +174,8 @@ async function buscarDadosRemotos(contexto) {
         supabase.from("exam_subjects").select("id, subject_id, question_count, weight").eq("workspace_id", workspaceId).eq("user_id", userId),
         supabase.from("exam_topics").select("id, exam_subject_id, title, checked, position").eq("workspace_id", workspaceId).eq("user_id", userId).order("position"),
         supabase.from("error_entries").select("id, subject_id, theme, observation, occurred_on, exam_topic_id, review_state, next_review_on, last_reviewed_at, last_retention_level, review_count, reinforced_at, source_type, source_fingerprint, question_text, selected_answer, correct_answer, explanation, quiz_topic, quiz_difficulty, board_name, occurrence_count, last_occurred_at, error_review_events(id, retention_level, reviewed_at, next_review_on)").eq("workspace_id", workspaceId).eq("user_id", userId),
-        supabase.from("subject_performance").select("subject_id, correct_answers, total_answers").eq("workspace_id", workspaceId).eq("user_id", userId)
+        supabase.from("subject_performance").select("subject_id, correct_answers, total_answers").eq("workspace_id", workspaceId).eq("user_id", userId),
+        supabase.from("quiz_attempts").select("id, subject_id, exam_topic_id, topic, difficulty, exam_name, board_name, status, total_questions, correct_answers, started_at, completed_at, duration_seconds, quiz_answers(id, question, options, correct_index, selected_index, explanation, is_correct, answered_at, position)").eq("workspace_id", workspaceId).eq("user_id", userId)
     ]);
 
     const itens = exigirResposta(respostas[0], "itens de migração");
@@ -178,6 +192,7 @@ async function buscarDadosRemotos(contexto) {
     const examTopics = exigirResposta(respostas[10], "checklist do edital");
     const errors = exigirResposta(respostas[11], "caderno de erros");
     const performance = exigirResposta(respostas[12], "desempenho");
+    const quizAttempts = exigirResposta(respostas[13], "histórico de simulados");
     const mapas = criarMapasDeLegado(itens);
     const topicsBySubject = agruparPor(topics, "subject_id");
     const notesBySubject = agruparPor(notes, "subject_id");
@@ -286,6 +301,21 @@ async function buscarDadosRemotos(contexto) {
                 total: Number(item.total_answers) || 0
             }))
             .sort((a, b) => a.materiaId.localeCompare(b.materiaId, "pt-BR")),
+        simulados: ordenarPorId(quizAttempts.map(tentativa => ({
+            id: idLegado(mapas, "quiz_attempt", tentativa.id),
+            materiaId: idLegado(mapas, "subject", tentativa.subject_id),
+            topicoEditalId: tentativa.exam_topic_id ? idLegado(mapas, "exam_topic", tentativa.exam_topic_id) : null,
+            tema: tentativa.topic || "", dificuldade: tentativa.difficulty || "Médio", concurso: tentativa.exam_name || "", banca: tentativa.board_name || "",
+            status: tentativa.status, total: Number(tentativa.total_questions) || 0, acertos: Number(tentativa.correct_answers) || 0,
+            iniciadoEm: tentativa.started_at, concluidoEm: tentativa.completed_at || null,
+            duracaoSegundos: tentativa.duration_seconds == null ? null : Number(tentativa.duration_seconds),
+            respostas: (tentativa.quiz_answers || []).map(resposta => ({
+                id: idLegado(mapas, "quiz_answer", resposta.id), posicao: Number(resposta.position), pergunta: resposta.question,
+                opcoes: resposta.options || [], respostaCorretaIndex: Number(resposta.correct_index),
+                respostaEscolhidaIndex: resposta.selected_index == null ? null : Number(resposta.selected_index),
+                explicacao: resposta.explanation || "", correta: resposta.is_correct === true, respondidaEm: resposta.answered_at || null
+            })).sort((a, b) => a.posicao - b.posicao)
+        }))),
         lote: loteResposta.data
     };
 }
@@ -308,7 +338,7 @@ async function checksum(valor) {
 export async function conferirConteudoRemoto(contexto, dadosLocais) {
     const local = normalizarDadosLocais(dadosLocais);
     const remoto = await buscarDadosRemotos(contexto);
-    const categorias = ["materias", "tarefas", "edital", "erros", "desempenho"];
+    const categorias = ["materias", "tarefas", "edital", "erros", "desempenho", "simulados"];
     const comparacoes = await Promise.all(categorias.map(async categoria => {
         const [localHash, remoteHash] = await Promise.all([checksum(local[categoria]), checksum(remoto[categoria])]);
         return [categoria, localHash === remoteHash];
@@ -319,7 +349,8 @@ export async function conferirConteudoRemoto(contexto, dadosLocais) {
         tarefas: remoto.tarefas,
         edital: remoto.edital,
         erros: remoto.erros,
-        desempenho: remoto.desempenho
+        desempenho: remoto.desempenho,
+        simulados: remoto.simulados
     })]);
     return {
         igual: divergencias.length === 0 && checksumLocal === checksumRemoto,

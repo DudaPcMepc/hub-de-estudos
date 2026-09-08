@@ -14,7 +14,9 @@ const entidades = [
     ["exam_subjects", "Itens do edital"],
     ["exam_topics", "Checklist pessoal do edital"],
     ["error_entries", "Registros de erros"],
-    ["subject_performance", "Históricos de desempenho"]
+    ["subject_performance", "Históricos de desempenho"],
+    ["quiz_attempts", "Simulados"],
+    ["quiz_answers", "Respostas de simulados"]
 ];
 
 const botaoAbrir = document.getElementById("btnPreviaMigracao");
@@ -52,7 +54,8 @@ async function executarConferenciaConteudo(dadosLocais) {
             tarefas: "cronograma",
             edital: "edital",
             erros: "caderno de erros",
-            desempenho: "desempenho"
+            desempenho: "desempenho",
+            simulados: "histórico de simulados"
         };
         definirMensagemConferencia(`A cópia remota diverge em: ${resultado.divergencias.map(item => nomes[item]).join(", ")}. Os dados locais foram preservados.`, "warning");
     }
@@ -88,7 +91,7 @@ async function contarTabela(tabela, workspaceId, userId) {
         .from(tabela)
         .select("*", { count: "exact", head: true })
         .eq("workspace_id", workspaceId);
-    if (["exam_settings", "exam_subjects", "exam_topics", "flashcard_progress", "error_entries", "subject_performance"].includes(tabela)) {
+    if (["exam_settings", "exam_subjects", "exam_topics", "flashcard_progress", "error_entries", "subject_performance", "quiz_attempts", "quiz_answers"].includes(tabela)) {
         consulta = consulta.eq("user_id", userId);
     }
     const { count, error } = await consulta;
