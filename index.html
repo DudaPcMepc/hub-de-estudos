@@ -1172,6 +1172,25 @@
     .subject-workspace-content { min-width: 0; min-height: 0; overflow-y: auto; padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 2rem; }
     .subject-workspace-content > .tab-content,
     .subject-workspace-content > .tab-content > .tab-pane.active { min-height: 100%; }
+    .subject-content-hub { max-width: 1080px; margin: 0 auto; display: grid; gap: 1rem; }
+    .subject-content-intro { padding: clamp(1rem, 3vw, 1.7rem); border-radius: 1.2rem; background: linear-gradient(135deg, rgba(184, 50, 42, .11), rgba(255, 253, 249, .92)); }
+    .subject-content-intro small { color: var(--pimentel-cafe-claro); }
+    .subject-module { padding: 1rem; background: #fffdfa; border: 1px solid rgba(59, 41, 35, .09); border-radius: 1rem; }
+    .subject-module-header { margin-bottom: .8rem; }
+    .subject-module-header p { color: var(--pimentel-cafe-claro); }
+    .subject-material-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: .75rem; }
+    .subject-material-card { display: flex; flex-direction: column; min-height: 180px; padding: 1rem; border-radius: .85rem; background: rgba(246, 242, 235, .72); }
+    .subject-material-card p { color: var(--pimentel-cafe-claro); font-size: .86rem; }
+    .subject-material-kind { width: fit-content; margin-bottom: .55rem; color: var(--pimentel-vermelho-escuro); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .subject-material-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: auto; padding-top: .8rem; }
+    .subject-content-empty { padding: 3rem 1rem; text-align: center; color: var(--pimentel-cafe-claro); }
+    .subject-content-empty i { display: block; margin-bottom: .65rem; font-size: 2rem; opacity: .55; }
+    .admin-editorial-section { margin-top: 1.5rem; }
+    .admin-editorial-layout { display: grid; grid-template-columns: minmax(250px, .7fr) minmax(0, 1.3fr); gap: 1rem; }
+    .admin-editorial-list { max-height: 620px; overflow: auto; }
+    .admin-editorial-item { padding: .8rem; border-bottom: 1px solid rgba(59, 41, 35, .09); }
+    .admin-editorial-item:last-child { border-bottom: 0; }
+    @media (max-width: 767.98px) { .admin-editorial-layout { grid-template-columns: 1fr; } }
     .subject-notes-grid { min-height: calc(100dvh - 145px); }
     .lista-notas { max-height: calc(100dvh - 220px); overflow-y: auto; }
     .nota-item { cursor: pointer; }
@@ -2470,6 +2489,44 @@
                     </div>
                 </div>
             </div>
+            <section class="card border-0 shadow-sm admin-editorial-section" aria-labelledby="tituloConteudoMateriasAdmin">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <div><h5 class="fw-bold mb-1" id="tituloConteudoMateriasAdmin"><i class="bi-layout-text-window-reverse text-primary me-2"></i>Conteúdo das matérias</h5><p class="text-muted small mb-0">Publique aulas, resumos, revisões, simulados e materiais fixos. Apenas administradores podem alterar esta área.</p></div>
+                        <button class="btn btn-sm btn-outline-primary" id="btnAtualizarConteudoMaterias" type="button"><i class="bi-arrow-clockwise me-1"></i>Atualizar</button>
+                    </div>
+                    <div class="alert d-none" id="mensagemConteudoMaterias" role="status"></div>
+                    <label class="form-label" for="adminConteudoMateria">Disciplina do catálogo</label>
+                    <select class="form-select mb-3" id="adminConteudoMateria"></select>
+                    <div class="admin-editorial-layout">
+                        <div>
+                            <form class="p-3 rounded bg-light" id="formModuloMateria">
+                                <input type="hidden" id="adminModuloId">
+                                <h6 class="fw-bold">Módulo ou unidade</h6>
+                                <label class="form-label small" for="adminModuloTitulo">Título</label><input class="form-control form-control-sm mb-2" id="adminModuloTitulo" maxlength="180" required>
+                                <label class="form-label small" for="adminModuloDescricao">Descrição</label><textarea class="form-control form-control-sm mb-2" id="adminModuloDescricao" rows="2" maxlength="2000"></textarea>
+                                <div class="row g-2 mb-3"><div class="col-5"><label class="form-label small" for="adminModuloPosicao">Ordem</label><input class="form-control form-control-sm" id="adminModuloPosicao" type="number" min="0" max="1000" value="0"></div><div class="col-7"><label class="form-label small" for="adminModuloStatus">Situação</label><select class="form-select form-select-sm" id="adminModuloStatus"><option value="draft">Rascunho</option><option value="published">Publicado</option></select></div></div>
+                                <div class="d-flex gap-2"><button class="btn btn-sm btn-primary flex-grow-1" type="submit"><i class="bi-cloud-check me-1"></i>Salvar módulo</button><button class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarModuloMateria" type="button">Cancelar</button></div>
+                            </form>
+                            <div class="admin-editorial-list mt-3" id="listaModulosMateria"></div>
+                        </div>
+                        <div>
+                            <form class="p-3 rounded bg-light" id="formMaterialMateria">
+                                <input type="hidden" id="adminMaterialId">
+                                <h6 class="fw-bold">Conteúdo do módulo</h6>
+                                <div class="row g-2"><div class="col-md-7"><label class="form-label small" for="adminMaterialModulo">Módulo</label><select class="form-select form-select-sm" id="adminMaterialModulo" required></select></div><div class="col-md-5"><label class="form-label small" for="adminMaterialTipo">Tipo</label><select class="form-select form-select-sm" id="adminMaterialTipo"><option value="lesson">Aula</option><option value="summary">Resumo</option><option value="revision">Revisão</option><option value="simulation">Simulado</option><option value="link">Link</option><option value="file">Arquivo</option></select></div></div>
+                                <label class="form-label small mt-2" for="adminMaterialTitulo">Título</label><input class="form-control form-control-sm" id="adminMaterialTitulo" maxlength="240" required>
+                                <label class="form-label small mt-2" for="adminMaterialDescricao">Descrição curta</label><textarea class="form-control form-control-sm" id="adminMaterialDescricao" rows="2" maxlength="3000"></textarea>
+                                <label class="form-label small mt-2" for="adminMaterialConteudo">Conteúdo</label><textarea class="form-control form-control-sm" id="adminMaterialConteudo" rows="7" maxlength="200000" placeholder="Texto da aula, resumo ou orientação de estudo"></textarea>
+                                <label class="form-label small mt-2" for="adminMaterialUrl">Link externo seguro (opcional)</label><input class="form-control form-control-sm" id="adminMaterialUrl" type="url" maxlength="4000" placeholder="https://...">
+                                <div class="row g-2 mb-3 mt-0"><div class="col-5"><label class="form-label small" for="adminMaterialPosicao">Ordem</label><input class="form-control form-control-sm" id="adminMaterialPosicao" type="number" min="0" max="2000" value="0"></div><div class="col-7"><label class="form-label small" for="adminMaterialStatus">Situação</label><select class="form-select form-select-sm" id="adminMaterialStatus"><option value="draft">Rascunho</option><option value="published">Publicado</option></select></div></div>
+                                <div class="d-flex gap-2"><button class="btn btn-sm btn-primary flex-grow-1" type="submit"><i class="bi-cloud-check me-1"></i>Salvar conteúdo</button><button class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarMaterialMateria" type="button">Cancelar</button></div>
+                            </form>
+                            <div class="admin-editorial-list mt-3" id="listaMateriaisMateria"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
     </div>
@@ -2573,7 +2630,8 @@
             <aside class="subject-workspace-sidebar" aria-label="Seções da matéria">
                 <div class="progress materia-progress mb-3" title="Progresso da matéria"><div class="progress-bar" id="wsBarraProgresso" style="width:0%"></div></div>
                 <ul class="nav nav-pills ws-nav gap-2 flex-nowrap" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#ws-topicos" type="button"><i class="bi-list-check me-1"></i>Tópicos</button></li>
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#ws-conteudo" type="button"><i class="bi-layout-text-window-reverse me-1"></i>Conteúdo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-topicos" type="button"><i class="bi-list-check me-1"></i>Tópicos</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-notas" type="button"><i class="bi-journal-text me-1"></i>Caderno</button></li>
                 <li class="nav-item"><button class="nav-link" id="wsTabMapas" data-bs-toggle="pill" data-bs-target="#ws-mapas" type="button"><i class="bi-diagram-3 me-1"></i>Mapas mentais</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#ws-cards" type="button"><i class="bi-card-heading me-1"></i>Flashcards</button></li>
@@ -2585,7 +2643,9 @@
             <main class="subject-workspace-content">
             <div class="tab-content">
 
-                <div class="tab-pane fade show active" id="ws-topicos">
+                <div class="tab-pane fade show active" id="ws-conteudo"><div class="subject-content-hub" id="wsConteudoMateria"></div></div>
+
+                <div class="tab-pane fade" id="ws-topicos">
                     <form id="formTopico" class="row g-2 mb-3">
                         <div class="col-md-9"><input type="text" class="form-control" id="topicoTitulo" placeholder="Novo tópico (ex: Art. 5º — direitos e deveres individuais)" required></div>
                         <div class="col-md-3"><button type="submit" class="btn btn-primary w-100"><i class="bi-plus-lg me-1"></i>Adicionar</button></div>
@@ -2820,6 +2880,10 @@
                             <section class="library-home-section" aria-labelledby="wsRecomendadosTitulo">
                                 <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsRecomendadosTitulo"><i class="bi-stars me-1"></i>Para esta matéria</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerTodoCatalogo">Ver catálogo</button></header>
                                 <div class="library-recommended-grid" id="wsRecomendadosBiblioteca"></div>
+                            </section>
+                            <section class="library-home-section" aria-labelledby="wsEditoriaisBibliotecaTitulo">
+                                <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsEditoriaisBibliotecaTitulo"><i class="bi-journal-richtext me-1"></i>Materiais publicados</h6></header>
+                                <div class="library-recommended-grid" id="wsMateriaisEditoriaisBiblioteca"></div>
                             </section>
                             <section class="library-home-section" aria-labelledby="wsCadernosResumoTitulo">
                                 <header class="library-home-section-header"><h6 class="fw-bold mb-0" id="wsCadernosResumoTitulo"><i class="bi-journals me-1"></i>Cadernos jurídicos</h6><button type="button" class="btn btn-sm btn-link text-secondary p-0" id="btnVerCadernosBiblioteca">Abrir</button></header>
@@ -4339,6 +4403,7 @@ document.getElementById("formMateria").addEventListener("submit", async (e) => {
 // WORKSPACE DA MATÉRIA
 // ============================================================
 let materiaAbertaId = null;
+const conteudoEditorialPorCatalogo = new Map();
 let notaSelecionadaId = null;
 let filtroStatusTopico = "todos";
 let buscaNotasTexto = "";
@@ -5351,6 +5416,7 @@ function itemCatalogoRelacionadoMateria(item, materia) {
     const relacionados = documentosJuridicosDaMateria(materia);
     if (documento && relacionados.some(relacionado => relacionado.id === documento.id)) return true;
     const catalogo = catalogoDaMateria(materia);
+    if (catalogo?.id) return false;
     const chave = chaveBuscaCatalogoVade(`${catalogo?.slug || ""} ${materia.nome || ""}`);
     if (chave.includes("constitucional")) return item.categoria === "constitucional";
     if (chave.includes("processo penal") || chave.includes("processo-penal")) return ["cpp", "prisao-temporaria"].includes(item.id);
@@ -5370,16 +5436,8 @@ function abrirDocumentoCatalogo(catalogoId) {
 
 function renderizarCatalogoVade() {
     const busca = chaveBuscaCatalogoVade(document.getElementById("buscaCatalogoVade").value);
-    const categorias = [
-        ["materia", "Para esta matéria"],
-        ["disponiveis", "Disponíveis agora"],
-        ["todos", "Todas"],
-        ["constitucional", "Constitucional"],
-        ["penal", "Penal"],
-        ["seguranca", "Segurança"],
-        ["transito", "Trânsito"],
-        ["especial", "Especiais"]
-    ];
+    const categorias = [["materia", "Para esta matéria"]];
+    filtroCatalogoVade = "materia";
     const filtros = document.getElementById("filtrosCatalogoVade");
     filtros.innerHTML = categorias.map(([id, nome]) => `<button type="button" class="btn btn-sm btn-outline-secondary vade-catalog-filter ${filtroCatalogoVade === id ? "is-active" : ""}" data-category="${id}">${nome}</button>`).join("");
     filtros.querySelectorAll(".vade-catalog-filter").forEach(botao => botao.addEventListener("click", () => {
@@ -5390,15 +5448,13 @@ function renderizarCatalogoVade() {
     const materia = materiaPorId(materiaAbertaId);
     const itens = CATALOGO_VADE_DIGITAL.filter(item => {
         const documento = documentoDoCatalogoVade(item);
-        const correspondeCategoria = filtroCatalogoVade === "todos"
-            || (filtroCatalogoVade === "materia" && itemCatalogoRelacionadoMateria(item, materia))
-            || (filtroCatalogoVade === "disponiveis" && Boolean(documento))
-            || item.categoria === filtroCatalogoVade;
+        const correspondeCategoria = itemCatalogoRelacionadoMateria(item, materia);
         const chave = chaveBuscaCatalogoVade(`${item.titulo} ${item.referencia} ${item.categoriaNome}`);
         return correspondeCategoria && (!busca || chave.includes(busca));
     });
-    const disponiveis = CATALOGO_VADE_DIGITAL.filter(documentoDoCatalogoVade).length;
-    document.getElementById("resumoCatalogoVade").innerHTML = `<strong>${disponiveis} de ${CATALOGO_VADE_DIGITAL.length}</strong> normas disponíveis para leitura · ${itens.length} exibida(s)`;
+    const relacionados = CATALOGO_VADE_DIGITAL.filter(item => itemCatalogoRelacionadoMateria(item, materia));
+    const disponiveis = relacionados.filter(documentoDoCatalogoVade).length;
+    document.getElementById("resumoCatalogoVade").innerHTML = `<strong>${disponiveis} de ${relacionados.length}</strong> normas desta matéria disponíveis · ${itens.length} exibida(s)`;
     const lista = document.getElementById("listaCatalogoVade");
     const card = item => {
         const documento = documentoDoCatalogoVade(item);
@@ -5433,16 +5489,90 @@ function selecionarVisaoBiblioteca(tipo) {
     document.getElementById("wsLeitorPrototipo").classList.add("d-none");
 }
 
+function iconeMaterialEditorial(tipo) {
+    return ({ lesson: "bi-mortarboard", summary: "bi-file-earmark-text", revision: "bi-arrow-repeat", simulation: "bi-ui-checks-grid", link: "bi-link-45deg", file: "bi-file-earmark-pdf" })[tipo] || "bi-journal-richtext";
+}
+
+function rotuloMaterialEditorial(tipo) {
+    return ({ lesson: "Aula", summary: "Resumo", revision: "Revisão", simulation: "Simulado", link: "Link", file: "Arquivo" })[tipo] || "Material";
+}
+
+function abrirFerramentaDoMaterial(acao, material) {
+    const alvo = acao === "nota" ? "#ws-notas" : acao === "flashcard" ? "#ws-cards" : "#ws-mapas";
+    const tab = document.querySelector(`[data-bs-target="${alvo}"]`);
+    if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
+    if (acao === "nota") {
+        document.getElementById("btnNovaNota")?.click();
+        window.setTimeout(() => {
+            const titulo = document.getElementById("notaTitulo");
+            const conteudo = document.getElementById("notaConteudo");
+            if (!titulo || !conteudo) return;
+            titulo.value = material.titulo;
+            conteudo.value = `Fonte de estudo: ${material.titulo}\n\n${material.descricao || material.conteudo || ""}`;
+            titulo.dispatchEvent(new Event("input", { bubbles: true }));
+            conteudo.dispatchEvent(new Event("input", { bubbles: true }));
+            conteudo.focus();
+        }, 250);
+    } else if (acao === "flashcard") {
+        document.getElementById("cardFrente").value = `O que devo lembrar sobre ${material.titulo}?`;
+        document.getElementById("cardVerso").value = material.descricao || material.conteudo || "";
+        document.getElementById("cardFrente").focus();
+    }
+}
+
+function montarConteudoEditorial(materia, modulos) {
+    const container = document.getElementById("wsConteudoMateria");
+    const catalogo = catalogoDaMateria(materia);
+    if (!materia.catalogoId) {
+        container.innerHTML = `<div class="subject-content-empty"><i class="bi-stars"></i><strong class="d-block mb-1">Matéria personalizada</strong><span>Use Tópicos, Caderno, Mapas mentais, Flashcards e Materiais para construir seu espaço particular.</span></div>`;
+        return;
+    }
+    container.innerHTML = `<header class="subject-content-intro"><small class="text-uppercase fw-bold">Conteúdo da disciplina</small><h2 class="h4 fw-bold mt-1 mb-2">${esc(catalogo?.nome || materia.nome)}</h2><p class="mb-0">Conteúdo-base publicado pela administração, integrado às suas ferramentas particulares de estudo.</p></header>${modulos.length ? modulos.map(modulo => `<section class="subject-module"><header class="subject-module-header"><h3 class="h6 fw-bold mb-1">${esc(modulo.titulo)}</h3>${modulo.descricao ? `<p class="small mb-0">${esc(modulo.descricao)}</p>` : ""}</header><div class="subject-material-grid">${modulo.materiais.map(material => { const href = urlHttpSegura(material.urlExterna); return `<article class="subject-material-card" data-material-id="${esc(material.id)}"><span class="subject-material-kind"><i class="${iconeMaterialEditorial(material.tipo)} me-1"></i>${rotuloMaterialEditorial(material.tipo)}</span><h4 class="h6 fw-bold">${esc(material.titulo)}</h4>${material.descricao ? `<p>${esc(material.descricao)}</p>` : ""}${material.conteudo ? `<details class="small mb-2"><summary class="fw-semibold">Ler conteúdo</summary><div class="mt-2">${renderizarMarkdown(material.conteudo)}</div></details>` : ""}<div class="subject-material-actions">${href ? `<a class="btn btn-sm btn-primary" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="bi-box-arrow-up-right me-1"></i>Abrir</a>` : ""}<button class="btn btn-sm btn-outline-secondary" data-editorial-action="nota"><i class="bi-journal-plus me-1"></i>Anotar</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="flashcard"><i class="bi-card-heading me-1"></i>Flashcard</button><button class="btn btn-sm btn-outline-secondary" data-editorial-action="mapa"><i class="bi-diagram-3 me-1"></i>Mapa</button></div></article>`; }).join("") || '<p class="small text-muted mb-0">Os materiais deste módulo estão sendo preparados.</p>'}</div></section>`).join("") : `<div class="subject-content-empty"><i class="bi-journal-richtext"></i><strong class="d-block mb-1">Conteúdo em preparação</strong><span>Esta disciplina já está vinculada ao catálogo, mas ainda não recebeu módulos publicados.</span></div>`;
+    container.querySelectorAll("[data-editorial-action]").forEach(button => button.addEventListener("click", () => {
+        const materialId = button.closest("[data-material-id]")?.dataset.materialId;
+        const material = modulos.flatMap(modulo => modulo.materiais).find(item => item.id === materialId);
+        if (material) abrirFerramentaDoMaterial(button.dataset.editorialAction, material);
+    }));
+}
+
+async function renderizarConteudoEditorial(materia) {
+    const container = document.getElementById("wsConteudoMateria");
+    if (!materia.catalogoId) { montarConteudoEditorial(materia, []); return; }
+    const chave = String(materia.catalogoId);
+    if (conteudoEditorialPorCatalogo.has(chave)) { montarConteudoEditorial(materia, conteudoEditorialPorCatalogo.get(chave)); return; }
+    container.innerHTML = '<div class="subject-content-empty"><span class="spinner-border spinner-border-sm me-2"></span>Carregando conteúdo da disciplina...</div>';
+    try {
+        if (!window.HUB_CLOUD_SUBJECT_CONTENT) throw new Error("A conexão do conteúdo ainda não está pronta.");
+        const modulos = await window.HUB_CLOUD_SUBJECT_CONTENT.listar(chave);
+        conteudoEditorialPorCatalogo.set(chave, modulos);
+        if (String(materiaAbertaId) !== String(materia.id)) return;
+        montarConteudoEditorial(materia, modulos);
+        renderizarInicioBiblioteca(materia);
+    } catch (erro) {
+        console.error("Falha ao carregar conteúdo editorial", erro);
+        if (String(materiaAbertaId) === String(materia.id)) container.innerHTML = `<div class="subject-content-empty"><i class="bi-cloud-slash"></i><strong class="d-block mb-1">Conteúdo indisponível agora</strong><span>Tente novamente ao reabrir a matéria.</span></div>`;
+    }
+}
+
 function renderizarInicioBiblioteca(materia) {
     renderizarAtalhosLeitura(materia);
     const relacionados = CATALOGO_VADE_DIGITAL.filter(item => itemCatalogoRelacionadoMateria(item, materia) && documentoDoCatalogoVade(item));
-    const recomendados = (relacionados.length ? relacionados : CATALOGO_VADE_DIGITAL.filter(documentoDoCatalogoVade)).slice(0, 4);
+    const recomendados = relacionados.slice(0, 4);
     const container = document.getElementById("wsRecomendadosBiblioteca");
     container.innerHTML = recomendados.length ? recomendados.map(item => {
         const documento = documentoDoCatalogoVade(item);
         return `<article class="library-recommended-card"><span class="library-recommended-icon"><i class="${item.icone}" aria-hidden="true"></i></span><div class="library-recommended-copy"><strong>${esc(item.titulo)}</strong><small>${esc(documento.versao.fonteNome)}</small></div><button type="button" class="btn btn-sm btn-primary btn-abrir-recomendado" data-catalog-id="${esc(item.id)}" aria-label="Abrir ${esc(item.titulo)}"><i class="bi-book"></i></button></article>`;
     }).join("") : `<div class="legal-reading-empty"><i class="bi-book" aria-hidden="true"></i><span>As normas recomendadas aparecerão aqui assim que forem disponibilizadas.</span></div>`;
     container.querySelectorAll(".btn-abrir-recomendado").forEach(botao => botao.addEventListener("click", () => abrirDocumentoCatalogo(botao.dataset.catalogId)));
+
+    const editoriais = document.getElementById("wsMateriaisEditoriaisBiblioteca");
+    const modulos = conteudoEditorialPorCatalogo.get(String(materia.catalogoId || "")) || [];
+    const materiais = modulos.flatMap(modulo => modulo.materiais.map(material => ({ ...material, modulo: modulo.titulo })));
+    editoriais.innerHTML = materiais.length ? materiais.slice(0, 6).map(material => `<article class="library-recommended-card"><span class="library-recommended-icon"><i class="${iconeMaterialEditorial(material.tipo)}" aria-hidden="true"></i></span><div class="library-recommended-copy"><strong>${esc(material.titulo)}</strong><small>${esc(material.modulo)}</small></div><button type="button" class="btn btn-sm btn-outline-primary btn-ver-conteudo-editorial" aria-label="Abrir conteúdo"><i class="bi-arrow-right"></i></button></article>`).join("") : `<div class="legal-reading-empty"><i class="bi-journal-richtext" aria-hidden="true"></i><span>Os materiais publicados para esta disciplina aparecerão aqui.</span></div>`;
+    editoriais.querySelectorAll(".btn-ver-conteudo-editorial").forEach(botao => botao.addEventListener("click", () => {
+        const tab = document.querySelector('[data-bs-target="#ws-conteudo"]');
+        if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
+    }));
 
     const totalDocumentos = colecoesVade.reduce((total, colecao) => total + (colecao.documentos?.length || 0), 0);
     const totalArtigos = colecoesVade.reduce((total, colecao) => total + (colecao.artigos?.length || 0), 0);
@@ -6845,6 +6975,7 @@ async function abrirMateria(id) {
     notaSelecionadaId = m.notas.length ? (m.notas.find(n => n.fixada) || m.notas[0]).id : null;
     buscaNotasTexto = "";
     document.getElementById("buscaNotas").value = "";
+    if (m.catalogoId) conteudoEditorialPorCatalogo.delete(String(m.catalogoId));
     renderizarWorkspace();
     mostrarWorkspaceMateria();
 }
@@ -6859,6 +6990,7 @@ function renderizarWorkspace() {
     const barra = document.getElementById("wsBarraProgresso");
     barra.style.width = p + "%";
     barra.className = "progress-bar bg-" + m.cor;
+    renderizarConteudoEditorial(m);
     renderizarTopicos(m);
     renderizarListaNotas(m);
     renderizarEditorNota(m);

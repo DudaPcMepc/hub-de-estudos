@@ -771,7 +771,8 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(html, /id="btnMostrarRecursosBiblioteca"/);
     assert.match(html, /Configurar recursos da biblioteca/);
     assert.match(html, /\["materia", "Para esta matéria"\]/);
-    assert.match(html, /\["disponiveis", "Disponíveis agora"\]/);
+    assert.doesNotMatch(html, /\["disponiveis", "Disponíveis agora"\]/);
+    assert.match(html, /const recomendados = relacionados\.slice\(0, 4\)/);
     assert.match(html, /function itemCatalogoRelacionadoMateria\(item, materia\)/);
     assert.match(html, /class="vade-pending-group"/);
     assert.match(html, /function renderizarInicioBiblioteca\(materia\)/);
@@ -783,6 +784,36 @@ test("a biblioteca por matéria mantém widgets pessoais e identifica os limites
     assert.match(architecture, /Todas as tabelas pessoais usam RLS/);
     assert.match(architecture, /Fase 4 concluída e fundação da Fase 5 preparada localmente/);
     assert.match(architecture, /ativar, ocultar e ordenar widgets por usuário/);
+});
+
+test("as matérias-base recebem conteúdo editorial administrado e uma biblioteca estritamente relacionada", () => {
+    const migration = readProjectFile("supabase/migrations/202609080001_subject_content_hubs.sql");
+    const edge = readProjectFile("supabase/functions/admin-subject-content/index.ts");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const admin = readProjectFile("src/admin-subject-content.js");
+    const config = readProjectFile("supabase/config.toml");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /create table public\.catalog_subject_modules/i);
+    assert.match(migration, /create table public\.catalog_subject_materials/i);
+    assert.match(migration, /catalog_subject_modules_select_published[\s\S]*?status = 'published'/i);
+    assert.match(migration, /catalog_subject_materials_select_published[\s\S]*?module\.status = 'published'/i);
+    assert.doesNotMatch(migration, /grant (?:insert|update|delete|all)[^;]*catalog_subject_(?:modules|materials)[^;]*authenticated/i);
+    assert.match(edge, /is_platform_admin/);
+    assert.match(edge, /action === "save-module"/);
+    assert.match(edge, /action === "save-material"/);
+    assert.match(config, /\[functions\.admin-subject-content\][\s\S]*?verify_jwt\s*=\s*true/);
+    assert.match(repository, /export async function carregarConteudoMateria/);
+    assert.match(repository, /\.eq\("status", "published"\)/);
+    assert.match(auth, /HUB_CLOUD_SUBJECT_CONTENT/);
+    assert.match(admin, /supabase\.functions\.invoke\("admin-subject-content"/);
+    assert.match(html, /data-bs-target="#ws-conteudo"/);
+    assert.match(html, /id="wsConteudoMateria"/);
+    assert.match(html, /id="wsMateriaisEditoriaisBiblioteca"/);
+    assert.match(html, /function renderizarConteudoEditorial\(materia\)/);
+    assert.match(html, /const categorias = \[\["materia", "Para esta matéria"\]\]/);
+    assert.doesNotMatch(html, /relacionados\.length \? relacionados : CATALOGO_VADE_DIGITAL/);
 });
 
 test("o leitor usa navegação fixa, modo foco e grifos com função didática", () => {

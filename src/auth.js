@@ -21,6 +21,7 @@ import {
     atualizarTopico,
     atualizarPdfColecaoVade,
     carregarCatalogoMaterias,
+    carregarConteudoMateria,
     carregarBibliotecaJuridica,
     carregarDispositivosJuridicosPorVersao,
     carregarColecoesVade,
@@ -117,6 +118,10 @@ window.HUB_CLOUD_SUBJECTS = Object.freeze({
 
 window.HUB_CLOUD_CATALOG = Object.freeze({
     listar: carregarCatalogoMaterias
+});
+
+window.HUB_CLOUD_SUBJECT_CONTENT = Object.freeze({
+    listar: carregarConteudoMateria
 });
 
 window.HUB_CLOUD_WIDGETS = Object.freeze({
