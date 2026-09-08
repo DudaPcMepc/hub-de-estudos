@@ -704,8 +704,21 @@
     .exam-topic-label { display: flex; align-items: center; gap: .65rem; flex: 1 1 auto; min-width: 0; cursor: pointer; }
     .exam-topic-title { overflow-wrap: anywhere; }
     .exam-topic-actions { display: inline-flex; align-items: center; gap: .15rem; flex: 0 0 auto; }
-    .exam-topic-edit, .exam-topic-delete { padding: .25rem .45rem; border: 0; }
+    .exam-topic-edit, .exam-topic-delete, .exam-topic-add-child { padding: .25rem .45rem; border: 0; }
     .exam-topic-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
+    .exam-topic-panel-heading small { color: #735e55; }
+    .exam-topic-group { overflow: hidden; background: rgba(244, 226, 212, .28); border: 1px solid rgba(59, 41, 35, .1); border-radius: .75rem; }
+    .exam-topic-group-header { display: flex; align-items: center; gap: .55rem; padding: .6rem .65rem; }
+    .exam-topic-group-toggle { width: 1.65rem; height: 1.65rem; display: inline-grid; place-items: center; flex: 0 0 auto; padding: 0; color: var(--pimentel-vermelho-escuro); background: transparent; border: 0; border-radius: .4rem; }
+    .exam-topic-group-toggle:hover, .exam-topic-group-toggle:focus-visible { background: rgba(184, 50, 42, .1); }
+    .exam-topic-group-title { display: flex; align-items: center; gap: .45rem; flex: 1 1 auto; min-width: 0; color: #3b2923; font-size: .82rem; font-weight: 700; }
+    .exam-topic-group-progress { flex: 0 0 auto; padding: .2rem .48rem; color: #654f46; background: rgba(255, 255, 255, .75); border-radius: 999px; font-size: .67rem; font-weight: 700; }
+    .exam-topic-children { display: grid; gap: .42rem; padding: 0 .65rem .65rem 2.2rem; }
+    .exam-topic-children[hidden] { display: none; }
+    .exam-topic-child { position: relative; }
+    .exam-topic-child::before { content: ""; position: absolute; top: 0; bottom: 0; left: -.85rem; width: 1px; background: rgba(184, 50, 42, .2); }
+    .exam-topic-add-row { position: sticky; bottom: .35rem; z-index: 2; display: flex; justify-content: flex-start; margin-top: .25rem; padding: .45rem .25rem; background: linear-gradient(180deg, rgba(255, 253, 249, 0), #fffdf9 38%); }
+    .exam-topic-add-row > .btn { background: #fffdf9; box-shadow: 0 3px 12px rgba(70, 48, 39, .08); }
     .exam-topic-editor {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
@@ -718,6 +731,16 @@
     }
     .exam-topic-editor-actions { display: inline-flex; gap: .35rem; }
     .exam-topic-empty { padding: .8rem; color: var(--pimentel-cafe-claro); background: rgba(91, 67, 58, .035); border-radius: .65rem; text-align: center; }
+    @media (max-width: 767.98px) {
+        .exam-topic-panel { padding: .8rem; }
+        .exam-topic-list { margin-left: 0; }
+        .exam-topic-panel-heading small { display: none; }
+        .exam-topic-children { padding-left: 1.5rem; }
+        .exam-topic-editor { grid-template-columns: 1fr; }
+        .exam-topic-editor-actions { justify-content: flex-end; }
+        .exam-topic-item { flex-wrap: wrap; }
+        .exam-topic-item > .flex-grow-1 { flex-basis: calc(100% - 4rem); }
+    }
     .exam-evolution {
         margin-top: 1rem;
         padding: 1rem;
@@ -981,6 +1004,27 @@
     .error-quiz-answer.is-correct { color: #245b3b; background: rgba(25, 135, 84, .09); }
     .error-quiz-explanation { margin: 0; padding-left: .75rem; color: #5d4b43; border-left: 3px solid rgba(184, 50, 42, .25); font-size: .78rem; line-height: 1.6; white-space: pre-line; }
     .quiz-error-sync { display: inline-flex; align-items: center; gap: .3rem; margin-top: .65rem; color: #2e6544; font-size: .7rem; font-weight: 700; }
+    .quiz-history-card { border: 1px solid rgba(59, 41, 35, .09) !important; background: rgba(255, 253, 249, .88); }
+    .quiz-history-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; }
+    .quiz-history-filters { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .quiz-history-filters .form-select { width: auto; min-width: 150px; border-color: rgba(59, 41, 35, .13); font-size: .72rem; }
+    .quiz-history-list { display: grid; gap: .65rem; margin-top: 1rem; }
+    .quiz-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .85rem; align-items: center; padding: .85rem .95rem; background: #fff; border: 1px solid rgba(59, 41, 35, .08); border-radius: .85rem; }
+    .quiz-history-main { min-width: 0; }
+    .quiz-history-meta { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .35rem; color: var(--pimentel-cafe-claro); font-size: .64rem; }
+    .quiz-history-title { margin: 0; color: var(--pimentel-cafe); font-size: .85rem; font-weight: 750; }
+    .quiz-history-summary { display: flex; align-items: center; gap: .65rem; }
+    .quiz-score { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; color: #6f342d; background: rgba(184, 50, 42, .08); border-radius: 50%; font-size: .78rem; font-weight: 800; }
+    .quiz-score.is-good { color: #245b3b; background: rgba(25, 135, 84, .1); }
+    .quiz-evolution { font-size: .66rem; font-weight: 700; }
+    .quiz-history-empty { padding: 2rem 1rem; color: #77655d; text-align: center; }
+    .quiz-history-empty i { display: block; margin-bottom: .45rem; font-size: 1.8rem; opacity: .45; }
+    .quiz-detail-list { display: grid; gap: .75rem; }
+    .quiz-detail-question { padding: .9rem; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .09); border-radius: .8rem; }
+    .quiz-detail-question.is-correct { border-left: 4px solid #4f8b64; }
+    .quiz-detail-question.is-wrong { border-left: 4px solid #bd5148; }
+    .quiz-detail-question p { font-size: .8rem; line-height: 1.5; }
+    .quiz-detail-answer { display: block; margin-top: .3rem; font-size: .72rem; }
     .error-review-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: .85rem; }
     .error-review-options .btn { min-height: 64px; display: grid; place-items: center; align-content: center; gap: .08rem; border-radius: .75rem; }
     .error-review-options small { display: block; font-size: .61rem; opacity: .76; }
@@ -2332,6 +2376,13 @@
 
             <div id="areaQuestoes" class="row g-3"></div>
             <div id="areaResultado" class="alert alert-info mt-3 d-none"></div>
+
+            <div class="card quiz-history-card shadow-sm mt-4">
+                <div class="card-body">
+                    <div class="quiz-history-toolbar"><div><h6 class="fw-bold mb-1"><i class="bi-clock-history me-1"></i>Histórico de Simulados</h6><p class="small text-muted mb-0">Revise resultados e acompanhe sua evolução.</p></div><div class="quiz-history-filters"><select class="form-select form-select-sm" id="filtroHistoricoSimuladoMateria" aria-label="Filtrar histórico por matéria"><option value="">Todas as matérias</option></select><select class="form-select form-select-sm" id="filtroHistoricoSimuladoPeriodo" aria-label="Filtrar histórico por período"><option value="30">Últimos 30 dias</option><option value="7">Últimos 7 dias</option><option value="90">Últimos 90 dias</option><option value="">Todo o período</option></select></div></div>
+                    <div class="quiz-history-list" id="listaHistoricoSimulados"></div>
+                </div>
+            </div>
         </div>
 
         <!-- ============================================================ -->
@@ -3007,6 +3058,15 @@
     </div></div>
 </div>
 
+<!-- ============ DETALHES DO SIMULADO ============ -->
+<div class="modal fade" id="modalDetalheSimulado" tabindex="-1" aria-labelledby="tituloModalDetalheSimulado" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><div><div class="error-card-eyebrow">Histórico privado</div><h5 class="modal-title fw-bold" id="tituloModalDetalheSimulado"><i class="bi-clipboard-data me-2"></i>Resultado do simulado</h5><p class="small text-muted mb-0 mt-1" id="contextoDetalheSimulado"></p></div><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+        <div class="modal-body"><div class="d-flex flex-wrap gap-2 mb-3" id="metricasDetalheSimulado"></div><div class="quiz-detail-list" id="questoesDetalheSimulado"></div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button><button type="button" class="btn btn-primary" id="btnRefazerErrosSimulado"><i class="bi-arrow-repeat me-1"></i>Refazer questões erradas</button></div>
+    </div></div>
+</div>
+
 <div class="modal fade" id="modalConfigEdital" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
         <div class="modal-header"><h5 class="modal-title fw-bold">Configurar Concurso</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -3318,6 +3378,12 @@ function ativarAbaPrincipal(alvo) {
     bootstrap.Tab.getOrCreateInstance(botao).show();
 }
 
+function topicosEstudaveisDoItemEdital(item) {
+    const topicos = Array.isArray(item?.topicos) ? item.topicos : [];
+    const pais = new Set(topicos.map(topico => topico.paiId).filter(Boolean).map(String));
+    return topicos.filter(topico => !pais.has(String(topico.id)));
+}
+
 let indicePrioridadeHoje = 0;
 
 function prioridadesInteligentesDoEdital() {
@@ -3340,7 +3406,7 @@ function prioridadesInteligentesDoEdital() {
     };
 
     return edital.materias.flatMap((item, indiceMateria) => {
-        const topicos = Array.isArray(item.topicos) ? item.topicos : [];
+        const topicos = topicosEstudaveisDoItemEdital(item);
         const pontos = Math.max(0, Number(item.questoes) || 0) * Math.max(0, Number(item.peso) || 0);
         const relevancia = totalPontos > 0 ? (pontos / totalPontos) * 100 : 0;
         const materia = materias.find(m => String(m.id) === String(item.materiaId));
@@ -3975,7 +4041,9 @@ function sincronizarEdital(editalRemoto) {
             topicos: Array.isArray(remota.topicos) ? remota.topicos.map(topico => ({
                 id: topico.id,
                 titulo: topico.titulo || "",
-                concluido: topico.concluido === true
+                concluido: topico.concluido === true,
+                paiId: topico.paiId || null,
+                position: Number(topico.position) || 0
             })) : []
         }));
     const configuracao = editalRemoto.configuracaoExiste ? editalRemoto : {};
@@ -7565,7 +7633,7 @@ function popularTopicosEditalFlashcards(materiaId) {
     const topicos = obterTopicosEditalDaMateria(materiaId);
     const selectEditor = document.getElementById("cardTopicoEdital");
     const valorEditor = selectEditor.value;
-    selectEditor.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    selectEditor.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(tituloTopicoEdital(topico.id))}${topico.concluido ? " ✓" : ""}</option>`).join("");
     selectEditor.value = topicos.some(topico => String(topico.id) === String(valorEditor)) ? valorEditor : "";
     selectEditor.disabled = topicos.length === 0;
     selectEditor.title = topicos.length ? "Organize este card em um tópico do seu Edital" : "Cadastre esta matéria no Edital para vincular seus tópicos";
@@ -7573,7 +7641,7 @@ function popularTopicosEditalFlashcards(materiaId) {
     const selectFiltro = document.getElementById("filtroTopicoCards");
     const opcoesValidas = new Set(["todos", "sem-topico", ...topicos.map(topico => String(topico.id))]);
     if (!opcoesValidas.has(String(filtroTopicoCardsAtual))) filtroTopicoCardsAtual = "todos";
-    selectFiltro.innerHTML = '<option value="todos">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}</option>`).join("");
+    selectFiltro.innerHTML = '<option value="todos">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(tituloTopicoEdital(topico.id))}</option>`).join("");
     selectFiltro.value = filtroTopicoCardsAtual;
     selectFiltro.disabled = topicos.length === 0;
 }
@@ -8685,7 +8753,10 @@ function tituloTopicoEdital(id) {
     if (!id) return "";
     for (const materia of obterEdital().materias) {
         const topico = (materia.topicos || []).find(item => String(item.id) === String(id));
-        if (topico) return topico.titulo;
+        if (topico) {
+            const pai = topico.paiId ? (materia.topicos || []).find(item => String(item.id) === String(topico.paiId)) : null;
+            return pai ? `${pai.titulo} → ${topico.titulo}` : topico.titulo;
+        }
     }
     return "Tópico removido do Edital";
 }
@@ -8705,7 +8776,7 @@ function limparEdicaoTarefa() {
 
 function obterTopicosEditalDaMateria(materiaId) {
     const item = obterEdital().materias.find(materia => String(materia.materiaId) === String(materiaId));
-    return Array.isArray(item?.topicos) ? item.topicos : [];
+    return topicosEstudaveisDoItemEdital(item);
 }
 
 function popularTopicosEditalCronograma(valorPreferido = "") {
@@ -8714,7 +8785,7 @@ function popularTopicosEditalCronograma(valorPreferido = "") {
     const materiaId = document.getElementById("tarefaMateria").value;
     const topicos = obterTopicosEditalDaMateria(materiaId);
     const valorAtual = valorPreferido || select.value;
-    select.innerHTML = '<option value="">Sem vínculo com o Edital</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    select.innerHTML = '<option value="">Sem vínculo com o Edital</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(tituloTopicoEdital(topico.id))}${topico.concluido ? " ✓" : ""}</option>`).join("");
     select.value = topicos.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
     select.disabled = topicos.length === 0;
     select.title = topicos.length ? "Vincule esta sessão ao checklist pessoal do Edital" : "Esta matéria ainda não possui tópicos no Edital";
@@ -9388,6 +9459,7 @@ function renderizarTudoCronograma() {
 // ============================================================
 let operacaoEditalEmAndamento = false;
 let materiasEditalExpandidas = new Set();
+let gruposTopicosEditalRecolhidos = new Set();
 let editorTopicoEdital = null;
 let metricaPainelEdital = "progresso";
 
@@ -9416,7 +9488,7 @@ function renderizarPainelEvolucaoEdital(edital) {
         return mapa;
     }, new Map());
     const itens = edital.materias.map(item => {
-        const topicos = Array.isArray(item.topicos) ? item.topicos : [];
+        const topicos = topicosEstudaveisDoItemEdital(item);
         const concluidos = topicos.filter(topico => topico.concluido === true).length;
         const pendentes = topicos.length - concluidos;
         const progresso = topicos.length ? (concluidos / topicos.length) * 100 : 0;
@@ -9543,41 +9615,69 @@ function renderizarEdital() {
         const pontos = Number(m.questoes) * Number(m.peso);
         const pct = total > 0 ? (pontos / total) * 100 : 0;
         const cor = pct > 20 ? "exam-relevance-high" : pct > 10 ? "exam-relevance-medium" : "exam-relevance-low";
-        const topicos = Array.isArray(m.topicos) ? m.topicos : [];
-        const dominados = topicos.filter(topico => topico.concluido === true).length;
+        const topicos = Array.isArray(m.topicos) ? [...m.topicos].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0)) : [];
+        const topicosEstudaveis = topicosEstudaveisDoItemEdital(m);
+        const dominados = topicosEstudaveis.filter(topico => topico.concluido === true).length;
         const expandida = materiasEditalExpandidas.has(String(m.id));
         const detalheId = `edital-topicos-${String(m.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
         const nomeMateria = nomeDaMateria(m.materiaId);
         const cardsDaMateria = materiaPorId(m.materiaId)?.cards || [];
         const errosDaMateria = obterErros().filter(erro => String(erro.materiaId) === String(m.materiaId));
-        const htmlEditor = topico => `<form class="exam-topic-editor form-topico-edital" data-item-id="${esc(m.id)}" ${topico ? `data-id="${esc(topico.id)}"` : ""}>
-            <input type="text" class="form-control form-control-sm campo-titulo-topico-edital" maxlength="1000" value="${esc(topico?.titulo || "")}" placeholder="Digite o tópico do edital" aria-label="Título do tópico" required>
+        const htmlEditor = (topico, paiId = null) => `<form class="exam-topic-editor form-topico-edital" data-item-id="${esc(m.id)}" ${topico ? `data-id="${esc(topico.id)}"` : ""} ${paiId ? `data-parent-id="${esc(paiId)}"` : ""}>
+            <input type="text" class="form-control form-control-sm campo-titulo-topico-edital" maxlength="1000" value="${esc(topico?.titulo || "")}" placeholder="${paiId ? "Digite o novo subtópico" : "Digite o novo tópico ou tema"}" aria-label="Título do ${paiId ? "subtópico" : "tópico"}" required>
             <div class="exam-topic-editor-actions"><button type="button" class="btn btn-sm btn-outline-secondary btn-cancelar-topico-edital">Cancelar</button><button type="submit" class="btn btn-sm btn-primary"><i class="bi-check-lg me-1"></i>Salvar</button></div>
         </form>`;
-        const checklist = topicos.length ? topicos.map(topico => {
-            if (String(editorTopicoEdital?.itemId) === String(m.id) && String(editorTopicoEdital?.topicoId) === String(topico.id)) return htmlEditor(topico);
+        const filhosPorPai = topicos.reduce((mapa, topico) => {
+            if (!topico.paiId) return mapa;
+            const chave = String(topico.paiId);
+            if (!mapa.has(chave)) mapa.set(chave, []);
+            mapa.get(chave).push(topico);
+            return mapa;
+        }, new Map());
+        const idsTopicos = new Set(topicos.map(topico => String(topico.id)));
+        const raizes = topicos.filter(topico => !topico.paiId || !idsTopicos.has(String(topico.paiId)));
+        const htmlTopico = (topico, nivel = 0) => {
+            const editando = String(editorTopicoEdital?.itemId) === String(m.id) && String(editorTopicoEdital?.topicoId) === String(topico.id);
+            if (editando) return `<div class="${nivel ? "exam-topic-child" : ""}">${htmlEditor(topico, topico.paiId || null)}</div>`;
             const info = topico.concluido ? STATUS_TOPICO.dominado : STATUS_TOPICO.nao;
             const inputId = `check-edital-${String(topico.id).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
             const cardsDoTopico = cardsDaMateria.filter(card => String(card.topicoEditalId) === String(topico.id));
             const cardsParaRevisar = cardsDoTopico.filter(card => String(card.proxima || hojeISO()) <= hojeISO()).length;
             const errosDoTopico = errosDaMateria.filter(erro => String(erro.topicoEditalId) === String(topico.id)).length;
-            return `<div class="exam-topic-item">
+            const filhos = filhosPorPai.get(String(topico.id)) || [];
+            const editorFilhoAtivo = String(editorTopicoEdital?.itemId) === String(m.id) && !editorTopicoEdital?.topicoId && String(editorTopicoEdital?.paiId || "") === String(topico.id);
+            if (filhos.length || editorFilhoAtivo) {
+                const recolhido = gruposTopicosEditalRecolhidos.has(String(topico.id));
+                const filhosDominados = filhos.filter(filho => filho.concluido === true).length;
+                return `<section class="exam-topic-group">
+                    <div class="exam-topic-group-header">
+                        <button type="button" class="exam-topic-group-toggle btn-toggle-grupo-topicos" data-id="${esc(topico.id)}" aria-expanded="${!recolhido}" title="${recolhido ? "Mostrar" : "Recolher"} subtópicos"><i class="bi-chevron-${recolhido ? "right" : "down"}" aria-hidden="true"></i></button>
+                        <span class="exam-topic-group-title"><i class="bi-folder2-open" aria-hidden="true"></i><span class="text-truncate">${esc(topico.titulo)}</span></span>
+                        <span class="exam-topic-group-progress">${filhosDominados}/${filhos.length}</span>
+                        <span class="exam-topic-actions"><button type="button" class="btn btn-sm btn-link text-primary exam-topic-add-child" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Adicionar subtópico" aria-label="Adicionar subtópico em ${esc(topico.titulo)}"><i class="bi-plus-lg" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-secondary exam-topic-edit" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Editar tema" aria-label="Editar tema ${esc(topico.titulo)}"><i class="bi-pencil" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tema" aria-label="Remover tema ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button></span>
+                    </div>
+                    <div class="exam-topic-children" ${recolhido ? "hidden" : ""}>${filhos.map(filho => htmlTopico(filho, 1)).join("")}${editorFilhoAtivo ? htmlEditor(null, topico.id) : ""}</div>
+                </section>`;
+            }
+            return `<div class="exam-topic-item ${nivel ? "exam-topic-child" : ""}">
                 <div class="flex-grow-1 min-w-0"><label class="exam-topic-label" for="${inputId}">
                     <input id="${inputId}" class="form-check-input m-0 check-topico-edital" type="checkbox" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" ${topico.concluido ? "checked" : ""}>
                     <span class="small exam-topic-title">${esc(topico.titulo)}</span>
                 </label><div class="exam-topic-learning"><span><i class="bi-card-heading me-1"></i>${cardsDoTopico.length} card${cardsDoTopico.length === 1 ? "" : "s"}</span><span class="${cardsParaRevisar ? "is-due" : ""}"><i class="bi-arrow-repeat me-1"></i>${cardsParaRevisar} para revisar</span><span class="${errosDoTopico ? "is-error" : ""}"><i class="bi-journal-x me-1"></i>${errosDoTopico} erro${errosDoTopico === 1 ? "" : "s"}</span>${cardsParaRevisar || errosDoTopico ? `<span class="exam-topic-quick-actions">${cardsParaRevisar ? `<button type="button" class="btn btn-sm btn-link p-0 btn-revisar-topico-edital" data-materia-id="${esc(m.materiaId)}" data-topico-id="${esc(topico.id)}"><i class="bi-play-fill me-1"></i>Revisar</button>` : ""}${errosDoTopico ? `<button type="button" class="btn btn-sm btn-link p-0 btn-ver-erros-topico" data-materia-id="${esc(m.materiaId)}" data-topico-id="${esc(topico.id)}"><i class="bi-arrow-up-right me-1"></i>Ver erros</button>` : ""}</span>` : ""}</div></div>
                 <span class="badge text-bg-${info.cor}">${info.rotulo}</span>
-                <span class="exam-topic-actions"><button type="button" class="btn btn-sm btn-link text-secondary exam-topic-edit" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Editar tópico" aria-label="Editar tópico ${esc(topico.titulo)}"><i class="bi-pencil" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tópico" aria-label="Remover tópico ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button></span>
+                <span class="exam-topic-actions">${nivel === 0 ? `<button type="button" class="btn btn-sm btn-link text-primary exam-topic-add-child" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Transformar em tema e adicionar subtópico" aria-label="Adicionar subtópico em ${esc(topico.titulo)}"><i class="bi-plus-lg" aria-hidden="true"></i></button>` : ""}<button type="button" class="btn btn-sm btn-link text-secondary exam-topic-edit" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Editar tópico" aria-label="Editar tópico ${esc(topico.titulo)}"><i class="bi-pencil" aria-hidden="true"></i></button><button type="button" class="btn btn-sm btn-link text-danger exam-topic-delete" data-item-id="${esc(m.id)}" data-id="${esc(topico.id)}" title="Remover tópico" aria-label="Remover tópico ${esc(topico.titulo)}"><i class="bi-trash" aria-hidden="true"></i></button></span>
             </div>`;
-        }).join("") : "";
+        };
+        const checklist = raizes.map(topico => htmlTopico(topico)).join("");
         const editorAtivoNaMateria = String(editorTopicoEdital?.itemId) === String(m.id);
-        const editorNovo = editorAtivoNaMateria && !editorTopicoEdital?.topicoId ? htmlEditor(null) : "";
-        const conteudoTopicos = `${checklist}${editorNovo}` || '<div class="exam-topic-empty"><i class="bi-list-check me-1"></i>Nenhum tópico cadastrado. Adicione o primeiro quando quiser.</div>';
+        const editorNovoRaiz = editorAtivoNaMateria && !editorTopicoEdital?.topicoId && !editorTopicoEdital?.paiId ? htmlEditor(null) : "";
+        const conteudoTopicos = checklist || '<div class="exam-topic-empty"><i class="bi-list-check me-1"></i>Nenhum tópico cadastrado. Adicione o primeiro quando quiser.</div>';
+        const linhaInclusao = `<div class="exam-topic-add-row">${editorNovoRaiz || `<button type="button" class="btn btn-sm btn-outline-primary btn-adicionar-topico-edital" data-item-id="${esc(m.id)}" ${editorAtivoNaMateria ? "disabled" : ""}><i class="bi-plus-lg me-1"></i>Adicionar tópico ou tema</button>`}</div>`;
         const botaoTopicos = `<button type="button" class="exam-topic-toggle btn-toggle-topicos-edital" data-id="${esc(m.id)}" aria-expanded="${expandida}" aria-controls="${detalheId}" title="${expandida ? "Recolher" : "Mostrar"} tópicos de ${esc(nomeMateria)}"><i class="bi-chevron-${expandida ? "up" : "down"}" aria-hidden="true"></i><span class="visually-hidden">${expandida ? "Recolher" : "Mostrar"} checklist</span></button>`;
-        const linhaTopicos = `<tr id="${detalheId}" class="exam-topic-detail-row" ${expandida ? "" : "hidden"}><td colspan="6"><div class="exam-topic-panel"><div class="exam-topic-panel-heading"><div class="fw-semibold small"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><button type="button" class="btn btn-sm btn-outline-primary btn-adicionar-topico-edital" data-item-id="${esc(m.id)}" ${editorAtivoNaMateria ? "disabled" : ""}><i class="bi-plus-lg me-1"></i>Novo tópico</button></div><div class="exam-topic-list">${conteudoTopicos}</div></div></td></tr>`;
+        const linhaTopicos = `<tr id="${detalheId}" class="exam-topic-detail-row" ${expandida ? "" : "hidden"}><td colspan="6"><div class="exam-topic-panel"><div class="exam-topic-panel-heading"><div class="fw-semibold small"><i class="bi-list-check me-1"></i>Checklist de tópicos</div><small>Organize temas e subtópicos do conteúdo programático.</small></div><div class="exam-topic-list">${conteudoTopicos}${linhaInclusao}</div></div></td></tr>`;
         return `
         <tr class="exam-subject-row ${expandida ? "is-expanded" : ""}" data-id="${esc(m.id)}">
-            <td class="fw-semibold"><div class="exam-subject-heading">${botaoTopicos}<div><span>${esc(nomeMateria)}</span><div><span class="exam-topic-count ${topicos.length > 0 && dominados === topicos.length ? "is-complete" : ""}">${topicos.length ? `${dominados}/${topicos.length} tópicos` : "0 tópicos"}</span></div></div></div></td>
+            <td class="fw-semibold"><div class="exam-subject-heading">${botaoTopicos}<div><span>${esc(nomeMateria)}</span><div><span class="exam-topic-count ${topicosEstudaveis.length > 0 && dominados === topicosEstudaveis.length ? "is-complete" : ""}">${topicosEstudaveis.length ? `${dominados}/${topicosEstudaveis.length} tópicos` : "0 tópicos"}</span></div></div></div></td>
             <td class="numeric-column"><input type="number" min="0" max="100000" class="form-control form-control-sm text-center campo-questoes" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.questoes}"></td>
             <td class="numeric-column"><input type="number" min="0" max="100000" step="0.1" class="form-control form-control-sm text-center campo-peso" style="width:80px;margin:0 auto;" data-id="${m.id}" value="${m.peso}"></td>
             <td class="numeric-column fw-bold">${pontos.toFixed(1)}</td>
@@ -9607,6 +9707,18 @@ function renderizarEdital() {
         if (abrir) materiasEditalExpandidas.add(btn.dataset.id);
         else materiasEditalExpandidas.delete(btn.dataset.id);
     }));
+    tabela.querySelectorAll(".btn-toggle-grupo-topicos").forEach(btn => btn.addEventListener("click", () => {
+        const grupo = btn.closest(".exam-topic-group");
+        const filhos = grupo?.querySelector(":scope > .exam-topic-children");
+        if (!filhos) return;
+        const abrir = btn.getAttribute("aria-expanded") !== "true";
+        btn.setAttribute("aria-expanded", String(abrir));
+        btn.title = `${abrir ? "Recolher" : "Mostrar"} subtópicos`;
+        btn.querySelector("i").className = `bi-chevron-${abrir ? "down" : "right"}`;
+        filhos.hidden = !abrir;
+        if (abrir) gruposTopicosEditalRecolhidos.delete(btn.dataset.id);
+        else gruposTopicosEditalRecolhidos.add(btn.dataset.id);
+    }));
 
     tabela.querySelectorAll(".btn-salvar-edital").forEach(btn => btn.addEventListener("click", async () => {
         const questoes = [...tabela.querySelectorAll(".campo-questoes")].find(input => input.dataset.id === btn.dataset.id);
@@ -9619,6 +9731,14 @@ function renderizarEdital() {
         materiasEditalExpandidas.add(btn.dataset.itemId);
         renderizarEdital();
         tabela.querySelector(`.form-topico-edital[data-item-id="${btn.dataset.itemId}"] .campo-titulo-topico-edital`)?.focus();
+    }));
+    tabela.querySelectorAll(".exam-topic-add-child").forEach(btn => btn.addEventListener("click", () => {
+        if (operacaoEditalEmAndamento) return;
+        editorTopicoEdital = { itemId: btn.dataset.itemId, topicoId: null, paiId: btn.dataset.id };
+        materiasEditalExpandidas.add(btn.dataset.itemId);
+        gruposTopicosEditalRecolhidos.delete(btn.dataset.id);
+        renderizarEdital();
+        tabela.querySelector(`.form-topico-edital[data-parent-id="${btn.dataset.id}"] .campo-titulo-topico-edital`)?.focus();
     }));
     tabela.querySelectorAll(".exam-topic-edit").forEach(btn => btn.addEventListener("click", () => {
         if (operacaoEditalEmAndamento) return;
@@ -9636,6 +9756,12 @@ function renderizarEdital() {
     tabela.querySelectorAll(".form-topico-edital").forEach(form => form.addEventListener("submit", evento => {
         evento.preventDefault();
         salvarFormularioTopicoEdital(form);
+    }));
+    tabela.querySelectorAll(".form-topico-edital").forEach(form => form.addEventListener("keydown", evento => {
+        if (evento.key !== "Escape") return;
+        evento.preventDefault();
+        editorTopicoEdital = null;
+        renderizarEdital();
     }));
     tabela.querySelectorAll(".check-topico-edital").forEach(input => input.addEventListener("change", async () => {
         if (operacaoEditalEmAndamento) { renderizarEdital(); return; }
@@ -9669,11 +9795,18 @@ function renderizarEdital() {
         const edital = obterEdital();
         const item = edital.materias.find(materia => String(materia.id) === btn.dataset.itemId);
         const topico = item?.topicos?.find(atual => String(atual.id) === btn.dataset.id);
-        if (!item || !topico || !confirm(`Remover o tópico “${topico.titulo}” do seu checklist pessoal?`)) return;
-        const topicosAnteriores = [...item.topicos];
+        const quantidadeFilhos = item?.topicos?.filter(atual => String(atual.paiId || "") === String(topico?.id || "")).length || 0;
+        const mensagem = quantidadeFilhos
+            ? `Remover o tema “${topico?.titulo}”? Seus ${quantidadeFilhos} subtópico(s) serão mantidos no primeiro nível.`
+            : `Remover o tópico “${topico?.titulo}” do seu checklist pessoal?`;
+        if (!item || !topico || !confirm(mensagem)) return;
+        const topicosAnteriores = item.topicos.map(atual => ({ ...atual }));
         operacaoEditalEmAndamento = true;
         try {
             item.topicos = item.topicos.filter(atual => String(atual.id) !== String(topico.id));
+            item.topicos.forEach(atual => {
+                if (String(atual.paiId || "") === String(topico.id)) atual.paiId = null;
+            });
             salvar(LS.edital, edital);
             try {
                 await exigirNuvemEdital().excluirTopico(topico.id);
@@ -9725,8 +9858,10 @@ async function salvarFormularioTopicoEdital(form) {
     const edital = obterEdital();
     const item = edital.materias.find(materia => String(materia.id) === form.dataset.itemId);
     const topico = form.dataset.id ? item?.topicos?.find(atual => String(atual.id) === form.dataset.id) : null;
+    const paiId = form.dataset.parentId || null;
+    const pai = paiId ? item?.topicos?.find(atual => String(atual.id) === String(paiId) && !atual.paiId) : null;
     const titulo = form.querySelector(".campo-titulo-topico-edital")?.value.trim() || "";
-    if (!item || (form.dataset.id && !topico)) return;
+    if (!item || (form.dataset.id && !topico) || (paiId && !pai)) return;
     if (!titulo || titulo.length > 1000) {
         alert("Informe um tópico com até 1.000 caracteres.");
         return;
@@ -9752,7 +9887,7 @@ async function salvarFormularioTopicoEdital(form) {
                 throw erroLocal;
             }
         } else {
-            const novoTopico = { id: novoId(), titulo, concluido: false, position: item.topicos.length };
+            const novoTopico = { id: novoId(), titulo, concluido: false, paiId, position: item.topicos.length };
             await exigirNuvemEdital().adicionarTopicos(item.id, [novoTopico]);
             try {
                 item.topicos.push(novoTopico);
@@ -9762,9 +9897,14 @@ async function salvarFormularioTopicoEdital(form) {
                 throw erroLocal;
             }
         }
-        editorTopicoEdital = null;
+        editorTopicoEdital = topico ? null : { itemId: String(item.id), topicoId: null, paiId };
         materiasEditalExpandidas.add(String(item.id));
+        if (paiId) gruposTopicosEditalRecolhidos.delete(String(paiId));
         renderizarEdital();
+        if (!topico) {
+            const seletorPai = paiId ? `[data-parent-id="${paiId}"]` : `:not([data-parent-id])`;
+            document.getElementById("tabelaEdital").querySelector(`.form-topico-edital[data-item-id="${item.id}"]${seletorPai} .campo-titulo-topico-edital`)?.focus();
+        }
     } catch (erro) {
         console.error("Falha ao salvar tópico do edital", erro);
         alert("O tópico não foi salvo porque o Supabase não confirmou a operação.");
@@ -9961,7 +10101,7 @@ function popularTopicosErro(valorPreferido = "") {
     const materiaId = document.getElementById("erroMateria").value;
     const topicos = obterTopicosEditalDaMateria(materiaId);
     const valorAtual = valorPreferido || select.value;
-    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}${topico.concluido ? " ✓" : ""}</option>`).join("");
+    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(tituloTopicoEdital(topico.id))}${topico.concluido ? " ✓" : ""}</option>`).join("");
     select.value = topicos.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
     select.disabled = topicos.length === 0;
 }
@@ -9972,9 +10112,9 @@ function popularFiltroTopicosErro(valorPreferido = "") {
     const materiaId = document.getElementById("filtroErroMateria").value;
     const itens = obterEdital().materias
         .filter(item => !materiaId || String(item.materiaId) === String(materiaId))
-        .flatMap(item => (item.topicos || []).map(topico => ({ ...topico, materiaId: item.materiaId })));
+        .flatMap(item => topicosEstudaveisDoItemEdital(item).map(topico => ({ ...topico, materiaId: item.materiaId })));
     const valorAtual = valorPreferido || select.value;
-    select.innerHTML = '<option value="">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + itens.map(topico => `<option value="${esc(topico.id)}">${materiaId ? "" : `${esc(nomeDaMateria(topico.materiaId))} — `}${esc(topico.titulo)}</option>`).join("");
+    select.innerHTML = '<option value="">Todos os tópicos</option><option value="sem-topico">Sem tópico</option>' + itens.map(topico => `<option value="${esc(topico.id)}">${materiaId ? "" : `${esc(nomeDaMateria(topico.materiaId))} — `}${esc(tituloTopicoEdital(topico.id))}</option>`).join("");
     select.value = valorAtual === "sem-topico" || itens.some(topico => String(topico.id) === String(valorAtual)) ? valorAtual : "";
 }
 
@@ -10156,7 +10296,7 @@ function abrirCardDoErro(id) {
     document.getElementById("cardErroVerso").value = erro.obs.trim() || `Revise o ponto registrado: ${erro.tema.trim()}`;
     const select = document.getElementById("cardErroTopicoEdital");
     const topicos = obterTopicosEditalDaMateria(erro.materiaId);
-    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(topico.titulo)}</option>`).join("");
+    select.innerHTML = '<option value="">Sem tópico</option>' + topicos.map(topico => `<option value="${esc(topico.id)}">${esc(tituloTopicoEdital(topico.id))}</option>`).join("");
     select.value = topicoDoErro(erro)?.id || "";
     select.disabled = topicos.length === 0;
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCardDoErro")).show();
@@ -10235,7 +10375,14 @@ function exigirNuvemIA() {
 }
 
 let quizAtual = [];
-let filaRegistroErrosSimulado = Promise.resolve();
+let tentativasSimulado = [];
+let tentativaAtualId = null;
+let tentativaDetalheId = null;
+
+function exigirNuvemSimulados() {
+    if (!window.HUB_CLOUD_QUIZZES) throw new Error("O histórico seguro de simulados ainda não está disponível.");
+    return window.HUB_CLOUD_QUIZZES;
+}
 
 function validarQuestoesIA(questoes) {
     if (!Array.isArray(questoes) || questoes.length === 0 || questoes.length > 20) {
@@ -10262,28 +10409,52 @@ function encontrarTopicoDoSimulado(materiaId, tema) {
     return obterTopicosEditalDaMateria(materiaId).find(topico => textoBuscaFlashcard(topico.titulo).trim().replace(/\s+/g, " ") === procurado) || null;
 }
 
-function registrarErroAutomaticoDoSimulado(questao, indiceEscolhido) {
-    const operacao = async () => {
-        const topico = encontrarTopicoDoSimulado(questao.materiaId, questao.temaSimulado);
-        await exigirNuvemErros().registrarSimulado({
-            materiaId: questao.materiaId,
-            topicoEditalId: topico?.id || null,
-            enunciado: questao.pergunta,
-            respostaEscolhida: questao.opcoes[indiceEscolhido],
-            respostaCorreta: questao.opcoes[questao.resposta_correta_index],
-            explicacao: questao.explicacao,
-            temaSimulado: questao.temaSimulado,
-            dificuldade: questao.dificuldade,
-            banca: questao.banca
-        });
-        sincronizarListaDeErros(await exigirNuvemErros().listar());
-        renderizarCentralRevisoes();
-        renderizarHoje();
-        renderizarMaterias();
-        renderizarEdital();
-    };
-    filaRegistroErrosSimulado = filaRegistroErrosSimulado.then(operacao, operacao);
-    return filaRegistroErrosSimulado;
+function sincronizarTentativasSimulado(remotas) {
+    tentativasSimulado = Array.isArray(remotas) ? remotas : [];
+    renderizarHistoricoSimulados();
+}
+
+function percentualTentativa(tentativa) {
+    return tentativa.total > 0 ? Math.round((tentativa.acertos / tentativa.total) * 100) : 0;
+}
+
+function formatarDataHoraSimulado(valor) {
+    const data = new Date(valor);
+    return Number.isNaN(data.getTime()) ? "Data indisponível" : data.toLocaleString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function formatarDuracaoSimulado(segundos) {
+    if (!Number.isFinite(Number(segundos))) return "Tempo não concluído";
+    const total = Math.max(0, Number(segundos));
+    const minutos = Math.floor(total / 60);
+    const resto = total % 60;
+    return minutos ? `${minutos} min ${resto ? `${resto}s` : ""}`.trim() : `${resto}s`;
+}
+
+function renderizarHistoricoSimulados() {
+    const lista = document.getElementById("listaHistoricoSimulados");
+    const filtroMateria = document.getElementById("filtroHistoricoSimuladoMateria");
+    const filtroPeriodo = document.getElementById("filtroHistoricoSimuladoPeriodo");
+    if (!lista || !filtroMateria || !filtroPeriodo) return;
+    const valorAtual = filtroMateria.value;
+    filtroMateria.innerHTML = '<option value="">Todas as matérias</option>' + obterMaterias().map(materia => `<option value="${esc(materia.id)}">${esc(materia.nome)}</option>`).join("");
+    filtroMateria.value = [...filtroMateria.options].some(opcao => opcao.value === valorAtual) ? valorAtual : "";
+    const limiteDias = Number(filtroPeriodo.value);
+    const limite = limiteDias > 0 ? Date.now() - limiteDias * 86400000 : 0;
+    const filtradas = tentativasSimulado.filter(tentativa => (!filtroMateria.value || String(tentativa.materiaId) === filtroMateria.value) && (!limite || new Date(tentativa.iniciadoEm).getTime() >= limite));
+    if (!filtradas.length) {
+        lista.innerHTML = '<div class="quiz-history-empty"><i class="bi-clipboard2-data"></i><strong>Nenhum simulado neste período</strong><div class="small mt-1">Ao responder seu primeiro simulado, o resultado aparecerá aqui.</div></div>';
+        return;
+    }
+    lista.innerHTML = filtradas.map(tentativa => {
+        const percentual = percentualTentativa(tentativa);
+        const anteriores = tentativasSimulado.filter(item => item.status === "concluido" && item.id !== tentativa.id && String(item.materiaId) === String(tentativa.materiaId) && new Date(item.iniciadoEm) < new Date(tentativa.iniciadoEm));
+        const anterior = anteriores.sort((a, b) => new Date(b.iniciadoEm) - new Date(a.iniciadoEm))[0];
+        const evolucao = anterior ? percentual - percentualTentativa(anterior) : null;
+        const status = tentativa.status === "concluido" ? `${tentativa.acertos}/${tentativa.total} acertos` : `${tentativa.respostas.filter(resposta => resposta.respostaEscolhidaIndex != null).length}/${tentativa.total} respondidas`;
+        return `<article class="quiz-history-item"><div class="quiz-history-main"><div class="quiz-history-meta"><span>${esc(formatarDataHoraSimulado(tentativa.iniciadoEm))}</span><span>•</span><span>${esc(tentativa.dificuldade)}</span>${tentativa.banca ? `<span>• ${esc(tentativa.banca)}</span>` : ""}<span>• ${esc(formatarDuracaoSimulado(tentativa.duracaoSegundos))}</span></div><h6 class="quiz-history-title">${esc(nomeDaMateria(tentativa.materiaId))}${tentativa.tema ? ` · ${esc(tentativa.tema)}` : ""}</h6><div class="small text-muted mt-1">${esc(status)}</div></div><div class="quiz-history-summary"><div><div class="quiz-evolution ${evolucao > 0 ? "text-success" : evolucao < 0 ? "text-danger" : "text-muted"}">${evolucao == null ? "Primeiro resultado" : evolucao > 0 ? `↑ ${evolucao} pontos` : evolucao < 0 ? `↓ ${Math.abs(evolucao)} pontos` : "Resultado estável"}</div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill mt-1 btn-abrir-historico-simulado" data-id="${esc(tentativa.id)}">${tentativa.status === "concluido" ? "Ver resultado" : "Continuar"}</button></div><div class="quiz-score ${percentual >= 70 ? "is-good" : ""}">${percentual}%</div></div></article>`;
+    }).join("");
+    lista.querySelectorAll(".btn-abrir-historico-simulado").forEach(botao => botao.addEventListener("click", () => abrirTentativaSimulado(botao.dataset.id)));
 }
 
 document.getElementById("btnIrGeradorSimulado").addEventListener("click", () => {
@@ -10320,7 +10491,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
         if (resultado.quota) {
             document.getElementById("statusCotaIA").textContent = `${resultado.quota.remaining}/${resultado.quota.limit} questões disponíveis hoje`;
         }
-        renderizarQuestoes(resultado.questions, materiaId, materiaNome, { tema, banca: edital.banca || "" });
+        await iniciarTentativaSimulado(resultado.questions, materiaId, materiaNome, { tema, banca: edital.banca || "", concurso: edital.nomeConcurso || "", dificuldade });
     } catch (err) {
         erroDiv.textContent = "Não foi possível gerar as questões: " + err.message;
         erroDiv.classList.remove("d-none");
@@ -10329,8 +10500,30 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     }
 });
 
+async function iniciarTentativaSimulado(questoes, materiaId, materiaNome, contexto = {}) {
+    const validadas = validarQuestoesIA(questoes);
+    const topico = encontrarTopicoDoSimulado(materiaId, contexto.tema || "");
+    const criada = await exigirNuvemSimulados().criar({
+        materiaId,
+        topicoEditalId: topico?.id || null,
+        tema: contexto.tema || "",
+        dificuldade: contexto.dificuldade || validadas[0]?.dificuldade || "Médio",
+        concurso: contexto.concurso || "",
+        banca: contexto.banca || "",
+        questoes: validadas
+    });
+    const idsPorPosicao = new Map((criada.answers || []).map(item => [Number(item.position), item.id]));
+    tentativaAtualId = criada.id;
+    renderizarQuestoes(validadas.map((questao, indice) => ({ ...questao, respostaId: idsPorPosicao.get(indice + 1) })), materiaId, materiaNome, { ...contexto, tentativaId: criada.id });
+    sincronizarTentativasSimulado(await exigirNuvemSimulados().listar());
+}
+
 function renderizarQuestoes(questoes, materiaId, materiaNome, contexto = {}) {
-    quizAtual = validarQuestoesIA(questoes).map(q => ({ ...q, materiaId, materiaNome, temaSimulado: contexto.tema || "", banca: contexto.banca || "", respondida: false }));
+    tentativaAtualId = contexto.tentativaId || tentativaAtualId;
+    quizAtual = validarQuestoesIA(questoes).map((q, indice) => {
+        const origem = questoes[indice] || {};
+        return { ...q, respostaId: origem.respostaId || origem.id || null, materiaId, materiaNome, temaSimulado: contexto.tema || "", banca: contexto.banca || "", respondida: origem.respondida === true || origem.respostaEscolhidaIndex != null, respostaEscolhidaIndex: origem.respostaEscolhidaIndex == null ? null : Number(origem.respostaEscolhidaIndex) };
+    });
     const area = document.getElementById("areaQuestoes");
     area.innerHTML = "";
 
@@ -10348,12 +10541,12 @@ function renderizarQuestoes(questoes, materiaId, materiaNome, contexto = {}) {
                     <p class="fw-semibold">${qIndex + 1}. ${esc(q.pergunta)}</p>
                     <div class="list-group" id="opcoes-${qIndex}">
                         ${q.opcoes.map((op, oIndex) => `
-                            <button type="button" class="list-group-item list-group-item-action opcao-resposta" data-qindex="${qIndex}" data-oindex="${oIndex}">
+                            <button type="button" class="list-group-item list-group-item-action opcao-resposta${q.respondida ? " desabilitada" : ""}${q.respondida && oIndex === q.resposta_correta_index ? " correta" : ""}${q.respondida && oIndex === q.respostaEscolhidaIndex && oIndex !== q.resposta_correta_index ? " incorreta" : ""}" data-qindex="${qIndex}" data-oindex="${oIndex}">
                                 ${String.fromCharCode(65 + oIndex)}) ${esc(op)}
                             </button>`).join("")}
                     </div>
-                    <div class="collapse mt-2" id="explicacao-${qIndex}">
-                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${esc(q.explicacao)}<div class="quiz-error-sync d-none" id="erro-sync-${qIndex}"><i class="bi-journal-check"></i><span>Questão e explicação salvas no Caderno de Erros</span></div></div>
+                    <div class="collapse mt-2${q.respondida ? " show" : ""}" id="explicacao-${qIndex}">
+                        <div class="alert alert-light border small mb-0"><strong>Explicação:</strong> ${esc(q.explicacao)}<div class="quiz-error-sync ${q.respondida && q.respostaEscolhidaIndex !== q.resposta_correta_index ? "" : "d-none"}" id="erro-sync-${qIndex}"><i class="bi-journal-check"></i><span>Questão e explicação salvas no Caderno de Erros</span></div></div>
                     </div>
                 </div>
             </div>`;
@@ -10368,64 +10561,49 @@ async function onResponder(e) {
     const qIndex = parseInt(btn.dataset.qindex);
     const oIndex = parseInt(btn.dataset.oindex);
     const q = quizAtual[qIndex];
-    if (q.respondida) return;
-    q.respondida = true;
-
+    if (q.respondida || q.salvando) return;
+    if (!tentativaAtualId || !q.respostaId) { alert("Esta questão não está vinculada ao histórico. Gere um novo simulado para responder com segurança."); return; }
+    q.salvando = true;
     const grupo = document.getElementById(`opcoes-${qIndex}`);
     grupo.querySelectorAll(".opcao-resposta").forEach(b => b.classList.add("desabilitada"));
-    const correta = q.resposta_correta_index;
-    grupo.children[correta].classList.add("correta");
-
-    const acertou = oIndex === correta;
-    document.getElementById(`explicacao-${qIndex}`).classList.add("show");
-    if (!acertou) {
-        grupo.children[oIndex].classList.add("incorreta");
-        q.registroPendente = true;
-        const statusErro = document.getElementById(`erro-sync-${qIndex}`);
-        statusErro?.classList.remove("d-none");
-        if (statusErro) statusErro.innerHTML = '<i class="bi-arrow-repeat"></i><span>Salvando automaticamente no Caderno de Erros...</span>';
-        try {
-            await registrarErroAutomaticoDoSimulado(q, oIndex);
-            q.erroRegistrado = true;
-            if (statusErro) statusErro.innerHTML = '<i class="bi-journal-check"></i><span>Questão e explicação salvas no Caderno de Erros</span>';
-        } catch (falhaErro) {
-            q.falhaRegistroErro = true;
-            if (statusErro) statusErro.innerHTML = '<i class="bi-exclamation-triangle"></i><span>Não foi possível salvar esta questão</span>';
-            console.error("Falha ao enviar o erro do simulado ao caderno", falhaErro);
-            alert("A resposta foi corrigida, mas o erro não entrou no Caderno de Erros. Tente registrá-lo manualmente.");
-        } finally {
-            q.registroPendente = false;
-        }
-    }
-
-    q.desempenhoPendente = true;
     try {
-        await registrarDesempenho(q.materiaId, acertou);
-    } catch (falhaDesempenho) {
-        q.falhaDesempenho = true;
-        console.error("Falha ao atualizar o desempenho do simulado", falhaDesempenho);
-        alert("A resposta foi corrigida, mas o histórico de desempenho não foi atualizado. Tente novamente em outro simulado.");
+        const resultado = await exigirNuvemSimulados().responder(tentativaAtualId, q.respostaId, oIndex);
+        q.respondida = true;
+        q.respostaEscolhidaIndex = oIndex;
+        const correta = q.resposta_correta_index;
+        grupo.children[correta].classList.add("correta");
+        if (oIndex !== correta) {
+            grupo.children[oIndex].classList.add("incorreta");
+            document.getElementById(`erro-sync-${qIndex}`)?.classList.remove("d-none");
+        }
+        document.getElementById(`explicacao-${qIndex}`).classList.add("show");
+        const [historico, desempenho, erros] = await Promise.all([exigirNuvemSimulados().listar(), exigirNuvemDesempenho().listar(), exigirNuvemErros().listar()]);
+        sincronizarTentativasSimulado(historico);
+        sincronizarDesempenho(desempenho);
+        sincronizarListaDeErros(erros);
+        renderizarDesempenho();
+        renderizarErros();
+        renderizarCentralRevisoes();
+        renderizarHoje();
+        renderizarMaterias();
+        renderizarEdital();
+        if (resultado.completed) verificarFimDoSimulado();
+    } catch (falha) {
+        grupo.querySelectorAll(".opcao-resposta").forEach(b => b.classList.remove("desabilitada"));
+        console.error("Falha ao registrar resposta do simulado", falha);
+        alert("A resposta não foi salva. Sua tentativa continua aberta; tente novamente.");
     } finally {
-        q.desempenhoPendente = false;
+        q.salvando = false;
     }
-    verificarFimDoSimulado();
 }
 
 function verificarFimDoSimulado() {
-    if (!quizAtual.every(q => q.respondida) || quizAtual.some(q => q.registroPendente || q.desempenhoPendente)) return;
-    const acertos = quizAtual.filter((q, i) => {
-        const grupo = document.getElementById(`opcoes-${i}`);
-        return grupo && !grupo.querySelector(".incorreta");
-    }).length;
+    if (!quizAtual.every(q => q.respondida)) return;
+    const acertos = quizAtual.filter(q => q.respostaEscolhidaIndex === q.resposta_correta_index).length;
     const total = quizAtual.length;
     const areaResultado = document.getElementById("areaResultado");
-    const complemento = acertos === total
-        ? "Mandou muito bem! 🎉"
-        : quizAtual.some(q => q.falhaRegistroErro)
-            ? "Algumas erradas não puderam ser salvas no Caderno de Erros. Registre-as manualmente."
-            : "As erradas foram confirmadas no Caderno de Erros.";
-    const avisoDesempenho = quizAtual.some(q => q.falhaDesempenho) ? " O histórico de desempenho ficou incompleto por uma falha de sincronização." : "";
-    areaResultado.innerHTML = `Simulado concluído! Você acertou <strong>${acertos} de ${total}</strong> questões. ${complemento}${avisoDesempenho}`;
+    const complemento = acertos === total ? "Mandou muito bem! 🎉" : "As erradas foram confirmadas no Caderno de Erros.";
+    areaResultado.innerHTML = `Simulado concluído! Você acertou <strong>${acertos} de ${total}</strong> questões. ${complemento}`;
     areaResultado.classList.remove("d-none");
     renderizarErros();
 }
@@ -10437,6 +10615,48 @@ function exigirNuvemDesempenho() {
     if (!window.HUB_CLOUD_PERFORMANCE) throw new Error("A conexão do histórico de desempenho com o Supabase ainda não está pronta.");
     return window.HUB_CLOUD_PERFORMANCE;
 }
+
+function abrirTentativaSimulado(id) {
+    const tentativa = tentativasSimulado.find(item => String(item.id) === String(id));
+    if (!tentativa) return;
+    if (tentativa.status !== "concluido") {
+        tentativaAtualId = tentativa.id;
+        renderizarQuestoes(tentativa.respostas.map(resposta => ({ pergunta: resposta.pergunta, opcoes: resposta.opcoes, resposta_correta_index: resposta.respostaCorretaIndex, explicacao: resposta.explicacao, dificuldade: tentativa.dificuldade, respostaId: resposta.id, respostaEscolhidaIndex: resposta.respostaEscolhidaIndex })), tentativa.materiaId, nomeDaMateria(tentativa.materiaId), { tema: tentativa.tema, banca: tentativa.banca, concurso: tentativa.concurso, tentativaId: tentativa.id });
+        document.getElementById("areaQuestoes").scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+    }
+    tentativaDetalheId = tentativa.id;
+    document.getElementById("contextoDetalheSimulado").textContent = `${nomeDaMateria(tentativa.materiaId)}${tentativa.tema ? ` · ${tentativa.tema}` : ""} · ${formatarDataHoraSimulado(tentativa.iniciadoEm)}`;
+    document.getElementById("metricasDetalheSimulado").innerHTML = `<span class="badge rounded-pill text-bg-light">${tentativa.acertos}/${tentativa.total} acertos</span><span class="badge rounded-pill text-bg-light">${percentualTentativa(tentativa)}%</span><span class="badge rounded-pill text-bg-light">${esc(tentativa.dificuldade)}</span><span class="badge rounded-pill text-bg-light">${esc(formatarDuracaoSimulado(tentativa.duracaoSegundos))}</span>`;
+    document.getElementById("questoesDetalheSimulado").innerHTML = tentativa.respostas.map(resposta => `<article class="quiz-detail-question ${resposta.correta ? "is-correct" : "is-wrong"}"><p class="fw-semibold mb-2">${resposta.posicao}. ${esc(resposta.pergunta)}</p><span class="quiz-detail-answer"><strong>Sua resposta:</strong> ${esc(resposta.opcoes[resposta.respostaEscolhidaIndex] || "Não respondida")}</span><span class="quiz-detail-answer"><strong>Resposta correta:</strong> ${esc(resposta.opcoes[resposta.respostaCorretaIndex] || "")}</span>${resposta.explicacao ? `<p class="text-muted mt-2 mb-0"><strong>Explicação:</strong> ${esc(resposta.explicacao)}</p>` : ""}</article>`).join("");
+    document.getElementById("btnRefazerErrosSimulado").classList.toggle("d-none", !tentativa.respostas.some(resposta => resposta.respostaEscolhidaIndex != null && !resposta.correta));
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalheSimulado")).show();
+}
+
+async function refazerErrosSimulado() {
+    const tentativa = tentativasSimulado.find(item => String(item.id) === String(tentativaDetalheId));
+    const erradas = tentativa?.respostas.filter(resposta => resposta.respostaEscolhidaIndex != null && !resposta.correta) || [];
+    if (!tentativa || !erradas.length) return;
+    const questoes = erradas.map(resposta => ({ pergunta: resposta.pergunta, opcoes: resposta.opcoes, resposta_correta_index: resposta.respostaCorretaIndex, explicacao: resposta.explicacao, dificuldade: tentativa.dificuldade }));
+    const botao = document.getElementById("btnRefazerErrosSimulado");
+    botao.disabled = true;
+    try {
+        await iniciarTentativaSimulado(questoes, tentativa.materiaId, nomeDaMateria(tentativa.materiaId), { tema: tentativa.tema, banca: tentativa.banca, concurso: tentativa.concurso, dificuldade: tentativa.dificuldade });
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalheSimulado")).hide();
+        document.getElementById("areaResultado").classList.add("d-none");
+        document.getElementById("areaQuestoes").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (falha) {
+        console.error("Falha ao criar revisão das questões erradas", falha);
+        alert("Não foi possível abrir a revisão agora. Tente novamente.");
+    } finally {
+        botao.disabled = false;
+    }
+}
+
+document.getElementById("filtroHistoricoSimuladoMateria").addEventListener("change", renderizarHistoricoSimulados);
+document.getElementById("filtroHistoricoSimuladoPeriodo").addEventListener("change", renderizarHistoricoSimulados);
+document.getElementById("btnRefazerErrosSimulado").addEventListener("click", refazerErrosSimulado);
+document.getElementById("modalDetalheSimulado").addEventListener("hidden.bs.modal", () => { tentativaDetalheId = null; });
 
 async function registrarDesempenho(materiaId, acertou) {
     const desempenho = obterDesempenho();
@@ -10495,7 +10715,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 10;
+const VERSAO_BACKUP = 12;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -10675,9 +10895,15 @@ function validarPayloadBackup(payload) {
             const topicos = topicosOrigem.map((topico, indice) => {
                 objetoBackup(topico, `Tópico pessoal ${indice + 1}`);
                 if (typeof topico.concluido !== "boolean") throw new Error(`Estado do tópico pessoal ${indice + 1} inválido.`);
-                return { id: idBackup(topico.id, "ID do tópico pessoal"), titulo: textoBackup(topico.titulo, "Título do tópico pessoal", 1000), concluido: topico.concluido };
+                return { id: idBackup(topico.id, "ID do tópico pessoal"), titulo: textoBackup(topico.titulo, "Título do tópico pessoal", 1000), concluido: topico.concluido, paiId: versao >= 12 && topico.paiId ? idBackup(topico.paiId, "Tema do subtópico") : null, position: indice };
             });
-            garantirIdsUnicos(topicos, "Checklist do edital");
+            const idsTopicos = garantirIdsUnicos(topicos, "Checklist do edital");
+            const topicosPorId = new Map(topicos.map(topico => [String(topico.id), topico]));
+            topicos.forEach((topico, indice) => {
+                if (!topico.paiId) return;
+                if (String(topico.paiId) === String(topico.id) || !idsTopicos.has(String(topico.paiId))) throw new Error(`Tema do subtópico pessoal ${indice + 1} inválido.`);
+                if (topicosPorId.get(String(topico.paiId))?.paiId) throw new Error("O checklist aceita no máximo dois níveis de hierarquia.");
+            });
             return { id: idBackup(m.id, "ID da matéria do edital"), materiaId, questoes: numeroBackup(m.questoes, "Questões", 0, 100000), peso: numeroBackup(m.peso, "Peso", 0, 100000), topicos };
         })
     };
@@ -10747,6 +10973,37 @@ function validarPayloadBackup(payload) {
         }
     });
 
+    const simulados = versao >= 11 ? listaBackup(dados.simulados || [], "Histórico de simulados", 200).map((tentativa, indice) => {
+        objetoBackup(tentativa, `Simulado ${indice + 1}`);
+        const materiaId = idBackup(tentativa.materiaId, "Matéria do simulado");
+        garantirReferenciaMateria(materiaId, idsMaterias, `Simulado ${indice + 1}`);
+        const topicoEditalId = tentativa.topicoEditalId == null ? null : idBackup(tentativa.topicoEditalId, "Tópico do Edital do simulado");
+        if (topicoEditalId != null && !idsTopicosPorMateria.get(String(materiaId))?.has(String(topicoEditalId))) throw new Error(`Simulado ${indice + 1} referencia um tópico inexistente no Edital.`);
+        if (!["em_andamento", "concluido", "cancelado"].includes(tentativa.status)) throw new Error(`Status do simulado ${indice + 1} inválido.`);
+        const respostas = listaBackup(tentativa.respostas || [], `Questões do simulado ${indice + 1}`, 20).map((resposta, posicao) => {
+            objetoBackup(resposta, `Questão ${posicao + 1} do simulado`);
+            const opcoes = listaBackup(resposta.opcoes || [], "Alternativas do simulado", 4).map(opcao => textoBackup(opcao, "Alternativa do simulado", 2000));
+            if (opcoes.length !== 4 || opcoes.some(opcao => !opcao.trim())) throw new Error(`Alternativas da questão ${posicao + 1} do simulado ${indice + 1} inválidas.`);
+            const respostaCorretaIndex = numeroBackup(resposta.respostaCorretaIndex, "Resposta correta do simulado", 0, 3);
+            const respostaEscolhidaIndex = resposta.respostaEscolhidaIndex == null ? null : numeroBackup(resposta.respostaEscolhidaIndex, "Resposta escolhida do simulado", 0, 3);
+            if (![respostaCorretaIndex, respostaEscolhidaIndex].filter(valor => valor != null).every(Number.isInteger)) throw new Error(`Índice de resposta da questão ${posicao + 1} inválido.`);
+            const posicaoSalva = numeroBackup(resposta.posicao, "Posição da questão", 1, 100, posicao + 1);
+            if (!Number.isInteger(posicaoSalva)) throw new Error(`Posição da questão ${posicao + 1} inválida.`);
+            return { id: idBackup(resposta.id, "ID da questão do simulado"), posicao: posicaoSalva, pergunta: textoBackup(resposta.pergunta, "Pergunta do simulado", 4000), opcoes, respostaCorretaIndex, respostaEscolhidaIndex, explicacao: textoBackup(resposta.explicacao || "", "Explicação do simulado", 8000), correta: respostaEscolhidaIndex != null && respostaEscolhidaIndex === respostaCorretaIndex, respondidaEm: instanteBackup(resposta.respondidaEm, "Data da resposta") };
+        });
+        if (!respostas.length) throw new Error(`Simulado ${indice + 1} não possui questões.`);
+        garantirIdsUnicos(respostas, `Questões do simulado ${indice + 1}`);
+        const total = numeroBackup(tentativa.total, "Total de questões do simulado", 1, 20, respostas.length);
+        const acertos = numeroBackup(tentativa.acertos, "Acertos do simulado", 0, total, respostas.filter(resposta => resposta.correta).length);
+        const duracaoSegundos = tentativa.duracaoSegundos == null ? null : numeroBackup(tentativa.duracaoSegundos, "Duração do simulado", 0, 86400);
+        if (![total, acertos].every(Number.isInteger) || total !== respostas.length || (duracaoSegundos != null && !Number.isInteger(duracaoSegundos))) throw new Error(`Totais do simulado ${indice + 1} inválidos.`);
+        const iniciadoEm = instanteBackup(tentativa.iniciadoEm, "Início do simulado");
+        const concluidoEm = instanteBackup(tentativa.concluidoEm, "Conclusão do simulado");
+        if (!iniciadoEm || (tentativa.status === "concluido" && !concluidoEm)) throw new Error(`Datas do simulado ${indice + 1} inválidas.`);
+        return { id: idBackup(tentativa.id, "ID do simulado"), materiaId, topicoEditalId, tema: textoBackup(tentativa.tema || "", "Tema do simulado", 2000), dificuldade: ["Fácil", "Médio", "Difícil"].includes(tentativa.dificuldade) ? tentativa.dificuldade : "Médio", concurso: textoBackup(tentativa.concurso || "", "Concurso do simulado", 500), banca: textoBackup(tentativa.banca || "", "Banca do simulado", 300), status: tentativa.status, total, acertos, iniciadoEm, concluidoEm, duracaoSegundos, respostas };
+    }) : [];
+    garantirIdsUnicos(simulados, "Histórico de simulados");
+
     const desempenhoOrigem = objetoBackup(dados.desempenho, "Desempenho");
     const entradasDesempenho = Object.entries(desempenhoOrigem);
     if (entradasDesempenho.length > 1000) throw new Error("Desempenho acima do limite.");
@@ -10760,7 +11017,7 @@ function validarPayloadBackup(payload) {
         const acertos = numeroBackup(valor.acertos, "Total de acertos", 0, total);
         desempenho[id] = { acertos, total };
     });
-    return { materias, tarefas, registrosEstudo, edital, erros, desempenho };
+    return { materias, tarefas, registrosEstudo, edital, erros, desempenho, simulados };
 }
 
 function aplicarBackupValidado(dados) {
@@ -10781,7 +11038,7 @@ document.getElementById("btnExportar").addEventListener("click", () => {
             tarefas: obterTarefas().map(tarefa => ({ ...tarefa, periodo: normalizarPeriodoEstudo(tarefa.periodo) })),
             registrosEstudo: obterRegistrosEstudo().map(registro => ({ ...registro, periodo: normalizarPeriodoEstudo(registro.periodo) })),
             edital: obterEdital(),
-            erros: obterErros(), desempenho: obterDesempenho()
+            erros: obterErros(), desempenho: obterDesempenho(), simulados: tentativasSimulado
         }
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -10861,6 +11118,7 @@ function iniciar() {
     renderizarEdital();
     renderizarErros();
     renderizarDesempenho();
+    renderizarHistoricoSimulados();
     renderizarHoje();
     renderizarCentralRevisoes();
     limparBackdropsOrfaos();
@@ -10874,7 +11132,8 @@ window.obterDadosParaPreviaMigracao = () => {
             registrosEstudo: obterRegistrosEstudo(),
             edital: obterEdital(),
             erros: obterErros(),
-            desempenho: obterDesempenho()
+            desempenho: obterDesempenho(),
+            simulados: tentativasSimulado
         },
         contagens: {
             subjects: materias.length,
@@ -10889,17 +11148,19 @@ window.obterDadosParaPreviaMigracao = () => {
             exam_subjects: obterEdital().materias.length,
             exam_topics: obterEdital().materias.reduce((total, materia) => total + (materia.topicos?.length || 0), 0),
             error_entries: obterErros().length,
-            subject_performance: Object.keys(obterDesempenho()).length
+            subject_performance: Object.keys(obterDesempenho()).length,
+            quiz_attempts: tentativasSimulado.length,
+            quiz_answers: tentativasSimulado.reduce((total, tentativa) => total + tentativa.respostas.length, 0)
         }
     };
 };
-window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }, registrosEstudoRemotos = []) => {
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }, registrosEstudoRemotos = [], tentativasSimuladoRemotas = []) => {
     geracaoSessaoHub += 1;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
     metricaPainelEdital = "progresso";
     definirUsuarioAtual(contexto.userId);
-    if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, colecoesVadeRemotas, grifosJuridicosRemotos].every(Array.isArray)) throw new Error("A configuração da biblioteca recebida do Supabase é inválida.");
+    if (![catalogoRemoto, widgetsRemotos, documentosJuridicosRemotos, colecoesVadeRemotas, grifosJuridicosRemotos, tentativasSimuladoRemotas].every(Array.isArray)) throw new Error("A configuração recebida do Supabase é inválida.");
     if (!Array.isArray(estadoLeituraJuridicaRemoto?.favoritos) || !Array.isArray(estadoLeituraJuridicaRemoto?.historico)) throw new Error("O estado de leitura recebido do Supabase é inválido.");
     catalogoMaterias = catalogoRemoto;
     documentosJuridicos = documentosJuridicosRemotos;
@@ -10925,6 +11186,7 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     sincronizarEdital(editalRemoto);
     sincronizarListaDeErros(errosRemotos);
     sincronizarDesempenho(desempenhoRemoto);
+    sincronizarTentativasSimulado(tentativasSimuladoRemotas);
     limparFiltrosDeMaterias();
     window.HUB_SESSION_CONTEXT = Object.freeze({ ...contexto });
     document.getElementById("usuarioAtual").textContent = contexto.displayName || contexto.email || "Usuário";
@@ -10967,6 +11229,9 @@ window.encerrarHub = () => {
     filaRevisao = [];
     indiceRevisao = 0;
     quizAtual = [];
+    tentativasSimulado = [];
+    tentativaAtualId = null;
+    tentativaDetalheId = null;
     offsetSemana = 0;
     offsetDiaMobile = 0;
     catalogoMaterias = [];

@@ -333,7 +333,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 10/);
+    assert.match(html, /VERSAO_BACKUP = 12/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -380,7 +380,7 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(html, /id="filtroTopicoCards"/);
     assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
     assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
-    assert.match(html, /VERSAO_BACKUP = 10/);
+    assert.match(html, /VERSAO_BACKUP = 12/);
     assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
     assert.match(repository, /export async function atualizarTopicoFlashcard/);
     assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
@@ -407,7 +407,7 @@ test("o Caderno de Erros transforma aprendizados em flashcards do tópico corret
     assert.match(html, /class="exam-topic-learning"/);
     assert.match(html, /btn-revisar-topico-edital/);
     assert.match(html, /btn-ver-erros-topico/);
-    assert.match(html, /VERSAO_BACKUP = 10/);
+    assert.match(html, /VERSAO_BACKUP = 12/);
     assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id,/);
     assert.match(repository, /exam_topic_id: erro\.topicoEditalId \? resolverId\("exam_topic", erro\.topicoEditalId\) : null/);
     assert.match(verification, /topicoEditalId: item\.exam_topic_id \? idLegado\(mapas, "exam_topic", item\.exam_topic_id\) : null/);
@@ -455,13 +455,11 @@ test("questões erradas do simulado entram completas e sem duplicação no Cader
     const verification = readProjectFile("src/cloud-verification.js");
     const migration = readProjectFile("supabase/migrations/202609020028_quiz_error_integration.sql");
 
-    assert.match(html, /function registrarErroAutomaticoDoSimulado\(questao, indiceEscolhido\)/);
-    assert.match(html, /respostaEscolhida: questao\.opcoes\[indiceEscolhido\]/);
-    assert.match(html, /respostaCorreta: questao\.opcoes\[questao\.resposta_correta_index\]/);
-    assert.match(html, /explicacao: questao\.explicacao/);
+    assert.match(html, /exigirNuvemSimulados\(\)\.responder\(tentativaAtualId, q\.respostaId, oIndex\)/);
+    assert.match(html, /sincronizarListaDeErros\(erros\)/);
     assert.match(html, /Questão e explicação salvas no Caderno de Erros/);
     assert.match(html, /id="detalhesQuestaoRevisaoErro"/);
-    assert.match(html, /VERSAO_BACKUP = 10/);
+    assert.match(html, /VERSAO_BACKUP = 12/);
     assert.match(repository, /export async function registrarErroSimulado/);
     assert.match(repository, /supabase\.rpc\("record_quiz_error"/);
     assert.match(auth, /registrarSimulado: registrarErroSimulado/);
@@ -473,6 +471,32 @@ test("questões erradas do simulado entram completas e sem duplicação no Cader
     assert.match(migration, /occurrence_count = least\(100000/i);
     assert.match(migration, /private\.is_workspace_member\(target_workspace_id\)/i);
     assert.match(migration, /import_local_hub_core_v7/i);
+});
+
+test("o histórico privado de simulados permite retomar, revisar e refazer somente os erros", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const verification = readProjectFile("src/cloud-verification.js");
+    const migration = readProjectFile("supabase/migrations/202609030001_quiz_history.sql");
+
+    assert.match(html, /id="listaHistoricoSimulados"/);
+    assert.match(html, /id="modalDetalheSimulado"/);
+    assert.match(html, /function abrirTentativaSimulado\(id\)/);
+    assert.match(html, /function refazerErrosSimulado\(\)/);
+    assert.match(html, /respostaEscolhidaIndex != null && !resposta\.correta/);
+    assert.match(html, /simulados: tentativasSimulado/);
+    assert.match(repository, /export async function carregarTentativasSimulado/);
+    assert.match(repository, /supabase\.rpc\("create_quiz_attempt"/);
+    assert.match(repository, /supabase\.rpc\("record_quiz_answer"/);
+    assert.match(auth, /HUB_CLOUD_QUIZZES/);
+    assert.match(verification, /quiz_attempts/);
+    assert.match(migration, /create or replace function public\.create_quiz_attempt/i);
+    assert.match(migration, /create or replace function public\.record_quiz_answer/i);
+    assert.match(migration, /for update/i);
+    assert.match(migration, /public\.record_quiz_error/i);
+    assert.match(migration, /import_local_hub_core_v8/i);
+    assert.match(migration, /entity_type, legacy_id, new_id[\s\S]*?'quiz_attempt'/i);
 });
 
 test("o calendário ampliado organiza estudos por manhã, tarde e noite", () => {
@@ -630,7 +654,7 @@ test("o checklist do edital é retrátil e gerencia os tópicos da matéria exis
     assert.match(html, /class="btn btn-sm btn-outline-primary btn-adicionar-topico-edital"/);
     assert.match(html, /class="exam-topic-editor form-topico-edital"/);
     assert.match(html, /Esse tópico já está no checklist desta matéria\./);
-    assert.match(html, /Remover o tópico “\$\{topico\.titulo\}” do seu checklist pessoal\?/);
+    assert.match(html, /Remover o tópico “\$\{topico\?\.titulo\}” do seu checklist pessoal\?/);
     assert.match(auth, /excluirTopico: excluirTopicoEdital/);
     assert.match(auth, /renomearTopico: renomearTopicoEdital/);
     assert.match(repository, /export async function excluirTopicoEdital/);
@@ -1654,7 +1678,30 @@ test("a Edge Function exige usuário autenticado e segredo no servidor", () => {
     assert.match(edgeFunction, /withSupabase\(\{ auth: ["']user["'] \}/);
     assert.match(edgeFunction, /Deno\.env\.get\(["']GEMINI_API_KEY["']\)/);
     assert.match(edgeFunction, /quantity > 10/);
+    assert.match(edgeFunction, /response\.status !== 503 \|\| attempt === attemptModels\.length - 1/);
+    assert.match(edgeFunction, /GEMINI_RETRY_DELAYS_MS\s*=\s*\[2_000, 5_000\]/);
+    assert.match(edgeFunction, /FALLBACK_MODEL\s*=\s*["']gemini-2\.5-flash["']/);
+    assert.match(edgeFunction, /attemptModels\s*=\s*\[primaryModel, primaryModel, FALLBACK_MODEL\]/);
+    assert.match(edgeFunction, /await refundQuota[\s\S]*?response\.status === 503/);
     assert.match(config, /\[functions\.generate-quiz\][\s\S]*?verify_jwt\s*=\s*true/);
+});
+
+test("o checklist do edital permite inclusão contínua e hierarquia privada em dois níveis", () => {
+    const html = readProjectFile("index.html");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const migration = readProjectFile("supabase/migrations/202609030002_exam_topic_hierarchy.sql");
+
+    assert.match(html, /Adicionar tópico ou tema/);
+    assert.match(html, /class="exam-topic-add-row"/);
+    assert.match(html, /class="[^"`]*exam-topic-add-child/);
+    assert.match(repository, /paiId: topico\.parent_topic_id \|\| null/);
+    assert.match(html, /topicosEstudaveisDoItemEdital/);
+    assert.match(html, /pai \? `\$\{pai\.titulo\} → \$\{topico\.titulo\}`/);
+    assert.match(repository, /parent_topic_id: topico\.paiId \? resolverId\("exam_topic", topico\.paiId\) : null/);
+    assert.match(migration, /add column parent_topic_id uuid references public\.exam_topics\(id\) on delete set null/i);
+    assert.match(migration, /create trigger exam_topics_validate_parent/i);
+    assert.match(migration, /parent\.workspace_id = new\.workspace_id[\s\S]*?parent\.user_id = new\.user_id[\s\S]*?parent\.exam_subject_id = new\.exam_subject_id/i);
+    assert.match(migration, /rename to import_local_hub_core_v9/i);
 });
 
 test("a cota de IA só pode ser alterada pelo service_role", () => {

@@ -2,7 +2,9 @@ import { withSupabase } from "npm:@supabase/server@^1";
 
 const ALLOWED_DIFFICULTIES = new Set(["Fácil", "Médio", "Difícil"]);
 const DEFAULT_MODEL = "gemini-3.6-flash";
+const FALLBACK_MODEL = "gemini-2.5-flash";
 const DEFAULT_DAILY_LIMIT = 50;
+const GEMINI_RETRY_DELAYS_MS = [2_000, 5_000] as const;
 
 function cleanText(value: unknown, maxLength: number, required = false): string {
   if (typeof value !== "string") {
@@ -162,47 +164,71 @@ export default {
       }
       reservation = { userId, quantity: input.quantity };
 
-      const model = Deno.env.get("GEMINI_MODEL")?.trim() || DEFAULT_MODEL;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30_000);
+      const primaryModel = Deno.env.get("GEMINI_MODEL")?.trim() || DEFAULT_MODEL;
+      const attemptModels = [primaryModel, primaryModel, FALLBACK_MODEL];
+      const requestBody = JSON.stringify({
+        systemInstruction: {
+          parts: [{
+            text: "Você elabora questões para concursos públicos no Brasil. Produza conteúdo correto, claro e sem dados pessoais. Responda somente no formato JSON solicitado.",
+          }],
+        },
+        contents: [{ role: "user", parts: [{ text: buildPrompt(input) }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseJsonSchema: responseSchema(input.quantity),
+        },
+      });
 
-      let response: Response;
-      try {
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey,
+      let response: Response | null = null;
+      let respondingModel = primaryModel;
+      for (let attempt = 0; attempt < attemptModels.length; attempt += 1) {
+        const model = attemptModels[attempt];
+        respondingModel = model;
+        if (attempt > 0) {
+          await new Promise((resolve) => setTimeout(resolve, GEMINI_RETRY_DELAYS_MS[attempt - 1]));
+        }
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30_000);
+        try {
+          response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey,
+              },
+              signal: controller.signal,
+              body: requestBody,
             },
-            signal: controller.signal,
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [{
-                  text: "Você elabora questões para concursos públicos no Brasil. Produza conteúdo correto, claro e sem dados pessoais. Responda somente no formato JSON solicitado.",
-                }],
-              },
-              contents: [{ role: "user", parts: [{ text: buildPrompt(input) }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                responseJsonSchema: responseSchema(input.quantity),
-              },
-            }),
-          },
-        );
-      } finally {
-        clearTimeout(timeout);
+          );
+        } finally {
+          clearTimeout(timeout);
+        }
+        if (response.ok || response.status !== 503 || attempt === attemptModels.length - 1) break;
+        console.warn("Gemini temporarily unavailable; retrying", {
+          attempt: attempt + 1,
+          model,
+          status: response.status,
+          nextModel: attemptModels[attempt + 1],
+        });
       }
 
+      if (!response) throw new Error("A IA não respondeu.");
+
       if (!response.ok) {
-        console.error("Gemini request failed", { status: response.status });
+        console.error("Gemini request failed", {
+          model: respondingModel,
+          status: response.status,
+        });
         await refundQuota(context.supabaseAdmin, reservation.userId, reservation.quantity);
         reservation = null;
         const status = response.status === 429 ? 429 : 502;
         const message = status === 429
           ? "O limite temporário da IA foi atingido. Aguarde um pouco e tente novamente."
-          : "A IA não conseguiu gerar o simulado agora. Tente novamente em instantes.";
+          : response.status === 503
+            ? "O Gemini está temporariamente indisponível, mesmo após novas tentativas. Aguarde um pouco e tente novamente."
+            : "A IA não conseguiu gerar o simulado agora. Tente novamente em instantes.";
         return Response.json({ error: message }, { status });
       }
 

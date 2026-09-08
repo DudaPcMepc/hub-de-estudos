@@ -37,6 +37,7 @@ import {
     carregarEditalRemoto,
     carregarErrosRemotos,
     carregarDesempenhoRemoto,
+    carregarTentativasSimulado,
     carregarTopicosRemotos,
     carregarWidgetsMaterias,
     carregarGrifosJuridicos,
@@ -52,6 +53,8 @@ import {
     renomearTopicoEdital,
     criarErro,
     registrarErroSimulado,
+    criarTentativaSimulado,
+    registrarRespostaTentativaSimulado,
     criarGrifoJuridico,
     criarColecaoVade,
     criarAnotacaoColecaoVade,
@@ -244,6 +247,12 @@ window.HUB_CLOUD_ERRORS = Object.freeze({
 window.HUB_CLOUD_PERFORMANCE = Object.freeze({
     listar: carregarDesempenhoRemoto,
     registrarResposta: registrarRespostaDesempenho
+});
+
+window.HUB_CLOUD_QUIZZES = Object.freeze({
+    listar: carregarTentativasSimulado,
+    criar: criarTentativaSimulado,
+    responder: registrarRespostaTentativaSimulado
 });
 
 window.HUB_CLOUD_AI = Object.freeze({
@@ -500,6 +509,7 @@ async function ativarSessao(session) {
             const editalRemoto = await carregarEditalRemoto();
             const errosRemotos = await carregarErrosRemotos();
             const desempenhoRemoto = await carregarDesempenhoRemoto();
+            const tentativasSimuladoRemotas = await carregarTentativasSimulado();
             const [catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto] = await Promise.all([
                 carregarCatalogoMaterias(),
                 carregarWidgetsMaterias(),
@@ -508,7 +518,7 @@ async function ativarSessao(session) {
                 carregarGrifosJuridicos(),
                 carregarEstadoLeituraJuridica()
             ]);
-            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto, registrosEstudoRemotos);
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto, registrosEstudoRemotos, tentativasSimuladoRemotas);
             iniciarPreviaMigracao(contexto);
             await iniciarAdministracao();
             usuarioAtivoId = session.user.id;
