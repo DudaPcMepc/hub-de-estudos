@@ -211,6 +211,57 @@ export async function carregarCatalogoMaterias() {
     }));
 }
 
+export async function carregarConteudoMateria(catalogSubjectId) {
+    obterContexto();
+    if (!UUID.test(String(catalogSubjectId || ""))) {
+        throw erroRepositorio("Esta matéria ainda não possui conteúdo editorial vinculado.");
+    }
+    const [respostaModulos, respostaMateriais] = await Promise.all([
+        supabase.from("catalog_subject_modules")
+            .select("id, catalog_subject_id, title, description, position, published_at, updated_at")
+            .eq("catalog_subject_id", catalogSubjectId)
+            .eq("status", "published")
+            .order("position", { ascending: true })
+            .order("created_at", { ascending: true }),
+        supabase.from("catalog_subject_materials")
+            .select("id, catalog_subject_id, module_id, kind, title, description, body, external_url, position, published_at, updated_at")
+            .eq("catalog_subject_id", catalogSubjectId)
+            .eq("status", "published")
+            .order("position", { ascending: true })
+            .order("created_at", { ascending: true })
+    ]);
+    const modulos = verificarResposta(respostaModulos, "Não foi possível carregar o conteúdo desta matéria.") || [];
+    const materiais = verificarResposta(respostaMateriais, "Não foi possível carregar os materiais desta matéria.") || [];
+    const materiaisPorModulo = new Map();
+    materiais.forEach(item => {
+        const chave = String(item.module_id);
+        if (!materiaisPorModulo.has(chave)) materiaisPorModulo.set(chave, []);
+        materiaisPorModulo.get(chave).push({
+            id: item.id,
+            catalogoId: item.catalog_subject_id,
+            moduloId: item.module_id,
+            tipo: item.kind,
+            titulo: item.title,
+            descricao: item.description || "",
+            conteudo: item.body || "",
+            urlExterna: item.external_url || "",
+            posicao: Number(item.position) || 0,
+            publicadoEm: item.published_at || "",
+            atualizadoEm: item.updated_at || ""
+        });
+    });
+    return modulos.map(item => ({
+        id: item.id,
+        catalogoId: item.catalog_subject_id,
+        titulo: item.title,
+        descricao: item.description || "",
+        posicao: Number(item.position) || 0,
+        publicadoEm: item.published_at || "",
+        atualizadoEm: item.updated_at || "",
+        materiais: materiaisPorModulo.get(String(item.id)) || []
+    }));
+}
+
 export async function carregarWidgetsMaterias() {
     const contexto = obterContexto();
     const resposta = await supabase.from("user_subject_widgets")

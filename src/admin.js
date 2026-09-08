@@ -1,4 +1,5 @@
 import { supabase } from "./supabase-client.js";
+import { encerrarConteudoAdministrativo, iniciarConteudoAdministrativo } from "./admin-subject-content.js";
 
 const tabItem = document.getElementById("abaAdministracaoItem");
 const formInvite = document.getElementById("formConviteUsuario");
@@ -246,7 +247,7 @@ export async function iniciarAdministracao() {
         prepareListeners();
         tabItem.classList.remove("d-none");
         clearMessage();
-        await loadUsers();
+        await Promise.all([loadUsers(), iniciarConteudoAdministrativo()]);
     } catch (error) {
         console.error("Falha ao preparar a administração", error);
     }
@@ -259,4 +260,5 @@ export function encerrarAdministracao() {
     emptyState.classList.remove("d-none");
     currentDeletion = null;
     clearMessage();
+    encerrarConteudoAdministrativo();
 }
