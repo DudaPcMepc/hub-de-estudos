@@ -1975,20 +1975,57 @@ function mapearNoCadernoMateria(item) {
         posicao: Number(item.position) || 0,
         versao: Number(item.version) || 1,
         criadoEm: item.created_at || "",
-        atualizadoEm: item.updated_at || ""
+        atualizadoEm: item.updated_at || "",
+        deletadoEm: item.deleted_at || "",
+        lixeiraRaizId: item.deleted_root_id || ""
     };
 }
 
 export async function carregarCadernosMateria(materiaIdLocal) {
     const contexto = obterContexto();
-    const resposta = await supabase.from("user_subject_notebook_nodes")
-        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+    const subjectId = resolverId("subject", materiaIdLocal);
+    let resposta = await supabase.from("user_subject_notebook_nodes")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("subject_id", subjectId)
+        .is("deleted_at", null)
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true });
+    if (["PGRST204", "42703"].includes(String(resposta.error?.code || ""))) {
+        resposta = await supabase.from("user_subject_notebook_nodes")
+            .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .eq("subject_id", subjectId)
+            .order("position", { ascending: true })
+            .order("created_at", { ascending: true });
+    }
+    return (verificarResposta(resposta, "Não foi possível carregar os cadernos desta matéria.") || []).map(mapearNoCadernoMateria);
+}
+
+export async function carregarPosicaoCadernoMateria(materiaIdLocal) {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("user_subject_notebook_positions")
+        .select("last_page_id")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .eq("subject_id", resolverId("subject", materiaIdLocal))
-        .order("position", { ascending: true })
-        .order("created_at", { ascending: true });
-    return (verificarResposta(resposta, "Não foi possível carregar os cadernos desta matéria.") || []).map(mapearNoCadernoMateria);
+        .maybeSingle();
+    return verificarResposta(resposta, "Não foi possível carregar a última página do caderno.")?.last_page_id || "";
+}
+
+export async function salvarPosicaoCadernoMateria(materiaIdLocal, paginaId) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.from("user_subject_notebook_positions").upsert({
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        subject_id: resolverId("subject", materiaIdLocal),
+        last_page_id: exigirUuidNovo(paginaId, "Página do caderno")
+    }, { onConflict: "workspace_id,user_id,subject_id" })
+        .select("last_page_id")
+        .single();
+    return verificarResposta(resposta, "Não foi possível salvar a última página do caderno.")?.last_page_id || "";
 }
 
 function valoresNoCadernoMateria(no, contexto, incluirIdentidade = false) {
@@ -2054,13 +2091,43 @@ export async function atualizarNoCadernoMateria(id, alteracoes, versaoEsperada) 
 }
 
 export async function excluirNoCadernoMateria(id) {
+    exigirContexto();
+    verificarResposta(await supabase.rpc("trash_subject_notebook_node", {
+        p_node_id: exigirUuidNovo(id, "Item do caderno")
+    }), "Não foi possível enviar o item para a lixeira.");
+}
+
+export async function carregarLixeiraCadernosMateria(materiaIdLocal) {
     const contexto = exigirContexto();
-    verificarRegistro(await supabase.from("user_subject_notebook_nodes").delete()
-        .eq("id", exigirUuidNovo(id, "Item do caderno"))
+    const subjectId = resolverId("subject", materiaIdLocal);
+    verificarResposta(await supabase.rpc("purge_expired_subject_notebook_trash", { p_subject_id: subjectId }), "Não foi possível atualizar a lixeira.");
+    const resposta = await supabase.from("user_subject_notebook_nodes")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
-        .select("id")
-        .maybeSingle(), "Não foi possível excluir o item do caderno.");
+        .eq("subject_id", subjectId)
+        .not("deleted_at", "is", null)
+        .order("deleted_at", { ascending: false });
+    return (verificarResposta(resposta, "Não foi possível carregar a lixeira.") || []).map(mapearNoCadernoMateria);
+}
+
+export async function restaurarDaLixeiraCadernoMateria(id, materiaIdLocal) {
+    verificarResposta(await supabase.rpc("restore_subject_notebook_node", {
+        p_node_id: exigirUuidNovo(id, "Item da lixeira")
+    }), "Não foi possível restaurar o item.");
+    return carregarCadernosMateria(materiaIdLocal);
+}
+
+export async function excluirDefinitivamenteCadernoMateria(id) {
+    verificarResposta(await supabase.rpc("delete_subject_notebook_node_forever", {
+        p_node_id: exigirUuidNovo(id, "Item da lixeira")
+    }), "Não foi possível excluir o item definitivamente.");
+}
+
+export async function esvaziarLixeiraCadernoMateria(materiaIdLocal) {
+    verificarResposta(await supabase.rpc("empty_subject_notebook_trash", {
+        p_subject_id: resolverId("subject", materiaIdLocal)
+    }), "Não foi possível esvaziar a lixeira.");
 }
 
 export async function reordenarNosCadernoMateria(materiaIdLocal, paiId, ids) {

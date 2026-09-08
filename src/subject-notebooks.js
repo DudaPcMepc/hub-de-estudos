@@ -4,6 +4,11 @@ const PAPEIS = Object.freeze({ plain: "Lisa", lined: "Pautada", grid: "Quadricul
 const CAPAS = Object.freeze({ solid: "Clássica", gradient: "Degradê", minimal: "Minimalista" });
 const uuid = () => crypto.randomUUID();
 const esc = (valor) => String(valor ?? "").replace(/[&<>'"]/g, caractere => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[caractere]);
+const formatarDataCurta = valor => {
+    const data = new Date(valor || "");
+    return Number.isNaN(data.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(data).replace(".", "");
+};
+const posicaoAindaNaoDisponivel = erro => ["PGRST205", "42P01"].includes(String(erro?.cause?.code || ""));
 
 export function criarCadernosMaterias(repositorio) {
     const dom = {
@@ -13,6 +18,9 @@ export function criarCadernosMaterias(repositorio) {
         count: document.getElementById("subjectNotebookCount"),
         search: document.getElementById("subjectNotebookSearch"),
         organize: document.getElementById("btnOrganizarCadernoMateria"),
+        notebooks: document.getElementById("btnCadernosMateria"),
+        trash: document.getElementById("btnLixeiraCadernoMateria"),
+        trashCount: document.getElementById("subjectNotebookTrashCount"),
         treePanel: document.getElementById("subjectNotebookTreePanel"),
         mobileTree: document.getElementById("btnAlternarArvoreCaderno"),
         workspace: document.getElementById("subjectNotebookWorkspace"),
@@ -25,7 +33,9 @@ export function criarCadernosMaterias(repositorio) {
         dialogTitle: document.getElementById("subjectNotebookDialogTitle"),
         itemId: document.getElementById("subjectNotebookItemId"),
         itemType: document.getElementById("subjectNotebookItemType"),
+        nameGroup: document.getElementById("subjectNotebookNameGroup"),
         itemTitle: document.getElementById("subjectNotebookItemTitle"),
+        parentGroup: document.getElementById("subjectNotebookParentGroup"),
         itemParent: document.getElementById("subjectNotebookItemParent"),
         itemTopic: document.getElementById("subjectNotebookItemTopic"),
         topicGroup: document.getElementById("subjectNotebookTopicGroup"),
@@ -34,8 +44,14 @@ export function criarCadernosMaterias(repositorio) {
         itemCover: document.getElementById("subjectNotebookItemCover"),
         itemPaper: document.getElementById("subjectNotebookItemPaper"),
         save: document.getElementById("subjectNotebookDialogSave"),
+        pageActions: document.getElementById("subjectNotebookPageActionsDialog"),
+        pageActionsTitle: document.getElementById("subjectNotebookPageActionsTitle"),
+        pageActionsId: document.getElementById("subjectNotebookPageActionsId"),
         toast: document.getElementById("subjectNotebookToast"),
+        toastIcon: document.getElementById("subjectNotebookToastIcon"),
+        toastTitle: document.getElementById("subjectNotebookToastTitle"),
         toastMessage: document.getElementById("subjectNotebookToastMessage"),
+        toastUndo: document.getElementById("btnDesfazerMovimentoCaderno"),
         toastClose: document.getElementById("btnFecharToastCaderno")
     };
     if (!dom.app) return Object.freeze({ definirMateria: async () => {}, salvarPendente: async () => true, encerrar: () => {} });
@@ -44,17 +60,47 @@ export function criarCadernosMaterias(repositorio) {
     let materiaNome = "";
     let topicos = [];
     let itens = [];
+    let lixeira = [];
     let selecionadoId = "";
     let carregamento = 0;
     let salvamentoPendente = null;
+    let salvamentoPosicaoPendente = null;
     let timerSalvamento = 0;
     let timerToast = 0;
     let busca = "";
     let organizando = false;
+    let lixeiraAberta = false;
     let paginasRecolhidas = false;
+    let modoDialogo = "full";
+    let ultimaPaginaMateriaId = "";
+    let arraste = null;
+    let desfazerMovimento = null;
+    let quadroRolagemArraste = 0;
     const pastasFechadas = new Set();
     const paginasIniciaisEmCriacao = new Map();
     const ultimaPaginaPorCaderno = new Map();
+
+    function registrarPaginaAtual(pagina) {
+        if (!pagina || pagina.tipo !== "page") return;
+        ultimaPaginaMateriaId = pagina.id;
+        ultimaPaginaPorCaderno.set(pagina.paiId, pagina.id);
+        if (typeof repositorio.salvarPosicao !== "function") return;
+        const materiaAoSalvar = materiaId;
+        const anterior = salvamentoPosicaoPendente || Promise.resolve(true);
+        const tarefa = anterior.catch(() => true).then(async () => {
+            await repositorio.salvarPosicao(materiaAoSalvar, pagina.id);
+            return true;
+        }).catch(erro => {
+            if (String(materiaId) === String(materiaAoSalvar) && !posicaoAindaNaoDisponivel(erro)) {
+                informar(erro.message || "Não foi possível guardar a última página aberta.", true);
+            }
+            return true;
+        });
+        salvamentoPosicaoPendente = tarefa;
+        tarefa.finally(() => {
+            if (salvamentoPosicaoPendente === tarefa) salvamentoPosicaoPendente = null;
+        });
+    }
 
     const itemPorId = id => itens.find(item => item.id === id);
     const filhosDe = id => itens.filter(item => (item.paiId || "") === (id || "")).sort((a, b) => a.posicao - b.posicao || a.titulo.localeCompare(b.titulo));
@@ -62,10 +108,18 @@ export function criarCadernosMaterias(repositorio) {
     const fecharToast = () => {
         clearTimeout(timerToast);
         dom.toast.classList.remove("is-visible");
+        desfazerMovimento = null;
     };
-    const exibirToast = mensagem => {
+    const exibirToast = (mensagem, opcoes = {}) => {
         clearTimeout(timerToast);
+        const sucesso = opcoes.tipo === "success";
+        desfazerMovimento = typeof opcoes.desfazer === "function" ? opcoes.desfazer : null;
+        dom.toast.classList.toggle("is-success", sucesso);
+        dom.toast.setAttribute("role", sucesso ? "status" : "alert");
+        dom.toastIcon.className = sucesso ? "bi-check-circle-fill" : "bi-exclamation-circle-fill";
+        dom.toastTitle.textContent = opcoes.titulo || (sucesso ? "Organização atualizada" : "Não foi possível concluir");
         dom.toastMessage.textContent = mensagem;
+        dom.toastUndo.hidden = !desfazerMovimento;
         dom.toast.classList.add("is-visible");
         timerToast = window.setTimeout(fecharToast, 8000);
     };
@@ -100,10 +154,8 @@ export function criarCadernosMaterias(repositorio) {
             const visiveis = filhos.filter(contemResultado);
             const recolhivel = item.tipo === "folder" || item.tipo === "notebook";
             const fechada = recolhivel && pastasFechadas.has(item.id) && !termo;
-            const irmaos = filhosDe(item.paiId);
-            const indice = irmaos.findIndex(valor => valor.id === item.id);
             const classeAtiva = item.id === selecionadoId ? "is-active" : item.id === cadernoAbertoId ? "is-context-active" : "";
-            return `<div class="subject-notebook-tree-row ${classeAtiva}" style="padding-left:${.25 + nivel * .78}rem">${recolhivel ? `<button class="subject-notebook-tree-disclosure" type="button" data-notebook-toggle="${item.id}" aria-label="${fechada ? "Expandir" : "Recolher"} ${esc(item.titulo)}"><i class="bi-chevron-${fechada ? "right" : "down"}"></i></button>` : '<span class="subject-notebook-tree-spacer"></span>'}<button class="subject-notebook-tree-item" type="button" data-notebook-select="${item.id}"><i class="bi-${ICONES[item.tipo]}"></i><span>${esc(item.titulo)}</span></button>${organizando ? `<span class="subject-notebook-order-actions"><button type="button" data-notebook-order="up" data-notebook-id="${item.id}" ${indice <= 0 ? "disabled" : ""} aria-label="Mover para cima"><i class="bi-chevron-up"></i></button><button type="button" data-notebook-order="down" data-notebook-id="${item.id}" ${indice >= irmaos.length - 1 ? "disabled" : ""} aria-label="Mover para baixo"><i class="bi-chevron-down"></i></button></span>` : ""}</div>${fechada ? "" : visiveis.map(filho => linha(filho, nivel + 1)).join("")}`;
+            return `<div class="subject-notebook-tree-row ${classeAtiva}" data-notebook-row-id="${item.id}" style="padding-left:${.25 + nivel * .78}rem">${recolhivel ? `<button class="subject-notebook-tree-disclosure" type="button" data-notebook-toggle="${item.id}" aria-label="${fechada ? "Expandir" : "Recolher"} ${esc(item.titulo)}"><i class="bi-chevron-${fechada ? "right" : "down"}"></i></button>` : '<span class="subject-notebook-tree-spacer"></span>'}<button class="subject-notebook-tree-item" type="button" data-notebook-select="${item.id}"><i class="bi-${ICONES[item.tipo]}"></i><span>${esc(item.titulo)}</span></button>${organizando ? `<button class="subject-notebook-drag-handle" type="button" data-notebook-drag="${item.id}" aria-label="Arrastar ${esc(item.titulo)}" title="Segure e arraste"><i class="bi-grip-vertical"></i></button>` : ""}</div>${fechada ? "" : visiveis.map(filho => linha(filho, nivel + 1)).join("")}`;
         };
         const raizes = filhosDe("").filter(contemResultado);
         dom.tree.innerHTML = raizes.length ? raizes.map(item => linha(item)).join("") : '<div class="subject-notebook-tree-empty"><i class="bi-search d-block mb-2 fs-4"></i>Nenhum item encontrado.</div>';
@@ -117,35 +169,54 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     function botoesAcoes(item) {
-        return `<details class="subject-notebook-more"><summary aria-label="Mais opções" title="Mais opções"><i class="bi-three-dots"></i></summary><div><button type="button" data-notebook-edit="${item.id}"><i class="bi-pencil"></i>Renomear ou mover</button><button type="button" data-notebook-duplicate="${item.id}"><i class="bi-copy"></i>Duplicar</button><button class="is-danger" type="button" data-notebook-delete="${item.id}"><i class="bi-trash"></i>Excluir</button></div></details>`;
+        const personalizar = item.tipo === "notebook" ? `<button type="button" data-notebook-edit="${item.id}"><i class="bi-palette"></i>Aparência e vínculo</button>` : "";
+        return `<details class="subject-notebook-more"><summary aria-label="Opções de ${esc(item.titulo)}" title="Opções de ${esc(item.titulo)}"><i class="bi-three-dots"></i></summary><div><button type="button" data-notebook-rename="${item.id}"><i class="bi-pencil"></i>Renomear</button><button type="button" data-notebook-move="${item.id}"><i class="bi-folder-symlink"></i>Mover para…</button>${personalizar}<button type="button" data-notebook-duplicate="${item.id}"><i class="bi-copy"></i>Duplicar</button><button class="is-danger" type="button" data-notebook-delete="${item.id}"><i class="bi-trash"></i>Excluir</button></div></details>`;
     }
 
     function cartoesFilhos(item) {
         const filhos = filhosDe(item?.id || "");
-        if (!filhos.length) return '<div class="subject-notebook-empty" style="min-height:230px"><i class="bi-folder2-open"></i><strong>Nada por aqui ainda</strong><small>Use as ações acima para organizar este espaço.</small></div>';
-        return `<div class="subject-notebook-child-grid">${filhos.map(filho => `<button class="subject-notebook-child" type="button" data-notebook-select="${filho.id}" style="--child-color:${esc(filho.cor)}" aria-label="Abrir ${TIPOS[filho.tipo].toLowerCase()} ${esc(filho.titulo)}"><i class="bi-${ICONES[filho.tipo]}"></i><strong>${esc(filho.titulo)}</strong><small>${TIPOS[filho.tipo]}${filho.tipo === "notebook" ? ` · ${PAPEIS[filho.estiloFolha]}` : ""}</small><span class="subject-notebook-child-open">Abrir <i class="bi-chevron-right"></i></span></button>`).join("")}</div>`;
+        if (!filhos.length) return '<div class="subject-notebook-empty is-contained"><i class="bi-folder2-open"></i><strong>Nada por aqui ainda</strong><small>Use as ações ao lado do título para organizar este espaço.</small></div>';
+        return `<div class="subject-notebook-child-grid">${filhos.map(filho => {
+            const paginas = filho.tipo === "notebook" ? filhosDe(filho.id).filter(valor => valor.tipo === "page") : [];
+            const topico = topicos.find(valor => String(valor.id) === String(filho.topicoId));
+            const ultimaAtualizacao = [filho, ...paginas].map(valor => valor.atualizadoEm).filter(Boolean).sort().at(-1);
+            const foiUltimoAcessado = filho.tipo === "notebook" && paginas.some(pagina => pagina.id === ultimaPaginaMateriaId);
+            const metadados = filho.tipo === "notebook"
+                ? `<span><i class="bi-file-earmark-text"></i>${paginas.length} ${paginas.length === 1 ? "página" : "páginas"}</span>${topico ? `<span><i class="bi-bookmark"></i>${esc(topico.titulo)}</span>` : ""}${ultimaAtualizacao ? `<span><i class="bi-clock"></i>${esc(formatarDataCurta(ultimaAtualizacao))}</span>` : ""}`
+                : `<span><i class="bi-folder2"></i>${filhosDe(filho.id).length} itens</span>`;
+            return `<article class="subject-notebook-child-card" style="--child-color:${esc(filho.cor)}"><button class="subject-notebook-child" type="button" data-notebook-select="${filho.id}" aria-label="Abrir ${TIPOS[filho.tipo].toLowerCase()} ${esc(filho.titulo)}"><i class="bi-${ICONES[filho.tipo]}"></i><strong>${esc(filho.titulo)}</strong><small>${TIPOS[filho.tipo]}${filho.tipo === "notebook" ? ` · ${PAPEIS[filho.estiloFolha]}` : ""}</small><span class="subject-notebook-child-meta">${metadados}</span>${foiUltimoAcessado ? '<span class="subject-notebook-last-opened"><i class="bi-bookmark-check"></i>Último acessado</span>' : ""}<span class="subject-notebook-child-open">Abrir <i class="bi-chevron-right"></i></span></button><div class="subject-notebook-child-menu">${botoesAcoes(filho)}</div></article>`;
+        }).join("")}</div>`;
     }
 
     function miniaturasPaginas(caderno, paginaAtual) {
         const paginas = filhosDe(caderno.id).filter(item => item.tipo === "page");
-        return `<aside class="subject-notebook-page-rail" aria-label="Páginas de ${esc(caderno.titulo)}"><div class="subject-notebook-page-rail-header"><div><strong>Páginas</strong><small>${paginas.length}</small></div><button type="button" data-notebook-create="page" aria-label="Criar nova página" title="Nova página"><i class="bi-plus-lg"></i></button></div><div class="subject-notebook-page-thumbnails">${paginas.map((pagina, indice) => `<button class="subject-notebook-page-thumbnail ${pagina.id === paginaAtual.id ? "is-active" : ""}" type="button" data-notebook-select="${pagina.id}" aria-current="${pagina.id === paginaAtual.id ? "page" : "false"}"><span>${indice + 1}</span><strong>${esc(pagina.titulo)}</strong><small>${esc(pagina.conteudo.trim().slice(0, 68) || "Página em branco")}</small></button>`).join("")}</div></aside>`;
+        return `<aside class="subject-notebook-page-rail" aria-label="Páginas de ${esc(caderno.titulo)}"><div class="subject-notebook-page-rail-header"><div><strong>Páginas</strong><small>${paginas.length}</small></div><button type="button" data-notebook-create="page" aria-label="Criar nova página" title="Nova página"><i class="bi-plus-lg"></i></button></div><div class="subject-notebook-page-thumbnails">${paginas.map((pagina, indice) => `<article class="subject-notebook-page-thumbnail-card"><button class="subject-notebook-page-thumbnail ${pagina.id === paginaAtual.id ? "is-active" : ""}" type="button" data-notebook-select="${pagina.id}" aria-current="${pagina.id === paginaAtual.id ? "page" : "false"}"><span>${indice + 1}</span><strong>${esc(pagina.titulo)}</strong><small>${esc(pagina.conteudo.trim().slice(0, 68) || "Página em branco")}</small></button><button class="subject-notebook-page-options" type="button" data-notebook-page-options="${pagina.id}" aria-label="Opções de ${esc(pagina.titulo)}" title="Opções da página"><i class="bi-three-dots"></i></button></article>`).join("")}</div></aside>`;
+    }
+
+    function abrirAcoesPagina(id) {
+        const pagina = itemPorId(id);
+        if (!pagina || pagina.tipo !== "page") return;
+        dom.pageActionsId.value = pagina.id;
+        dom.pageActionsTitle.textContent = pagina.titulo;
+        dom.pageActions.showModal();
     }
 
     function renderizarModoOrganizacao() {
-        const item = selecionado();
-        if (!item) {
-            dom.workspace.innerHTML = `<div class="subject-notebook-organize-mode"><div class="subject-notebook-organize-icon"><i class="bi-folder2-open"></i></div><small>Modo organização</small><h3>Organize seus materiais</h3><p>Selecione uma pasta, um caderno ou uma página na coluna ao lado. Use as setas para ordenar ou o menu para renomear, mover, duplicar e excluir.</p><button class="btn btn-sm btn-primary" type="button" data-notebook-organize-finish>Concluir organização</button></div>`;
-            return;
-        }
-        const pai = itemPorId(item.paiId);
-        dom.workspace.innerHTML = `<div class="subject-notebook-organize-mode"><div class="subject-notebook-organize-icon"><i class="bi-${ICONES[item.tipo]}"></i></div><small>${TIPOS[item.tipo]} selecionado</small><h3>${esc(item.titulo)}</h3><p>${pai ? `Dentro de “${esc(pai.titulo)}”.` : `Na raiz de ${esc(materiaNome)}.`} Use as setas da organização para alterar a ordem ou abra o menu de opções.</p><div class="subject-notebook-organize-actions">${botoesAcoes(item)}<button class="btn btn-sm btn-outline-secondary" type="button" data-notebook-edit="${item.id}"><i class="bi-arrows-move me-1"></i>Renomear ou mover</button><button class="btn btn-sm btn-primary" type="button" data-notebook-organize-finish>Concluir organização</button></div></div>`;
+        dom.workspace.insertAdjacentHTML("afterbegin", '<div class="subject-notebook-organize-banner"><i class="bi-grip-vertical"></i><span>Segure a alça para ordenar ou solte sobre uma pasta para mover o item.</span><button class="btn btn-sm btn-outline-secondary" type="button" data-notebook-organize-finish>Concluir</button></div>');
+    }
+
+    function renderizarLixeira() {
+        const raizes = lixeira.filter(item => item.id === item.lixeiraRaizId);
+        const lista = raizes.length ? `<div class="subject-notebook-trash-list">${raizes.map(item => {
+            const quantidade = lixeira.filter(valor => valor.lixeiraRaizId === item.id).length;
+            const data = item.deletadoEm ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.deletadoEm)).replace(".", "") : "";
+            return `<article class="subject-notebook-trash-card"><i class="bi-${ICONES[item.tipo]}"></i><div class="subject-notebook-trash-card-copy"><strong>${esc(item.titulo)}</strong><small>${TIPOS[item.tipo]} · ${quantidade} ${quantidade === 1 ? "item" : "itens"}${data ? ` · removido em ${esc(data)}` : ""}</small></div><div class="subject-notebook-trash-card-actions"><button class="btn btn-sm btn-outline-secondary" type="button" data-notebook-trash-restore="${item.id}"><i class="bi-arrow-counterclockwise me-1"></i>Restaurar</button><button class="btn btn-sm btn-outline-danger" type="button" data-notebook-trash-delete="${item.id}"><i class="bi-trash3 me-1"></i>Excluir definitivamente</button></div></article>`;
+        }).join("")}</div>` : '<div class="subject-notebook-empty is-contained"><i class="bi-trash3"></i><strong>A lixeira está vazia</strong><small>Os itens removidos ficam disponíveis por até 30 dias.</small></div>';
+        dom.workspace.innerHTML = `<div class="subject-notebook-trash-header"><div><small class="text-muted">PROTEÇÃO DO SEU CONTEÚDO</small><h3 class="h5 mb-0">Lixeira</h3><p>Restaure pastas completas com seus cadernos e páginas.</p></div><div class="subject-notebook-view-actions"><button class="btn btn-sm btn-light" type="button" data-notebook-trash-close><i class="bi-arrow-left me-1"></i>Voltar</button>${raizes.length ? '<button class="btn btn-sm btn-outline-danger" type="button" data-notebook-trash-empty><i class="bi-trash3 me-1"></i>Esvaziar</button>' : ""}</div></div>${lista}`;
     }
 
     function renderizarWorkspace() {
-        if (organizando) {
-            renderizarModoOrganizacao();
-            return;
-        }
+        if (lixeiraAberta) { renderizarLixeira(); return; }
         const item = selecionado();
         if (!item) {
             if (!itens.length) {
@@ -171,14 +242,24 @@ export function criarCadernosMaterias(repositorio) {
             : '<button class="btn btn-sm btn-primary" type="button" data-notebook-create="page"><i class="bi-file-earmark-plus me-1"></i>Nova página</button>';
         const cabecalho = item.tipo === "notebook"
             ? `<div class="subject-notebook-cover is-${esc(item.estiloCapa)}" style="--notebook-color:${esc(item.cor)}"><small>${topico ? esc(topico.titulo) : "Caderno livre"}</small><h3 class="h4 mb-0">${esc(item.titulo)}</h3></div>`
-            : `<div><small class="text-muted">Pasta de organização</small><h3 class="h5 mb-1">${esc(item.titulo)}</h3><p class="mb-0">${filhosDe(item.id).length} itens nesta pasta</p></div>`;
-        dom.workspace.innerHTML = `${caminhoDoItem(item)}<div class="subject-notebook-view-header">${cabecalho}<div class="subject-notebook-view-toolbar">${botoesAcoes(item)}<div class="subject-notebook-view-actions">${acoesCriacao}</div></div></div>${cartoesFilhos(item)}${item.tipo === "notebook" ? '<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapas mentais</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-collection me-1"></i>Materiais da matéria</button></div>' : ""}`;
+            : `<div class="subject-notebook-detail-heading"><small>Pasta de organização</small><div class="subject-notebook-detail-title-row"><h3>${esc(item.titulo)}</h3><div class="subject-notebook-context-actions">${acoesCriacao}${botoesAcoes(item)}</div></div><p>${filhosDe(item.id).length} itens nesta pasta</p></div>`;
+        const toolbarCaderno = item.tipo === "notebook" ? `<div class="subject-notebook-view-toolbar"><div class="subject-notebook-context-actions">${acoesCriacao}${botoesAcoes(item)}</div></div>` : "";
+        dom.workspace.innerHTML = `${caminhoDoItem(item)}<div class="subject-notebook-view-header">${cabecalho}${toolbarCaderno}</div>${cartoesFilhos(item)}${item.tipo === "notebook" ? '<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapas mentais</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-collection me-1"></i>Materiais da matéria</button></div>' : ""}`;
     }
 
     function renderizar() {
-        dom.headerActions.classList.toggle("d-none", itens.length === 0);
+        dom.headerActions.classList.toggle("d-none", itens.length === 0 || lixeiraAberta);
+        const raizesLixeira = lixeira.filter(item => item.id === item.lixeiraRaizId).length;
+        dom.trashCount.textContent = String(raizesLixeira);
+        dom.trashCount.hidden = raizesLixeira === 0;
+        dom.trash.classList.toggle("is-active", lixeiraAberta);
+        dom.trash.setAttribute("aria-pressed", String(lixeiraAberta));
+        dom.notebooks.classList.toggle("is-active", !lixeiraAberta);
+        dom.notebooks.setAttribute("aria-pressed", String(!lixeiraAberta));
+        dom.organize.classList.toggle("d-none", lixeiraAberta);
         renderizarArvore();
         renderizarWorkspace();
+        if (organizando) renderizarModoOrganizacao();
     }
 
     function opcoesPais(tipo, itemAtual) {
@@ -190,7 +271,8 @@ export function criarCadernosMaterias(repositorio) {
         return raiz + opcoes.map(item => `<option value="${item.id}">${esc(item.titulo)}</option>`).join("");
     }
 
-    function abrirDialogo(tipo, item = null) {
+    function abrirDialogo(tipo, item = null, modo = "full") {
+        modoDialogo = item ? modo : "full";
         const paiSugerido = item
             ? item.paiId
             : selecionado()?.tipo === "folder"
@@ -210,12 +292,19 @@ export function criarCadernosMaterias(repositorio) {
         dom.itemColor.value = item?.cor || "#b8322a";
         dom.itemCover.value = item?.estiloCapa || "solid";
         dom.itemPaper.value = item?.estiloFolha || "lined";
-        dom.dialogEyebrow.textContent = item ? "Editar item" : "Novo item";
-        dom.dialogTitle.textContent = `${item ? "Editar" : "Criar"} ${TIPOS[tipo].toLowerCase()}`;
-        dom.topicGroup.classList.toggle("d-none", tipo === "folder");
-        dom.styleFields.classList.toggle("d-none", tipo === "folder");
+        const somenteNome = modoDialogo === "rename";
+        const somenteLocal = modoDialogo === "move";
+        dom.nameGroup.classList.toggle("d-none", somenteLocal);
+        dom.parentGroup.classList.toggle("d-none", somenteNome);
+        dom.itemTitle.disabled = somenteLocal;
+        dom.itemParent.disabled = somenteNome;
+        dom.dialogEyebrow.textContent = item ? (somenteNome ? "Alterar nome" : somenteLocal ? "Alterar local" : "Personalizar item") : "Novo item";
+        dom.dialogTitle.textContent = item ? (somenteNome ? `Renomear ${TIPOS[tipo].toLowerCase()}` : somenteLocal ? `Mover ${TIPOS[tipo].toLowerCase()}` : `Personalizar ${TIPOS[tipo].toLowerCase()}`) : `Criar ${TIPOS[tipo].toLowerCase()}`;
+        dom.topicGroup.classList.toggle("d-none", tipo === "folder" || somenteNome || somenteLocal);
+        dom.styleFields.classList.toggle("d-none", tipo === "folder" || somenteNome || somenteLocal);
+        dom.save.textContent = somenteNome ? "Renomear" : somenteLocal ? "Mover" : "Salvar";
         dom.dialog.showModal();
-        dom.itemTitle.focus();
+        (somenteLocal ? dom.itemParent : dom.itemTitle).focus();
     }
 
     async function salvarFormulario(evento) {
@@ -223,7 +312,7 @@ export function criarCadernosMaterias(repositorio) {
         const id = dom.itemId.value;
         const tipo = dom.itemType.value;
         const atual = itemPorId(id);
-        const dados = {
+        const dadosCompletos = {
             tipo,
             titulo: dom.itemTitle.value,
             paiId: dom.itemParent.value,
@@ -234,6 +323,9 @@ export function criarCadernosMaterias(repositorio) {
             posicao: atual?.posicao ?? filhosDe(dom.itemParent.value).length,
             conteudo: atual?.conteudo || ""
         };
+        const dados = modoDialogo === "rename" ? { titulo: dadosCompletos.titulo }
+            : modoDialogo === "move" ? { paiId: dadosCompletos.paiId }
+                : dadosCompletos;
         dom.save.disabled = true;
         try {
             const salvo = atual
@@ -255,16 +347,85 @@ export function criarCadernosMaterias(repositorio) {
 
     async function excluirItem(id) {
         const item = itemPorId(id);
-        if (!item || !window.confirm(`Excluir “${item.titulo}”${filhosDe(id).length ? " e tudo o que está dentro" : ""}?`)) return;
+        if (!item || !window.confirm(`Mover “${item.titulo}”${filhosDe(id).length ? " e tudo o que está dentro" : ""} para a lixeira?`)) return;
+        const irmaos = item.tipo === "page" ? filhosDe(item.paiId).filter(valor => valor.tipo === "page") : [];
+        const indice = irmaos.findIndex(valor => valor.id === item.id);
+        const paginaAlternativa = irmaos[indice + 1] || irmaos[indice - 1] || null;
         try {
             await repositorio.excluir(id);
             const removidos = descendentes(id);
             removidos.add(id);
             itens = itens.filter(valor => !removidos.has(valor.id));
-            selecionadoId = item.paiId || "";
-            informar(`${TIPOS[item.tipo]} excluído.`);
+            lixeira = typeof repositorio.listarLixeira === "function" ? await repositorio.listarLixeira(materiaId) : lixeira;
+            if (removidos.has(selecionadoId)) {
+                selecionadoId = paginaAlternativa?.id || item.paiId || "";
+                if (paginaAlternativa) registrarPaginaAtual(paginaAlternativa);
+            }
+            informar("");
+            exibirToast(`${TIPOS[item.tipo]} enviado para a lixeira.`, {
+                tipo: "success",
+                desfazer: async () => {
+                    itens = await repositorio.restaurar(id, materiaId);
+                    lixeira = typeof repositorio.listarLixeira === "function" ? await repositorio.listarLixeira(materiaId) : [];
+                    selecionadoId = id;
+                    informar("Item restaurado.");
+                    renderizar();
+                }
+            });
             renderizar();
-        } catch (erro) { informar(erro.message || "Não foi possível excluir o item.", true); }
+        } catch (erro) { informar(erro.message || "Não foi possível enviar o item para a lixeira.", true); }
+    }
+
+    async function abrirLixeira() {
+        if (!await salvarPendente() || typeof repositorio.listarLixeira !== "function") return;
+        organizando = false;
+        dom.organize.setAttribute("aria-pressed", "false");
+        dom.organize.classList.remove("is-active");
+        dom.organize.querySelector("span").textContent = "Organizar itens";
+        const materiaAoAbrir = materiaId;
+        lixeiraAberta = true;
+        informar("");
+        renderizar();
+        try {
+            const itensAtualizados = await repositorio.listarLixeira(materiaAoAbrir);
+            if (materiaAoAbrir !== materiaId) return;
+            lixeira = itensAtualizados;
+            if (lixeiraAberta) renderizar();
+        } catch (erro) { informar(erro.message || "Não foi possível atualizar a lixeira.", true); }
+    }
+
+    async function restaurarItem(id) {
+        const item = lixeira.find(valor => valor.id === id && valor.id === valor.lixeiraRaizId);
+        if (!item) return;
+        informar("Restaurando o item…");
+        try {
+            itens = await repositorio.restaurar(id, materiaId);
+            lixeira = await repositorio.listarLixeira(materiaId);
+            selecionadoId = id;
+            informar(`${TIPOS[item.tipo]} restaurado com todo o seu conteúdo.`);
+            renderizar();
+        } catch (erro) { informar(erro.message || "Não foi possível restaurar o item.", true); }
+    }
+
+    async function excluirDefinitivamente(id) {
+        const item = lixeira.find(valor => valor.id === id && valor.id === valor.lixeiraRaizId);
+        if (!item || !window.confirm(`Excluir “${item.titulo}” definitivamente? Esta ação não poderá ser desfeita.`)) return;
+        try {
+            await repositorio.excluirDefinitivamente(id);
+            lixeira = await repositorio.listarLixeira(materiaId);
+            informar("Item excluído definitivamente.");
+            renderizar();
+        } catch (erro) { informar(erro.message || "Não foi possível excluir o item definitivamente.", true); }
+    }
+
+    async function esvaziarLixeira() {
+        if (!lixeira.length || !window.confirm("Esvaziar a lixeira? Todo o conteúdo será excluído definitivamente.")) return;
+        try {
+            await repositorio.esvaziarLixeira(materiaId);
+            lixeira = [];
+            informar("Lixeira esvaziada.");
+            renderizar();
+        } catch (erro) { informar(erro.message || "Não foi possível esvaziar a lixeira.", true); }
     }
 
     async function duplicarItem(id) {
@@ -300,18 +461,74 @@ export function criarCadernosMaterias(repositorio) {
         }
     }
 
-    async function moverNaOrdem(id, direcao) {
+    function limparDestinoArraste() {
+        dom.tree.querySelectorAll(".is-drop-before,.is-drop-after,.is-drop-inside,.is-dragging").forEach(elemento => elemento.classList.remove("is-drop-before", "is-drop-after", "is-drop-inside", "is-dragging"));
+    }
+
+    function pararRolagemArraste() {
+        cancelAnimationFrame(quadroRolagemArraste);
+        quadroRolagemArraste = 0;
+    }
+
+    function atualizarRolagemArraste(clientY) {
+        if (!arraste?.ativo) return;
+        const margem = 64;
+        const limiteSuperior = margem;
+        const limiteInferior = window.innerHeight - margem;
+        arraste.velocidadeRolagem = clientY < limiteSuperior ? -10 : clientY > limiteInferior ? 10 : 0;
+        if (!arraste.velocidadeRolagem || quadroRolagemArraste) return;
+        const rolar = () => {
+            quadroRolagemArraste = 0;
+            if (!arraste?.ativo || !arraste.velocidadeRolagem) return;
+            const painelRolavel = dom.treePanel.scrollHeight > dom.treePanel.clientHeight;
+            if (painelRolavel) dom.treePanel.scrollBy({ top: arraste.velocidadeRolagem, behavior: "auto" });
+            else window.scrollBy({ top: arraste.velocidadeRolagem, behavior: "auto" });
+            quadroRolagemArraste = requestAnimationFrame(rolar);
+        };
+        quadroRolagemArraste = requestAnimationFrame(rolar);
+    }
+
+    function podeConter(destino, item) {
+        if (!destino || !item || destino.id === item.id || descendentes(item.id).has(destino.id)) return false;
+        return destino.tipo === "folder" ? ["folder", "notebook"].includes(item.tipo) : destino.tipo === "notebook" && item.tipo === "page";
+    }
+
+    async function moverPorArraste(id, destinoId, modo) {
         const item = itemPorId(id);
-        if (!item) return;
-        const irmaos = filhosDe(item.paiId);
-        const origem = irmaos.findIndex(valor => valor.id === id);
-        const destino = direcao === "up" ? origem - 1 : origem + 1;
-        if (origem < 0 || destino < 0 || destino >= irmaos.length) return;
-        [irmaos[origem], irmaos[destino]] = [irmaos[destino], irmaos[origem]];
-        informar("Salvando a nova ordem…");
+        const destino = itemPorId(destinoId);
+        if (!item || !destino || item.id === destino.id) return;
+        const paiAnterior = item.paiId || "";
+        const ordemAnterior = filhosDe(paiAnterior).map(valor => valor.id);
+        const novoPaiId = modo === "inside" ? destino.id : destino.paiId || "";
+        if (modo === "inside" && !podeConter(destino, item)) return;
+        if (modo !== "inside" && paiAnterior !== novoPaiId) return;
+        const ordemDestino = filhosDe(novoPaiId).filter(valor => valor.id !== item.id);
+        const indiceDestino = modo === "inside" ? ordemDestino.length : ordemDestino.findIndex(valor => valor.id === destino.id) + (modo === "after" ? 1 : 0);
+        ordemDestino.splice(Math.max(0, indiceDestino), 0, item);
+        if (paiAnterior === novoPaiId && ordemDestino.every((valor, indice) => valor.id === ordemAnterior[indice])) return;
+        informar(modo === "inside" ? "Movendo o item…" : "Salvando a nova ordem…");
         try {
-            itens = await repositorio.reordenar(materiaId, item.paiId, irmaos.map(valor => valor.id));
-            informar("Ordem atualizada.");
+            if (paiAnterior !== novoPaiId) {
+                const salvo = await repositorio.atualizar(item.id, { paiId: novoPaiId, posicao: ordemDestino.length - 1 }, item.versao);
+                itens = itens.map(valor => valor.id === item.id ? salvo : valor);
+            }
+            itens = await repositorio.reordenar(materiaId, novoPaiId, ordemDestino.map(valor => valor.id));
+            const tituloDestino = modo === "inside" ? destino.titulo : itemPorId(novoPaiId)?.titulo;
+            informar("");
+            exibirToast(modo === "inside" ? `${item.titulo} foi movido para ${tituloDestino}.` : `${item.titulo} mudou de posição.`, {
+                tipo: "success",
+                desfazer: async () => {
+                    const atual = itemPorId(item.id);
+                    if (!atual) return;
+                    if ((atual.paiId || "") !== paiAnterior) {
+                        const restaurado = await repositorio.atualizar(atual.id, { paiId: paiAnterior, posicao: ordemAnterior.indexOf(item.id) }, atual.versao);
+                        itens = itens.map(valor => valor.id === atual.id ? restaurado : valor);
+                    }
+                    itens = await repositorio.reordenar(materiaId, paiAnterior, ordemAnterior);
+                    informar("Movimento desfeito.");
+                    renderizar();
+                }
+            });
             renderizar();
         } catch (erro) { informar(erro.message || "Não foi possível reorganizar os itens.", true); }
     }
@@ -386,6 +603,7 @@ export function criarCadernosMaterias(repositorio) {
 
     async function selecionar(id) {
         if (!await salvarPendente()) return;
+        lixeiraAberta = false;
         const item = itemPorId(id);
         if (organizando) {
             selecionadoId = id;
@@ -397,6 +615,7 @@ export function criarCadernosMaterias(repositorio) {
             const paginas = filhosDe(item.id).filter(valor => valor.tipo === "page");
             const ultimaId = ultimaPaginaPorCaderno.get(item.id);
             selecionadoId = paginas.some(pagina => pagina.id === ultimaId) ? ultimaId : paginas[0].id;
+            registrarPaginaAtual(itemPorId(selecionadoId));
             informar("");
             renderizar();
             return;
@@ -410,7 +629,7 @@ export function criarCadernosMaterias(repositorio) {
                 if (!itemPorId(pagina.id)) itens.push(pagina);
                 if (selecionadoId === item.id) {
                     selecionadoId = pagina.id;
-                    ultimaPaginaPorCaderno.set(item.id, pagina.id);
+                    registrarPaginaAtual(pagina);
                 }
                 informar("");
                 renderizar();
@@ -420,7 +639,7 @@ export function criarCadernosMaterias(repositorio) {
             return;
         }
         selecionadoId = id;
-        if (item?.tipo === "page") ultimaPaginaPorCaderno.set(item.paiId, item.id);
+        if (item?.tipo === "page") registrarPaginaAtual(item);
         informar("");
         renderizar();
     }
@@ -437,6 +656,7 @@ export function criarCadernosMaterias(repositorio) {
     async function alternarOrganizacao(forcar) {
         if (!await salvarPendente()) return;
         organizando = typeof forcar === "boolean" ? forcar : !organizando;
+        if (organizando) lixeiraAberta = false;
         dom.organize.setAttribute("aria-pressed", String(organizando));
         dom.organize.classList.toggle("is-active", organizando);
         dom.organize.querySelector("span").textContent = organizando ? "Concluir organização" : "Organizar itens";
@@ -444,8 +664,9 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     async function salvarPendente() {
-        if (timerSalvamento) return salvarPagina();
-        return salvamentoPendente ? salvamentoPendente : true;
+        const paginaSalva = timerSalvamento ? await salvarPagina() : salvamentoPendente ? await salvamentoPendente : true;
+        const posicaoSalva = salvamentoPosicaoPendente ? await salvamentoPosicaoPendente : true;
+        return paginaSalva !== false && posicaoSalva !== false;
     }
 
     async function definirMateria(id, nome, listaTopicos = []) {
@@ -460,7 +681,9 @@ export function criarCadernosMaterias(repositorio) {
         topicos = Array.isArray(listaTopicos) ? listaTopicos : [];
         busca = "";
         organizando = false;
+        lixeiraAberta = false;
         paginasRecolhidas = false;
+        ultimaPaginaMateriaId = "";
         pastasFechadas.clear();
         dom.search.value = "";
         dom.organize.classList.remove("is-active");
@@ -471,13 +694,26 @@ export function criarCadernosMaterias(repositorio) {
         const token = ++carregamento;
         selecionadoId = "";
         itens = [];
+        lixeira = [];
         informar("Carregando seus cadernos…");
         renderizar();
         try {
-            const carregados = await repositorio.listar(id);
+            const [carregados, ultimaPaginaId, itensLixeira] = await Promise.all([
+                repositorio.listar(id),
+                typeof repositorio.carregarPosicao === "function" ? repositorio.carregarPosicao(id).catch(() => "") : Promise.resolve(""),
+                typeof repositorio.listarLixeira === "function" ? repositorio.listarLixeira(id).catch(() => []) : Promise.resolve([])
+            ]);
             if (token !== carregamento) return;
             itens = carregados;
-            selecionadoId = itens[0]?.id || "";
+            lixeira = itensLixeira;
+            const ultimaPagina = itens.find(item => item.id === ultimaPaginaId && item.tipo === "page");
+            if (ultimaPagina) {
+                ultimaPaginaMateriaId = ultimaPagina.id;
+                ultimaPaginaPorCaderno.set(ultimaPagina.paiId, ultimaPagina.id);
+                selecionadoId = ultimaPagina.id;
+            } else {
+                selecionadoId = itens[0]?.id || "";
+            }
             informar("");
             renderizar();
         } catch (erro) {
@@ -489,35 +725,116 @@ export function criarCadernosMaterias(repositorio) {
     dom.novoCaderno.addEventListener("click", () => abrirDialogo("notebook"));
     dom.form.addEventListener("submit", salvarFormulario);
     dom.toastClose.addEventListener("click", fecharToast);
+    dom.toastUndo.addEventListener("click", async () => {
+        const desfazer = desfazerMovimento;
+        if (!desfazer) return;
+        fecharToast();
+        informar("Desfazendo o movimento…");
+        try { await desfazer(); }
+        catch (erro) { informar(erro.message || "Não foi possível desfazer o movimento.", true); }
+    });
     dom.dialog.querySelectorAll("[data-notebook-dialog-close]").forEach(botao => botao.addEventListener("click", () => dom.dialog.close()));
     dom.dialog.addEventListener("click", evento => { if (evento.target === dom.dialog) dom.dialog.close(); });
+    dom.pageActions.querySelectorAll("[data-notebook-page-actions-close]").forEach(botao => botao.addEventListener("click", () => dom.pageActions.close()));
+    dom.pageActions.addEventListener("click", async evento => {
+        if (evento.target === dom.pageActions) { dom.pageActions.close(); return; }
+        const botao = evento.target.closest("[data-notebook-page-action]");
+        if (!botao) return;
+        const id = dom.pageActionsId.value;
+        const pagina = itemPorId(id);
+        dom.pageActions.close();
+        if (!pagina) return;
+        if (botao.dataset.notebookPageAction === "rename") abrirDialogo("page", pagina, "rename");
+        if (botao.dataset.notebookPageAction === "move") abrirDialogo("page", pagina, "move");
+        if (botao.dataset.notebookPageAction === "duplicate") await duplicarItem(id);
+        if (botao.dataset.notebookPageAction === "delete") await excluirItem(id);
+    });
     dom.search.addEventListener("input", evento => { busca = evento.target.value; renderizarArvore(); });
     dom.organize.addEventListener("click", async () => { await alternarOrganizacao(); });
+    dom.notebooks.addEventListener("click", () => { if (lixeiraAberta) { lixeiraAberta = false; renderizar(); } });
+    dom.trash.addEventListener("click", async () => { if (!lixeiraAberta) await abrirLixeira(); });
     dom.mobileTree.addEventListener("click", () => {
         const aberta = dom.treePanel.classList.toggle("is-mobile-open");
         dom.mobileTree.setAttribute("aria-expanded", String(aberta));
     });
+    dom.tree.addEventListener("pointerdown", evento => {
+        const alca = evento.target.closest("[data-notebook-drag]");
+        if (!organizando || !alca) return;
+        evento.preventDefault();
+        arraste = { id: alca.dataset.notebookDrag, pointerId: evento.pointerId, x: evento.clientX, y: evento.clientY, ativo: false, destinoId: "", modo: "", velocidadeRolagem: 0 };
+        alca.setPointerCapture?.(evento.pointerId);
+    });
+    dom.tree.addEventListener("pointermove", evento => {
+        if (!arraste || arraste.pointerId !== evento.pointerId) return;
+        if (!arraste.ativo && Math.hypot(evento.clientX - arraste.x, evento.clientY - arraste.y) < 6) return;
+        arraste.ativo = true;
+        evento.preventDefault();
+        atualizarRolagemArraste(evento.clientY);
+        limparDestinoArraste();
+        dom.tree.querySelector(`[data-notebook-row-id="${arraste.id}"]`)?.classList.add("is-dragging");
+        const linhaDestino = document.elementFromPoint(evento.clientX, evento.clientY)?.closest("[data-notebook-row-id]");
+        const destino = linhaDestino ? itemPorId(linhaDestino.dataset.notebookRowId) : null;
+        const origem = itemPorId(arraste.id);
+        if (!origem || !destino || origem.id === destino.id || descendentes(origem.id).has(destino.id)) {
+            arraste.destinoId = "";
+            arraste.modo = "";
+            return;
+        }
+        const caixa = linhaDestino.getBoundingClientRect();
+        const proporcaoVertical = (evento.clientY - caixa.top) / Math.max(caixa.height, 1);
+        const dentro = podeConter(destino, origem) && proporcaoVertical >= .25 && proporcaoVertical <= .75;
+        const mesmoPai = (origem.paiId || "") === (destino.paiId || "");
+        if (!dentro && !mesmoPai) {
+            arraste.destinoId = "";
+            arraste.modo = "";
+            return;
+        }
+        arraste.destinoId = destino.id;
+        arraste.modo = dentro ? "inside" : proporcaoVertical > .5 ? "after" : "before";
+        linhaDestino.classList.add(`is-drop-${arraste.modo}`);
+    });
+    const concluirArraste = async evento => {
+        if (!arraste || arraste.pointerId !== evento.pointerId) return;
+        const atual = arraste;
+        arraste = null;
+        pararRolagemArraste();
+        limparDestinoArraste();
+        if (atual.ativo && atual.destinoId) await moverPorArraste(atual.id, atual.destinoId, atual.modo);
+    };
+    dom.tree.addEventListener("pointerup", concluirArraste);
+    dom.tree.addEventListener("pointercancel", evento => {
+        if (!arraste || arraste.pointerId !== evento.pointerId) return;
+        arraste = null;
+        pararRolagemArraste();
+        limparDestinoArraste();
+    });
     dom.app.addEventListener("click", async evento => {
-        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-order],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-back],[data-notebook-organize-finish]");
+        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty]");
         if (!alvo) return;
         if (alvo.hasAttribute("data-notebook-home")) await selecionar("");
         if (alvo.dataset.notebookSelect) await selecionar(alvo.dataset.notebookSelect);
         if (alvo.dataset.notebookCreate) abrirDialogo(alvo.dataset.notebookCreate);
         if (alvo.dataset.notebookEdit) { const item = itemPorId(alvo.dataset.notebookEdit); if (item) abrirDialogo(item.tipo, item); }
+        if (alvo.dataset.notebookRename) { const item = itemPorId(alvo.dataset.notebookRename); if (item) abrirDialogo(item.tipo, item, "rename"); }
+        if (alvo.dataset.notebookMove) { const item = itemPorId(alvo.dataset.notebookMove); if (item) abrirDialogo(item.tipo, item, "move"); }
         if (alvo.dataset.notebookDelete) await excluirItem(alvo.dataset.notebookDelete);
         if (alvo.dataset.notebookDuplicate) await duplicarItem(alvo.dataset.notebookDuplicate);
+        if (alvo.dataset.notebookPageOptions) abrirAcoesPagina(alvo.dataset.notebookPageOptions);
         if (alvo.dataset.notebookToggle) {
             const id = alvo.dataset.notebookToggle;
             if (pastasFechadas.has(id)) pastasFechadas.delete(id); else pastasFechadas.add(id);
             renderizarArvore();
         }
-        if (alvo.dataset.notebookOrder) await moverNaOrdem(alvo.dataset.notebookId, alvo.dataset.notebookOrder);
         if (alvo.hasAttribute("data-notebook-pages-toggle")) {
             paginasRecolhidas = !paginasRecolhidas;
             renderizarWorkspace();
         }
         if (alvo.hasAttribute("data-notebook-back")) await voltarDaPagina();
         if (alvo.hasAttribute("data-notebook-organize-finish")) await alternarOrganizacao(false);
+        if (alvo.hasAttribute("data-notebook-trash-close")) { lixeiraAberta = false; renderizar(); }
+        if (alvo.dataset.notebookTrashRestore) await restaurarItem(alvo.dataset.notebookTrashRestore);
+        if (alvo.dataset.notebookTrashDelete) await excluirDefinitivamente(alvo.dataset.notebookTrashDelete);
+        if (alvo.hasAttribute("data-notebook-trash-empty")) await esvaziarLixeira();
         if (alvo.dataset.notebookShortcut === "cards") document.querySelector('[data-bs-target="#ws-cards"]')?.click();
         if (alvo.dataset.notebookShortcut === "maps") document.querySelector('[data-bs-target="#ws-mapas"]')?.click();
         if (alvo.dataset.notebookShortcut === "materials") document.querySelector('[data-bs-target="#ws-links"]')?.click();
@@ -529,5 +846,5 @@ export function criarCadernosMaterias(repositorio) {
         if (evento.target.id === "subjectNotebookPagePaper") alterarPapelPagina(evento.target.value);
     });
 
-    return Object.freeze({ definirMateria, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); carregamento += 1; } });
+    return Object.freeze({ definirMateria, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); pararRolagemArraste(); carregamento += 1; } });
 }
