@@ -61,7 +61,7 @@ function pontosDaForma(tipo, inicio, fim) {
     return [inicio, fim];
 }
 
-export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTexto = () => {}) {
+export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTexto = () => {}, opcoes = {}) {
     const svg = container.querySelector("[data-page-drawing-canvas]");
     const camada = container.querySelector("[data-page-drawing-strokes]");
     const camadaSelecao = container.querySelector("[data-page-drawing-selection]");
@@ -106,6 +106,8 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     const desfazerBotao = container.querySelector("[data-page-drawing-undo]");
     const refazerBotao = container.querySelector("[data-page-drawing-redo]");
     const limparBotao = container.querySelector("[data-page-drawing-clear]");
+    const adicionarImagemBotao = container.querySelector("[data-page-drawing-add-image]");
+    const imagemInput = container.querySelector("[data-page-drawing-image-input]");
     let tracos = Array.isArray(dadosIniciais?.strokes) ? copiar(dadosIniciais.strokes) : [];
     let ferramenta = "pen";
     let gesto = null;
@@ -221,6 +223,23 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     }
 
     function elementoDoTraco(traco) {
+        if (traco.tool === "image") {
+            const limites = limitesDosTracos([traco]) || { esquerda: 0, topo: 0, largura: 320, altura: 220 };
+            if (!traco.src) {
+                const grupo = svgEl("g", { class: "subject-page-drawing-image-placeholder", "data-stroke-id": traco.id });
+                grupo.append(svgEl("rect", { x: limites.esquerda, y: limites.topo, width: limites.largura, height: limites.altura, rx: 10 }));
+                const rotulo = svgEl("text", { x: limites.esquerda + limites.largura / 2, y: limites.topo + limites.altura / 2 });
+                rotulo.textContent = traco.imageError ? "Imagem indisponível" : "Carregando imagem…";
+                grupo.append(rotulo);
+                return grupo;
+            }
+            return svgEl("image", {
+                x: limites.esquerda, y: limites.topo, width: limites.largura, height: limites.altura,
+                href: traco.src, preserveAspectRatio: "none",
+                class: `subject-page-drawing-image${selecionados.has(traco.id) ? " is-selected" : ""}`,
+                "data-stroke-id": traco.id
+            });
+        }
         if (traco.tool !== "text") return svgEl("path", {
             d: caminhoDosPontos(traco.points || []), fill: "none", stroke: traco.color || "#3b2923",
             "stroke-width": limitar(Number(traco.width) || 3, 1, 40), "stroke-linecap": "round", "stroke-linejoin": "round",
@@ -318,8 +337,82 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     }
 
     function notificar() {
-        aoAlterar({ strokes: copiar(tracos), pageSize: tamanhoPagina });
+        const persistentes = tracos.map(traco => {
+            const salvo = copiar(traco);
+            delete salvo.src;
+            delete salvo.imageError;
+            return salvo;
+        });
+        aoAlterar({ strokes: persistentes, pageSize: tamanhoPagina });
         atualizarBotoes();
+    }
+
+    function dimensoesImagem(arquivo) {
+        return new Promise((resolver, rejeitar) => {
+            const url = URL.createObjectURL(arquivo);
+            const imagem = new Image();
+            imagem.onload = () => {
+                URL.revokeObjectURL(url);
+                resolver({ largura: imagem.naturalWidth || 1, altura: imagem.naturalHeight || 1 });
+            };
+            imagem.onerror = () => {
+                URL.revokeObjectURL(url);
+                rejeitar(new Error("Não foi possível ler essa imagem."));
+            };
+            imagem.src = url;
+        });
+    }
+
+    async function inserirImagem(arquivo) {
+        if (!arquivo || typeof opcoes.enviarImagem !== "function") return;
+        adicionarImagemBotao.disabled = true;
+        adicionarImagemBotao.classList.add("is-loading");
+        adicionarImagemBotao.querySelector("i")?.classList.replace("bi-image", "bi-arrow-repeat");
+        try {
+            const dimensoes = await dimensoesImagem(arquivo);
+            const enviada = await opcoes.enviarImagem(arquivo);
+            const pagina = TAMANHOS_PAGINA[tamanhoPagina];
+            const escala = Math.min(460 / dimensoes.largura, 340 / dimensoes.altura, 1);
+            const largura = Math.max(120, Math.round(dimensoes.largura * escala));
+            const altura = Math.max(80, Math.round(dimensoes.altura * escala));
+            const esquerda = Math.round((pagina.largura - largura) / 2);
+            const topo = Math.max(40, Math.round((pagina.altura - altura) / 3));
+            const traco = {
+                id: crypto.randomUUID(), tool: "image", storagePath: enviada.storagePath,
+                name: enviada.nome || arquivo.name || "Imagem", mimeType: enviada.mimeType || arquivo.type,
+                src: enviada.url, points: [{ x: esquerda, y: topo }, { x: esquerda + largura, y: topo + altura }]
+            };
+            registrarHistorico();
+            tracos.unshift(traco);
+            selecionados = new Set([traco.id]);
+            selecionarFerramenta("select");
+            notificar();
+        } catch (erro) {
+            opcoes.aoErro?.(erro.message || "Não foi possível inserir a imagem.");
+        } finally {
+            adicionarImagemBotao.disabled = false;
+            adicionarImagemBotao.classList.remove("is-loading");
+            adicionarImagemBotao.querySelector("i")?.classList.replace("bi-arrow-repeat", "bi-image");
+            imagemInput.value = "";
+        }
+    }
+
+    function carregarImagensPrivadas() {
+        if (typeof opcoes.resolverImagem !== "function") return;
+        tracos.filter(traco => traco.tool === "image" && traco.storagePath && !traco.src).forEach(traco => {
+            Promise.resolve(opcoes.resolverImagem(traco.storagePath)).then(url => {
+                const atual = tracos.find(item => item.id === traco.id);
+                if (!atual || !container.isConnected) return;
+                atual.src = url;
+                atual.imageError = false;
+                renderizar();
+            }).catch(() => {
+                const atual = tracos.find(item => item.id === traco.id);
+                if (!atual || !container.isConnected) return;
+                atual.imageError = true;
+                renderizar();
+            });
+        });
     }
 
     function ajustarGrifosAposEdicao(anterior, novo, marcas) {
@@ -480,6 +573,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     function apagarNoPonto(ponto) {
         const raio = Math.max(8, Number(tamanho.value));
         const restantes = tracos.filter(traco => {
+            if (traco.tool === "image") return true;
             if (traco.tool === "text") {
                 const limites = limitesDosTracos([traco]);
                 return !limites || ponto.x < limites.esquerda - raio || ponto.x > limites.direita + raio || ponto.y < limites.topo - raio || ponto.y > limites.base + raio;
@@ -494,7 +588,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
 
     function encontrarTraco(ponto) {
         return [...tracos].reverse().find(traco => {
-            if (traco.tool === "text") {
+            if (["text", "image"].includes(traco.tool)) {
                 const limites = limitesDosTracos([traco]);
                 return limites && ponto.x >= limites.esquerda && ponto.x <= limites.direita && ponto.y >= limites.topo && ponto.y <= limites.base;
             }
@@ -705,6 +799,8 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     }
 
     ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.pageDrawingTool)));
+    adicionarImagemBotao?.addEventListener("click", () => imagemInput?.click());
+    imagemInput?.addEventListener("change", () => inserirImagem(imagemInput.files?.[0]));
     grifarTextoBotao.addEventListener("pointerdown", evento => evento.preventDefault());
     grifarTextoBotao.addEventListener("click", alternarGrifoTexto);
     menuEstudoTexto.addEventListener("pointerdown", evento => {
@@ -718,7 +814,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     cor.addEventListener("input", () => {
         if (ferramenta !== "select" || !selecionados.size) return;
         registrarHistorico();
-        tracos.forEach(traco => { if (selecionados.has(traco.id)) traco.color = cor.value; });
+        tracos.forEach(traco => { if (selecionados.has(traco.id) && traco.tool !== "image") traco.color = cor.value; });
         renderizar(); notificar();
     });
     tamanho.addEventListener("input", () => { tamanhoSaida.textContent = tamanho.value; if (ferramenta === "eraser") cursor.setAttribute("r", String(Math.max(8, Number(tamanho.value)))); });
@@ -769,6 +865,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
 
     aplicarVisualizacaoPagina();
     selecionarFerramenta("pen");
+    carregarImagensPrivadas();
     return Object.freeze({ destruir: () => {
         gesto = null;
         textoEmEdicaoId = null;

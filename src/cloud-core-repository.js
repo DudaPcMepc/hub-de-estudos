@@ -18,6 +18,14 @@ const ESTILOS_CAPA_CADERNO_MATERIA = new Set(["solid", "gradient", "minimal"]);
 const ESTILOS_FOLHA_CADERNO_MATERIA = new Set(["plain", "lined", "grid", "dotted"]);
 const BUCKET_PDFS_VADE = "private-legal-notebook-pdfs";
 const LIMITE_PDF_VADE_BYTES = 25 * 1024 * 1024;
+const BUCKET_IMAGENS_CADERNO = "private-subject-notebook-images";
+const LIMITE_IMAGEM_CADERNO_BYTES = 8 * 1024 * 1024;
+const TIPOS_IMAGEM_CADERNO = new Map([
+    ["image/png", "png"],
+    ["image/jpeg", "jpg"],
+    ["image/webp", "webp"],
+    ["image/gif", "gif"]
+]);
 
 let contextoAtivo = null;
 let mapasLegados = new Map();
@@ -2109,6 +2117,42 @@ export async function salvarPosicaoCadernoMateria(materiaIdLocal, paginaId) {
         .select("last_page_id")
         .single();
     return verificarResposta(resposta, "Não foi possível salvar a última página do caderno.")?.last_page_id || "";
+}
+
+export async function enviarImagemPaginaCaderno(materiaIdLocal, paginaId, arquivo) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", materiaIdLocal);
+    const pageId = exigirUuidNovo(paginaId, "Página do caderno");
+    const extensao = TIPOS_IMAGEM_CADERNO.get(String(arquivo?.type || "").toLowerCase());
+    if (!arquivo || !extensao || arquivo.size < 1 || arquivo.size > LIMITE_IMAGEM_CADERNO_BYTES) {
+        throw erroRepositorio("Escolha uma imagem PNG, JPG, WEBP ou GIF com até 8 MB.");
+    }
+    const caminho = `${contexto.userId}/${contexto.workspaceId}/${subjectId}/${pageId}/${crypto.randomUUID()}.${extensao}`;
+    verificarResposta(await supabase.storage.from(BUCKET_IMAGENS_CADERNO).upload(caminho, arquivo, {
+        cacheControl: "3600",
+        contentType: arquivo.type,
+        upsert: false
+    }), "Não foi possível enviar a imagem privada.");
+    const assinatura = verificarResposta(
+        await supabase.storage.from(BUCKET_IMAGENS_CADERNO).createSignedUrl(caminho, 3600),
+        "A imagem foi enviada, mas não foi possível abri-la."
+    );
+    if (!assinatura?.signedUrl) throw erroRepositorio("O endereço temporário da imagem não foi criado.");
+    return { storagePath: caminho, url: assinatura.signedUrl, nome: String(arquivo.name || "Imagem").slice(0, 255), mimeType: arquivo.type };
+}
+
+export async function criarUrlImagemPaginaCaderno(caminho) {
+    const contexto = obterContexto();
+    const storagePath = String(caminho || "");
+    if (!storagePath.startsWith(`${contexto.userId}/${contexto.workspaceId}/`)) {
+        throw erroRepositorio("A imagem não pertence a este espaço de estudos.");
+    }
+    const assinatura = verificarResposta(
+        await supabase.storage.from(BUCKET_IMAGENS_CADERNO).createSignedUrl(storagePath, 3600),
+        "Não foi possível abrir a imagem privada."
+    );
+    if (!assinatura?.signedUrl) throw erroRepositorio("O endereço temporário da imagem não foi criado.");
+    return assinatura.signedUrl;
 }
 
 function valoresNoCadernoMateria(no, contexto, incluirIdentidade = false) {

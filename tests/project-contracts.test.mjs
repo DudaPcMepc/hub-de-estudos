@@ -2370,9 +2370,32 @@ test("páginas do caderno oferecem escrita livre persistente no estilo TouchNote
     assert.match(drawing, /tipo: "lasso"/);
     assert.match(drawing, /tipo: "resize"/);
     assert.match(drawing, /tipo: "move"/);
-    assert.match(drawing, /tracos\.forEach\(traco => \{ if \(selecionados\.has\(traco\.id\)\) traco\.color = cor\.value/);
+    assert.match(drawing, /tracos\.forEach\(traco => \{ if \(selecionados\.has\(traco\.id\).*traco\.color = cor\.value/);
     assert.match(html, /\.subject-page-drawing-resize-handle/);
     assert.match(html, /\.subject-page-drawing-stage[\s\S]*?touch-action: none/);
+});
+
+test("a escrita livre aceita imagens privadas móveis e redimensionáveis", () => {
+    const migration = readProjectFile("supabase/migrations/202609090001_private_subject_notebook_images.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+
+    assert.match(migration, /private-subject-notebook-images[\s\S]*?false[\s\S]*?8388608/i);
+    assert.match(migration, /private_subject_notebook_images_select_self[\s\S]*?auth\.uid\(\)/i);
+    assert.match(migration, /private_subject_notebook_images_insert_self[\s\S]*?auth\.uid\(\)/i);
+    assert.match(repository, /export async function enviarImagemPaginaCaderno/);
+    assert.match(repository, /TIPOS_IMAGEM_CADERNO/);
+    assert.match(repository, /createSignedUrl\(storagePath, 3600\)/);
+    assert.match(auth, /enviarImagem: enviarImagemPaginaCaderno/);
+    assert.match(auth, /criarUrlImagem: criarUrlImagemPaginaCaderno/);
+    assert.match(frontend, /data-page-drawing-add-image/);
+    assert.match(frontend, /accept="image\/png,image\/jpeg,image\/webp,image\/gif"/);
+    assert.match(drawing, /traco\.tool === "image"/);
+    assert.match(drawing, /delete salvo\.src/);
+    assert.match(drawing, /tracos\.unshift\(traco\)/);
+    assert.match(drawing, /opcoes\.resolverImagem/);
 });
 
 test("o caderno protege alterações locais até a confirmação do salvamento", () => {
