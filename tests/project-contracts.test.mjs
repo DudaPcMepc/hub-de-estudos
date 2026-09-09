@@ -2407,3 +2407,55 @@ test("a escrita livre oferece formas editáveis com a mesma seleção dos traço
     assert.match(drawing, /tipo: "shape"/);
     assert.match(drawing, /gesto\.traco\.points = pontosDaForma/);
 });
+
+test("a escrita livre oferece caixas de texto editáveis e persistentes", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(frontend, /data-page-drawing-tool="text"/);
+    assert.match(frontend, /data-page-drawing-edit-text/);
+    assert.match(drawing, /data-page-drawing-edit-handle/);
+    assert.match(drawing, /function ajustarCaixaTextoAoConteudo/);
+    assert.match(drawing, /const somenteTexto/);
+    assert.match(drawing, /Math\.min\(escalaX, escalaY\)/);
+    assert.match(drawing, /data-page-drawing-resize\": direcao/);
+    assert.match(drawing, /gesto\?\.tipo === "text-box"/);
+    assert.match(drawing, /redimensionaProporcionalmente/);
+    assert.match(drawing, /larguraProporcional/);
+    assert.match(drawing, /alturaProporcional/);
+    assert.doesNotMatch(drawing, /queueMicrotask\(\(\) => ajustarCaixaTextoAoConteudo/);
+    assert.match(drawing, /tool: "text"/);
+    assert.match(drawing, /function iniciarEdicaoTexto/);
+    assert.match(drawing, /contenteditable/);
+    assert.match(drawing, /data-page-drawing-edit-text/);
+    assert.match(drawing, /fontSize/);
+    assert.match(html, /\.subject-page-drawing-text-content/);
+    assert.match(html, /\.subject-page-drawing-edit-handle/);
+    assert.match(html, /word-break: break-word/);
+    assert.match(html, /subject-page-drawing-text-content[^}]+min-height: 0/);
+    assert.match(html, /subject-page-drawing-text-box-preview/);
+    assert.match(frontend, /data-page-drawing-highlight-text/);
+    assert.match(drawing, /function alternarGrifoTexto/);
+    assert.match(drawing, /highlights/);
+    assert.match(html, /\.subject-page-drawing-text-highlight/);
+});
+
+test("o editor de texto do caderno permite grifar trechos selecionados", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(frontend, /data-notebook-text-selection-menu/);
+    assert.match(frontend, /function alternarGrifoTextoPagina/);
+    assert.match(frontend, /textHighlights/);
+    assert.match(frontend, /contenteditable="true"/);
+    assert.match(frontend, /function htmlTextoComGrifos/);
+    assert.match(html, /\.subject-notebook-text-highlight/);
+    assert.match(html, /\.subject-notebook-text-selection-menu/);
+    assert.match(frontend, /const CORES_GRIFO/);
+    assert.match(frontend, /data-notebook-text-highlight-color/);
+    assert.match(frontend, /data-notebook-text-highlight-remove/);
+    assert.match(html, /\.subject-notebook-highlight-swatch/);
+    assert.match(frontend, /selectionchange/);
+    assert.match(frontend, /function atualizarMenuGrifoTexto/);
+});

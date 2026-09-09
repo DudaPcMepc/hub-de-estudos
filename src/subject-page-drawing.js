@@ -1,4 +1,5 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
+const XHTML_NS = "http://www.w3.org/1999/xhtml";
 const LIMITE_HISTORICO = 50;
 const copiar = valor => JSON.parse(JSON.stringify(valor));
 const limitar = (valor, minimo, maximo) => Math.min(maximo, Math.max(minimo, valor));
@@ -63,6 +64,8 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     const cor = container.querySelector("[data-page-drawing-color]");
     const tamanho = container.querySelector("[data-page-drawing-size]");
     const tamanhoSaida = container.querySelector("[data-page-drawing-size-output]");
+    const grifarTextoBotao = container.querySelector("[data-page-drawing-highlight-text]");
+    const editarTextoBotao = container.querySelector("[data-page-drawing-edit-text]");
     const duplicarBotao = container.querySelector("[data-page-drawing-duplicate]");
     const excluirBotao = container.querySelector("[data-page-drawing-delete]");
     const desfazerBotao = container.querySelector("[data-page-drawing-undo]");
@@ -74,6 +77,9 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     let selecionados = new Set();
     let historico = [];
     let futuros = [];
+    let textoEmEdicaoId = null;
+    let textoAntesEdicao = null;
+    let selecaoTexto = null;
 
     function pontoDoEvento(evento) {
         const ponto = svg.createSVGPoint();
@@ -94,6 +100,9 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
 
     function atualizarBotoes() {
         selecionados = new Set([...selecionados].filter(id => tracos.some(traco => traco.id === id)));
+        const unicoSelecionado = selecionados.size === 1 ? tracos.find(traco => selecionados.has(traco.id)) : null;
+        editarTextoBotao.disabled = unicoSelecionado?.tool !== "text";
+        grifarTextoBotao.disabled = !textoEmEdicaoId || !selecaoTexto || selecaoTexto.inicio === selecaoTexto.fim;
         duplicarBotao.disabled = !selecionados.size;
         excluirBotao.disabled = !selecionados.size;
         desfazerBotao.disabled = !historico.length;
@@ -108,8 +117,35 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
             if (limites) {
                 const margem = 9;
                 elementos.push(svgEl("rect", { x: limites.esquerda - margem, y: limites.topo - margem, width: limites.largura + margem * 2, height: limites.altura + margem * 2, rx: 5, class: "subject-page-drawing-selection-box" }));
-                elementos.push(svgEl("circle", { cx: limites.direita + margem, cy: limites.base + margem, r: 8, class: "subject-page-drawing-resize-handle", "data-page-drawing-resize": "true" }));
+                const textoSelecionado = selecionados.size === 1 ? tracosSelecionados()[0] : null;
+                if (textoSelecionado?.tool === "text") {
+                    const x1 = limites.esquerda - margem;
+                    const x2 = limites.direita + margem;
+                    const y1 = limites.topo - margem;
+                    const y2 = limites.base + margem;
+                    const xm = (x1 + x2) / 2;
+                    const ym = (y1 + y2) / 2;
+                    [
+                        ["nw", x1, y1], ["n", xm, y1], ["ne", x2, y1], ["e", x2, ym],
+                        ["se", x2, y2], ["s", xm, y2], ["sw", x1, y2], ["w", x1, ym]
+                    ].forEach(([direcao, cx, cy]) => elementos.push(svgEl("circle", {
+                        cx, cy, r: 6, class: `subject-page-drawing-resize-handle is-${direcao}`,
+                        "data-page-drawing-resize": direcao
+                    })));
+                    const editar = svgEl("g", { class: "subject-page-drawing-edit-handle", "data-page-drawing-edit-handle": textoSelecionado.id, transform: `translate(${limites.esquerda - margem} ${limites.base + margem - 28})` });
+                    editar.append(svgEl("rect", { width: 31, height: 27, rx: 7 }), svgEl("text", { x: 15.5, y: 18, "text-anchor": "middle", "aria-hidden": "true" }));
+                    editar.lastElementChild.textContent = "✎";
+                    elementos.push(editar);
+                } else elementos.push(svgEl("circle", { cx: limites.direita + margem, cy: limites.base + margem, r: 8, class: "subject-page-drawing-resize-handle is-se", "data-page-drawing-resize": "se" }));
             }
+        }
+        if (gesto?.tipo === "text-box") {
+            const esquerda = Math.min(gesto.inicio.x, gesto.atual.x);
+            const topo = Math.min(gesto.inicio.y, gesto.atual.y);
+            elementos.push(svgEl("rect", {
+                x: esquerda, y: topo, width: Math.abs(gesto.atual.x - gesto.inicio.x), height: Math.abs(gesto.atual.y - gesto.inicio.y),
+                rx: 5, class: "subject-page-drawing-text-box-preview"
+            }));
         }
         if (gesto?.tipo === "lasso") {
             elementos.push(svgEl("rect", {
@@ -121,12 +157,88 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         camadaSelecao.replaceChildren(...elementos);
     }
 
-    function renderizar() {
-        camada.replaceChildren(...tracos.map(traco => svgEl("path", {
+    function elementoDoTraco(traco) {
+        if (traco.tool !== "text") return svgEl("path", {
             d: caminhoDosPontos(traco.points || []), fill: "none", stroke: traco.color || "#3b2923",
             "stroke-width": limitar(Number(traco.width) || 3, 1, 40), "stroke-linecap": "round", "stroke-linejoin": "round",
             opacity: traco.tool === "highlighter" ? .28 : 1, class: selecionados.has(traco.id) ? "is-selected" : "", "data-stroke-id": traco.id
-        })));
+        });
+        const limites = limitesDosTracos([traco]) || { esquerda: 0, topo: 0, largura: 240, altura: 80 };
+        const editando = textoEmEdicaoId === traco.id;
+        const elemento = svgEl("foreignObject", {
+            x: limites.esquerda, y: limites.topo, width: Math.max(80, limites.largura), height: Math.max(42, limites.altura),
+            class: `subject-page-drawing-text${selecionados.has(traco.id) ? " is-selected" : ""}`, "data-stroke-id": traco.id
+        });
+        const conteudo = document.createElementNS(XHTML_NS, "div");
+        conteudo.className = "subject-page-drawing-text-content";
+        conteudo.dataset.strokeId = traco.id;
+        const texto = traco.text || "Texto";
+        const marcas = (Array.isArray(traco.highlights) ? traco.highlights : [])
+            .map(marca => ({ inicio: limitar(Number(marca.inicio) || 0, 0, texto.length), fim: limitar(Number(marca.fim) || 0, 0, texto.length), color: /^#[0-9a-f]{6}$/i.test(marca.color || "") ? marca.color : "#ffe58f" }))
+            .filter(marca => marca.fim > marca.inicio)
+            .sort((a, b) => a.inicio - b.inicio);
+        const limitesMarcas = [...new Set([0, texto.length, ...marcas.flatMap(marca => [marca.inicio, marca.fim])])].sort((a, b) => a - b);
+        limitesMarcas.slice(0, -1).forEach((inicio, indice) => {
+            const fim = limitesMarcas[indice + 1];
+            const trecho = texto.slice(inicio, fim);
+            if (!trecho) return;
+            const marcada = [...marcas].reverse().find(marca => marca.inicio <= inicio && marca.fim >= fim);
+            if (!marcada) { conteudo.append(document.createTextNode(trecho)); return; }
+            const marca = document.createElementNS(XHTML_NS, "mark");
+            marca.className = "subject-page-drawing-text-highlight";
+            marca.style.backgroundColor = marcada.color;
+            marca.textContent = trecho;
+            conteudo.append(marca);
+        });
+        conteudo.style.setProperty("--drawing-text-color", traco.color || "#3b2923");
+        conteudo.style.setProperty("--drawing-text-size", `${limitar(Number(traco.fontSize) || 26, 12, 120)}px`);
+        if (editando) {
+            conteudo.setAttribute("contenteditable", "true");
+            conteudo.setAttribute("role", "textbox");
+            conteudo.setAttribute("aria-label", "Editar caixa de texto");
+            conteudo.addEventListener("pointerdown", evento => evento.stopPropagation());
+            conteudo.addEventListener("input", () => {
+                const anterior = String(traco.text || "");
+                const novo = conteudo.innerText.slice(0, 4000);
+                if (novo !== anterior) traco.highlights = ajustarGrifosAposEdicao(anterior, novo, traco.highlights);
+                traco.text = novo;
+                selecaoTexto = null;
+                ajustarCaixaTextoAoConteudo(traco, conteudo, elemento);
+                atualizarBotoes();
+            });
+            conteudo.addEventListener("keyup", () => guardarSelecaoTexto(conteudo));
+            conteudo.addEventListener("pointerup", () => guardarSelecaoTexto(conteudo));
+            conteudo.addEventListener("blur", () => finalizarEdicaoTexto(false), { once: true });
+            conteudo.addEventListener("keydown", evento => {
+                if (evento.key === "Escape") { evento.preventDefault(); finalizarEdicaoTexto(true); }
+                if (evento.key === "Enter" && (evento.ctrlKey || evento.metaKey)) { evento.preventDefault(); conteudo.blur(); }
+            });
+            queueMicrotask(() => {
+                conteudo.focus();
+                const selecao = window.getSelection();
+                const intervalo = document.createRange();
+                intervalo.selectNodeContents(conteudo); intervalo.collapse(false);
+                selecao?.removeAllRanges(); selecao?.addRange(intervalo);
+            });
+        }
+        elemento.append(conteudo);
+        return elemento;
+    }
+
+    function ajustarCaixaTextoAoConteudo(traco, conteudo, elemento) {
+        if (traco.tool !== "text" || !Array.isArray(traco.points) || traco.points.length < 2 || !conteudo.isConnected) return;
+        const inicio = traco.points[0];
+        const fim = traco.points[1];
+        const alturaAtual = Math.max(42, Math.abs(fim.y - inicio.y));
+        const alturaNecessaria = Math.max(42, Math.ceil(conteudo.scrollHeight + 8));
+        if (alturaNecessaria <= alturaAtual + 1) return;
+        fim.y = inicio.y + alturaNecessaria;
+        elemento.setAttribute("height", String(alturaNecessaria));
+        renderizarSelecao();
+    }
+
+    function renderizar() {
+        camada.replaceChildren(...tracos.map(elementoDoTraco));
         renderizarSelecao();
         atualizarBotoes();
     }
@@ -140,6 +252,83 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     function notificar() {
         aoAlterar({ strokes: copiar(tracos) });
         atualizarBotoes();
+    }
+
+    function ajustarGrifosAposEdicao(anterior, novo, marcas) {
+        const atuais = Array.isArray(marcas) ? marcas : [];
+        let prefixo = 0;
+        while (prefixo < anterior.length && prefixo < novo.length && anterior[prefixo] === novo[prefixo]) prefixo++;
+        let sufixo = 0;
+        while (sufixo < anterior.length - prefixo && sufixo < novo.length - prefixo && anterior[anterior.length - 1 - sufixo] === novo[novo.length - 1 - sufixo]) sufixo++;
+        const fimAntigo = anterior.length - sufixo;
+        const deslocamento = novo.length - anterior.length;
+        return atuais.flatMap(marca => {
+            if (marca.fim <= prefixo) return [marca];
+            if (marca.inicio >= fimAntigo) return [{ ...marca, inicio: marca.inicio + deslocamento, fim: marca.fim + deslocamento }];
+            const preservadas = [];
+            if (marca.inicio < prefixo) preservadas.push({ ...marca, inicio: marca.inicio, fim: prefixo });
+            if (marca.fim > fimAntigo) preservadas.push({ ...marca, inicio: prefixo + Math.max(0, novo.length - prefixo - sufixo), fim: marca.fim + deslocamento });
+            return preservadas;
+        }).filter(marca => marca.fim > marca.inicio);
+    }
+
+    function guardarSelecaoTexto(editor) {
+        const selecao = window.getSelection();
+        if (!selecao?.rangeCount || selecao.isCollapsed || !editor.contains(selecao.anchorNode) || !editor.contains(selecao.focusNode)) {
+            selecaoTexto = null;
+            atualizarBotoes();
+            return;
+        }
+        const intervalo = selecao.getRangeAt(0);
+        const antes = document.createRange();
+        antes.selectNodeContents(editor);
+        antes.setEnd(intervalo.startContainer, intervalo.startOffset);
+        const ateFim = document.createRange();
+        ateFim.selectNodeContents(editor);
+        ateFim.setEnd(intervalo.endContainer, intervalo.endOffset);
+        selecaoTexto = { inicio: antes.toString().length, fim: ateFim.toString().length };
+        atualizarBotoes();
+    }
+
+    function alternarGrifoTexto() {
+        const traco = tracos.find(item => item.id === textoEmEdicaoId);
+        if (!traco || !selecaoTexto || selecaoTexto.inicio === selecaoTexto.fim) return;
+        registrarHistorico();
+        const inicio = Math.min(selecaoTexto.inicio, selecaoTexto.fim);
+        const fim = Math.max(selecaoTexto.inicio, selecaoTexto.fim);
+        const marcas = Array.isArray(traco.highlights) ? traco.highlights : [];
+        const jaMarcado = marcas.some(marca => marca.inicio <= inicio && marca.fim >= fim);
+        traco.highlights = jaMarcado
+            ? marcas.flatMap(marca => {
+                if (marca.fim <= inicio || marca.inicio >= fim) return [marca];
+                return [{ inicio: marca.inicio, fim: Math.min(marca.fim, inicio) }, { inicio: Math.max(marca.inicio, fim), fim: marca.fim }].filter(parte => parte.fim > parte.inicio);
+            })
+            : [...marcas, { inicio, fim, color: cor.value }];
+        selecaoTexto = null;
+        notificar();
+        renderizar();
+    }
+
+    function finalizarEdicaoTexto(reverter) {
+        if (!textoEmEdicaoId) return;
+        const traco = tracos.find(item => item.id === textoEmEdicaoId);
+        if (traco) traco.text = reverter ? textoAntesEdicao : (String(traco.text || "").trim() || "Texto");
+        textoEmEdicaoId = null;
+        textoAntesEdicao = null;
+        selecaoTexto = null;
+        notificar();
+        renderizar();
+    }
+
+    function iniciarEdicaoTexto(traco, registrar = true) {
+        if (!traco || traco.tool !== "text") return;
+        if (textoEmEdicaoId && textoEmEdicaoId !== traco.id) finalizarEdicaoTexto(false);
+        if (registrar) registrarHistorico();
+        selecionados = new Set([traco.id]);
+        textoEmEdicaoId = traco.id;
+        textoAntesEdicao = traco.text || "";
+        selecaoTexto = null;
+        selecionarFerramenta("select");
     }
 
     function selecionarFerramenta(nova) {
@@ -157,7 +346,13 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
 
     function apagarNoPonto(ponto) {
         const raio = Math.max(8, Number(tamanho.value));
-        const restantes = tracos.filter(traco => !(traco.points || []).some((atual, indice, pontos) => distanciaSegmento(ponto, pontos[Math.max(0, indice - 1)], atual) <= raio));
+        const restantes = tracos.filter(traco => {
+            if (traco.tool === "text") {
+                const limites = limitesDosTracos([traco]);
+                return !limites || ponto.x < limites.esquerda - raio || ponto.x > limites.direita + raio || ponto.y < limites.topo - raio || ponto.y > limites.base + raio;
+            }
+            return !(traco.points || []).some((atual, indice, pontos) => distanciaSegmento(ponto, pontos[Math.max(0, indice - 1)], atual) <= raio);
+        });
         if (restantes.length === tracos.length) return false;
         tracos = restantes;
         renderizar();
@@ -166,6 +361,10 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
 
     function encontrarTraco(ponto) {
         return [...tracos].reverse().find(traco => {
+            if (traco.tool === "text") {
+                const limites = limitesDosTracos([traco]);
+                return limites && ponto.x >= limites.esquerda && ponto.x <= limites.direita && ponto.y >= limites.topo && ponto.y <= limites.base;
+            }
             const pontos = traco.points || [];
             const tolerancia = Math.max(7, (Number(traco.width) || 3) / 2 + 4);
             return pontos.some((atual, indice) => distanciaSegmento(ponto, pontos[Math.max(0, indice - 1)], atual) <= tolerancia);
@@ -173,12 +372,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     }
 
     function iniciarSelecao(evento, ponto) {
-        if (evento.target.closest?.("[data-page-drawing-resize]") && selecionados.size) {
+        const alcaRedimensionamento = evento.target.closest?.("[data-page-drawing-resize]");
+        if (alcaRedimensionamento && selecionados.size) {
             registrarHistorico();
-            gesto = { tipo: "resize", pointerId: evento.pointerId, inicio: ponto, limites: limitesDosTracos(tracosSelecionados()), originais: copiar(tracosSelecionados()), alterou: false };
+            gesto = { tipo: "resize", pointerId: evento.pointerId, inicio: ponto, direcao: alcaRedimensionamento.dataset.pageDrawingResize || "se", limites: limitesDosTracos(tracosSelecionados()), originais: copiar(tracosSelecionados()), alterou: false };
             return;
         }
-        const atingido = encontrarTraco(ponto);
+        const idDoAlvo = evento.target.closest?.("[data-stroke-id]")?.dataset.strokeId;
+        const atingido = tracos.find(traco => traco.id === idDoAlvo) || encontrarTraco(ponto);
         if (evento.shiftKey && atingido) {
             if (selecionados.has(atingido.id)) selecionados.delete(atingido.id); else selecionados.add(atingido.id);
             if (svg.hasPointerCapture(evento.pointerId)) svg.releasePointerCapture(evento.pointerId);
@@ -200,10 +401,23 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     function aoPointerDown(evento) {
         if (evento.button !== 0) return;
         evento.preventDefault();
+        const editarId = evento.target.closest?.("[data-page-drawing-edit-handle]")?.dataset.pageDrawingEditHandle;
+        if (editarId) {
+            const texto = tracos.find(traco => traco.id === editarId && traco.tool === "text");
+            if (texto) iniciarEdicaoTexto(texto);
+            return;
+        }
         svg.setPointerCapture(evento.pointerId);
         const ponto = pontoDoEvento(evento);
         if (ferramenta === "select") { iniciarSelecao(evento, ponto); return; }
         registrarHistorico();
+        if (ferramenta === "text") {
+            const traco = { id: crypto.randomUUID(), tool: "text", color: cor.value, width: 2, fontSize: 26, text: "Digite seu texto", highlights: [], points: [ponto, { ...ponto }] };
+            tracos.push(traco);
+            gesto = { tipo: "text-box", pointerId: evento.pointerId, traco, inicio: ponto, atual: ponto };
+            renderizar();
+            return;
+        }
         if (ferramenta === "eraser") {
             gesto = { tipo: "erase", pointerId: evento.pointerId, apagou: apagarNoPonto(ponto) };
             return;
@@ -232,6 +446,48 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
             });
         }
         if (gesto.tipo === "resize") {
+            const somenteTexto = gesto.originais.length === 1 && gesto.originais[0].tool === "text";
+            if (somenteTexto) {
+                const original = gesto.originais[0];
+                const atual = tracos.find(traco => traco.id === original.id);
+                const direcao = gesto.direcao || "se";
+                const redimensionaProporcionalmente = direcao.length === 2;
+                let esquerda = gesto.limites.esquerda;
+                let direita = gesto.limites.direita;
+                let topo = gesto.limites.topo;
+                let base = gesto.limites.base;
+                if (redimensionaProporcionalmente) {
+                    const larguraDesejada = direcao.includes("w") ? direita - ponto.x : ponto.x - esquerda;
+                    const alturaDesejada = direcao.includes("n") ? base - ponto.y : ponto.y - topo;
+                    const escala = Math.max(
+                        80 / Math.max(1, gesto.limites.largura),
+                        42 / Math.max(1, gesto.limites.altura),
+                        Math.min(larguraDesejada / Math.max(1, gesto.limites.largura), alturaDesejada / Math.max(1, gesto.limites.altura))
+                    );
+                    const larguraProporcional = gesto.limites.largura * escala;
+                    const alturaProporcional = gesto.limites.altura * escala;
+                    if (direcao.includes("w")) esquerda = direita - larguraProporcional; else direita = esquerda + larguraProporcional;
+                    if (direcao.includes("n")) topo = base - alturaProporcional; else base = topo + alturaProporcional;
+                } else {
+                    if (direcao.includes("w")) esquerda = Math.min(ponto.x, direita - 80);
+                    if (direcao.includes("e")) direita = Math.max(ponto.x, esquerda + 80);
+                    if (direcao.includes("n")) topo = Math.min(ponto.y, base - 42);
+                    if (direcao.includes("s")) base = Math.max(ponto.y, topo + 42);
+                }
+                const largura = direita - esquerda;
+                const altura = base - topo;
+                const escalaX = largura / Math.max(1, gesto.limites.largura);
+                const escalaY = altura / Math.max(1, gesto.limites.altura);
+                gesto.alterou = gesto.alterou || Math.abs(escalaX - 1) > .01 || Math.abs(escalaY - 1) > .01;
+                if (atual) {
+                    atual.points = [{ x: esquerda, y: topo }, { x: direita, y: base }];
+                    atual.fontSize = redimensionaProporcionalmente
+                        ? limitar((Number(original.fontSize) || 26) * Math.min(escalaX, escalaY), 12, 120)
+                        : Number(original.fontSize) || 26;
+                }
+                renderizar();
+                return;
+            }
             const distanciaInicial = Math.hypot(gesto.inicio.x - gesto.limites.esquerda, gesto.inicio.y - gesto.limites.topo) || 1;
             const escala = limitar(Math.hypot(ponto.x - gesto.limites.esquerda, ponto.y - gesto.limites.topo) / distanciaInicial, .15, 8);
             gesto.alterou = gesto.alterou || Math.abs(escala - 1) > .01;
@@ -240,6 +496,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
                 if (!atual) return;
                 atual.points = original.points.map(valor => ({ x: gesto.limites.esquerda + (valor.x - gesto.limites.esquerda) * escala, y: gesto.limites.topo + (valor.y - gesto.limites.topo) * escala }));
                 atual.width = limitar((Number(original.width) || 3) * escala, 1, 40);
+                if (atual.tool === "text") atual.fontSize = limitar((Number(original.fontSize) || 26) * escala, 12, 120);
             });
         }
         renderizar();
@@ -253,6 +510,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         if (!gesto || gesto.pointerId !== evento.pointerId) return;
         evento.preventDefault();
         if (["move", "resize"].includes(gesto.tipo)) atualizarTransformacaoSelecao(ponto);
+        else if (gesto.tipo === "text-box") {
+            gesto.atual = ponto;
+            gesto.traco.points = [
+                { x: Math.min(gesto.inicio.x, ponto.x), y: Math.min(gesto.inicio.y, ponto.y) },
+                { x: Math.max(gesto.inicio.x, ponto.x), y: Math.max(gesto.inicio.y, ponto.y) }
+            ];
+            renderizar();
+        }
         else if (gesto.tipo === "lasso") { gesto.atual = ponto; renderizarSelecao(); }
         else if (gesto.tipo === "erase") gesto.apagou = apagarNoPonto(ponto) || gesto.apagou;
         else if (gesto.tipo === "shape") { gesto.traco.points = pontosDaForma(gesto.traco.tool, gesto.inicio, ponto); renderizar(); }
@@ -276,6 +541,21 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         gesto = null;
         if (svg.hasPointerCapture(evento.pointerId)) svg.releasePointerCapture(evento.pointerId);
         if (atual.tipo === "lasso") concluirLaco(atual);
+        else if (atual.tipo === "text-box") {
+            const largura = Math.abs(atual.atual.x - atual.inicio.x);
+            const altura = Math.abs(atual.atual.y - atual.inicio.y);
+            if (largura < 20 && altura < 20) atual.traco.points = [atual.inicio, { x: atual.inicio.x + 260, y: atual.inicio.y + 90 }];
+            else {
+                const limites = limitesDosTracos([atual.traco]);
+                atual.traco.points = [
+                    { x: limites.esquerda, y: limites.topo },
+                    { x: limites.esquerda + Math.max(80, limites.largura), y: limites.topo + Math.max(42, limites.altura) }
+                ];
+            }
+            notificar();
+            iniciarEdicaoTexto(atual.traco, false);
+            return;
+        }
         else if (["move", "resize"].includes(atual.tipo)) { if (atual.alterou) notificar(); else historico.pop(); }
         else if (atual.tipo === "erase") { if (atual.apagou) notificar(); else historico.pop(); }
         else notificar();
@@ -283,6 +563,9 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     }
 
     ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.pageDrawingTool)));
+    grifarTextoBotao.addEventListener("pointerdown", evento => evento.preventDefault());
+    grifarTextoBotao.addEventListener("click", alternarGrifoTexto);
+    editarTextoBotao.addEventListener("click", () => iniciarEdicaoTexto(tracosSelecionados()[0]));
     cor.addEventListener("input", () => {
         if (ferramenta !== "select" || !selecionados.size) return;
         registrarHistorico();
@@ -316,9 +599,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     svg.addEventListener("pointermove", aoPointerMove);
     svg.addEventListener("pointerup", aoPointerUp);
     svg.addEventListener("pointercancel", aoPointerUp);
+    svg.addEventListener("dblclick", evento => {
+        const id = evento.target.closest?.("[data-stroke-id]")?.dataset.strokeId;
+        const traco = tracos.find(item => item.id === id);
+        if (traco?.tool === "text") { evento.preventDefault(); iniciarEdicaoTexto(traco); }
+    });
     svg.addEventListener("pointerleave", () => { if (!gesto && ferramenta === "eraser") cursor.setAttribute("visibility", "hidden"); });
     svg.addEventListener("pointerenter", () => { if (ferramenta === "eraser") cursor.setAttribute("visibility", "visible"); });
 
     selecionarFerramenta("pen");
-    return Object.freeze({ destruir: () => { gesto = null; } });
+    return Object.freeze({ destruir: () => { gesto = null; textoEmEdicaoId = null; } });
 }

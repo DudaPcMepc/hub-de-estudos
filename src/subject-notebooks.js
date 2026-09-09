@@ -4,6 +4,7 @@ const TIPOS = Object.freeze({ folder: "Pasta", notebook: "Caderno", page: "Pági
 const ICONES = Object.freeze({ folder: "folder2", notebook: "journal-bookmark", page: "file-earmark-text" });
 const PAPEIS = Object.freeze({ plain: "Lisa", lined: "Pautada", grid: "Quadriculada", dotted: "Pontilhada" });
 const CAPAS = Object.freeze({ solid: "Clássica", gradient: "Degradê", minimal: "Minimalista" });
+const CORES_GRIFO = Object.freeze(["#ffe58f", "#bdecc8", "#b9ddff", "#ffc6d9", "#ffd0a8"]);
 const uuid = () => crypto.randomUUID();
 const esc = (valor) => String(valor ?? "").replace(/[&<>'"]/g, caractere => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[caractere]);
 const formatarDataCurta = valor => {
@@ -83,6 +84,7 @@ export function criarCadernosMaterias(repositorio) {
     let lixeiraAberta = false;
     let paginasRecolhidas = false;
     let modoDialogo = "full";
+    let corGrifoTexto = CORES_GRIFO[0];
     let ultimaPaginaMateriaId = "";
     let arraste = null;
     let desfazerMovimento = null;
@@ -216,7 +218,40 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     function htmlEditorDesenho(item) {
-        return `<section class="subject-page-drawing" data-page-drawing-root data-tool="pen"><div class="subject-page-drawing-toolbar" role="toolbar" aria-label="Ferramentas de escrita livre"><div class="subject-page-drawing-tools"><button type="button" data-page-drawing-tool="select" aria-pressed="false" title="Selecionar e mover"><i class="bi-bounding-box-circles"></i><span>Selecionar</span></button><button class="is-active" type="button" data-page-drawing-tool="pen" aria-pressed="true" title="Caneta"><i class="bi-pen"></i><span>Caneta</span></button><button type="button" data-page-drawing-tool="highlighter" aria-pressed="false" title="Marca-texto"><i class="bi-highlighter"></i><span>Marca-texto</span></button><button type="button" data-page-drawing-tool="eraser" aria-pressed="false" title="Borracha"><i class="bi-eraser"></i><span>Borracha</span></button><button type="button" data-page-drawing-tool="line" aria-pressed="false" title="Linha"><i class="bi-slash-lg"></i><span>Linha</span></button><button type="button" data-page-drawing-tool="arrow" aria-pressed="false" title="Seta"><i class="bi-arrow-up-right"></i><span>Seta</span></button><button type="button" data-page-drawing-tool="rectangle" aria-pressed="false" title="Retângulo"><i class="bi-square"></i><span>Retângulo</span></button><button type="button" data-page-drawing-tool="ellipse" aria-pressed="false" title="Círculo ou elipse"><i class="bi-circle"></i><span>Círculo</span></button></div><span class="subject-notebook-editor-divider"></span><label class="subject-page-drawing-color" title="Cor"><i class="bi-palette"></i><input type="color" value="${esc(item.cor || "#3b2923")}" data-page-drawing-color aria-label="Cor da caneta, forma ou seleção"></label><label class="subject-page-drawing-size" title="Espessura"><i class="bi-circle"></i><input type="range" min="2" max="28" step="1" value="4" data-page-drawing-size aria-label="Espessura da ferramenta"><output data-page-drawing-size-output>4</output></label><span class="subject-notebook-editor-spacer"></span><button type="button" data-page-drawing-duplicate title="Duplicar seleção" aria-label="Duplicar seleção" disabled><i class="bi-copy"></i></button><button class="is-danger" type="button" data-page-drawing-delete title="Excluir seleção" aria-label="Excluir seleção" disabled><i class="bi-trash3"></i></button><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-undo title="Desfazer" aria-label="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i></button><button type="button" data-page-drawing-redo title="Refazer" aria-label="Refazer" disabled><i class="bi-arrow-clockwise"></i></button><button class="is-danger" type="button" data-page-drawing-clear title="Limpar toda a página" aria-label="Limpar toda a página" disabled><i class="bi-file-earmark-x"></i></button></div><div class="subject-page-drawing-stage is-paper-${esc(item.estiloFolha)}"><svg data-page-drawing-canvas viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin meet" aria-label="Folha de escrita livre"><g data-page-drawing-strokes></g><g data-page-drawing-selection></g><circle class="subject-page-drawing-eraser-cursor" data-page-drawing-eraser-cursor cx="0" cy="0" r="10" visibility="hidden"></circle></svg><div class="subject-page-drawing-hint"><i class="bi-hand-index-thumb me-1"></i>Selecione para mover ou contorne vários traços com o laço.</div></div></section>`;
+        return `<section class="subject-page-drawing" data-page-drawing-root data-tool="pen"><div class="subject-page-drawing-toolbar" role="toolbar" aria-label="Ferramentas de escrita livre"><div class="subject-page-drawing-tools"><button type="button" data-page-drawing-tool="select" aria-pressed="false" title="Selecionar e mover"><i class="bi-bounding-box-circles"></i><span>Selecionar</span></button><button class="is-active" type="button" data-page-drawing-tool="pen" aria-pressed="true" title="Caneta"><i class="bi-pen"></i><span>Caneta</span></button><button type="button" data-page-drawing-tool="highlighter" aria-pressed="false" title="Marca-texto livre"><i class="bi-highlighter"></i><span>Marca-texto</span></button><button type="button" data-page-drawing-tool="eraser" aria-pressed="false" title="Borracha"><i class="bi-eraser"></i><span>Borracha</span></button><button type="button" data-page-drawing-tool="text" aria-pressed="false" title="Caixa de texto"><i class="bi-fonts"></i><span>Texto</span></button><button type="button" data-page-drawing-tool="line" aria-pressed="false" title="Linha"><i class="bi-slash-lg"></i><span>Linha</span></button><button type="button" data-page-drawing-tool="arrow" aria-pressed="false" title="Seta"><i class="bi-arrow-up-right"></i><span>Seta</span></button><button type="button" data-page-drawing-tool="rectangle" aria-pressed="false" title="Retângulo"><i class="bi-square"></i><span>Retângulo</span></button><button type="button" data-page-drawing-tool="ellipse" aria-pressed="false" title="Círculo ou elipse"><i class="bi-circle"></i><span>Círculo</span></button></div><span class="subject-notebook-editor-divider"></span><label class="subject-page-drawing-color" title="Cor"><i class="bi-palette"></i><input type="color" value="${esc(item.cor || "#3b2923")}" data-page-drawing-color aria-label="Cor da caneta, forma, texto ou seleção"></label><label class="subject-page-drawing-size" title="Espessura"><i class="bi-circle"></i><input type="range" min="2" max="28" step="1" value="4" data-page-drawing-size aria-label="Espessura da ferramenta"><output data-page-drawing-size-output>4</output></label><span class="subject-notebook-editor-spacer"></span><button type="button" data-page-drawing-highlight-text title="Grifar ou desmarcar trecho selecionado" aria-label="Grifar ou desmarcar trecho selecionado" disabled><i class="bi-highlighter"></i></button><button type="button" data-page-drawing-edit-text title="Editar texto selecionado" aria-label="Editar texto selecionado" disabled><i class="bi-pencil-square"></i></button><button type="button" data-page-drawing-duplicate title="Duplicar seleção" aria-label="Duplicar seleção" disabled><i class="bi-copy"></i></button><button class="is-danger" type="button" data-page-drawing-delete title="Excluir seleção" aria-label="Excluir seleção" disabled><i class="bi-trash3"></i></button><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-undo title="Desfazer" aria-label="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i></button><button type="button" data-page-drawing-redo title="Refazer" aria-label="Refazer" disabled><i class="bi-arrow-clockwise"></i></button><button class="is-danger" type="button" data-page-drawing-clear title="Limpar toda a página" aria-label="Limpar toda a página" disabled><i class="bi-file-earmark-x"></i></button></div><div class="subject-page-drawing-stage is-paper-${esc(item.estiloFolha)}"><svg data-page-drawing-canvas viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin meet" aria-label="Folha de escrita livre"><g data-page-drawing-strokes></g><g data-page-drawing-selection></g><circle class="subject-page-drawing-eraser-cursor" data-page-drawing-eraser-cursor cx="0" cy="0" r="10" visibility="hidden"></circle></svg><div class="subject-page-drawing-hint"><i class="bi-hand-index-thumb me-1"></i>Selecione para mover. Ao editar um texto, selecione palavras e use o marcador para grifar.</div></div></section>`;
+    }
+
+    function htmlTextoComGrifos(texto, marcas) {
+        const valor = String(texto || "");
+        const intervalos = (Array.isArray(marcas) ? marcas : [])
+            .map(marca => ({ inicio: Math.max(0, Math.min(valor.length, Number(marca.inicio) || 0)), fim: Math.max(0, Math.min(valor.length, Number(marca.fim) || 0)), cor: CORES_GRIFO.includes(marca.cor) ? marca.cor : CORES_GRIFO[0] }))
+            .filter(marca => marca.fim > marca.inicio)
+            .sort((a, b) => a.inicio - b.inicio);
+        const cortes = [...new Set([0, valor.length, ...intervalos.flatMap(marca => [marca.inicio, marca.fim])])].sort((a, b) => a - b);
+        return cortes.slice(0, -1).map((inicio, indice) => {
+            const fim = cortes[indice + 1];
+            const trecho = esc(valor.slice(inicio, fim));
+            const marca = [...intervalos].reverse().find(item => item.inicio <= inicio && item.fim >= fim);
+            return marca ? `<mark class="subject-notebook-text-highlight" style="--text-highlight:${marca.cor}">${trecho}</mark>` : trecho;
+        }).join("");
+    }
+
+    function ajustarGrifosTexto(anterior, novo, marcas) {
+        const atuais = Array.isArray(marcas) ? marcas : [];
+        let prefixo = 0;
+        while (prefixo < anterior.length && prefixo < novo.length && anterior[prefixo] === novo[prefixo]) prefixo++;
+        let sufixo = 0;
+        while (sufixo < anterior.length - prefixo && sufixo < novo.length - prefixo && anterior[anterior.length - 1 - sufixo] === novo[novo.length - 1 - sufixo]) sufixo++;
+        const fimAntigo = anterior.length - sufixo;
+        const deslocamento = novo.length - anterior.length;
+        return atuais.flatMap(marca => {
+            if (marca.fim <= prefixo) return [marca];
+            if (marca.inicio >= fimAntigo) return [{ inicio: marca.inicio + deslocamento, fim: marca.fim + deslocamento }];
+            const preservadas = [];
+            if (marca.inicio < prefixo) preservadas.push({ inicio: marca.inicio, fim: prefixo });
+            if (marca.fim > fimAntigo) preservadas.push({ inicio: prefixo + Math.max(0, novo.length - prefixo - sufixo), fim: marca.fim + deslocamento });
+            return preservadas;
+        }).filter(marca => marca.fim > marca.inicio);
     }
 
     function urlMaterialSegura(valor) {
@@ -375,7 +410,9 @@ export function criarCadernosMaterias(repositorio) {
                 : null;
             const alternador = `<div class="subject-notebook-page-mode" role="group" aria-label="Modo da página"><button type="button" class="${modo === "text" ? "is-active" : ""}" data-notebook-page-mode="text" aria-pressed="${modo === "text"}"><i class="bi-text-paragraph"></i>Texto</button><button type="button" class="${modo === "drawing" ? "is-active" : ""}" data-notebook-page-mode="drawing" aria-pressed="${modo === "drawing"}"><i class="bi-pen"></i>Escrita livre</button></div>`;
             const topbar = `<div class="subject-notebook-editor-topbar"><button class="subject-notebook-tool" type="button" data-notebook-back title="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}" aria-label="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}"><i class="bi-arrow-left"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" data-notebook-pages-toggle aria-pressed="${!paginasRecolhidas}" title="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}" aria-label="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}"><i class="bi-layout-sidebar-inset"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" ${anterior ? `data-notebook-select="${anterior.id}"` : "disabled"} title="Página anterior" aria-label="Página anterior"><i class="bi-chevron-left"></i></button><span class="subject-notebook-page-position">${indice + 1} / ${paginas.length}</span><button class="subject-notebook-tool" type="button" ${proxima ? `data-notebook-select="${proxima.id}"` : "disabled"} title="Próxima página" aria-label="Próxima página"><i class="bi-chevron-right"></i></button><label class="subject-notebook-paper-picker" title="Estilo da folha"><i class="bi-grid-3x3"></i><select id="subjectNotebookPagePaper" aria-label="Estilo da folha">${opcoesPapel}</select></label><span class="subject-notebook-editor-spacer"></span><button class="subject-notebook-tool is-primary" type="button" data-notebook-create="page" title="Nova página" aria-label="Nova página"><i class="bi-file-earmark-plus"></i></button>${botoesAcoes(item)}</div>`;
-            const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><textarea class="subject-notebook-page-content" id="subjectNotebookPageContent" maxlength="500000" placeholder="Comece a escrever suas anotações…">${esc(item.conteudo)}</textarea></div>`;
+            const grifosTexto = item.desenho?.textHighlights || [];
+            const paletaGrifo = CORES_GRIFO.map((cor, indice) => `<button class="subject-notebook-highlight-swatch" type="button" data-notebook-text-highlight-color="${cor}" style="--swatch:${cor}" aria-label="Grifar em ${["amarelo", "verde", "azul", "rosa", "laranja"][indice]}"></button>`).join("");
+            const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><div class="subject-notebook-page-content" id="subjectNotebookPageContent" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Comece a escrever suas anotações…" data-last-text="${esc(item.conteudo)}">${htmlTextoComGrifos(item.conteudo, grifosTexto)}</div><div class="subject-notebook-text-selection-menu" data-notebook-text-selection-menu role="toolbar" aria-label="Cores do grifo" hidden><span>Grifar</span>${paletaGrifo}<button class="subject-notebook-highlight-remove" type="button" data-notebook-text-highlight-remove title="Remover grifo" aria-label="Remover grifo"><i class="bi-eraser"></i></button></div></div>`;
             const conteudo = materialAberto ? htmlLeitorMaterial(materialAberto) : modo === "drawing" ? htmlEditorDesenho(item) : editorTexto;
             dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item)}<section class="subject-notebook-page-stage">${topbar}<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>${conteudo}${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="ms-auto small text-muted" id="subjectNotebookPageStatus">Salvo</span></div></section></div>`;
             if (!materialAberto && modo === "drawing") queueMicrotask(() => {
@@ -692,11 +729,12 @@ export function criarCadernosMaterias(repositorio) {
         const titulo = document.getElementById("subjectNotebookPageTitle");
         const conteudo = document.getElementById("subjectNotebookPageContent");
         if (!item || item.tipo !== "page" || !titulo || !conteudo) return true;
+        const textoConteudo = "value" in conteudo ? conteudo.value : conteudo.innerText.slice(0, 500000);
         if (!titulo.value.trim()) { informar("Dê um título à página antes de sair.", true); titulo.focus(); return false; }
-        if (titulo.value === item.titulo && conteudo.value === item.conteudo) return true;
+        if (titulo.value === item.titulo && textoConteudo === item.conteudo) return true;
         document.getElementById("subjectNotebookPageStatus").textContent = "Salvando…";
         try {
-            const salvo = await repositorio.atualizar(item.id, { titulo: titulo.value, conteudo: conteudo.value }, item.versao);
+            const salvo = await repositorio.atualizar(item.id, { titulo: titulo.value, conteudo: textoConteudo, desenho: item.desenho || { strokes: [] } }, item.versao);
             itens = itens.map(valor => valor.id === item.id ? salvo : valor);
             document.getElementById("subjectNotebookPageStatus").textContent = "Salvo";
             renderizarArvore();
@@ -713,6 +751,54 @@ export function criarCadernosMaterias(repositorio) {
         if (status) status.textContent = "Alterações pendentes";
         clearTimeout(timerSalvamento);
         timerSalvamento = window.setTimeout(() => { salvamentoPendente = salvarPagina(); }, 800);
+    }
+
+    function atualizarMenuGrifoTexto() {
+        const editor = document.getElementById("subjectNotebookPageContent");
+        const menu = dom.workspace.querySelector("[data-notebook-text-selection-menu]");
+        const selecao = window.getSelection();
+        if (!editor || !menu || !selecao?.rangeCount || selecao.isCollapsed || !editor.contains(selecao.anchorNode) || !editor.contains(selecao.focusNode)) {
+            if (menu) menu.hidden = true;
+            return;
+        }
+        const caixaSelecao = selecao.getRangeAt(0).getBoundingClientRect();
+        const caixaEditor = editor.closest(".subject-notebook-page-editor").getBoundingClientRect();
+        menu.hidden = false;
+        menu.style.left = `${Math.max(112, Math.min(caixaEditor.width - 112, caixaSelecao.left - caixaEditor.left + caixaSelecao.width / 2))}px`;
+        menu.style.top = `${Math.max(54, caixaSelecao.top - caixaEditor.top - 45)}px`;
+    }
+
+    async function alternarGrifoTextoPagina(corEscolhida = null, remover = false) {
+        const pagina = selecionado();
+        const editor = document.getElementById("subjectNotebookPageContent");
+        const selecao = window.getSelection();
+        if (!pagina || pagina.tipo !== "page" || !editor || !selecao?.rangeCount || selecao.isCollapsed || !editor.contains(selecao.anchorNode) || !editor.contains(selecao.focusNode)) {
+            informar("Selecione primeiro as palavras que deseja grifar.", true);
+            return;
+        }
+        const intervalo = selecao.getRangeAt(0);
+        const antes = document.createRange();
+        antes.selectNodeContents(editor);
+        antes.setEnd(intervalo.startContainer, intervalo.startOffset);
+        const ateFim = document.createRange();
+        ateFim.selectNodeContents(editor);
+        ateFim.setEnd(intervalo.endContainer, intervalo.endOffset);
+        const inicio = antes.toString().length;
+        const fim = ateFim.toString().length;
+        if (fim <= inicio) return;
+        const desenho = pagina.desenho || { strokes: [] };
+        const marcas = Array.isArray(desenho.textHighlights) ? desenho.textHighlights : [];
+        const semTrechoAtual = marcas.flatMap(marca => {
+                if (marca.fim <= inicio || marca.inicio >= fim) return [marca];
+                return [{ inicio: marca.inicio, fim: Math.min(marca.fim, inicio) }, { inicio: Math.max(marca.inicio, fim), fim: marca.fim }].filter(parte => parte.fim > parte.inicio);
+            });
+        const atualizadas = remover ? semTrechoAtual : [...semTrechoAtual, { inicio, fim, cor: CORES_GRIFO.includes(corEscolhida) ? corEscolhida : corGrifoTexto }];
+        pagina.desenho = { ...desenho, textHighlights: atualizadas };
+        editor.innerHTML = htmlTextoComGrifos(editor.innerText, atualizadas);
+        editor.dataset.lastText = editor.innerText;
+        dom.workspace.querySelector("[data-notebook-text-selection-menu]").hidden = true;
+        await enfileirarSalvamentoDesenho(pagina.id);
+        informar(remover ? "Grifo removido." : "Trecho grifado.");
     }
 
     async function salvarDesenhoPagina(paginaId) {
@@ -1032,7 +1118,7 @@ export function criarCadernosMaterias(repositorio) {
         limparDestinoArraste();
     });
     dom.app.addEventListener("click", async evento => {
-        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step]");
+        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step],[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove]");
         if (!alvo) return;
         if (alvo.hasAttribute("data-notebook-home")) await selecionar("");
         if (alvo.dataset.notebookSelect) await selecionar(alvo.dataset.notebookSelect);
@@ -1062,6 +1148,11 @@ export function criarCadernosMaterias(repositorio) {
             }
         }
         if (alvo.hasAttribute("data-notebook-back")) await voltarDaPagina();
+        if (alvo.dataset.notebookTextHighlightColor) {
+            corGrifoTexto = CORES_GRIFO.includes(alvo.dataset.notebookTextHighlightColor) ? alvo.dataset.notebookTextHighlightColor : CORES_GRIFO[0];
+            await alternarGrifoTextoPagina(corGrifoTexto, false);
+        }
+        if (alvo.hasAttribute("data-notebook-text-highlight-remove")) await alternarGrifoTextoPagina(null, true);
         if (alvo.hasAttribute("data-notebook-organize-finish")) await alternarOrganizacao(false);
         if (alvo.hasAttribute("data-notebook-trash-close")) { lixeiraAberta = false; renderizar(); }
         if (alvo.dataset.notebookTrashRestore) await restaurarItem(alvo.dataset.notebookTrashRestore);
@@ -1090,8 +1181,21 @@ export function criarCadernosMaterias(repositorio) {
         }
     });
     dom.app.addEventListener("input", evento => {
+        if (evento.target.id === "subjectNotebookPageContent" && !("value" in evento.target)) {
+            const pagina = selecionado();
+            const anterior = evento.target.dataset.lastText ?? pagina?.conteudo ?? "";
+            const novo = evento.target.innerText.slice(0, 500000);
+            if (pagina?.tipo === "page" && anterior !== novo) {
+                pagina.desenho = { ...(pagina.desenho || { strokes: [] }), textHighlights: ajustarGrifosTexto(anterior, novo, pagina.desenho?.textHighlights) };
+                evento.target.dataset.lastText = novo;
+            }
+        }
         if (["subjectNotebookPageTitle", "subjectNotebookPageContent"].includes(evento.target.id)) agendarSalvamento();
     });
+    dom.app.addEventListener("pointerdown", evento => {
+        if (evento.target.closest("[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove]")) evento.preventDefault();
+    });
+    document.addEventListener("selectionchange", () => queueMicrotask(atualizarMenuGrifoTexto));
     dom.app.addEventListener("submit", async evento => {
         const form = evento.target.closest("[data-notebook-pdf-progress]");
         if (!form) return;
