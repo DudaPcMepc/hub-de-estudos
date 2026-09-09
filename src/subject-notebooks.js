@@ -5,6 +5,7 @@ const ICONES = Object.freeze({ folder: "folder2", notebook: "journal-bookmark", 
 const PAPEIS = Object.freeze({ plain: "Lisa", lined: "Pautada", grid: "Quadriculada", dotted: "Pontilhada" });
 const CAPAS = Object.freeze({ solid: "Clássica", gradient: "Degradê", minimal: "Minimalista" });
 const CORES_GRIFO = Object.freeze(["#ffe58f", "#bdecc8", "#b9ddff", "#ffc6d9", "#ffd0a8"]);
+const PREFIXO_RASCUNHO = "esquema-estudos:caderno-materia:rascunho:v1";
 const uuid = () => crypto.randomUUID();
 const esc = (valor) => String(valor ?? "").replace(/[&<>'"]/g, caractere => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[caractere]);
 const formatarDataCurta = valor => {
@@ -95,6 +96,55 @@ export function criarCadernosMaterias(repositorio) {
     const modoPaginaPorId = new Map();
     const materiaisPorPagina = new Map();
     const materiaisCarregando = new Set();
+
+    const chaveRascunho = paginaId => `${PREFIXO_RASCUNHO}:${materiaId}:${paginaId}`;
+    const assinaturaRascunho = dados => JSON.stringify({ titulo: dados?.titulo || "", conteudo: dados?.conteudo || "", desenho: dados?.desenho || { strokes: [] } });
+
+    function lerRascunho(paginaId) {
+        try { return JSON.parse(localStorage.getItem(chaveRascunho(paginaId)) || "null"); }
+        catch { return null; }
+    }
+
+    function atualizarStatusSalvamento(estado, texto) {
+        const status = document.getElementById("subjectNotebookPageStatus");
+        if (!status) return;
+        status.dataset.saveState = estado;
+        const icones = { saved: "bi-cloud-check", pending: "bi-cloud-arrow-up", saving: "bi-arrow-repeat", offline: "bi-cloud-slash", recovered: "bi-clock-history" };
+        status.innerHTML = `<i class="bi ${icones[estado] || "bi-cloud"}" aria-hidden="true"></i><span>${esc(texto)}</span>`;
+    }
+
+    function guardarRascunho(pagina, substituicoes = {}) {
+        if (!pagina || pagina.tipo !== "page") return null;
+        const rascunho = {
+            paginaId: pagina.id,
+            materiaId,
+            titulo: substituicoes.titulo ?? pagina.titulo,
+            conteudo: substituicoes.conteudo ?? pagina.conteudo,
+            desenho: substituicoes.desenho ?? pagina.desenho ?? { strokes: [] },
+            criadoEm: new Date().toISOString()
+        };
+        try { localStorage.setItem(chaveRascunho(pagina.id), JSON.stringify(rascunho)); }
+        catch { atualizarStatusSalvamento("offline", "Rascunho não armazenado"); }
+        return rascunho;
+    }
+
+    function removerRascunhoSeIgual(paginaId, dadosSalvos) {
+        const atual = lerRascunho(paginaId);
+        if (!atual || assinaturaRascunho(atual) !== assinaturaRascunho(dadosSalvos)) return;
+        try { localStorage.removeItem(chaveRascunho(paginaId)); } catch {}
+    }
+
+    function recuperarRascunhosLocais() {
+        let recuperados = 0;
+        itens = itens.map(item => {
+            if (item.tipo !== "page") return item;
+            const rascunho = lerRascunho(item.id);
+            if (!rascunho || String(rascunho.materiaId) !== String(materiaId) || assinaturaRascunho(rascunho) === assinaturaRascunho(item)) return item;
+            recuperados += 1;
+            return { ...item, titulo: rascunho.titulo || item.titulo, conteudo: rascunho.conteudo ?? item.conteudo, desenho: rascunho.desenho || item.desenho, rascunhoRecuperado: true };
+        });
+        return recuperados;
+    }
 
     function registrarPaginaAtual(pagina) {
         if (!pagina || pagina.tipo !== "page") return;
@@ -414,7 +464,9 @@ export function criarCadernosMaterias(repositorio) {
             const paletaGrifo = CORES_GRIFO.map((cor, indice) => `<button class="subject-notebook-highlight-swatch" type="button" data-notebook-text-highlight-color="${cor}" style="--swatch:${cor}" aria-label="Grifar em ${["amarelo", "verde", "azul", "rosa", "laranja"][indice]}"></button>`).join("");
             const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><div class="subject-notebook-page-content" id="subjectNotebookPageContent" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Comece a escrever suas anotações…" data-last-text="${esc(item.conteudo)}">${htmlTextoComGrifos(item.conteudo, grifosTexto)}</div><div class="subject-notebook-text-selection-menu" data-notebook-text-selection-menu role="toolbar" aria-label="Cores do grifo" hidden><span>Grifar</span>${paletaGrifo}<button class="subject-notebook-highlight-remove" type="button" data-notebook-text-highlight-remove title="Remover grifo" aria-label="Remover grifo"><i class="bi-eraser"></i></button></div></div>`;
             const conteudo = materialAberto ? htmlLeitorMaterial(materialAberto) : modo === "drawing" ? htmlEditorDesenho(item) : editorTexto;
-            dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item)}<section class="subject-notebook-page-stage">${topbar}<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>${conteudo}${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="ms-auto small text-muted" id="subjectNotebookPageStatus">Salvo</span></div></section></div>`;
+            dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item)}<section class="subject-notebook-page-stage">${topbar}<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>${conteudo}${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="subject-notebook-save-status ms-auto" id="subjectNotebookPageStatus" role="status" aria-live="polite"></span></div></section></div>`;
+            const rascunhoAtual = lerRascunho(item.id);
+            atualizarStatusSalvamento(item.rascunhoRecuperado || rascunhoAtual ? "recovered" : "saved", item.rascunhoRecuperado || rascunhoAtual ? "Rascunho recuperado" : "Salvo na nuvem");
             if (!materialAberto && modo === "drawing") queueMicrotask(() => {
                 const raiz = dom.workspace.querySelector("[data-page-drawing-root]");
                 if (raiz && selecionadoId === item.id) editorDesenho = criarDesenhoPagina(raiz, item.desenho, desenho => agendarSalvamentoDesenho(item.id, desenho));
@@ -731,24 +783,30 @@ export function criarCadernosMaterias(repositorio) {
         if (!item || item.tipo !== "page" || !titulo || !conteudo) return true;
         const textoConteudo = "value" in conteudo ? conteudo.value : conteudo.innerText.slice(0, 500000);
         if (!titulo.value.trim()) { informar("Dê um título à página antes de sair.", true); titulo.focus(); return false; }
-        if (titulo.value === item.titulo && textoConteudo === item.conteudo) return true;
-        document.getElementById("subjectNotebookPageStatus").textContent = "Salvando…";
+        const dadosEnviados = { titulo: titulo.value, conteudo: textoConteudo, desenho: item.desenho || { strokes: [] } };
+        if (titulo.value === item.titulo && textoConteudo === item.conteudo && !lerRascunho(item.id)) return true;
+        atualizarStatusSalvamento("saving", "Salvando…");
         try {
-            const salvo = await repositorio.atualizar(item.id, { titulo: titulo.value, conteudo: textoConteudo, desenho: item.desenho || { strokes: [] } }, item.versao);
+            const salvo = await repositorio.atualizar(item.id, dadosEnviados, item.versao);
             itens = itens.map(valor => valor.id === item.id ? salvo : valor);
-            document.getElementById("subjectNotebookPageStatus").textContent = "Salvo";
+            removerRascunhoSeIgual(item.id, dadosEnviados);
+            atualizarStatusSalvamento("saved", "Salvo na nuvem");
             renderizarArvore();
             return true;
         } catch (erro) {
-            document.getElementById("subjectNotebookPageStatus").textContent = "Não salvo";
+            guardarRascunho(item, dadosEnviados);
+            atualizarStatusSalvamento(navigator.onLine ? "offline" : "offline", navigator.onLine ? "Não foi possível salvar" : "Sem conexão · rascunho protegido");
             informar(erro.message || "Não foi possível salvar a página.", true);
             return false;
         } finally { salvamentoPendente = null; }
     }
 
     function agendarSalvamento() {
-        const status = document.getElementById("subjectNotebookPageStatus");
-        if (status) status.textContent = "Alterações pendentes";
+        const pagina = selecionado();
+        const titulo = document.getElementById("subjectNotebookPageTitle");
+        const conteudo = document.getElementById("subjectNotebookPageContent");
+        if (pagina?.tipo === "page" && titulo && conteudo) guardarRascunho(pagina, { titulo: titulo.value, conteudo: conteudo.innerText.slice(0, 500000), desenho: pagina.desenho || { strokes: [] } });
+        atualizarStatusSalvamento(navigator.onLine ? "pending" : "offline", navigator.onLine ? "Alterações pendentes" : "Sem conexão · rascunho protegido");
         clearTimeout(timerSalvamento);
         timerSalvamento = window.setTimeout(() => { salvamentoPendente = salvarPagina(); }, 800);
     }
@@ -794,6 +852,7 @@ export function criarCadernosMaterias(repositorio) {
             });
         const atualizadas = remover ? semTrechoAtual : [...semTrechoAtual, { inicio, fim, cor: CORES_GRIFO.includes(corEscolhida) ? corEscolhida : corGrifoTexto }];
         pagina.desenho = { ...desenho, textHighlights: atualizadas };
+        guardarRascunho(pagina, { desenho: pagina.desenho, conteudo: editor.innerText });
         editor.innerHTML = htmlTextoComGrifos(editor.innerText, atualizadas);
         editor.dataset.lastText = editor.innerText;
         dom.workspace.querySelector("[data-notebook-text-selection-menu]").hidden = true;
@@ -808,8 +867,7 @@ export function criarCadernosMaterias(repositorio) {
         if (!pagina || pagina.tipo !== "page") return true;
         const desenhoEnviado = pagina.desenho || { strokes: [] };
         const assinaturaEnviada = JSON.stringify(desenhoEnviado);
-        const status = document.getElementById("subjectNotebookPageStatus");
-        if (status && selecionadoId === paginaId) status.textContent = "Salvando…";
+        if (selecionadoId === paginaId) atualizarStatusSalvamento("saving", "Salvando…");
         try {
             const salvo = await repositorio.atualizar(pagina.id, { desenho: desenhoEnviado }, pagina.versao);
             itens = itens.map(item => {
@@ -817,10 +875,12 @@ export function criarCadernosMaterias(repositorio) {
                 const recebeuNovoTraco = JSON.stringify(item.desenho || { strokes: [] }) !== assinaturaEnviada;
                 return recebeuNovoTraco ? { ...salvo, desenho: item.desenho } : salvo;
             });
-            if (status && selecionadoId === paginaId) status.textContent = "Salvo";
+            removerRascunhoSeIgual(paginaId, { titulo: pagina.titulo, conteudo: pagina.conteudo, desenho: desenhoEnviado });
+            if (selecionadoId === paginaId) atualizarStatusSalvamento("saved", "Salvo na nuvem");
             return true;
         } catch (erro) {
-            if (status && selecionadoId === paginaId) status.textContent = "Não salvo";
+            guardarRascunho(pagina, { desenho: desenhoEnviado });
+            if (selecionadoId === paginaId) atualizarStatusSalvamento("offline", navigator.onLine ? "Não foi possível salvar" : "Sem conexão · rascunho protegido");
             informar(erro.message || "Não foi possível salvar a escrita livre.", true);
             return false;
         }
@@ -836,8 +896,9 @@ export function criarCadernosMaterias(repositorio) {
 
     function agendarSalvamentoDesenho(paginaId, desenho) {
         itens = itens.map(item => item.id === paginaId ? { ...item, desenho } : item);
-        const status = document.getElementById("subjectNotebookPageStatus");
-        if (status) status.textContent = "Alterações pendentes";
+        const pagina = itemPorId(paginaId);
+        guardarRascunho(pagina, { desenho });
+        atualizarStatusSalvamento(navigator.onLine ? "pending" : "offline", navigator.onLine ? "Alterações pendentes" : "Sem conexão · rascunho protegido");
         clearTimeout(timerSalvamentoDesenho);
         timerSalvamentoDesenho = window.setTimeout(() => {
             enfileirarSalvamentoDesenho(paginaId);
@@ -1008,6 +1069,7 @@ export function criarCadernosMaterias(repositorio) {
             if (token !== carregamento) return;
             itens = carregados;
             lixeira = itensLixeira;
+            const rascunhosRecuperados = recuperarRascunhosLocais();
             const ultimaPagina = itens.find(item => item.id === ultimaPaginaId && item.tipo === "page");
             if (ultimaPagina) {
                 ultimaPaginaMateriaId = ultimaPagina.id;
@@ -1018,6 +1080,7 @@ export function criarCadernosMaterias(repositorio) {
             }
             informar("");
             renderizar();
+            if (rascunhosRecuperados) exibirToast(`${rascunhosRecuperados} ${rascunhosRecuperados === 1 ? "rascunho local foi recuperado" : "rascunhos locais foram recuperados"}.`, { tipo: "success", titulo: "Seu conteúdo está protegido" });
         } catch (erro) {
             if (token === carregamento) informar(erro.message || "Não foi possível carregar os cadernos.", true);
         }
@@ -1209,5 +1272,25 @@ export function criarCadernosMaterias(repositorio) {
         if (evento.target.id === "subjectNotebookPagePaper") alterarPapelPagina(evento.target.value);
     });
 
-    return Object.freeze({ definirMateria, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); editorDesenho?.destruir(); pararRolagemArraste(); carregamento += 1; } });
+    const haAlteracoesPendentes = () => Boolean(timerSalvamento || timerSalvamentoDesenho || salvamentoPendente || salvamentoDesenhoPendente || (selecionadoId && lerRascunho(selecionadoId)));
+    const protegerSaida = evento => {
+        if (!haAlteracoesPendentes()) return;
+        evento.preventDefault();
+        evento.returnValue = "";
+    };
+    const indicarModoOffline = () => {
+        if (selecionado()?.tipo === "page" && haAlteracoesPendentes()) atualizarStatusSalvamento("offline", "Sem conexão · rascunho protegido");
+    };
+    const tentarSalvarAoReconectar = async () => {
+        const pagina = selecionado();
+        if (pagina?.tipo !== "page" || !lerRascunho(pagina.id)) return;
+        atualizarStatusSalvamento("saving", "Conexão restaurada · salvando…");
+        if (document.getElementById("subjectNotebookPageContent")) salvamentoPendente = salvarPagina();
+        else enfileirarSalvamentoDesenho(pagina.id);
+    };
+    window.addEventListener("beforeunload", protegerSaida);
+    window.addEventListener("offline", indicarModoOffline);
+    window.addEventListener("online", tentarSalvarAoReconectar);
+
+    return Object.freeze({ definirMateria, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); editorDesenho?.destruir(); pararRolagemArraste(); carregamento += 1; window.removeEventListener("beforeunload", protegerSaida); window.removeEventListener("offline", indicarModoOffline); window.removeEventListener("online", tentarSalvarAoReconectar); } });
 }
