@@ -2503,3 +2503,32 @@ test("trechos do caderno alimentam flashcards, resumos e revisões com contexto"
     assert.match(html, /function topicoEditalParaAcaoDoCaderno/);
     assert.match(html, /\.subject-notebook-selection-actions/);
 });
+
+test("caixas de texto da escrita livre oferecem as mesmas ações de estudo", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(drawing, /aoAcaoTexto = \(\) => \{\}/);
+    assert.match(drawing, /data-page-drawing-study-action="flashcard"/);
+    assert.match(drawing, /data-page-drawing-study-action="summary"/);
+    assert.match(drawing, /data-page-drawing-study-action="review"/);
+    assert.match(drawing, /function acionarEstudoComTexto\(acao\)/);
+    assert.match(drawing, /aoAcaoTexto\(acao, texto/);
+    assert.match(drawing, /const TAMANHOS_PAGINA/);
+    assert.match(drawing, /function alterarZoom\(direcao\)/);
+    assert.match(drawing, /pageSize: tamanhoPagina/);
+    assert.match(drawing, /subject-page-drawing-viewport-controls/);
+    assert.match(drawing, /r: 4\.5/);
+    assert.match(frontend, /acionarEstudoComTrecho\(acao, texto, item\)/);
+    assert.match(frontend, /data-page-drawing-page-size/);
+    assert.match(frontend, /data-page-drawing-zoom="fit"/);
+    assert.match(frontend, /function alternarModoFocoCaderno\(\)/);
+    assert.match(frontend, /dataset\.notebookFocus/);
+    assert.match(frontend, /subject-notebook-page-rail-add/);
+    assert.match(frontend, /function contextoDeTrecho\(texto, pagina\)/);
+    assert.match(frontend, /if \(menuSelecaoTexto\) menuSelecaoTexto\.hidden = true/);
+    assert.match(html, /\.subject-page-drawing-text-action-menu/);
+    assert.match(html, /\.subject-page-drawing-viewport-controls/);
+    assert.match(html, /subject-notebook-focus-mode \.subject-notebook-page-rail/);
+});
