@@ -2364,3 +2364,46 @@ test("páginas do caderno oferecem escrita livre persistente no estilo TouchNote
     assert.match(html, /\.subject-page-drawing-resize-handle/);
     assert.match(html, /\.subject-page-drawing-stage[\s\S]*?touch-action: none/);
 });
+
+test("materiais PDF anexados abrem no leitor interno com progresso privado", () => {
+    const migration = readProjectFile("supabase/migrations/202609080007_subject_notebook_material_progress.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(migration, /add column current_page integer not null default 1/i);
+    assert.match(migration, /add column total_pages integer/i);
+    assert.match(migration, /add column last_read_at timestamptz/i);
+    assert.match(migration, /user_subject_notebook_material_links_update_self[\s\S]*?auth\.uid\(\)/i);
+    assert.match(migration, /grant update on table public\.user_subject_notebook_material_links to authenticated/i);
+    assert.match(repository, /export async function salvarProgressoMaterialPaginaCaderno/);
+    assert.match(repository, /current_page: paginaAtual/);
+    assert.match(repository, /last_read_at: new Date\(\)\.toISOString\(\)/);
+    assert.match(auth, /salvarProgressoMaterial: salvarProgressoMaterialPaginaCaderno/);
+    assert.match(frontend, /function materialEhPdf\(item\)/);
+    assert.match(frontend, /function htmlLeitorMaterial\(item\)/);
+    assert.match(frontend, /data-notebook-material-open/);
+    assert.match(frontend, /data-notebook-pdf-progress/);
+    assert.match(frontend, /data-notebook-pdf-step/);
+    assert.match(frontend, /sandbox="allow-downloads allow-same-origin"/);
+    assert.match(html, /\.subject-notebook-pdf-reader/);
+    assert.match(html, /\.subject-notebook-pdf-controls/);
+    assert.match(html, /\.subject-notebook-pdf-frame/);
+});
+
+test("a escrita livre oferece formas editáveis com a mesma seleção dos traços", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+
+    assert.match(frontend, /data-page-drawing-tool="line"/);
+    assert.match(frontend, /data-page-drawing-tool="arrow"/);
+    assert.match(frontend, /data-page-drawing-tool="rectangle"/);
+    assert.match(frontend, /data-page-drawing-tool="ellipse"/);
+    assert.match(drawing, /function pontosDaForma\(tipo, inicio, fim\)/);
+    assert.match(drawing, /tipo === "rectangle"/);
+    assert.match(drawing, /tipo === "ellipse"/);
+    assert.match(drawing, /tipo === "arrow"/);
+    assert.match(drawing, /tipo: "shape"/);
+    assert.match(drawing, /gesto\.traco\.points = pontosDaForma/);
+});

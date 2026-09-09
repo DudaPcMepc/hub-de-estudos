@@ -94,6 +94,7 @@ import {
     excluirSecaoColecaoVade,
     excluirMapaMental,
     removerMaterialPaginaCaderno,
+    salvarProgressoMaterialPaginaCaderno,
     enviarPdfColecaoVade,
     registrarLeituraJuridica,
     registrarRevisaoTarefa,
@@ -225,6 +226,7 @@ window.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object.freeze({
     listarLixeira: carregarLixeiraCadernosMateria,
     reordenar: reordenarNosCadernoMateria,
     removerMaterial: removerMaterialPaginaCaderno,
+    salvarProgressoMaterial: salvarProgressoMaterialPaginaCaderno,
     restaurar: restaurarDaLixeiraCadernoMateria,
     salvarPosicao: salvarPosicaoCadernoMateria
 });
