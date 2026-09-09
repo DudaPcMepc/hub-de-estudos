@@ -114,6 +114,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     let futuros = [];
     let textoEmEdicaoId = null;
     let textoAntesEdicao = null;
+    let ultimoCliqueTexto = { id: null, instante: 0 };
     let selecaoTexto = null;
     let selecaoEstudoPendente = null;
     let tamanhoPagina = TAMANHOS_PAGINA[dadosIniciais?.pageSize] ? dadosIniciais.pageSize : "standard";
@@ -198,10 +199,6 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
                         cx, cy, r: 4.5, class: `subject-page-drawing-resize-handle is-${direcao}`,
                         "data-page-drawing-resize": direcao
                     })));
-                    const editar = svgEl("g", { class: "subject-page-drawing-edit-handle", "data-page-drawing-edit-handle": textoSelecionado.id, transform: `translate(${limites.esquerda - margem} ${limites.base + margem - 28})` });
-                    editar.append(svgEl("rect", { width: 31, height: 27, rx: 7 }), svgEl("text", { x: 15.5, y: 18, "text-anchor": "middle", "aria-hidden": "true" }));
-                    editar.lastElementChild.textContent = "✎";
-                    elementos.push(editar);
                 } else elementos.push(svgEl("circle", { cx: limites.direita + margem, cy: limites.base + margem, r: 6, class: "subject-page-drawing-resize-handle is-se", "data-page-drawing-resize": "se" }));
             }
         }
@@ -523,12 +520,20 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
             return;
         }
         if (atingido) {
+            const agora = performance.now();
+            const editarAoSoltar = atingido.tool === "text"
+                && ultimoCliqueTexto.id === atingido.id
+                && agora - ultimoCliqueTexto.instante <= 420;
+            ultimoCliqueTexto = atingido.tool === "text"
+                ? { id: atingido.id, instante: agora }
+                : { id: null, instante: 0 };
             if (!selecionados.has(atingido.id)) selecionados = new Set([atingido.id]);
             registrarHistorico();
-            gesto = { tipo: "move", pointerId: evento.pointerId, inicio: ponto, originais: copiar(tracosSelecionados()), alterou: false };
+            gesto = { tipo: "move", id: atingido.id, pointerId: evento.pointerId, inicio: ponto, originais: copiar(tracosSelecionados()), alterou: false, editarAoSoltar };
             renderizar();
             return;
         }
+        ultimoCliqueTexto = { id: null, instante: 0 };
         selecionados.clear();
         gesto = { tipo: "lasso", pointerId: evento.pointerId, inicio: ponto, atual: ponto };
         renderizar();
@@ -537,12 +542,6 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     function aoPointerDown(evento) {
         if (evento.button !== 0) return;
         evento.preventDefault();
-        const editarId = evento.target.closest?.("[data-page-drawing-edit-handle]")?.dataset.pageDrawingEditHandle;
-        if (editarId) {
-            const texto = tracos.find(traco => traco.id === editarId && traco.tool === "text");
-            if (texto) iniciarEdicaoTexto(texto);
-            return;
-        }
         svg.setPointerCapture(evento.pointerId);
         const ponto = pontoDoEvento(evento);
         if (ferramenta === "select") { iniciarSelecao(evento, ponto); return; }
@@ -692,6 +691,13 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
             iniciarEdicaoTexto(atual.traco, false);
             return;
         }
+        else if (atual.tipo === "move" && atual.editarAoSoltar && !atual.alterou) {
+            historico.pop();
+            ultimoCliqueTexto = { id: null, instante: 0 };
+            const texto = tracos.find(traco => traco.id === atual.id && traco.tool === "text");
+            if (texto) iniciarEdicaoTexto(texto);
+            return;
+        }
         else if (["move", "resize"].includes(atual.tipo)) { if (atual.alterou) notificar(); else historico.pop(); }
         else if (atual.tipo === "erase") { if (atual.apagou) notificar(); else historico.pop(); }
         else notificar();
@@ -758,11 +764,6 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     svg.addEventListener("pointermove", aoPointerMove);
     svg.addEventListener("pointerup", aoPointerUp);
     svg.addEventListener("pointercancel", aoPointerUp);
-    svg.addEventListener("dblclick", evento => {
-        const id = evento.target.closest?.("[data-stroke-id]")?.dataset.strokeId;
-        const traco = tracos.find(item => item.id === id);
-        if (traco?.tool === "text") { evento.preventDefault(); iniciarEdicaoTexto(traco); }
-    });
     svg.addEventListener("pointerleave", () => { if (!gesto && ferramenta === "eraser") cursor.setAttribute("visibility", "hidden"); });
     svg.addEventListener("pointerenter", () => { if (ferramenta === "eraser") cursor.setAttribute("visibility", "visible"); });
 

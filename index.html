@@ -1431,9 +1431,6 @@
     .subject-page-drawing-resize-handle.is-n, .subject-page-drawing-resize-handle.is-s { cursor: ns-resize; }
     .subject-page-drawing-resize-handle.is-e, .subject-page-drawing-resize-handle.is-w { cursor: ew-resize; }
     .subject-page-drawing-text-box-preview { fill: rgba(43,113,187,.09); stroke: #2b71bb; stroke-width: 1.5; stroke-dasharray: 6 4; pointer-events: none; }
-    .subject-page-drawing-edit-handle { cursor: pointer; pointer-events: all; }
-    .subject-page-drawing-edit-handle rect { fill: #2b71bb; stroke: #fff; stroke-width: 1.5; }
-    .subject-page-drawing-edit-handle text { fill: #fff; font: 700 17px/1 system-ui, sans-serif; pointer-events: none; }
     .subject-page-drawing-lasso { fill: rgba(43,113,187,.07); stroke: #2b71bb; stroke-width: 1.5; stroke-dasharray: 7 4; pointer-events: none; }
     .subject-page-drawing-eraser-cursor { fill: rgba(255,255,255,.72); stroke: #806f67; stroke-width: 1.5; pointer-events: none; }
     .subject-page-drawing-hint { position: absolute; right: .65rem; bottom: .55rem; padding: .3rem .48rem; color: #8a7770; background: rgba(255,253,249,.82); border-radius: .45rem; font-size: .58rem; pointer-events: none; }
@@ -3187,6 +3184,14 @@
                         <div class="mind-map-toolbar" role="toolbar" aria-label="Ferramentas do mapa mental">
                             <div class="mind-map-tool-group mind-map-primary-tools" aria-label="Ferramentas principais">
                                 <button class="mind-map-tool" type="button" data-mind-tool="node" aria-label="Adicionar conceito" aria-pressed="false" title="Adicionar conceito"><i class="bi-card-text"></i><span>Conceito</span></button>
+                                <button class="mind-map-tool" type="button" data-mind-tool="text" aria-label="Adicionar caixa de texto" aria-pressed="false" title="Adicionar caixa de texto"><i class="bi-fonts"></i><span>Texto</span></button>
+                            </div>
+                            <div class="mind-map-text-format d-none" id="mindMapTextFormat" role="group" aria-label="Formatação da caixa de texto">
+                                <label title="Cor do texto"><i class="bi-fonts" aria-hidden="true"></i><input id="mindMapTextColor" type="color" value="#3b2923" aria-label="Cor do texto"></label>
+                                <label title="Tamanho do texto"><i class="bi-type" aria-hidden="true"></i><select id="mindMapTextSize" aria-label="Tamanho do texto"><option value="14">14</option><option value="18">18</option><option value="22">22</option><option value="28">28</option><option value="36">36</option></select></label>
+                                <button class="mind-map-tool" id="btnMindTextBold" type="button" aria-label="Negrito" aria-pressed="false" title="Negrito"><i class="bi-type-bold"></i></button>
+                                <button class="mind-map-tool" id="btnMindTextItalic" type="button" aria-label="Itálico" aria-pressed="false" title="Itálico"><i class="bi-type-italic"></i></button>
+                                <button class="mind-map-tool" id="btnMindTextAlign" type="button" aria-label="Alterar alinhamento" title="Alterar alinhamento"><i class="bi-text-left"></i></button>
                             </div>
                             <button class="mind-map-tool mind-map-mobile-more" id="btnMindMobileTools" type="button" aria-label="Mais ferramentas" aria-expanded="false" aria-controls="mindMapMobileExtra"><i class="bi-grid"></i><span>Mais</span></button>
                             <div class="mind-map-mobile-extra" id="mindMapMobileExtra">
@@ -3221,7 +3226,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mind-map-hint" id="mindMapHint">Clique para selecionar. Segure e arraste para mover; ao soltar, a posição é salva.</div>
+                        <div class="mind-map-hint" id="mindMapHint">Clique para selecionar, arraste para mover e dê dois cliques para editar o texto.</div>
                         <div class="mind-map-stage" id="mindMapStage" tabindex="0" aria-label="Tela livre do mapa mental">
                             <svg class="mind-map-canvas" id="mindMapCanvas" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa mental">
                                 <defs>
