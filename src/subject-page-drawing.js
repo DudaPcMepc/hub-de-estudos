@@ -32,6 +32,28 @@ function retangulosSeTocam(a, b) {
     return a.esquerda <= b.direita && a.direita >= b.esquerda && a.topo <= b.base && a.base >= b.topo;
 }
 
+function pontosDaForma(tipo, inicio, fim) {
+    if (tipo === "line") return [inicio, fim];
+    if (tipo === "rectangle") return [inicio, { x: fim.x, y: inicio.y }, fim, { x: inicio.x, y: fim.y }, inicio];
+    if (tipo === "ellipse") {
+        const centro = { x: (inicio.x + fim.x) / 2, y: (inicio.y + fim.y) / 2 };
+        const raioX = Math.abs(fim.x - inicio.x) / 2;
+        const raioY = Math.abs(fim.y - inicio.y) / 2;
+        return Array.from({ length: 33 }, (_, indice) => {
+            const angulo = (Math.PI * 2 * indice) / 32;
+            return { x: centro.x + Math.cos(angulo) * raioX, y: centro.y + Math.sin(angulo) * raioY };
+        });
+    }
+    if (tipo === "arrow") {
+        const angulo = Math.atan2(fim.y - inicio.y, fim.x - inicio.x);
+        const ponta = Math.min(28, Math.max(10, Math.hypot(fim.x - inicio.x, fim.y - inicio.y) * .28));
+        const esquerda = { x: fim.x - ponta * Math.cos(angulo - .55), y: fim.y - ponta * Math.sin(angulo - .55) };
+        const direita = { x: fim.x - ponta * Math.cos(angulo + .55), y: fim.y - ponta * Math.sin(angulo + .55) };
+        return [inicio, fim, esquerda, fim, direita];
+    }
+    return [inicio, fim];
+}
+
 export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     const svg = container.querySelector("[data-page-drawing-canvas]");
     const camada = container.querySelector("[data-page-drawing-strokes]");
@@ -186,6 +208,13 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
             gesto = { tipo: "erase", pointerId: evento.pointerId, apagou: apagarNoPonto(ponto) };
             return;
         }
+        if (["line", "arrow", "rectangle", "ellipse"].includes(ferramenta)) {
+            const traco = { id: crypto.randomUUID(), tool: ferramenta, color: cor.value, width: Number(tamanho.value), points: pontosDaForma(ferramenta, ponto, ponto) };
+            tracos.push(traco);
+            gesto = { tipo: "shape", pointerId: evento.pointerId, traco, inicio: ponto };
+            renderizar();
+            return;
+        }
         const traco = { id: crypto.randomUUID(), tool: ferramenta, color: cor.value, width: ferramenta === "highlighter" ? Math.max(10, Number(tamanho.value) * 2.4) : Number(tamanho.value), points: [ponto] };
         tracos.push(traco);
         gesto = { tipo: "draw", pointerId: evento.pointerId, traco };
@@ -226,6 +255,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         if (["move", "resize"].includes(gesto.tipo)) atualizarTransformacaoSelecao(ponto);
         else if (gesto.tipo === "lasso") { gesto.atual = ponto; renderizarSelecao(); }
         else if (gesto.tipo === "erase") gesto.apagou = apagarNoPonto(ponto) || gesto.apagou;
+        else if (gesto.tipo === "shape") { gesto.traco.points = pontosDaForma(gesto.traco.tool, gesto.inicio, ponto); renderizar(); }
         else {
             const ultimo = gesto.traco.points.at(-1);
             if (Math.hypot(ponto.x - ultimo.x, ponto.y - ultimo.y) < 1.5) return;

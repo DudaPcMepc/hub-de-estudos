@@ -2015,7 +2015,7 @@ export async function carregarMateriaisPaginaCaderno(materiaIdLocal, paginaId) {
             .eq("subject_id", subjectId)
             .order("created_at", { ascending: true }),
         supabase.from("user_subject_notebook_material_links")
-            .select("study_link_id, created_at")
+            .select("study_link_id, current_page, total_pages, last_read_at, created_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .eq("subject_id", subjectId)
@@ -2025,12 +2025,15 @@ export async function carregarMateriaisPaginaCaderno(materiaIdLocal, paginaId) {
     const materiais = verificarResposta(materiaisResposta, "Não foi possível carregar os materiais desta matéria.") || [];
     const vinculos = verificarResposta(vinculosResposta, "Não foi possível carregar os anexos desta página.") || [];
     const linksLegados = idsLocaisPorRemotos.get("study_link");
-    const anexados = new Set(vinculos.map(item => item.study_link_id));
+    const vinculosPorMaterial = new Map(vinculos.map(item => [item.study_link_id, item]));
     return materiais.map(item => ({
         id: linksLegados?.get(item.id) || item.id,
         titulo: item.title,
         url: item.url,
-        anexado: anexados.has(item.id)
+        anexado: vinculosPorMaterial.has(item.id),
+        paginaAtual: Number(vinculosPorMaterial.get(item.id)?.current_page) || 1,
+        totalPaginas: Number(vinculosPorMaterial.get(item.id)?.total_pages) || null,
+        ultimaLeituraEm: vinculosPorMaterial.get(item.id)?.last_read_at || null
     }));
 }
 
@@ -2055,6 +2058,33 @@ export async function removerMaterialPaginaCaderno(materiaIdLocal, paginaId, mat
         .eq("node_id", exigirUuidNovo(paginaId, "Página do caderno"))
         .eq("study_link_id", resolverId("study_link", materialIdLocal));
     verificarResposta(resposta, "Não foi possível remover o material desta página.");
+}
+
+export async function salvarProgressoMaterialPaginaCaderno(materiaIdLocal, paginaId, materialIdLocal, progresso) {
+    const contexto = exigirContexto();
+    const paginaAtual = numeroLimitado(progresso?.paginaAtual, "Página atual", 1, 100000, true);
+    const totalPaginas = progresso?.totalPaginas == null || progresso.totalPaginas === ""
+        ? null
+        : numeroLimitado(progresso.totalPaginas, "Total de páginas", 1, 100000, true);
+    if (totalPaginas && paginaAtual > totalPaginas) throw erroRepositorio("A página atual não pode ultrapassar o total de páginas.");
+    const resposta = await supabase.from("user_subject_notebook_material_links").update({
+        current_page: paginaAtual,
+        total_pages: totalPaginas,
+        last_read_at: new Date().toISOString()
+    })
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("subject_id", resolverId("subject", materiaIdLocal))
+        .eq("node_id", exigirUuidNovo(paginaId, "Página do caderno"))
+        .eq("study_link_id", resolverId("study_link", materialIdLocal))
+        .select("current_page, total_pages, last_read_at")
+        .maybeSingle();
+    const salvo = verificarRegistro(resposta, "Não foi possível salvar o progresso deste material.");
+    return {
+        paginaAtual: Number(salvo.current_page) || 1,
+        totalPaginas: Number(salvo.total_pages) || null,
+        ultimaLeituraEm: salvo.last_read_at || null
+    };
 }
 
 export async function carregarPosicaoCadernoMateria(materiaIdLocal) {
