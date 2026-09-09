@@ -464,6 +464,7 @@ function mapearAnotacaoColecaoVade(item) {
         tipo: item.kind,
         titulo: item.title || "",
         conteudo: item.content || "",
+        desenho: item.drawing_data && typeof item.drawing_data === "object" ? item.drawing_data : { strokes: [] },
         tags: Array.isArray(item.tags) ? item.tags : [],
         fixada: item.pinned === true,
         versao: Number(item.version) || 1,
@@ -1985,7 +1986,7 @@ export async function carregarCadernosMateria(materiaIdLocal) {
     const contexto = obterContexto();
     const subjectId = resolverId("subject", materiaIdLocal);
     let resposta = await supabase.from("user_subject_notebook_nodes")
-        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .eq("subject_id", subjectId)
@@ -1994,7 +1995,7 @@ export async function carregarCadernosMateria(materiaIdLocal) {
         .order("created_at", { ascending: true });
     if (["PGRST204", "42703"].includes(String(resposta.error?.code || ""))) {
         resposta = await supabase.from("user_subject_notebook_nodes")
-            .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+            .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at")
             .eq("workspace_id", contexto.workspaceId)
             .eq("user_id", contexto.userId)
             .eq("subject_id", subjectId)
@@ -2002,6 +2003,58 @@ export async function carregarCadernosMateria(materiaIdLocal) {
             .order("created_at", { ascending: true });
     }
     return (verificarResposta(resposta, "Não foi possível carregar os cadernos desta matéria.") || []).map(mapearNoCadernoMateria);
+}
+
+export async function carregarMateriaisPaginaCaderno(materiaIdLocal, paginaId) {
+    const contexto = obterContexto();
+    const subjectId = resolverId("subject", materiaIdLocal);
+    const [materiaisResposta, vinculosResposta] = await Promise.all([
+        supabase.from("study_links")
+            .select("id, title, url")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("subject_id", subjectId)
+            .order("created_at", { ascending: true }),
+        supabase.from("user_subject_notebook_material_links")
+            .select("study_link_id, created_at")
+            .eq("workspace_id", contexto.workspaceId)
+            .eq("user_id", contexto.userId)
+            .eq("subject_id", subjectId)
+            .eq("node_id", exigirUuidNovo(paginaId, "Página do caderno"))
+            .order("created_at", { ascending: true })
+    ]);
+    const materiais = verificarResposta(materiaisResposta, "Não foi possível carregar os materiais desta matéria.") || [];
+    const vinculos = verificarResposta(vinculosResposta, "Não foi possível carregar os anexos desta página.") || [];
+    const linksLegados = idsLocaisPorRemotos.get("study_link");
+    const anexados = new Set(vinculos.map(item => item.study_link_id));
+    return materiais.map(item => ({
+        id: linksLegados?.get(item.id) || item.id,
+        titulo: item.title,
+        url: item.url,
+        anexado: anexados.has(item.id)
+    }));
+}
+
+export async function anexarMaterialPaginaCaderno(materiaIdLocal, paginaId, materialIdLocal) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.from("user_subject_notebook_material_links").insert({
+        workspace_id: contexto.workspaceId,
+        user_id: contexto.userId,
+        subject_id: resolverId("subject", materiaIdLocal),
+        node_id: exigirUuidNovo(paginaId, "Página do caderno"),
+        study_link_id: resolverId("study_link", materialIdLocal)
+    });
+    verificarResposta(resposta, "Não foi possível anexar o material à página.");
+}
+
+export async function removerMaterialPaginaCaderno(materiaIdLocal, paginaId, materialIdLocal) {
+    const contexto = exigirContexto();
+    const resposta = await supabase.from("user_subject_notebook_material_links").delete()
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .eq("subject_id", resolverId("subject", materiaIdLocal))
+        .eq("node_id", exigirUuidNovo(paginaId, "Página do caderno"))
+        .eq("study_link_id", resolverId("study_link", materialIdLocal));
+    verificarResposta(resposta, "Não foi possível remover o material desta página.");
 }
 
 export async function carregarPosicaoCadernoMateria(materiaIdLocal) {
@@ -2037,6 +2090,11 @@ function valoresNoCadernoMateria(no, contexto, incluirIdentidade = false) {
     if (incluirIdentidade || Object.hasOwn(no, "tipo")) valores.node_type = tipo;
     if (incluirIdentidade || Object.hasOwn(no, "titulo")) valores.title = texto(no.titulo, 240, "Título", true).trim();
     if (incluirIdentidade || Object.hasOwn(no, "conteudo")) valores.content = texto(no.conteudo, 500000, "Conteúdo");
+    if (incluirIdentidade || Object.hasOwn(no, "desenho")) {
+        const desenho = no.desenho && typeof no.desenho === "object" && !Array.isArray(no.desenho) ? no.desenho : { strokes: [] };
+        if (!Array.isArray(desenho.strokes) || JSON.stringify(desenho).length > 2000000) throw erroRepositorio("O desenho desta página é inválido ou muito grande.");
+        valores.drawing_data = desenho;
+    }
     if (incluirIdentidade || Object.hasOwn(no, "cor")) {
         const cor = String(no.cor || "#b8322a");
         if (!/^#[0-9a-f]{6}$/i.test(cor)) throw erroRepositorio("Cor do caderno inválida.");
@@ -2067,7 +2125,7 @@ export async function criarNoCadernoMateria(materiaIdLocal, no) {
     valores.id = id;
     valores.subject_id = resolverId("subject", materiaIdLocal);
     const resposta = await supabase.from("user_subject_notebook_nodes").insert(valores)
-        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at")
         .single();
     return mapearNoCadernoMateria(verificarResposta(resposta, "Não foi possível criar o item no caderno."));
 }
@@ -2083,7 +2141,7 @@ export async function atualizarNoCadernoMateria(id, alteracoes, versaoEsperada) 
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .eq("version", versao)
-        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at")
         .maybeSingle();
     const salvo = verificarResposta(resposta, "Não foi possível atualizar o item do caderno.");
     if (!salvo) throw erroRepositorio("Este item foi alterado em outra aba. Recarregue antes de salvar novamente.");
@@ -2102,7 +2160,7 @@ export async function carregarLixeiraCadernosMateria(materiaIdLocal) {
     const subjectId = resolverId("subject", materiaIdLocal);
     verificarResposta(await supabase.rpc("purge_expired_subject_notebook_trash", { p_subject_id: subjectId }), "Não foi possível atualizar a lixeira.");
     const resposta = await supabase.from("user_subject_notebook_nodes")
-        .select("id, subject_id, parent_id, topic_id, node_type, title, content, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at, deleted_at, deleted_root_id")
         .eq("workspace_id", contexto.workspaceId)
         .eq("user_id", contexto.userId)
         .eq("subject_id", subjectId)

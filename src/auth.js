@@ -6,6 +6,7 @@ import { criarEditorMapasMentais } from "./mind-map-editor.js";
 import { criarCadernosMaterias } from "./subject-notebooks.js";
 import {
     atualizarMateria,
+    anexarMaterialPaginaCaderno,
     atualizarNota,
     atualizarNoCadernoMateria,
     atualizarFlashcard,
@@ -33,6 +34,7 @@ import {
     carregarMapaMental,
     carregarMapasMentais,
     carregarMateriasRemotas,
+    carregarMateriaisPaginaCaderno,
     carregarNotasRemotas,
     carregarCadernosMateria,
     carregarLixeiraCadernosMateria,
@@ -91,6 +93,7 @@ import {
     excluirPdfColecaoVade,
     excluirSecaoColecaoVade,
     excluirMapaMental,
+    removerMaterialPaginaCaderno,
     enviarPdfColecaoVade,
     registrarLeituraJuridica,
     registrarRevisaoTarefa,
@@ -210,7 +213,9 @@ window.HUB_CLOUD_NOTES = Object.freeze({
 });
 
 window.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object.freeze({
+    anexarMaterial: anexarMaterialPaginaCaderno,
     atualizar: atualizarNoCadernoMateria,
+    carregarMateriais: carregarMateriaisPaginaCaderno,
     carregarPosicao: carregarPosicaoCadernoMateria,
     criar: criarNoCadernoMateria,
     excluir: excluirNoCadernoMateria,
@@ -219,6 +224,7 @@ window.HUB_CLOUD_SUBJECT_NOTEBOOKS = Object.freeze({
     listar: carregarCadernosMateria,
     listarLixeira: carregarLixeiraCadernosMateria,
     reordenar: reordenarNosCadernoMateria,
+    removerMaterial: removerMaterialPaginaCaderno,
     restaurar: restaurarDaLixeiraCadernoMateria,
     salvarPosicao: salvarPosicaoCadernoMateria
 });
