@@ -2365,6 +2365,22 @@ test("páginas do caderno oferecem escrita livre persistente no estilo TouchNote
     assert.match(html, /\.subject-page-drawing-stage[\s\S]*?touch-action: none/);
 });
 
+test("o caderno protege alterações locais até a confirmação do salvamento", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(frontend, /PREFIXO_RASCUNHO/);
+    assert.match(frontend, /localStorage\.setItem\(chaveRascunho/);
+    assert.match(frontend, /function recuperarRascunhosLocais/);
+    assert.match(frontend, /function removerRascunhoSeIgual/);
+    assert.match(frontend, /window\.addEventListener\("beforeunload", protegerSaida\)/);
+    assert.match(frontend, /window\.addEventListener\("online", tentarSalvarAoReconectar\)/);
+    assert.match(frontend, /Sem conexão · rascunho protegido/);
+    assert.match(frontend, /subject-notebook-save-status/);
+    assert.match(html, /\.subject-notebook-save-status\[data-save-state="saved"\]/);
+    assert.match(html, /@keyframes subjectNotebookSaveSpin/);
+});
+
 test("materiais PDF anexados abrem no leitor interno com progresso privado", () => {
     const migration = readProjectFile("supabase/migrations/202609080007_subject_notebook_material_progress.sql");
     const repository = readProjectFile("src/cloud-core-repository.js");
