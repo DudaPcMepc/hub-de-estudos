@@ -1410,6 +1410,11 @@
     .subject-page-drawing[data-tool="select"] .subject-page-drawing-stage svg { cursor: default; }
     .subject-page-drawing[data-tool="eraser"] .subject-page-drawing-stage svg { cursor: none; }
     .subject-page-drawing-stage path.is-selected, .subject-page-drawing-text.is-selected { filter: drop-shadow(0 0 2px rgba(43,113,187,.55)); }
+    .subject-page-drawing-image { cursor: grab; }
+    .subject-page-drawing-image.is-selected { filter: drop-shadow(0 0 3px rgba(43,113,187,.65)); }
+    .subject-page-drawing-image-placeholder rect { fill: #f4f0eb; stroke: rgba(91,67,58,.28); stroke-width: 1.5; stroke-dasharray: 8 6; }
+    .subject-page-drawing-image-placeholder text { fill: #806f67; font: 700 22px Inter, system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .subject-page-drawing-toolbar button[data-page-drawing-add-image].is-loading i { animation: subjectNotebookSaveSpin .8s linear infinite; }
     .subject-page-drawing-text { overflow: visible; cursor: grab; }
     .subject-page-drawing-text-content { box-sizing: border-box; display: block; width: 100%; min-height: 0; padding: .2rem .28rem; overflow: visible; color: var(--drawing-text-color, #3b2923); font: var(--drawing-text-style, normal) var(--drawing-text-weight, 600) var(--drawing-text-size, 26px)/1.25 Inter, system-ui, sans-serif; text-align: var(--drawing-text-align, left); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; outline: 0; border-radius: .3rem; }
     .subject-page-drawing-text-format { height: 2rem; display: inline-flex; align-items: center; gap: .12rem; flex: 0 0 auto; padding: 0 .18rem; background: rgba(43,113,187,.07); border: 1px solid rgba(43,113,187,.12); border-radius: .55rem; }
