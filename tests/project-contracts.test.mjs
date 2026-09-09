@@ -140,12 +140,15 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     assert.match(html, /id="wsTabMapas"[^>]*data-bs-target="#ws-mapas"/);
     assert.match(html, /id="mindMapStage"/);
     assert.match(html, /data-mind-tool="node"/);
+    assert.match(html, /data-mind-tool="text"[^>]*aria-label="Adicionar caixa de texto"/);
+    assert.match(html, /id="mindMapTextFormat"/);
+    assert.match(html, /id="mindMapTextColor"/);
     assert.match(html, /data-mind-tool="edge"/);
     assert.match(html, /data-mind-tool="draw"/);
     assert.match(html, /data-mind-tool="eraser"/);
     assert.doesNotMatch(html, /data-mind-tool="select"/);
     assert.doesNotMatch(html, /data-mind-tool="pan"/);
-    assert.match(html, /ao soltar, a posição é salva/);
+    assert.match(html, /dê dois cliques para editar o texto/);
     assert.match(html, /id="mindMapEraserSize"[^>]*min="10"[^>]*max="72"/);
     assert.doesNotMatch(html, /id="btnMindLock"/);
     assert.doesNotMatch(html, /id="btnMindEditText"/);
@@ -178,7 +181,8 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     assert.match(editor, /async function editarTextoSelecionado\(\)/);
     assert.match(editor, /\["Enter", "F2"\]\.includes\(evento\.key\)/);
     assert.match(editor, /"data-mind-action": "toggle-menu"/);
-    assert.match(editor, /"data-mind-action": "edit"/);
+    assert.match(editor, /const duploClique = ultimoCliqueItem\.id === item\.id/);
+    assert.match(editor, /terminou\.tipo === "pending-move" && terminou\.editarAoSoltar/);
     assert.match(editor, /"data-mind-action": "delete"/);
     assert.match(editor, /"data-mind-action": "custom-color"/);
     assert.match(editor, /const controleAcao = evento\.target\.closest/);
@@ -199,6 +203,12 @@ test("os mapas mentais possuem editor livre e salvamento privado por usuário", 
     assert.match(mindMapCss, /\.mind-map-primary-tools \{ flex: 1/);
     assert.match(mindMapCss, /\.mind-map-resize-handle/);
     assert.match(mindMapCss, /\.mind-map-selection-frame/);
+    assert.match(mindMapCss, /\.mind-map-free-text-content/);
+    assert.match(mindMapCss, /\.mind-map-text-format/);
+    assert.match(editor, /function atualizarTextoSelecionado\(alterar\)/);
+    assert.match(editor, /function finalizarTextoInline\(id\)/);
+    assert.match(editor, /conteudo\.dataset\.mindInlineText = item\.id/);
+    assert.match(editor, /conteudo\.contentEditable = "true"/);
     assert.match(mindMapCss, /cursor: nwse-resize/);
     assert.match(mindMapCss, /cursor: ew-resize/);
     assert.match(editor, /setTimeout\(\(\) => \{ void salvarAgora\(\); \}, 900\)/);
@@ -2431,7 +2441,7 @@ test("a escrita livre oferece caixas de texto editáveis e persistentes", () => 
 
     assert.match(frontend, /data-page-drawing-tool="text"/);
     assert.match(frontend, /data-page-drawing-edit-text/);
-    assert.match(drawing, /data-page-drawing-edit-handle/);
+    assert.match(drawing, /ultimoCliqueTexto/);
     assert.match(drawing, /function ajustarCaixaTextoAoConteudo/);
     assert.match(drawing, /const somenteTexto/);
     assert.match(drawing, /Math\.min\(escalaX, escalaY\)/);
@@ -2447,7 +2457,8 @@ test("a escrita livre oferece caixas de texto editáveis e persistentes", () => 
     assert.match(drawing, /data-page-drawing-edit-text/);
     assert.match(drawing, /fontSize/);
     assert.match(html, /\.subject-page-drawing-text-content/);
-    assert.match(html, /\.subject-page-drawing-edit-handle/);
+    assert.match(drawing, /editarAoSoltar/);
+    assert.doesNotMatch(drawing, /data-page-drawing-edit-handle/);
     assert.match(html, /word-break: break-word/);
     assert.match(html, /subject-page-drawing-text-content[^}]+min-height: 0/);
     assert.match(html, /subject-page-drawing-text-box-preview/);
@@ -2524,6 +2535,8 @@ test("caixas de texto da escrita livre oferecem as mesmas ações de estudo", ()
     assert.match(frontend, /data-page-drawing-page-size/);
     assert.match(frontend, /data-page-drawing-zoom="fit"/);
     assert.match(frontend, /function alternarModoFocoCaderno\(\)/);
+    assert.match(frontend, /function alternarPainelPaginas\(botao\)/);
+    assert.match(frontend, /classList\.toggle\("is-pages-collapsed", paginasRecolhidas\)/);
     assert.match(frontend, /dataset\.notebookFocus/);
     assert.match(frontend, /subject-notebook-page-rail-add/);
     assert.match(frontend, /function contextoDeTrecho\(texto, pagina\)/);

@@ -51,6 +51,12 @@ export function criarEditorMapasMentais(repositorio) {
         mobileExtra: document.getElementById("mindMapMobileExtra"),
         mobileClose: document.getElementById("btnMindMobileToolsClose"),
         cor: document.getElementById("mindMapColor"),
+        textoFormatacao: document.getElementById("mindMapTextFormat"),
+        textoCor: document.getElementById("mindMapTextColor"),
+        textoTamanho: document.getElementById("mindMapTextSize"),
+        textoNegrito: document.getElementById("btnMindTextBold"),
+        textoItalico: document.getElementById("btnMindTextItalic"),
+        textoAlinhamento: document.getElementById("btnMindTextAlign"),
         estiloLinha: document.getElementById("mindMapLineStyle"),
         undo: document.getElementById("btnMindUndo"),
         redo: document.getElementById("btnMindRedo"),
@@ -106,6 +112,9 @@ export function criarEditorMapasMentais(repositorio) {
     let carregamentoToken = 0;
     let resolverTexto = null;
     let resolverConfirmacao = null;
+    let textoInlineId = null;
+    let selecionarTextoInlineAoFocar = false;
+    let ultimoCliqueItem = { id: null, instante: 0 };
 
     const elementoPorId = (id) => elementos.find(item => item.id === id) || null;
     const maxZ = () => Math.max(0, ...elementos.map(item => Number(item.zIndex) || 0));
@@ -201,12 +210,23 @@ export function criarEditorMapasMentais(repositorio) {
 
     function atualizarBotoes() {
         const item = elementoPorId(selecionadoId);
+        const textoLivre = item?.payload?.shape === "text";
         dom.undo.disabled = !historico.length;
         dom.redo.disabled = !futuros.length;
         dom.excluir.disabled = !item;
         dom.frente.disabled = !item || item.type === "edge";
         dom.duplicar.disabled = !item || item.type === "edge";
         dom.zoomLabel.textContent = `${Math.round(viewport.zoom * 100)}%`;
+        dom.textoFormatacao.classList.toggle("d-none", !textoLivre);
+        if (textoLivre) {
+            dom.textoCor.value = item.payload.textColor || "#3b2923";
+            dom.textoTamanho.value = String(item.payload.fontSize || 18);
+            dom.textoNegrito.setAttribute("aria-pressed", String(item.payload.fontWeight === "bold"));
+            dom.textoItalico.setAttribute("aria-pressed", String(item.payload.fontStyle === "italic"));
+            const alinhamento = ["left", "center", "right"].includes(item.payload.textAlign) ? item.payload.textAlign : "left";
+            dom.textoAlinhamento.dataset.align = alinhamento;
+            dom.textoAlinhamento.innerHTML = `<i class="bi-text-${alinhamento}"></i>`;
+        }
     }
 
     function selecionarFerramenta(nova) {
@@ -222,8 +242,9 @@ export function criarEditorMapasMentais(repositorio) {
         dom.borrachaControle.classList.toggle("d-none", nova !== "eraser");
         if (nova !== "eraser") dom.borrachaCursor.setAttribute("visibility", "hidden");
         const dicas = {
-            select: "Clique para selecionar. Segure e arraste para mover; ao soltar, a posição é salva.",
+            select: "Clique para selecionar, arraste para mover e dê dois cliques para editar o texto.",
             node: "Clique na tela para criar um novo conceito.",
+            text: "Clique na tela para criar uma caixa de texto livre.",
             rect: "Clique na tela para criar um retângulo livre.",
             ellipse: "Clique na tela para criar uma forma circular.",
             edge: "Clique em um elemento e depois em outro para criar uma ligação.",
@@ -276,6 +297,49 @@ export function criarEditorMapasMentais(repositorio) {
 
     function criarTextoSvg(item, grupo) {
         const p = item.payload;
+        if (p.shape === "text") {
+            const objeto = svgEl("foreignObject", {
+                class: `mind-map-free-text${textoInlineId === item.id ? " is-editing" : ""}`,
+                x: 0,
+                y: 0,
+                width: Number(p.width || 220),
+                height: Number(p.height || 100)
+            });
+            const conteudo = document.createElement("div");
+            conteudo.className = "mind-map-free-text-content";
+            conteudo.textContent = p.text || "Digite seu texto";
+            conteudo.dataset.mindInlineText = item.id;
+            conteudo.dataset.placeholder = "Digite seu texto…";
+            conteudo.style.color = p.textColor || "#3b2923";
+            conteudo.style.fontSize = `${limitar(Number(p.fontSize) || 18, 12, 48)}px`;
+            conteudo.style.fontWeight = p.fontWeight === "bold" ? "800" : "600";
+            conteudo.style.fontStyle = p.fontStyle === "italic" ? "italic" : "normal";
+            conteudo.style.textAlign = ["left", "center", "right"].includes(p.textAlign) ? p.textAlign : "left";
+            if (textoInlineId === item.id) {
+                conteudo.textContent = p.text || "";
+                conteudo.contentEditable = "true";
+                conteudo.setAttribute("role", "textbox");
+                conteudo.setAttribute("aria-label", "Editar texto do mapa mental");
+                conteudo.spellcheck = true;
+                conteudo.addEventListener("pointerdown", evento => evento.stopPropagation());
+                conteudo.addEventListener("input", () => {
+                    const atual = elementoPorId(item.id);
+                    if (!atual) return;
+                    atual.payload.text = conteudo.innerText.replace(/\r/g, "");
+                    marcarAlterado();
+                });
+                conteudo.addEventListener("keydown", evento => {
+                    if (evento.key === "Escape" || ((evento.ctrlKey || evento.metaKey) && evento.key === "Enter")) {
+                        evento.preventDefault();
+                        conteudo.blur();
+                    }
+                });
+                conteudo.addEventListener("blur", () => finalizarTextoInline(item.id));
+            }
+            objeto.appendChild(conteudo);
+            grupo.appendChild(objeto);
+            return;
+        }
         const linhas = linhasDoTexto(p.text, Math.max(14, Math.floor(Number(p.width || 170) / 8)));
         const texto = svgEl("text", {
             x: Number(p.width || 170) / 2,
@@ -321,13 +385,13 @@ export function criarEditorMapasMentais(repositorio) {
                 "data-mind-id": item.id,
                 "data-mind-resize": posicao
             });
-            alca.appendChild(svgEl("circle", { class: "mind-map-resize-hit", cx: 0, cy: 0, r: 16 }));
-            alca.appendChild(svgEl("circle", { class: "mind-map-resize-handle", cx: 0, cy: 0, r: 9 }));
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-hit", cx: 0, cy: 0, r: 12 }));
+            alca.appendChild(svgEl("circle", { class: "mind-map-resize-handle", cx: 0, cy: 0, r: 6 }));
             grupo.appendChild(alca);
         });
         const menu = svgEl("g", {
             class: "mind-map-actions-control",
-            transform: `translate(${largura + 20} ${altura + 20})`,
+            transform: `translate(${largura + 16} 16)`,
             role: "button",
             tabindex: 0,
             "aria-label": menuAcoesId === item.id ? "Fechar opções do elemento" : "Abrir opções do elemento",
@@ -335,47 +399,45 @@ export function criarEditorMapasMentais(repositorio) {
             "data-mind-id": item.id,
             "data-mind-action": "toggle-menu"
         });
-        menu.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 15 }));
+        menu.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 12 }));
         const iconeMenu = svgEl("text", { x: 0, y: 3, "text-anchor": "middle", "aria-hidden": "true" });
         iconeMenu.textContent = "•••";
         menu.appendChild(iconeMenu);
         grupo.appendChild(menu);
         if (menuAcoesId !== item.id) return;
 
+        const limiteDireito = dom.stage.clientWidth;
+        const direitaVisivel = (Number(item.payload.x) + largura) * viewport.zoom + viewport.x;
+        const abrirParaEsquerda = direitaVisivel + (190 * viewport.zoom) > limiteDireito;
         const painel = svgEl("g", {
             class: "mind-map-actions-menu",
-            transform: `translate(${Math.max(0, largura - 154)} ${altura + 42})`,
+            transform: `translate(${abrirParaEsquerda ? -168 : largura + 34} ${Math.max(0, (altura - 40) / 2)})`,
             role: "menu",
             "aria-label": "Opções do elemento"
         });
-        painel.appendChild(svgEl("rect", { class: "mind-map-actions-menu-bg", x: 0, y: 0, width: 176, height: 116, rx: 12 }));
+        painel.appendChild(svgEl("rect", { class: "mind-map-actions-menu-bg", x: 0, y: 0, width: 154, height: 40, rx: 20 }));
 
-        const editar = svgEl("g", { class: "mind-map-actions-item", role: "menuitem", tabindex: 0, "aria-label": "Editar texto", "data-mind-id": item.id, "data-mind-action": "edit" });
-        editar.appendChild(svgEl("rect", { x: 7, y: 7, width: 162, height: 30, rx: 8 }));
-        const textoEditar = svgEl("text", { x: 18, y: 27, "aria-hidden": "true" });
-        textoEditar.textContent = "✎  Editar texto";
-        editar.appendChild(textoEditar);
-        painel.appendChild(editar);
-
-        const rotuloCor = svgEl("text", { class: "mind-map-actions-label", x: 14, y: 55, "aria-hidden": "true" });
-        rotuloCor.textContent = "Cor";
-        painel.appendChild(rotuloCor);
-        ["#fff3cd", "#f6b7b2", "#bfe3c0", "#bcd8f5", "#d8c5ef"].forEach((cor, indice) => {
-            const opcao = svgEl("g", { class: "mind-map-color-option", role: "menuitem", tabindex: 0, "aria-label": `Usar cor ${indice + 1}`, transform: `translate(${48 + indice * 23} 51)`, "data-mind-id": item.id, "data-mind-color": cor });
-            opcao.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 8, fill: cor }));
+        const cores = item.payload.shape === "text"
+            ? ["#29211e", "#92271f", "#2167d5", "#386641", "#6b3fa0"]
+            : ["#fff3cd", "#f6b7b2", "#bfe3c0", "#bcd8f5", "#d8c5ef"];
+        const corAtual = item.payload.shape === "text" ? item.payload.textColor : item.payload.fill;
+        cores.forEach((cor, indice) => {
+            const opcao = svgEl("g", { class: `mind-map-color-option${String(corAtual).toLowerCase() === cor ? " is-active" : ""}`, role: "menuitem", tabindex: 0, "aria-label": `Usar cor ${indice + 1}`, transform: `translate(${14 + indice * 18} 20)`, "data-mind-id": item.id, "data-mind-color": cor });
+            opcao.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 6, fill: cor }));
             painel.appendChild(opcao);
         });
-        const maisCores = svgEl("g", { class: "mind-map-more-colors", role: "menuitem", tabindex: 0, "aria-label": "Escolher outra cor", transform: "translate(163 51)", "data-mind-id": item.id, "data-mind-action": "custom-color" });
-        maisCores.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 8 }));
+        const maisCores = svgEl("g", { class: "mind-map-more-colors", role: "menuitem", tabindex: 0, "aria-label": "Escolher outra cor", transform: "translate(106 20)", "data-mind-id": item.id, "data-mind-action": "custom-color" });
+        maisCores.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 6 }));
         const iconeCor = svgEl("text", { x: 0, y: 4, "text-anchor": "middle", "aria-hidden": "true" });
         iconeCor.textContent = "+";
         maisCores.appendChild(iconeCor);
         painel.appendChild(maisCores);
+        painel.appendChild(svgEl("line", { class: "mind-map-actions-divider", x1: 119, y1: 8, x2: 119, y2: 32 }));
 
         const excluir = svgEl("g", { class: "mind-map-actions-item is-danger", role: "menuitem", tabindex: 0, "aria-label": "Excluir elemento", "data-mind-id": item.id, "data-mind-action": "delete" });
-        excluir.appendChild(svgEl("rect", { x: 7, y: 72, width: 162, height: 35, rx: 8 }));
-        const textoExcluir = svgEl("text", { x: 18, y: 95, "aria-hidden": "true" });
-        textoExcluir.textContent = "⌫  Excluir elemento";
+        excluir.appendChild(svgEl("rect", { x: 125, y: 5, width: 24, height: 30, rx: 10 }));
+        const textoExcluir = svgEl("text", { x: 137, y: 24, "text-anchor": "middle", "aria-hidden": "true" });
+        textoExcluir.textContent = "⌫";
         excluir.appendChild(textoExcluir);
         painel.appendChild(excluir);
         grupo.appendChild(painel);
@@ -395,7 +457,14 @@ export function criarEditorMapasMentais(repositorio) {
             stroke: p.stroke || "#b58b27",
             "stroke-width": 2
         };
-        if (p.shape === "ellipse") {
+        if (p.shape === "text") {
+            grupo.appendChild(svgEl("rect", {
+                class: "mind-map-free-text-surface",
+                width: Number(p.width || 220),
+                height: Number(p.height || 100),
+                rx: 8
+            }));
+        } else if (p.shape === "ellipse") {
             grupo.appendChild(svgEl("ellipse", {
                 ...comum,
                 cx: Number(p.width || 170) / 2,
@@ -486,6 +555,31 @@ export function criarEditorMapasMentais(repositorio) {
         dom.vazio.classList.toggle("d-none", elementos.length > 0);
         atualizarBotoes();
         renderizarMinimapa();
+        if (textoInlineId) requestAnimationFrame(() => focarTextoInline());
+    }
+
+    function focarTextoInline() {
+        if (!textoInlineId) return;
+        const editor = dom.elementos.querySelector(`[data-mind-inline-text="${CSS.escape(textoInlineId)}"]`);
+        if (!editor || document.activeElement === editor) return;
+        editor.focus({ preventScroll: true });
+        const selecao = window.getSelection();
+        const intervalo = document.createRange();
+        intervalo.selectNodeContents(editor);
+        if (!selecionarTextoInlineAoFocar) intervalo.collapse(false);
+        selecao.removeAllRanges();
+        selecao.addRange(intervalo);
+        selecionarTextoInlineAoFocar = false;
+    }
+
+    function finalizarTextoInline(id) {
+        if (textoInlineId !== id) return;
+        const item = elementoPorId(id);
+        textoInlineId = null;
+        selecionarTextoInlineAoFocar = false;
+        if (item && !String(item.payload.text || "").trim()) item.payload.text = "Texto";
+        marcarAlterado();
+        renderizar();
     }
 
     function marcarAlterado() {
@@ -533,32 +627,57 @@ export function criarEditorMapasMentais(repositorio) {
     }
 
     async function novoElemento(tipo, ponto) {
-        const cor = dom.cor.value || "#b8322a";
-        const forma = tipo === "ellipse" ? "ellipse" : tipo === "rect" ? "rect" : "node";
+        const cor = tipo === "text" ? (dom.textoCor.value || "#3b2923") : (dom.cor.value || "#b8322a");
+        const forma = tipo === "ellipse" ? "ellipse" : tipo === "rect" ? "rect" : tipo === "text" ? "text" : "node";
+        if (tipo === "text") {
+            registrarHistorico();
+            const item = {
+                id: uuid(),
+                type: "shape",
+                zIndex: maxZ() + 1,
+                payload: {
+                    x: Math.round(ponto.x - 110), y: Math.round(ponto.y - 50), width: 220, height: 100,
+                    text: "", shape: "text", fill: "transparent", stroke: "transparent", textColor: cor,
+                    fontSize: 18, fontWeight: "normal", fontStyle: "normal", textAlign: "left"
+                }
+            };
+            elementos.push(item);
+            selecionadoId = item.id;
+            selecionarFerramenta("select");
+            textoInlineId = item.id;
+            selecionarTextoInlineAoFocar = false;
+            marcarAlterado();
+            renderizar();
+            return;
+        }
         const resposta = await solicitarTexto({
-            titulo: tipo === "node" ? "Novo conceito" : "Nova forma",
-            ajuda: tipo === "node" ? "Escreva a ideia que deseja conectar no mapa." : "Dê um nome à forma para facilitar a organização.",
+            titulo: tipo === "node" ? "Novo conceito" : tipo === "text" ? "Nova caixa de texto" : "Nova forma",
+            ajuda: tipo === "node" ? "Escreva a ideia que deseja conectar no mapa." : tipo === "text" ? "Escreva uma anotação livre para posicionar no mapa." : "Dê um nome à forma para facilitar a organização.",
             valor: tipo === "node" ? "Ideia central" : "",
             confirmar: "Criar"
         });
         if (resposta == null) return;
         const texto = resposta.trim();
-        if (tipo === "node" && !texto) return;
+        if (["node", "text"].includes(tipo) && !texto) return;
         registrarHistorico();
         const item = {
             id: uuid(),
             type: tipo === "node" ? "node" : "shape",
             zIndex: maxZ() + 1,
             payload: {
-                x: Math.round(ponto.x - 85),
-                y: Math.round(ponto.y - 42),
-                width: forma === "ellipse" ? 180 : 170,
-                height: forma === "ellipse" ? 100 : 84,
+                x: Math.round(ponto.x - (forma === "text" ? 110 : 85)),
+                y: Math.round(ponto.y - (forma === "text" ? 50 : 42)),
+                width: forma === "text" ? 220 : forma === "ellipse" ? 180 : 170,
+                height: forma === "text" ? 100 : forma === "ellipse" ? 100 : 84,
                 text: texto || (forma === "ellipse" ? "Círculo" : "Forma"),
                 shape: forma,
-                fill: cor,
-                stroke: cor,
-                textColor: corDoTexto(cor)
+                fill: forma === "text" ? "transparent" : cor,
+                stroke: forma === "text" ? "transparent" : cor,
+                textColor: forma === "text" ? cor : corDoTexto(cor)
+                ,fontSize: forma === "text" ? 18 : undefined
+                ,fontWeight: forma === "text" ? "normal" : undefined
+                ,fontStyle: forma === "text" ? "normal" : undefined
+                ,textAlign: forma === "text" ? "left" : undefined
             }
         };
         elementos.push(item);
@@ -599,6 +718,7 @@ export function criarEditorMapasMentais(repositorio) {
     function excluirSelecionado() {
         const item = elementoPorId(selecionadoId);
         if (!item) return;
+        if (textoInlineId === item.id) textoInlineId = null;
         registrarHistorico();
         const removidos = new Set([item.id]);
         if (["node", "shape"].includes(item.type)) {
@@ -692,16 +812,28 @@ export function criarEditorMapasMentais(repositorio) {
 
     function aplicarCor() {
         const item = elementoPorId(selecionadoId);
-        if (!item) return;
+        if (!item || item.payload?.shape === "text") return;
         aplicarCorAoItem(item, dom.cor.value);
+    }
+
+    function atualizarTextoSelecionado(alterar) {
+        const item = elementoPorId(selecionadoId);
+        if (!item || item.payload?.shape !== "text") return;
+        registrarHistorico();
+        alterar(item.payload);
+        marcarAlterado();
+        renderizar();
     }
 
     function aplicarCorAoItem(item, cor, salvarImediatamente = false) {
         registrarHistorico();
         if (["node", "shape"].includes(item.type)) {
-            item.payload.fill = cor;
-            item.payload.stroke = cor;
-            item.payload.textColor = corDoTexto(cor);
+            if (item.payload.shape === "text") item.payload.textColor = cor;
+            else {
+                item.payload.fill = cor;
+                item.payload.stroke = cor;
+                item.payload.textColor = corDoTexto(cor);
+            }
         } else item.payload.color = cor;
         dom.cor.value = cor;
         marcarAlterado();
@@ -798,7 +930,7 @@ export function criarEditorMapasMentais(repositorio) {
             return;
         }
         if (ferramenta === "edge" && item) { evento.preventDefault(); ligar(item.id); return; }
-        if (["node", "rect", "ellipse"].includes(ferramenta) && !item) { evento.preventDefault(); void novoElemento(ferramenta, ponto); return; }
+        if (["node", "text", "rect", "ellipse"].includes(ferramenta) && !item) { evento.preventDefault(); void novoElemento(ferramenta, ponto); return; }
         if (ferramenta === "draw" && !item) {
             evento.preventDefault();
             registrarHistorico();
@@ -812,6 +944,7 @@ export function criarEditorMapasMentais(repositorio) {
         if (!item && ferramenta === "select") {
             evento.preventDefault();
             selecionadoId = null;
+            textoInlineId = null;
             menuAcoesId = null;
             gesto = {
                 tipo: "pending-pan",
@@ -828,6 +961,9 @@ export function criarEditorMapasMentais(repositorio) {
         if (item && ferramenta === "select") {
             evento.preventDefault();
             const jaSelecionado = selecionadoId === item.id;
+            const agora = performance.now();
+            const duploClique = ultimoCliqueItem.id === item.id && agora - ultimoCliqueItem.instante <= 420;
+            ultimoCliqueItem = { id: item.id, instante: agora };
             selecionadoId = item.id;
             menuAcoesId = null;
             if (jaSelecionado && ["node", "shape"].includes(item.type)) {
@@ -840,6 +976,7 @@ export function criarEditorMapasMentais(repositorio) {
                     inicioClienteY: evento.clientY,
                     x: Number(item.payload.x),
                     y: Number(item.payload.y),
+                    editarAoSoltar: duploClique,
                     alterou: false
                 };
             dom.canvas.setPointerCapture(evento.pointerId);
@@ -925,12 +1062,25 @@ export function criarEditorMapasMentais(repositorio) {
             else marcarAlterado();
             selecionarFerramenta("select");
         }
+        if (terminou.tipo === "pending-move" && terminou.editarAoSoltar) {
+            ultimoCliqueItem = { id: null, instante: 0 };
+            await editarTextoItem(elementoPorId(terminou.id));
+            return;
+        }
         renderizar();
         if (salvarPosicaoAgora) await salvarAgora();
     }
 
     async function editarTextoItem(item) {
         if (!item || !["node", "shape"].includes(item.type)) return;
+        if (item.payload.shape === "text") {
+            if (textoInlineId !== item.id) registrarHistorico();
+            selecionadoId = item.id;
+            textoInlineId = item.id;
+            selecionarTextoInlineAoFocar = true;
+            renderizar();
+            return;
+        }
         const novo = await solicitarTexto({ titulo: "Editar texto", ajuda: "Atualize o conteúdo deste elemento.", valor: item.payload.text || "", confirmar: "Salvar" });
         if (novo == null || novo.trim() === item.payload.text) return;
         registrarHistorico();
@@ -955,9 +1105,16 @@ export function criarEditorMapasMentais(repositorio) {
             renderizar();
             return;
         }
-        if (acao === "edit") { menuAcoesId = null; void editarTextoItem(item); }
-        else if (acao === "delete") { menuAcoesId = null; excluirSelecionado(); }
-        else if (acao === "custom-color") { dom.cor.value = item.payload.fill || item.payload.color || dom.cor.value; dom.cor.click(); }
+        if (acao === "delete") { menuAcoesId = null; excluirSelecionado(); }
+        else if (acao === "custom-color") {
+            if (item.payload.shape === "text") {
+                dom.textoCor.value = item.payload.textColor || "#3b2923";
+                dom.textoCor.click();
+            } else {
+                dom.cor.value = item.payload.fill || item.payload.color || dom.cor.value;
+                dom.cor.click();
+            }
+        }
     }
 
     async function editarTexto(evento) {
@@ -1055,6 +1212,7 @@ export function criarEditorMapasMentais(repositorio) {
             historico = [];
             futuros = [];
             selecionadoId = null;
+            textoInlineId = null;
             origemConexaoId = null;
             sujo = false;
             definirStatus("Salvo no Supabase");
@@ -1073,6 +1231,7 @@ export function criarEditorMapasMentais(repositorio) {
         if (!await salvarAgora()) return;
         mapa = null;
         elementos = [];
+        textoInlineId = null;
         clearTimeout(timerSalvar);
         dom.editor.classList.add("d-none");
         dom.biblioteca.classList.remove("d-none");
@@ -1156,6 +1315,14 @@ export function criarEditorMapasMentais(repositorio) {
     dom.frente.addEventListener("click", trazerParaFrente);
     dom.excluir.addEventListener("click", excluirSelecionado);
     dom.cor.addEventListener("change", aplicarCor);
+    dom.textoCor.addEventListener("change", () => atualizarTextoSelecionado(payload => { payload.textColor = dom.textoCor.value; }));
+    dom.textoTamanho.addEventListener("change", () => atualizarTextoSelecionado(payload => { payload.fontSize = Number(dom.textoTamanho.value); }));
+    dom.textoNegrito.addEventListener("click", () => atualizarTextoSelecionado(payload => { payload.fontWeight = payload.fontWeight === "bold" ? "normal" : "bold"; }));
+    dom.textoItalico.addEventListener("click", () => atualizarTextoSelecionado(payload => { payload.fontStyle = payload.fontStyle === "italic" ? "normal" : "italic"; }));
+    dom.textoAlinhamento.addEventListener("click", () => atualizarTextoSelecionado(payload => {
+        const alinhamentos = ["left", "center", "right"];
+        payload.textAlign = alinhamentos[(alinhamentos.indexOf(payload.textAlign || "left") + 1) % alinhamentos.length];
+    }));
     dom.estiloLinha.addEventListener("change", aplicarEstiloLinha);
     dom.borrachaTamanho.addEventListener("input", () => {
         dom.borrachaLabel.textContent = dom.borrachaTamanho.value;
@@ -1182,7 +1349,6 @@ export function criarEditorMapasMentais(repositorio) {
     dom.canvas.addEventListener("pointerup", aoPointerUp);
     dom.canvas.addEventListener("pointercancel", aoPointerUp);
     dom.canvas.addEventListener("pointerleave", () => { if (!gesto && ferramenta === "eraser") dom.borrachaCursor.setAttribute("visibility", "hidden"); });
-    dom.canvas.addEventListener("dblclick", editarTexto);
     dom.stage.addEventListener("wheel", evento => {
         if (!mapa) return;
         evento.preventDefault();
@@ -1202,6 +1368,7 @@ export function criarEditorMapasMentais(repositorio) {
                 mapa = null;
                 mapas = [];
                 elementos = [];
+                textoInlineId = null;
                 dom.editor.classList.add("d-none");
                 dom.biblioteca.classList.remove("d-none");
                 renderizarBiblioteca();
@@ -1219,6 +1386,7 @@ export function criarEditorMapasMentais(repositorio) {
             mapas = [];
             mapa = null;
             elementos = [];
+            textoInlineId = null;
             sujo = false;
             dom.editor.classList.add("d-none");
             dom.biblioteca.classList.remove("d-none");

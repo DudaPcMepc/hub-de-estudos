@@ -272,6 +272,15 @@ export function criarCadernosMaterias(repositorio) {
         botao.innerHTML = `<i class="bi-${modoFocoCaderno ? "fullscreen-exit" : "arrows-fullscreen"}"></i>`;
     }
 
+    function alternarPainelPaginas(botao) {
+        paginasRecolhidas = !paginasRecolhidas;
+        const rotulo = paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas";
+        dom.workspace.querySelector(".subject-notebook-open")?.classList.toggle("is-pages-collapsed", paginasRecolhidas);
+        botao.setAttribute("aria-pressed", String(!paginasRecolhidas));
+        botao.setAttribute("aria-label", rotulo);
+        botao.title = rotulo;
+    }
+
     function abrirAcoesPagina(id) {
         const pagina = itemPorId(id);
         if (!pagina || pagina.tipo !== "page") return;
@@ -1265,8 +1274,7 @@ export function criarCadernosMaterias(repositorio) {
             renderizarArvore();
         }
         if (alvo.hasAttribute("data-notebook-pages-toggle")) {
-            paginasRecolhidas = !paginasRecolhidas;
-            renderizarWorkspace();
+            alternarPainelPaginas(alvo);
         }
         if (alvo.hasAttribute("data-notebook-focus")) alternarModoFocoCaderno();
         if (alvo.dataset.notebookPageMode) {
