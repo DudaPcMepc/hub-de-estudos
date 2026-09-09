@@ -8,6 +8,17 @@ const TAMANHOS_PAGINA = Object.freeze({
     wide: { largura: 1600, altura: 900 }
 });
 const copiar = valor => JSON.parse(JSON.stringify(valor));
+let carregamentoPdfJs = null;
+export const carregarPdfJs = () => {
+    if (!carregamentoPdfJs) carregamentoPdfJs = Promise.all([
+        import("pdfjs-dist"),
+        import("pdfjs-dist/build/pdf.worker.min.mjs?url")
+    ]).then(([pdfjs, worker]) => {
+        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        return pdfjs;
+    });
+    return carregamentoPdfJs;
+};
 const limitar = (valor, minimo, maximo) => Math.min(maximo, Math.max(minimo, valor));
 const svgEl = (nome, atributos = {}) => {
     const elemento = document.createElementNS(SVG_NS, nome);
@@ -63,6 +74,7 @@ function pontosDaForma(tipo, inicio, fim) {
 
 export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTexto = () => {}, opcoes = {}) {
     const svg = container.querySelector("[data-page-drawing-canvas]");
+    const camadaFundo = container.querySelector("[data-page-drawing-background]");
     const camada = container.querySelector("[data-page-drawing-strokes]");
     const camadaSelecao = container.querySelector("[data-page-drawing-selection]");
     const cursor = container.querySelector("[data-page-drawing-eraser-cursor]");
@@ -108,7 +120,28 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     const limparBotao = container.querySelector("[data-page-drawing-clear]");
     const adicionarImagemBotao = container.querySelector("[data-page-drawing-add-image]");
     const imagemInput = container.querySelector("[data-page-drawing-image-input]");
+    const adicionarPdfBotao = container.querySelector("[data-page-drawing-add-pdf]");
+    const pdfInput = container.querySelector("[data-page-drawing-pdf-input]");
+    const controlesPdf = document.createElement("div");
+    controlesPdf.className = "subject-page-drawing-pdf-controls";
+    controlesPdf.hidden = true;
+    controlesPdf.innerHTML = `<span title="PDF usado como fundo"><i class="bi-file-earmark-pdf"></i><strong data-page-drawing-pdf-name>PDF</strong><i class="bi-lock-fill subject-page-drawing-pdf-lock" title="Fundo bloqueado" aria-label="Fundo bloqueado"></i></span><button type="button" data-page-drawing-pdf-step="-1" title="Página anterior" aria-label="Página anterior do PDF"><i class="bi-chevron-left"></i></button><output data-page-drawing-pdf-page aria-live="polite">1 / 1</output><button type="button" data-page-drawing-pdf-step="1" title="Próxima página" aria-label="Próxima página do PDF"><i class="bi-chevron-right"></i></button><button class="is-danger" type="button" data-page-drawing-pdf-remove title="Remover fundo" aria-label="Remover PDF do fundo"><i class="bi-x-lg"></i></button>`;
+    container.append(controlesPdf);
+    const nomePdf = controlesPdf.querySelector("[data-page-drawing-pdf-name]");
+    const paginaPdfSaida = controlesPdf.querySelector("[data-page-drawing-pdf-page]");
+    const passosPdf = [...controlesPdf.querySelectorAll("[data-page-drawing-pdf-step]")];
+    const removerPdfBotao = controlesPdf.querySelector("[data-page-drawing-pdf-remove]");
     let tracos = Array.isArray(dadosIniciais?.strokes) ? copiar(dadosIniciais.strokes) : [];
+    let fundoPdf = dadosIniciais?.background?.type === "pdf" ? copiar(dadosIniciais.background) : null;
+    if (fundoPdf) delete fundoPdf.src;
+    if (fundoPdf) {
+        fundoPdf.annotations = fundoPdf.annotations && typeof fundoPdf.annotations === "object" ? fundoPdf.annotations : {};
+        const salvosDaPagina = fundoPdf.annotations[String(Number(fundoPdf.page) || 1)];
+        if (Array.isArray(salvosDaPagina)) tracos = copiar(salvosDaPagina);
+    }
+    let documentoPdf = null;
+    let urlRenderizadaPdf = "";
+    let geracaoRenderPdf = 0;
     let ferramenta = "pen";
     let gesto = null;
     let selecionados = new Set();
@@ -120,7 +153,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     let selecaoTexto = null;
     let selecaoEstudoPendente = null;
     let tamanhoPagina = TAMANHOS_PAGINA[dadosIniciais?.pageSize] ? dadosIniciais.pageSize : "standard";
-    let zoomPagina = 100;
+    let zoomPagina = fundoPdf ? 75 : 100;
 
     function aplicarVisualizacaoPagina() {
         const dimensoes = TAMANHOS_PAGINA[tamanhoPagina];
@@ -133,10 +166,11 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
             if (botao.dataset.pageDrawingZoom === "out") botao.disabled = zoomPagina <= 50;
             if (botao.dataset.pageDrawingZoom === "in") botao.disabled = zoomPagina >= 200;
         });
+        renderizarFundoPdf();
     }
 
     function alterarZoom(direcao) {
-        if (direcao === "fit") zoomPagina = 100;
+        if (direcao === "fit") zoomPagina = fundoPdf ? 75 : 100;
         else zoomPagina = limitar(zoomPagina + (direcao === "in" ? 25 : -25), 50, 200);
         aplicarVisualizacaoPagina();
     }
@@ -312,6 +346,159 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
         return elemento;
     }
 
+    function atualizarControlesPdf() {
+        controlesPdf.hidden = !fundoPdf;
+        if (!fundoPdf) return;
+        const atual = limitar(Number(fundoPdf.page) || 1, 1, Math.max(1, Number(fundoPdf.totalPages) || 1));
+        const total = Math.max(atual, Number(fundoPdf.totalPages) || 1);
+        nomePdf.textContent = fundoPdf.name || "Documento PDF";
+        paginaPdfSaida.textContent = fundoPdf.loading ? "Carregando…" : `${atual} / ${total}`;
+        passosPdf.forEach(botao => {
+            botao.hidden = Boolean(fundoPdf.fixedPage);
+            const direcao = Number(botao.dataset.pageDrawingPdfStep);
+            botao.disabled = fundoPdf.loading || (direcao < 0 ? atual <= 1 : atual >= total);
+        });
+    }
+
+    function renderizarFundoPdf() {
+        if (!camadaFundo) return;
+        if (!fundoPdf) {
+            camadaFundo.replaceChildren();
+            atualizarControlesPdf();
+            return;
+        }
+        const dimensoes = TAMANHOS_PAGINA[tamanhoPagina];
+        if (urlRenderizadaPdf) {
+            camadaFundo.replaceChildren(svgEl("image", {
+                x: 0, y: 0, width: dimensoes.largura, height: dimensoes.altura,
+                href: urlRenderizadaPdf, preserveAspectRatio: "xMidYMid meet",
+                class: "subject-page-drawing-pdf-background"
+            }));
+        } else {
+            const grupo = svgEl("g", { class: "subject-page-drawing-pdf-placeholder" });
+            grupo.append(svgEl("rect", { x: 0, y: 0, width: dimensoes.largura, height: dimensoes.altura }));
+            const texto = svgEl("text", { x: dimensoes.largura / 2, y: dimensoes.altura / 2 });
+            texto.textContent = fundoPdf.loading ? "Preparando página do PDF…" : "PDF indisponível";
+            grupo.append(texto);
+            camadaFundo.replaceChildren(grupo);
+        }
+        atualizarControlesPdf();
+    }
+
+    function canvasParaUrl(canvas) {
+        return new Promise((resolver, rejeitar) => canvas.toBlob(blob => {
+            if (!blob) { rejeitar(new Error("Não foi possível preparar a página do PDF.")); return; }
+            resolver(URL.createObjectURL(blob));
+        }, "image/png"));
+    }
+
+    async function renderizarPaginaPdf() {
+        if (!fundoPdf || !documentoPdf) return;
+        const geracao = ++geracaoRenderPdf;
+        fundoPdf.loading = true;
+        renderizarFundoPdf();
+        try {
+            const pagina = await documentoPdf.getPage(limitar(Number(fundoPdf.page) || 1, 1, documentoPdf.numPages));
+            const base = pagina.getViewport({ scale: 1 });
+            const escala = limitar(1800 / Math.max(1, base.width), 1, 3);
+            const viewport = pagina.getViewport({ scale: escala });
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            await pagina.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
+            const novaUrl = await canvasParaUrl(canvas);
+            if (geracao !== geracaoRenderPdf || !container.isConnected) { URL.revokeObjectURL(novaUrl); return; }
+            if (urlRenderizadaPdf) URL.revokeObjectURL(urlRenderizadaPdf);
+            urlRenderizadaPdf = novaUrl;
+            fundoPdf.loading = false;
+            fundoPdf.error = false;
+            renderizarFundoPdf();
+        } catch (erro) {
+            if (geracao !== geracaoRenderPdf) return;
+            fundoPdf.loading = false;
+            fundoPdf.error = true;
+            renderizarFundoPdf();
+            opcoes.aoErro?.(erro.message || "Não foi possível mostrar esta página do PDF.");
+        }
+    }
+
+    async function abrirDocumentoPdf(url, ajustarPagina = false) {
+        documentoPdf?.destroy?.();
+        const pdfjs = await carregarPdfJs();
+        documentoPdf = await pdfjs.getDocument({ url }).promise;
+        if (!fundoPdf) return;
+        fundoPdf.totalPages = documentoPdf.numPages;
+        fundoPdf.page = limitar(Number(fundoPdf.page) || 1, 1, documentoPdf.numPages);
+        if (ajustarPagina) {
+            const primeiraPagina = await documentoPdf.getPage(fundoPdf.page);
+            const viewport = primeiraPagina.getViewport({ scale: 1 });
+            tamanhoPagina = viewport.height >= viewport.width ? "portrait" : "wide";
+            aplicarVisualizacaoPagina();
+        }
+        await renderizarPaginaPdf();
+    }
+
+    async function inserirPdf(arquivo) {
+        if (!arquivo || typeof opcoes.enviarPdf !== "function") return;
+        adicionarPdfBotao.disabled = true;
+        adicionarPdfBotao.classList.add("is-loading");
+        adicionarPdfBotao.querySelector("i")?.classList.replace("bi-file-earmark-pdf", "bi-arrow-repeat");
+        try {
+            const enviado = await opcoes.enviarPdf(arquivo);
+            fundoPdf = { type: "pdf", storagePath: enviado.storagePath, name: enviado.nome || arquivo.name || "Documento PDF", page: 1, totalPages: 1, annotations: { 1: tracosParaPersistir() }, loading: true };
+            renderizarFundoPdf();
+            await abrirDocumentoPdf(enviado.url, true);
+            fundoPdf.fixedPage = true;
+            notificar();
+            if (typeof opcoes.aoImportarPdf === "function" && fundoPdf.totalPages > 1) {
+                await opcoes.aoImportarPdf({
+                    storagePath: fundoPdf.storagePath,
+                    name: fundoPdf.name,
+                    totalPages: fundoPdf.totalPages,
+                    pageSize: tamanhoPagina,
+                    annotations: copiar(fundoPdf.annotations)
+                });
+            }
+        } catch (erro) {
+            fundoPdf = null;
+            renderizarFundoPdf();
+            opcoes.aoErro?.(erro.message || "Não foi possível usar o PDF como fundo.");
+        } finally {
+            adicionarPdfBotao.disabled = false;
+            adicionarPdfBotao.classList.remove("is-loading");
+            adicionarPdfBotao.querySelector("i")?.classList.replace("bi-arrow-repeat", "bi-file-earmark-pdf");
+            pdfInput.value = "";
+        }
+    }
+
+    async function carregarFundoPdfPrivado() {
+        if (!fundoPdf || typeof opcoes.resolverPdf !== "function") return;
+        fundoPdf.loading = true;
+        renderizarFundoPdf();
+        try {
+            const url = await opcoes.resolverPdf(fundoPdf.storagePath);
+            if (!container.isConnected) return;
+            await abrirDocumentoPdf(url, false);
+            if (!fundoPdf.fixedPage && fundoPdf.totalPages > 1 && typeof opcoes.aoImportarPdf === "function") {
+                fundoPdf.fixedPage = true;
+                notificar();
+                await opcoes.aoImportarPdf({
+                    storagePath: fundoPdf.storagePath,
+                    name: fundoPdf.name,
+                    totalPages: fundoPdf.totalPages,
+                    pageSize: tamanhoPagina,
+                    annotations: copiar(fundoPdf.annotations)
+                });
+            }
+        } catch (erro) {
+            if (!fundoPdf || !container.isConnected) return;
+            fundoPdf.loading = false;
+            fundoPdf.error = true;
+            renderizarFundoPdf();
+            opcoes.aoErro?.(erro.message || "Não foi possível reabrir o PDF privado.");
+        }
+    }
+
     function ajustarCaixaTextoAoConteudo(traco, conteudo, elemento) {
         if (traco.tool !== "text" || !Array.isArray(traco.points) || traco.points.length < 2 || !conteudo.isConnected) return;
         const inicio = traco.points[0];
@@ -325,6 +512,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     }
 
     function renderizar() {
+        renderizarFundoPdf();
         camada.replaceChildren(...tracos.map(elementoDoTraco));
         renderizarSelecao();
         atualizarBotoes();
@@ -336,14 +524,25 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
         futuros = [];
     }
 
-    function notificar() {
-        const persistentes = tracos.map(traco => {
+    function tracosParaPersistir() {
+        return tracos.map(traco => {
             const salvo = copiar(traco);
             delete salvo.src;
             delete salvo.imageError;
             return salvo;
         });
-        aoAlterar({ strokes: persistentes, pageSize: tamanhoPagina });
+    }
+
+    function notificar() {
+        const persistentes = tracosParaPersistir();
+        if (fundoPdf) fundoPdf.annotations[String(Number(fundoPdf.page) || 1)] = persistentes;
+        const background = fundoPdf ? copiar(fundoPdf) : null;
+        if (background) {
+            delete background.src;
+            delete background.loading;
+            delete background.error;
+        }
+        aoAlterar({ strokes: persistentes, pageSize: tamanhoPagina, background });
         atualizarBotoes();
     }
 
@@ -801,6 +1000,35 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.pageDrawingTool)));
     adicionarImagemBotao?.addEventListener("click", () => imagemInput?.click());
     imagemInput?.addEventListener("change", () => inserirImagem(imagemInput.files?.[0]));
+    adicionarPdfBotao?.addEventListener("click", () => {
+        if (fundoPdf && !window.confirm("Substituir o PDF usado como fundo? As anotações visíveis serão mantidas na primeira página do novo documento.")) return;
+        pdfInput?.click();
+    });
+    pdfInput?.addEventListener("change", () => inserirPdf(pdfInput.files?.[0]));
+    passosPdf.forEach(botao => botao.addEventListener("click", async () => {
+        if (!fundoPdf || fundoPdf.loading) return;
+        fundoPdf.annotations[String(Number(fundoPdf.page) || 1)] = tracosParaPersistir();
+        fundoPdf.page = limitar((Number(fundoPdf.page) || 1) + Number(botao.dataset.pageDrawingPdfStep), 1, Number(fundoPdf.totalPages) || 1);
+        tracos = copiar(fundoPdf.annotations[String(fundoPdf.page)] || []);
+        selecionados.clear();
+        historico = [];
+        futuros = [];
+        carregarImagensPrivadas();
+        notificar();
+        renderizar();
+        await renderizarPaginaPdf();
+    }));
+    removerPdfBotao.addEventListener("click", () => {
+        if (!fundoPdf || !window.confirm("Remover o PDF do fundo desta página? Suas anotações serão mantidas.")) return;
+        geracaoRenderPdf += 1;
+        documentoPdf?.destroy?.();
+        documentoPdf = null;
+        if (urlRenderizadaPdf) URL.revokeObjectURL(urlRenderizadaPdf);
+        urlRenderizadaPdf = "";
+        fundoPdf = null;
+        renderizarFundoPdf();
+        notificar();
+    });
     grifarTextoBotao.addEventListener("pointerdown", evento => evento.preventDefault());
     grifarTextoBotao.addEventListener("click", alternarGrifoTexto);
     menuEstudoTexto.addEventListener("pointerdown", evento => {
@@ -866,11 +1094,16 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     aplicarVisualizacaoPagina();
     selecionarFerramenta("pen");
     carregarImagensPrivadas();
+    carregarFundoPdfPrivado();
     return Object.freeze({ destruir: () => {
         gesto = null;
         textoEmEdicaoId = null;
         document.removeEventListener("selectionchange", aoMudarSelecaoTexto);
         controlesVisualizacao.remove();
+        controlesPdf.remove();
+        geracaoRenderPdf += 1;
+        documentoPdf?.destroy?.();
+        if (urlRenderizadaPdf) URL.revokeObjectURL(urlRenderizadaPdf);
         menuEstudoTexto.remove();
     } });
 }

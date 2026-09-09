@@ -12,7 +12,8 @@
     "supabase": "supabase"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.112.4"
+    "@supabase/supabase-js": "2.112.4",
+    "pdfjs-dist": "5.4.624"
   },
   "devDependencies": {
     "supabase": "2.116.0",

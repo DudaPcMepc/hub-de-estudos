@@ -19,6 +19,7 @@ const ESTILOS_FOLHA_CADERNO_MATERIA = new Set(["plain", "lined", "grid", "dotted
 const BUCKET_PDFS_VADE = "private-legal-notebook-pdfs";
 const LIMITE_PDF_VADE_BYTES = 25 * 1024 * 1024;
 const BUCKET_IMAGENS_CADERNO = "private-subject-notebook-images";
+const BUCKET_PDFS_CADERNO = "private-subject-notebook-pdfs";
 const LIMITE_IMAGEM_CADERNO_BYTES = 8 * 1024 * 1024;
 const TIPOS_IMAGEM_CADERNO = new Map([
     ["image/png", "png"],
@@ -1978,6 +1979,7 @@ function mapearNoCadernoMateria(item) {
         tipo: item.node_type,
         titulo: item.title,
         conteudo: item.content || "",
+        desenho: item.drawing_data && typeof item.drawing_data === "object" ? item.drawing_data : { strokes: [] },
         cor: item.color,
         estiloCapa: item.cover_style,
         estiloFolha: item.paper_style,
@@ -2155,6 +2157,39 @@ export async function criarUrlImagemPaginaCaderno(caminho) {
     return assinatura.signedUrl;
 }
 
+export async function enviarPdfPaginaCaderno(materiaIdLocal, paginaId, arquivo) {
+    const contexto = exigirContexto();
+    const subjectId = resolverId("subject", materiaIdLocal);
+    const pageId = exigirUuidNovo(paginaId, "Página do caderno");
+    const validado = await validarPdfColecaoVade(arquivo);
+    const caminho = `${contexto.userId}/${contexto.workspaceId}/${subjectId}/${pageId}/${crypto.randomUUID()}.pdf`;
+    verificarResposta(await supabase.storage.from(BUCKET_PDFS_CADERNO).upload(caminho, arquivo, {
+        cacheControl: "3600",
+        contentType: "application/pdf",
+        upsert: false
+    }), "Não foi possível enviar o PDF privado.");
+    const assinatura = verificarResposta(
+        await supabase.storage.from(BUCKET_PDFS_CADERNO).createSignedUrl(caminho, 3600),
+        "O PDF foi enviado, mas não foi possível abri-lo."
+    );
+    if (!assinatura?.signedUrl) throw erroRepositorio("O endereço temporário do PDF não foi criado.");
+    return { storagePath: caminho, url: assinatura.signedUrl, nome: validado.nome };
+}
+
+export async function criarUrlPdfPaginaCaderno(caminho) {
+    const contexto = obterContexto();
+    const storagePath = String(caminho || "");
+    if (!storagePath.startsWith(`${contexto.userId}/${contexto.workspaceId}/`)) {
+        throw erroRepositorio("O PDF não pertence a este espaço de estudos.");
+    }
+    const assinatura = verificarResposta(
+        await supabase.storage.from(BUCKET_PDFS_CADERNO).createSignedUrl(storagePath, 3600),
+        "Não foi possível abrir o PDF privado."
+    );
+    if (!assinatura?.signedUrl) throw erroRepositorio("O endereço temporário do PDF não foi criado.");
+    return assinatura.signedUrl;
+}
+
 function valoresNoCadernoMateria(no, contexto, incluirIdentidade = false) {
     const tipo = String(no.tipo || "");
     if (Object.hasOwn(no, "tipo") && !TIPOS_NO_CADERNO_MATERIA.has(tipo)) throw erroRepositorio("Tipo de item do caderno inválido.");
@@ -2202,6 +2237,20 @@ export async function criarNoCadernoMateria(materiaIdLocal, no) {
         .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at")
         .single();
     return mapearNoCadernoMateria(verificarResposta(resposta, "Não foi possível criar o item no caderno."));
+}
+
+export async function criarNosCadernoMateria(materiaIdLocal, nos) {
+    const contexto = exigirContexto();
+    if (!Array.isArray(nos) || !nos.length || nos.length > 100) throw erroRepositorio("O lote de páginas do caderno é inválido.");
+    const subjectId = resolverId("subject", materiaIdLocal);
+    const valores = nos.map(no => ({
+        ...valoresNoCadernoMateria(no, contexto, true),
+        id: exigirUuidNovo(no.id, "Item do caderno"),
+        subject_id: subjectId
+    }));
+    const resposta = await supabase.from("user_subject_notebook_nodes").insert(valores)
+        .select("id, subject_id, parent_id, topic_id, node_type, title, content, drawing_data, color, cover_style, paper_style, position, version, created_at, updated_at");
+    return (verificarResposta(resposta, "Não foi possível criar as páginas do PDF no caderno.") || []).map(mapearNoCadernoMateria);
 }
 
 export async function atualizarNoCadernoMateria(id, alteracoes, versaoEsperada) {
