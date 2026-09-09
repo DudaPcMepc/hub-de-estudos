@@ -64,6 +64,16 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     const cor = container.querySelector("[data-page-drawing-color]");
     const tamanho = container.querySelector("[data-page-drawing-size]");
     const tamanhoSaida = container.querySelector("[data-page-drawing-size-output]");
+    const formatacaoTexto = document.createElement("div");
+    formatacaoTexto.className = "subject-page-drawing-text-format";
+    formatacaoTexto.dataset.pageDrawingTextFormat = "";
+    formatacaoTexto.hidden = true;
+    formatacaoTexto.innerHTML = `<label title="Tamanho da letra"><i class="bi-type"></i><select data-page-drawing-font-size aria-label="Tamanho da letra"><option value="14">14</option><option value="18">18</option><option value="22">22</option><option value="26">26</option><option value="32">32</option><option value="40">40</option><option value="48">48</option><option value="64">64</option></select></label><button type="button" data-page-drawing-text-style="bold" title="Negrito" aria-label="Negrito" aria-pressed="false"><i class="bi-type-bold"></i></button><button type="button" data-page-drawing-text-style="italic" title="Itálico" aria-label="Itálico" aria-pressed="false"><i class="bi-type-italic"></i></button><button type="button" data-page-drawing-text-align="left" title="Alinhar à esquerda" aria-label="Alinhar à esquerda" aria-pressed="false"><i class="bi-text-left"></i></button><button type="button" data-page-drawing-text-align="center" title="Centralizar" aria-label="Centralizar" aria-pressed="false"><i class="bi-text-center"></i></button><button type="button" data-page-drawing-text-align="right" title="Alinhar à direita" aria-label="Alinhar à direita" aria-pressed="false"><i class="bi-text-right"></i></button><button type="button" data-page-drawing-text-list="bullet" title="Lista com marcadores" aria-label="Lista com marcadores"><i class="bi-list-ul"></i></button><button type="button" data-page-drawing-text-list="number" title="Lista numerada" aria-label="Lista numerada"><i class="bi-list-ol"></i></button>`;
+    container.querySelector(".subject-notebook-editor-spacer")?.before(formatacaoTexto);
+    const tamanhoFonte = formatacaoTexto.querySelector("[data-page-drawing-font-size]");
+    const estilosTexto = [...formatacaoTexto.querySelectorAll("[data-page-drawing-text-style]")];
+    const alinhamentosTexto = [...formatacaoTexto.querySelectorAll("[data-page-drawing-text-align]")];
+    const listasTexto = [...formatacaoTexto.querySelectorAll("[data-page-drawing-text-list]")];
     const grifarTextoBotao = container.querySelector("[data-page-drawing-highlight-text]");
     const editarTextoBotao = container.querySelector("[data-page-drawing-edit-text]");
     const duplicarBotao = container.querySelector("[data-page-drawing-duplicate]");
@@ -101,6 +111,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     function atualizarBotoes() {
         selecionados = new Set([...selecionados].filter(id => tracos.some(traco => traco.id === id)));
         const unicoSelecionado = selecionados.size === 1 ? tracos.find(traco => selecionados.has(traco.id)) : null;
+        const textoSelecionado = unicoSelecionado?.tool === "text" ? unicoSelecionado : null;
+        formatacaoTexto.hidden = !textoSelecionado;
+        if (textoSelecionado) {
+            const tamanhos = [14, 18, 22, 26, 32, 40, 48, 64];
+            tamanhoFonte.value = String(tamanhos.reduce((maisProximo, atual) => Math.abs(atual - (Number(textoSelecionado.fontSize) || 26)) < Math.abs(maisProximo - (Number(textoSelecionado.fontSize) || 26)) ? atual : maisProximo, 26));
+            estilosTexto.forEach(botao => botao.setAttribute("aria-pressed", String(botao.dataset.pageDrawingTextStyle === "bold" ? textoSelecionado.fontWeight === "bold" : textoSelecionado.fontStyle === "italic")));
+            alinhamentosTexto.forEach(botao => botao.setAttribute("aria-pressed", String((textoSelecionado.textAlign || "left") === botao.dataset.pageDrawingTextAlign)));
+        }
         editarTextoBotao.disabled = unicoSelecionado?.tool !== "text";
         grifarTextoBotao.disabled = !textoEmEdicaoId || !selecaoTexto || selecaoTexto.inicio === selecaoTexto.fim;
         duplicarBotao.disabled = !selecionados.size;
@@ -192,6 +210,9 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         });
         conteudo.style.setProperty("--drawing-text-color", traco.color || "#3b2923");
         conteudo.style.setProperty("--drawing-text-size", `${limitar(Number(traco.fontSize) || 26, 12, 120)}px`);
+        conteudo.style.setProperty("--drawing-text-weight", traco.fontWeight === "bold" ? "800" : "600");
+        conteudo.style.setProperty("--drawing-text-style", traco.fontStyle === "italic" ? "italic" : "normal");
+        conteudo.style.setProperty("--drawing-text-align", ["left", "center", "right"].includes(traco.textAlign) ? traco.textAlign : "left");
         if (editando) {
             conteudo.setAttribute("contenteditable", "true");
             conteudo.setAttribute("role", "textbox");
@@ -307,6 +328,41 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         selecaoTexto = null;
         notificar();
         renderizar();
+    }
+
+    function textoUnicoSelecionado() {
+        return selecionados.size === 1 ? tracos.find(traco => selecionados.has(traco.id) && traco.tool === "text") : null;
+    }
+
+    function aplicarFormatoTexto(chave, valor) {
+        const traco = textoUnicoSelecionado();
+        if (!traco) return;
+        registrarHistorico();
+        traco[chave] = valor;
+        renderizar();
+        notificar();
+    }
+
+    function alternarListaTexto(tipo) {
+        const traco = textoUnicoSelecionado();
+        if (!traco) return;
+        registrarHistorico();
+        const anterior = String(traco.text || "Texto");
+        const linhas = anterior.split("\n");
+        const padrao = /^\s*(?:[•-]\s+|\d+[.)]\s+)/;
+        const linhasPreenchidas = linhas.filter(linha => linha.trim());
+        const todasFormatadas = linhasPreenchidas.length > 0 && linhasPreenchidas.every(linha => padrao.test(linha));
+        let contador = 0;
+        const novo = linhas.map(linha => {
+            const limpa = linha.replace(padrao, "");
+            if (todasFormatadas || !linha.trim()) return limpa;
+            contador += 1;
+            return tipo === "number" ? `${contador}. ${limpa}` : `• ${limpa}`;
+        }).join("\n");
+        traco.highlights = ajustarGrifosAposEdicao(anterior, novo, traco.highlights);
+        traco.text = novo;
+        renderizar();
+        notificar();
     }
 
     function finalizarEdicaoTexto(reverter) {
@@ -573,6 +629,16 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         renderizar(); notificar();
     });
     tamanho.addEventListener("input", () => { tamanhoSaida.textContent = tamanho.value; if (ferramenta === "eraser") cursor.setAttribute("r", String(Math.max(8, Number(tamanho.value)))); });
+    formatacaoTexto.addEventListener("pointerdown", evento => evento.preventDefault());
+    tamanhoFonte.addEventListener("change", () => aplicarFormatoTexto("fontSize", limitar(Number(tamanhoFonte.value) || 26, 12, 120)));
+    estilosTexto.forEach(botao => botao.addEventListener("click", () => {
+        const traco = textoUnicoSelecionado();
+        if (!traco) return;
+        const negrito = botao.dataset.pageDrawingTextStyle === "bold";
+        aplicarFormatoTexto(negrito ? "fontWeight" : "fontStyle", negrito ? (traco.fontWeight === "bold" ? "normal" : "bold") : (traco.fontStyle === "italic" ? "normal" : "italic"));
+    }));
+    alinhamentosTexto.forEach(botao => botao.addEventListener("click", () => aplicarFormatoTexto("textAlign", botao.dataset.pageDrawingTextAlign)));
+    listasTexto.forEach(botao => botao.addEventListener("click", () => alternarListaTexto(botao.dataset.pageDrawingTextList)));
     duplicarBotao.addEventListener("click", () => {
         if (!selecionados.size) return;
         registrarHistorico();
