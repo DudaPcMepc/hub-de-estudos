@@ -2212,7 +2212,7 @@ test("os cadernos das matérias formam uma árvore privada de pastas, cadernos e
     assert.match(frontend, /subject-notebook-child-menu">\$\{botoesAcoes\(filho\)\}/);
     assert.match(frontend, /aria-label="Opções de \$\{esc\(item\.titulo\)\}"/);
     assert.match(html, /\.subject-notebook-child-menu[\s\S]*?position: absolute/);
-    assert.match(frontend, /function miniaturasPaginas\(caderno, paginaAtual\)/);
+    assert.match(frontend, /function miniaturasPaginas\(caderno, paginaAtual(?:, caminhoPdf = "")?\)/);
     assert.match(frontend, /subject-notebook-page-thumbnail-card/);
     assert.match(frontend, /data-notebook-page-options="\$\{pagina\.id\}"/);
     assert.match(frontend, /function abrirAcoesPagina\(id\)/);
@@ -2396,6 +2396,45 @@ test("a escrita livre aceita imagens privadas móveis e redimensionáveis", () =
     assert.match(drawing, /delete salvo\.src/);
     assert.match(drawing, /tracos\.unshift\(traco\)/);
     assert.match(drawing, /opcoes\.resolverImagem/);
+});
+
+test("o caderno usa páginas de PDF privado como fundo anotável", () => {
+    const migration = readProjectFile("supabase/migrations/202609090002_private_subject_notebook_pdfs.sql");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const auth = readProjectFile("src/auth.js");
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const drawing = readProjectFile("src/subject-page-drawing.js");
+    const html = readProjectFile("index.html");
+    const manifest = JSON.parse(readProjectFile("package.json"));
+
+    assert.equal(manifest.dependencies["pdfjs-dist"], "5.4.624");
+    assert.match(migration, /private-subject-notebook-pdfs[\s\S]*?false[\s\S]*?26214400/i);
+    assert.match(migration, /private_subject_notebook_pdfs_select_self[\s\S]*?auth\.uid\(\)/i);
+    assert.match(repository, /export async function enviarPdfPaginaCaderno/);
+    assert.match(repository, /export async function criarUrlPdfPaginaCaderno/);
+    assert.match(repository, /export async function criarNosCadernoMateria/);
+    assert.match(repository, /desenho: item\.drawing_data/);
+    assert.match(auth, /enviarPdf: enviarPdfPaginaCaderno/);
+    assert.match(auth, /criarUrlPdf: criarUrlPdfPaginaCaderno/);
+    assert.match(auth, /criarLote: criarNosCadernoMateria/);
+    assert.match(frontend, /data-page-drawing-add-pdf/);
+    assert.match(frontend, /data-page-drawing-background/);
+    assert.match(drawing, /import\("pdfjs-dist"\)/);
+    assert.match(drawing, /function renderizarPaginaPdf/);
+    assert.match(drawing, /fundoPdf\.annotations/);
+    assert.match(drawing, /opcoes\.aoImportarPdf/);
+    assert.match(frontend, /criarPaginasDoPdf/);
+    assert.match(frontend, /PDF importado em \$\{total\} páginas do caderno/);
+    assert.match(frontend, /item\.desenho\?\.background\?\.type === "pdf" \? "drawing" : "text"/);
+    assert.match(frontend, /subject-notebook-pdf-mode/);
+    assert.match(frontend, /Voltar ao caderno/);
+    assert.match(frontend, /Folhas do PDF/);
+    assert.match(html, /\.subject-notebook-open\.is-pdf-workspace/);
+    assert.match(html, /\.subject-notebook-open\.is-pdf-workspace \{ position: fixed/);
+    assert.match(drawing, /zoomPagina = fundoPdf \? 75 : 100/);
+    assert.match(drawing, /preserveAspectRatio: "xMidYMid meet"/);
+    assert.match(html, /\.subject-page-drawing-pdf-controls/);
+    assert.match(html, /\.subject-page-drawing-pdf-background/);
 });
 
 test("o caderno protege alterações locais até a confirmação do salvamento", () => {

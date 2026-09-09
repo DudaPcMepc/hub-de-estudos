@@ -1,4 +1,5 @@
 import { criarDesenhoPagina } from "./subject-page-drawing.js";
+import { carregarPdfJs } from "./subject-page-drawing.js";
 
 const TIPOS = Object.freeze({ folder: "Pasta", notebook: "Caderno", page: "Página" });
 const ICONES = Object.freeze({ folder: "folder2", notebook: "journal-bookmark", page: "file-earmark-text" });
@@ -12,6 +13,11 @@ const formatarDataCurta = valor => {
     const data = new Date(valor || "");
     return Number.isNaN(data.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(data).replace(".", "");
 };
+const nomePdfLegivel = valor => String(valor || "Documento PDF")
+    .replace(/\.pdf$/i, "")
+    .replace(/[+_.-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 const posicaoAindaNaoDisponivel = erro => ["PGRST205", "42P01"].includes(String(erro?.cause?.code || ""));
 
 export function criarCadernosMaterias(repositorio) {
@@ -84,6 +90,11 @@ export function criarCadernosMaterias(repositorio) {
     let organizando = false;
     let lixeiraAberta = false;
     let paginasRecolhidas = false;
+    let primeiroPdfAberto = false;
+    let posicionarPdfNoFim = false;
+    let observadorMiniaturasPdf = null;
+    let leituraContinuaPdf = true;
+    let paginaContinuaInicial = "";
     let modoFocoCaderno = false;
     let modoDialogo = "full";
     let corGrifoTexto = CORES_GRIFO[0];
@@ -98,6 +109,8 @@ export function criarCadernosMaterias(repositorio) {
     const modoPaginaPorId = new Map();
     const materiaisPorPagina = new Map();
     const materiaisCarregando = new Set();
+    const documentosMiniaturaPdf = new Map();
+    const miniaturasPdf = new Map();
 
     const chaveRascunho = paginaId => `${PREFIXO_RASCUNHO}:${materiaId}:${paginaId}`;
     const assinaturaRascunho = dados => JSON.stringify({ titulo: dados?.titulo || "", conteudo: dados?.conteudo || "", desenho: dados?.desenho || { strokes: [] } });
@@ -207,7 +220,9 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     function renderizarArvore() {
-        dom.count.textContent = `${itens.length} ${itens.length === 1 ? "item" : "itens"}`;
+        const caminhosPdf = new Set(itens.filter(item => item.tipo === "page" && item.desenho?.background?.type === "pdf" && item.desenho.background.storagePath).map(item => item.desenho.background.storagePath));
+        const totalOrganizado = itens.filter(item => !(item.tipo === "page" && item.desenho?.background?.type === "pdf")).length + caminhosPdf.size;
+        dom.count.textContent = `${totalOrganizado} ${totalOrganizado === 1 ? "item" : "itens"}`;
         if (!itens.length) {
             dom.tree.innerHTML = '<div class="subject-notebook-tree-empty"><i class="bi-folder2-open d-block mb-2 fs-4"></i>Crie uma pasta ou um caderno para começar.</div>';
             return;
@@ -217,13 +232,37 @@ export function criarCadernosMaterias(repositorio) {
         const contemResultado = item => corresponde(item) || filhosDe(item.id).some(contemResultado);
         const paginaAtual = selecionado()?.tipo === "page" ? selecionado() : null;
         const cadernoAbertoId = paginaAtual?.paiId || (selecionado()?.tipo === "notebook" ? selecionadoId : "");
+        const linhaDocumentoPdf = (paginas, nivel) => {
+            const ordenadas = paginas.sort((a, b) => (Number(a.desenho?.background?.page) || 1) - (Number(b.desenho?.background?.page) || 1));
+            const paginaSelecionada = ordenadas.find(pagina => pagina.id === selecionadoId);
+            const paginaAnterior = ordenadas.find(pagina => pagina.id === ultimaPaginaMateriaId);
+            const destino = paginaSelecionada || paginaAnterior || ordenadas[0];
+            const nome = nomePdfLegivel(ordenadas[0]?.desenho?.background?.name || ordenadas[0]?.titulo || "Documento PDF");
+            const ativa = paginaSelecionada ? "is-active" : "";
+            return `<div class="subject-notebook-tree-row is-pdf-group ${ativa}" data-notebook-row-id="${destino.id}" style="padding-left:${.25 + nivel * .78}rem"><span class="subject-notebook-tree-spacer"></span><button class="subject-notebook-tree-item" type="button" data-notebook-select="${destino.id}" aria-label="Abrir documento PDF ${esc(nome)}"><i class="bi-file-earmark-pdf"></i><span>${esc(nome)}</span><small>${ordenadas.length}</small></button></div>`;
+        };
         const linha = (item, nivel = 0) => {
             const filhos = filhosDe(item.id);
-            const visiveis = filhos.filter(contemResultado);
+            const entradasVisiveis = [];
+            const gruposPdf = new Map();
+            filhos.forEach(filho => {
+                const caminhoPdf = item.tipo === "notebook" && filho.tipo === "page" && filho.desenho?.background?.type === "pdf" ? filho.desenho.background.storagePath : "";
+                if (!caminhoPdf) {
+                    if (contemResultado(filho)) entradasVisiveis.push({ tipo: "item", item: filho });
+                    return;
+                }
+                if (!gruposPdf.has(caminhoPdf)) {
+                    const grupo = { tipo: "pdf", paginas: [] };
+                    gruposPdf.set(caminhoPdf, grupo);
+                    entradasVisiveis.push(grupo);
+                }
+                gruposPdf.get(caminhoPdf).paginas.push(filho);
+            });
+            const visiveis = entradasVisiveis.filter(entrada => entrada.tipo === "item" || !termo || entrada.paginas.some(corresponde));
             const recolhivel = item.tipo === "folder" || item.tipo === "notebook";
             const fechada = recolhivel && pastasFechadas.has(item.id) && !termo;
             const classeAtiva = item.id === selecionadoId ? "is-active" : item.id === cadernoAbertoId ? "is-context-active" : "";
-            return `<div class="subject-notebook-tree-row ${classeAtiva}" data-notebook-row-id="${item.id}" style="padding-left:${.25 + nivel * .78}rem">${recolhivel ? `<button class="subject-notebook-tree-disclosure" type="button" data-notebook-toggle="${item.id}" aria-label="${fechada ? "Expandir" : "Recolher"} ${esc(item.titulo)}"><i class="bi-chevron-${fechada ? "right" : "down"}"></i></button>` : '<span class="subject-notebook-tree-spacer"></span>'}<button class="subject-notebook-tree-item" type="button" data-notebook-select="${item.id}"><i class="bi-${ICONES[item.tipo]}"></i><span>${esc(item.titulo)}</span></button>${organizando ? `<button class="subject-notebook-drag-handle" type="button" data-notebook-drag="${item.id}" aria-label="Arrastar ${esc(item.titulo)}" title="Segure e arraste"><i class="bi-grip-vertical"></i></button>` : ""}</div>${fechada ? "" : visiveis.map(filho => linha(filho, nivel + 1)).join("")}`;
+            return `<div class="subject-notebook-tree-row ${classeAtiva}" data-notebook-row-id="${item.id}" style="padding-left:${.25 + nivel * .78}rem">${recolhivel ? `<button class="subject-notebook-tree-disclosure" type="button" data-notebook-toggle="${item.id}" aria-label="${fechada ? "Expandir" : "Recolher"} ${esc(item.titulo)}"><i class="bi-chevron-${fechada ? "right" : "down"}"></i></button>` : '<span class="subject-notebook-tree-spacer"></span>'}<button class="subject-notebook-tree-item" type="button" data-notebook-select="${item.id}"><i class="bi-${ICONES[item.tipo]}"></i><span>${esc(item.titulo)}</span></button>${organizando ? `<button class="subject-notebook-drag-handle" type="button" data-notebook-drag="${item.id}" aria-label="Arrastar ${esc(item.titulo)}" title="Segure e arraste"><i class="bi-grip-vertical"></i></button>` : ""}</div>${fechada ? "" : visiveis.map(entrada => entrada.tipo === "pdf" ? linhaDocumentoPdf(entrada.paginas, nivel + 1) : linha(entrada.item, nivel + 1)).join("")}`;
         };
         const raizes = filhosDe("").filter(contemResultado);
         dom.tree.innerHTML = raizes.length ? raizes.map(item => linha(item)).join("") : '<div class="subject-notebook-tree-empty"><i class="bi-search d-block mb-2 fs-4"></i>Nenhum item encontrado.</div>';
@@ -242,23 +281,221 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     function cartoesFilhos(item) {
-        const filhos = filhosDe(item?.id || "");
-        if (!filhos.length) return '<div class="subject-notebook-empty is-contained"><i class="bi-folder2-open"></i><strong>Nada por aqui ainda</strong><small>Use as ações ao lado do título para organizar este espaço.</small></div>';
-        return `<div class="subject-notebook-child-grid">${filhos.map(filho => {
+        const filhosDiretos = filhosDe(item?.id || "");
+        if (!filhosDiretos.length) return '<div class="subject-notebook-empty is-contained"><i class="bi-folder2-open"></i><strong>Nada por aqui ainda</strong><small>Use as ações ao lado do título para organizar este espaço.</small></div>';
+        const documentosPdf = new Map();
+        const entradas = [];
+        filhosDiretos.forEach(filho => {
+            const caminhoPdf = item?.tipo === "notebook" && filho.tipo === "page" && filho.desenho?.background?.type === "pdf"
+                ? filho.desenho.background.storagePath
+                : "";
+            if (!caminhoPdf) { entradas.push({ tipo: "item", item: filho }); return; }
+            if (!documentosPdf.has(caminhoPdf)) {
+                const grupo = { tipo: "pdf", caminho: caminhoPdf, paginas: [] };
+                documentosPdf.set(caminhoPdf, grupo);
+                entradas.push(grupo);
+            }
+            documentosPdf.get(caminhoPdf).paginas.push(filho);
+        });
+        return `<div class="subject-notebook-child-grid">${entradas.map(entrada => {
+            if (entrada.tipo === "pdf") {
+                const paginasPdf = entrada.paginas.sort((a, b) => (Number(a.desenho?.background?.page) || 1) - (Number(b.desenho?.background?.page) || 1));
+                const paginaAnterior = paginasPdf.find(pagina => pagina.id === ultimaPaginaMateriaId);
+                const destino = paginaAnterior || paginasPdf[0];
+                const numeroAtual = Number(destino.desenho?.background?.page) || 1;
+                const nomeOriginal = paginasPdf[0]?.desenho?.background?.name || paginasPdf[0]?.titulo || "Documento PDF";
+                const nome = nomePdfLegivel(nomeOriginal);
+                const anotacoes = paginasPdf.reduce((total, pagina) => total + (Array.isArray(pagina.desenho?.strokes) ? pagina.desenho.strokes.length : 0), 0);
+                const ultimaAtualizacao = paginasPdf.map(pagina => pagina.atualizadoEm).filter(Boolean).sort().at(-1);
+                return `<article class="subject-notebook-child-card is-pdf-document"><button class="subject-notebook-child" type="button" data-notebook-select="${destino.id}" aria-label="Abrir documento PDF ${esc(nome)}"><span class="subject-notebook-pdf-document-icon"><i class="bi-file-earmark-pdf"></i></span><strong>${esc(nome)}</strong><small>Documento PDF</small><span class="subject-notebook-child-meta"><span><i class="bi-files"></i>${paginasPdf.length} páginas</span>${anotacoes ? `<span><i class="bi-pen"></i>${anotacoes} ${anotacoes === 1 ? "anotação" : "anotações"}</span>` : ""}${ultimaAtualizacao ? `<span><i class="bi-clock"></i>${esc(formatarDataCurta(ultimaAtualizacao))}</span>` : ""}</span>${paginaAnterior ? `<span class="subject-notebook-last-opened"><i class="bi-bookmark-check"></i>Continuar na página ${numeroAtual}</span>` : ""}<span class="subject-notebook-child-open">${paginaAnterior ? "Continuar leitura" : "Abrir documento"} <i class="bi-chevron-right"></i></span></button></article>`;
+            }
+            const filho = entrada.item;
             const paginas = filho.tipo === "notebook" ? filhosDe(filho.id).filter(valor => valor.tipo === "page") : [];
             const topico = topicos.find(valor => String(valor.id) === String(filho.topicoId));
             const ultimaAtualizacao = [filho, ...paginas].map(valor => valor.atualizadoEm).filter(Boolean).sort().at(-1);
             const foiUltimoAcessado = filho.tipo === "notebook" && paginas.some(pagina => pagina.id === ultimaPaginaMateriaId);
             const metadados = filho.tipo === "notebook"
                 ? `<span><i class="bi-file-earmark-text"></i>${paginas.length} ${paginas.length === 1 ? "página" : "páginas"}</span>${topico ? `<span><i class="bi-bookmark"></i>${esc(topico.titulo)}</span>` : ""}${ultimaAtualizacao ? `<span><i class="bi-clock"></i>${esc(formatarDataCurta(ultimaAtualizacao))}</span>` : ""}`
-                : `<span><i class="bi-folder2"></i>${filhosDe(filho.id).length} itens</span>`;
+                : filho.tipo === "folder"
+                    ? `<span><i class="bi-folder2"></i>${filhosDe(filho.id).length} itens</span>`
+                    : `<span><i class="bi-file-earmark-text"></i>Página do caderno</span>${ultimaAtualizacao ? `<span><i class="bi-clock"></i>${esc(formatarDataCurta(ultimaAtualizacao))}</span>` : ""}`;
             return `<article class="subject-notebook-child-card" style="--child-color:${esc(filho.cor)}"><button class="subject-notebook-child" type="button" data-notebook-select="${filho.id}" aria-label="Abrir ${TIPOS[filho.tipo].toLowerCase()} ${esc(filho.titulo)}"><i class="bi-${ICONES[filho.tipo]}"></i><strong>${esc(filho.titulo)}</strong><small>${TIPOS[filho.tipo]}${filho.tipo === "notebook" ? ` · ${PAPEIS[filho.estiloFolha]}` : ""}</small><span class="subject-notebook-child-meta">${metadados}</span>${foiUltimoAcessado ? '<span class="subject-notebook-last-opened"><i class="bi-bookmark-check"></i>Último acessado</span>' : ""}<span class="subject-notebook-child-open">Abrir <i class="bi-chevron-right"></i></span></button><div class="subject-notebook-child-menu">${botoesAcoes(filho)}</div></article>`;
         }).join("")}</div>`;
     }
 
-    function miniaturasPaginas(caderno, paginaAtual) {
-        const paginas = filhosDe(caderno.id).filter(item => item.tipo === "page");
-        return `<aside class="subject-notebook-page-rail" aria-label="Páginas de ${esc(caderno.titulo)}"><div class="subject-notebook-page-rail-header"><div><strong>Páginas</strong><small>${paginas.length}</small></div></div><div class="subject-notebook-page-thumbnails">${paginas.map((pagina, indice) => `<article class="subject-notebook-page-thumbnail-card"><button class="subject-notebook-page-thumbnail ${pagina.id === paginaAtual.id ? "is-active" : ""}" type="button" data-notebook-select="${pagina.id}" aria-current="${pagina.id === paginaAtual.id ? "page" : "false"}"><span>${indice + 1}</span><strong>${esc(pagina.titulo)}</strong><small>${esc(pagina.conteudo.trim().slice(0, 68) || "Página em branco")}</small></button><button class="subject-notebook-page-options" type="button" data-notebook-page-options="${pagina.id}" aria-label="Opções de ${esc(pagina.titulo)}" title="Opções da página"><i class="bi-three-dots"></i></button></article>`).join("")}</div><button class="subject-notebook-page-rail-add" type="button" data-notebook-create="page"><i class="bi-plus-lg"></i><span>Nova página</span></button></aside>`;
+    function miniaturasPaginas(caderno, paginaAtual, caminhoPdf = "") {
+        const paginas = filhosDe(caderno.id).filter(item => item.tipo === "page" && (!caminhoPdf || item.desenho?.background?.storagePath === caminhoPdf));
+        const titulo = caminhoPdf ? "Folhas do PDF" : "Páginas";
+        const itens = paginas.map((pagina, indice) => {
+            const numeroPdf = Number(pagina.desenho?.background?.page) || indice + 1;
+            const resumo = caminhoPdf ? `Página ${numeroPdf} do documento` : pagina.conteudo.trim().slice(0, 68) || "Página em branco";
+            const tituloPagina = caminhoPdf ? `Página ${numeroPdf}` : pagina.titulo;
+            const previaPdf = caminhoPdf ? `<span class="subject-notebook-pdf-thumbnail-preview"><canvas data-pdf-thumbnail="${numeroPdf}" aria-hidden="true"></canvas><i class="bi-file-earmark-pdf" aria-hidden="true"></i></span>` : "";
+            return `<article class="subject-notebook-page-thumbnail-card"><button class="subject-notebook-page-thumbnail ${caminhoPdf ? "is-pdf-thumbnail" : ""} ${pagina.id === paginaAtual.id ? "is-active" : ""}" type="button" data-notebook-select="${pagina.id}" aria-current="${pagina.id === paginaAtual.id ? "page" : "false"}" aria-label="${caminhoPdf ? `Abrir página ${numeroPdf}` : `Abrir ${esc(pagina.titulo)}`}">${previaPdf}<span>${numeroPdf}</span><strong>${esc(tituloPagina)}</strong>${caminhoPdf ? "" : `<small>${esc(resumo)}</small>`}</button>${caminhoPdf ? "" : `<button class="subject-notebook-page-options" type="button" data-notebook-page-options="${pagina.id}" aria-label="Opções de ${esc(pagina.titulo)}" title="Opções da página"><i class="bi-three-dots"></i></button>`}</article>`;
+        }).join("");
+        return `<aside class="subject-notebook-page-rail" aria-label="${titulo} de ${esc(caderno.titulo)}"><div class="subject-notebook-page-rail-header"><div><strong>${titulo}</strong><small>${paginas.length}</small></div></div><div class="subject-notebook-page-thumbnails">${itens}</div>${caminhoPdf ? "" : '<button class="subject-notebook-page-rail-add" type="button" data-notebook-create="page"><i class="bi-plus-lg"></i><span>Nova página</span></button>'}</aside>`;
+    }
+
+    async function documentoParaMiniaturas(caminhoPdf) {
+        if (!documentosMiniaturaPdf.has(caminhoPdf)) {
+            documentosMiniaturaPdf.set(caminhoPdf, (async () => {
+                const [pdfjs, url] = await Promise.all([carregarPdfJs(), repositorio.criarUrlPdf(caminhoPdf)]);
+                return pdfjs.getDocument({ url }).promise;
+            })().catch(erro => {
+                documentosMiniaturaPdf.delete(caminhoPdf);
+                throw erro;
+            }));
+        }
+        return documentosMiniaturaPdf.get(caminhoPdf);
+    }
+
+    async function desenharMiniaturaPdf(canvas, caminhoPdf, numeroPagina) {
+        if (!canvas?.isConnected || canvas.dataset.pdfReady === "true" || canvas.dataset.pdfLoading === "true") return;
+        canvas.dataset.pdfLoading = "true";
+        const chave = `${caminhoPdf}:${numeroPagina}`;
+        try {
+            const armazenada = miniaturasPdf.get(chave);
+            if (armazenada) {
+                const imagem = new Image();
+                await new Promise((resolver, rejeitar) => { imagem.onload = resolver; imagem.onerror = rejeitar; imagem.src = armazenada; });
+                if (!canvas.isConnected) return;
+                canvas.width = imagem.naturalWidth;
+                canvas.height = imagem.naturalHeight;
+                canvas.getContext("2d").drawImage(imagem, 0, 0);
+            } else {
+                const documento = await documentoParaMiniaturas(caminhoPdf);
+                const pagina = await documento.getPage(numeroPagina);
+                const base = pagina.getViewport({ scale: 1 });
+                const escala = Math.min(1, 150 / Math.max(1, base.width));
+                const viewport = pagina.getViewport({ scale: escala });
+                canvas.width = Math.ceil(viewport.width);
+                canvas.height = Math.ceil(viewport.height);
+                await pagina.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
+                if (canvas.isConnected) miniaturasPdf.set(chave, canvas.toDataURL("image/jpeg", .72));
+            }
+            if (canvas.isConnected) {
+                canvas.dataset.pdfReady = "true";
+                canvas.closest(".subject-notebook-pdf-thumbnail-preview")?.classList.add("is-ready");
+            }
+        } catch {
+            canvas.closest(".subject-notebook-pdf-thumbnail-preview")?.classList.add("is-error");
+        } finally { delete canvas.dataset.pdfLoading; }
+    }
+
+    function prepararMiniaturasPdf(caminhoPdf) {
+        observadorMiniaturasPdf?.disconnect();
+        const miniaturas = [...dom.workspace.querySelectorAll("canvas[data-pdf-thumbnail]")];
+        if (!caminhoPdf || !miniaturas.length) return;
+        const trilho = dom.workspace.querySelector(".subject-notebook-page-thumbnails");
+        const carregarVisiveis = () => {
+            const limite = trilho?.getBoundingClientRect();
+            miniaturas.forEach(canvas => {
+                const caixa = canvas.getBoundingClientRect();
+                if (!limite || (caixa.bottom >= limite.top - 180 && caixa.top <= limite.bottom + 180)) {
+                    desenharMiniaturaPdf(canvas, caminhoPdf, Number(canvas.dataset.pdfThumbnail) || 1);
+                }
+            });
+        };
+        observadorMiniaturasPdf = new IntersectionObserver(entradas => entradas.forEach(entrada => {
+            if (!entrada.isIntersecting) return;
+            observadorMiniaturasPdf?.unobserve(entrada.target);
+            desenharMiniaturaPdf(entrada.target, caminhoPdf, Number(entrada.target.dataset.pdfThumbnail) || 1);
+        }), { root: trilho, rootMargin: "180px 0px" });
+        miniaturas.forEach(canvas => observadorMiniaturasPdf.observe(canvas));
+        trilho?.addEventListener("scroll", carregarVisiveis, { passive: true });
+        requestAnimationFrame(carregarVisiveis);
+    }
+
+    function htmlLeituraContinuaPdf(paginas, paginaAtual) {
+        const tamanhos = { standard: [1200, 800], portrait: [1200, 1697], square: [1200, 1200], wide: [1600, 900] };
+        const folhas = paginas.map((pagina, indice) => {
+            const numero = Number(pagina.desenho?.background?.page) || indice + 1;
+            const [largura, altura] = tamanhos[pagina.desenho?.pageSize] || tamanhos.portrait;
+            const anotacoes = Array.isArray(pagina.desenho?.strokes) ? pagina.desenho.strokes.length : 0;
+            return `<article class="subject-notebook-pdf-continuous-page ${pagina.id === paginaAtual.id ? "is-current" : ""}" data-pdf-continuous-page="${pagina.id}" data-pdf-page-number="${numero}" style="--pdf-page-ratio:${largura}/${altura}"><div class="subject-notebook-pdf-continuous-sheet"><canvas data-pdf-continuous-canvas="${numero}" aria-label="Página ${numero} do PDF"></canvas><span class="subject-notebook-pdf-continuous-loading"><i class="bi-file-earmark-pdf"></i>Carregando página ${numero}…</span></div><footer><span>Página ${numero}</span>${anotacoes ? `<small><i class="bi-pen"></i>${anotacoes} ${anotacoes === 1 ? "anotação" : "anotações"}</small>` : ""}<button type="button" data-notebook-pdf-annotate="${pagina.id}"><i class="bi-pencil-square"></i>Anotar esta página</button></footer></article>`;
+        }).join("");
+        return `<section class="subject-notebook-pdf-continuous" data-pdf-continuous-root aria-label="Leitura contínua do PDF">${folhas}</section>`;
+    }
+
+    async function desenharPaginaContinuaPdf(canvas, caminhoPdf, numeroPagina) {
+        if (!canvas?.isConnected || canvas.dataset.pdfReady === "true" || canvas.dataset.pdfLoading === "true") return;
+        canvas.dataset.pdfLoading = "true";
+        try {
+            const documento = await documentoParaMiniaturas(caminhoPdf);
+            const pagina = await documento.getPage(numeroPagina);
+            if (!canvas.isConnected) return;
+            const base = pagina.getViewport({ scale: 1 });
+            const larguraCss = Math.max(320, canvas.parentElement?.clientWidth || 820);
+            const densidade = Math.min(window.devicePixelRatio || 1, 1.5);
+            const escala = Math.min(2.25, (larguraCss * densidade) / Math.max(1, base.width));
+            const viewport = pagina.getViewport({ scale: escala });
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            await pagina.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
+            if (canvas.isConnected) {
+                canvas.dataset.pdfReady = "true";
+                canvas.closest(".subject-notebook-pdf-continuous-page")?.classList.add("is-ready");
+            }
+        } catch {
+            canvas.closest(".subject-notebook-pdf-continuous-page")?.classList.add("is-error");
+        } finally { delete canvas.dataset.pdfLoading; }
+    }
+
+    function prepararLeituraContinuaPdf(caminhoPdf, paginas, paginaAtual) {
+        const raiz = dom.workspace.querySelector("[data-pdf-continuous-root]");
+        if (!raiz || !caminhoPdf) return;
+        const folhas = [...raiz.querySelectorAll("[data-pdf-continuous-page]")];
+        const renderizador = new IntersectionObserver(entradas => entradas.forEach(entrada => {
+            const canvas = entrada.target.querySelector("canvas[data-pdf-continuous-canvas]");
+            if (entrada.isIntersecting) {
+                clearTimeout(Number(canvas?.dataset.pdfUnloadTimer) || 0);
+                desenharPaginaContinuaPdf(canvas, caminhoPdf, Number(canvas?.dataset.pdfContinuousCanvas) || 1);
+            } else if (canvas?.dataset.pdfReady === "true") {
+                const timer = window.setTimeout(() => {
+                    if (!canvas.isConnected) return;
+                    canvas.width = 1;
+                    canvas.height = 1;
+                    delete canvas.dataset.pdfReady;
+                    entrada.target.classList.remove("is-ready");
+                }, 1200);
+                canvas.dataset.pdfUnloadTimer = String(timer);
+            }
+        }), { root: raiz, rootMargin: "1400px 0px" });
+        folhas.forEach(folha => renderizador.observe(folha));
+
+        let quadro = 0;
+        const atualizarPaginaVisivel = () => {
+            quadro = 0;
+            const centro = raiz.getBoundingClientRect().top + raiz.clientHeight * .42;
+            const folha = folhas.reduce((melhor, atual) => {
+                const caixa = atual.getBoundingClientRect();
+                const distancia = Math.abs((caixa.top + Math.min(caixa.height, raiz.clientHeight) / 2) - centro);
+                return !melhor || distancia < melhor.distancia ? { elemento: atual, distancia } : melhor;
+            }, null)?.elemento;
+            const id = folha?.dataset.pdfContinuousPage;
+            if (!id || id === selecionadoId) return;
+            selecionadoId = id;
+            folhas.forEach(item => item.classList.toggle("is-current", item === folha));
+            dom.workspace.querySelectorAll(".subject-notebook-page-thumbnail").forEach(item => item.classList.toggle("is-active", item.dataset.notebookSelect === id));
+            const seletor = dom.workspace.querySelector("[data-notebook-pdf-page-select]");
+            if (seletor) seletor.value = id;
+        };
+        raiz.addEventListener("scroll", () => {
+            if (!quadro) quadro = requestAnimationFrame(atualizarPaginaVisivel);
+        }, { passive: true });
+        const destinoId = paginaContinuaInicial || paginaAtual.id;
+        paginaContinuaInicial = "";
+        requestAnimationFrame(() => {
+            raiz.querySelector(`[data-pdf-continuous-page="${CSS.escape(destinoId)}"]`)?.scrollIntoView({ block: "start" });
+            atualizarPaginaVisivel();
+        });
+    }
+
+    function rolarParaPaginaPdf(id, comportamento = "smooth") {
+        const pagina = dom.workspace.querySelector(`[data-pdf-continuous-page="${CSS.escape(id)}"]`);
+        if (!pagina) return false;
+        pagina.scrollIntoView({ behavior: comportamento, block: "start" });
+        return true;
     }
 
     function alternarModoFocoCaderno() {
@@ -278,7 +515,39 @@ export function criarCadernosMaterias(repositorio) {
         dom.workspace.querySelector(".subject-notebook-open")?.classList.toggle("is-pages-collapsed", paginasRecolhidas);
         botao.setAttribute("aria-pressed", String(!paginasRecolhidas));
         botao.setAttribute("aria-label", rotulo);
-        botao.title = rotulo;
+        if (botao.hasAttribute("data-tooltip")) botao.dataset.tooltip = paginasRecolhidas ? "Mostrar miniaturas" : "Recolher miniaturas";
+        else botao.title = rotulo;
+        const caminhoPdf = selecionado()?.desenho?.background?.storagePath;
+        if (!paginasRecolhidas && caminhoPdf) prepararMiniaturasPdf(caminhoPdf);
+    }
+
+    function ativarNavegacaoPorRolagem(paginas, indiceAtual) {
+        const area = dom.workspace.querySelector(".subject-page-drawing-stage");
+        if (!area) return;
+        if (posicionarPdfNoFim) {
+            posicionarPdfNoFim = false;
+            queueMicrotask(() => { area.scrollTop = area.scrollHeight; });
+        }
+        let acumulado = 0;
+        let instanteUltimoEvento = 0;
+        let trocando = false;
+        area.addEventListener("wheel", async evento => {
+            if (trocando || Math.abs(evento.deltaY) <= Math.abs(evento.deltaX)) return;
+            const agora = performance.now();
+            if (agora - instanteUltimoEvento > 450) acumulado = 0;
+            instanteUltimoEvento = agora;
+            const descendo = evento.deltaY > 0;
+            const noInicio = area.scrollTop <= 2;
+            const noFim = area.scrollTop + area.clientHeight >= area.scrollHeight - 2;
+            const destino = descendo ? paginas[indiceAtual + 1] : paginas[indiceAtual - 1];
+            if (!destino || (descendo ? !noFim : !noInicio)) { acumulado = 0; return; }
+            evento.preventDefault();
+            acumulado += evento.deltaY;
+            if (Math.abs(acumulado) < 70) return;
+            trocando = true;
+            posicionarPdfNoFim = !descendo;
+            await selecionar(destino.id);
+        }, { passive: false });
     }
 
     function abrirAcoesPagina(id) {
@@ -290,7 +559,7 @@ export function criarCadernosMaterias(repositorio) {
     }
 
     function htmlEditorDesenho(item) {
-        return `<section class="subject-page-drawing" data-page-drawing-root data-tool="pen"><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-page-drawing-image-input hidden><div class="subject-page-drawing-toolbar" role="toolbar" aria-label="Ferramentas de escrita livre"><div class="subject-page-drawing-tools"><button type="button" data-page-drawing-tool="select" aria-pressed="false" title="Selecionar e mover"><i class="bi-bounding-box-circles"></i><span>Selecionar</span></button><button class="is-active" type="button" data-page-drawing-tool="pen" aria-pressed="true" title="Caneta"><i class="bi-pen"></i><span>Caneta</span></button><button type="button" data-page-drawing-tool="highlighter" aria-pressed="false" title="Marca-texto livre"><i class="bi-highlighter"></i><span>Marca-texto</span></button><button type="button" data-page-drawing-tool="eraser" aria-pressed="false" title="Borracha"><i class="bi-eraser"></i><span>Borracha</span></button><button type="button" data-page-drawing-tool="text" aria-pressed="false" title="Caixa de texto"><i class="bi-fonts"></i><span>Texto</span></button><button type="button" data-page-drawing-add-image title="Inserir imagem privada" aria-label="Inserir imagem privada"><i class="bi-image"></i><span>Imagem</span></button><button type="button" data-page-drawing-tool="line" aria-pressed="false" title="Linha"><i class="bi-slash-lg"></i><span>Linha</span></button><button type="button" data-page-drawing-tool="arrow" aria-pressed="false" title="Seta"><i class="bi-arrow-up-right"></i><span>Seta</span></button><button type="button" data-page-drawing-tool="rectangle" aria-pressed="false" title="Retângulo"><i class="bi-square"></i><span>Retângulo</span></button><button type="button" data-page-drawing-tool="ellipse" aria-pressed="false" title="Círculo ou elipse"><i class="bi-circle"></i><span>Círculo</span></button></div><span class="subject-notebook-editor-divider"></span><label class="subject-page-drawing-color" title="Cor"><i class="bi-palette"></i><input type="color" value="${esc(item.cor || "#3b2923")}" data-page-drawing-color aria-label="Cor da caneta, forma, texto ou seleção"></label><label class="subject-page-drawing-size" title="Espessura"><i class="bi-circle"></i><input type="range" min="2" max="28" step="1" value="4" data-page-drawing-size aria-label="Espessura da ferramenta"><output data-page-drawing-size-output>4</output></label><span class="subject-notebook-editor-spacer"></span><label class="subject-page-drawing-page-size" title="Tamanho da página"><i class="bi-aspect-ratio"></i><select data-page-drawing-page-size aria-label="Tamanho da página"><option value="standard">Padrão</option><option value="portrait">A4 vertical</option><option value="square">Quadrada</option><option value="wide">Ampla</option></select></label><div class="subject-page-drawing-zoom" role="group" aria-label="Zoom da página"><button type="button" data-page-drawing-zoom="out" title="Diminuir zoom" aria-label="Diminuir zoom"><i class="bi-dash-lg"></i></button><output data-page-drawing-zoom-output aria-live="polite">100%</output><button type="button" data-page-drawing-zoom="in" title="Aumentar zoom" aria-label="Aumentar zoom"><i class="bi-plus-lg"></i></button><button type="button" data-page-drawing-zoom="fit" title="Ajustar página à largura" aria-label="Ajustar página à largura"><i class="bi-arrows-angle-contract"></i></button></div><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-highlight-text title="Grifar ou desmarcar trecho selecionado" aria-label="Grifar ou desmarcar trecho selecionado" disabled><i class="bi-highlighter"></i></button><button type="button" data-page-drawing-edit-text title="Editar texto selecionado" aria-label="Editar texto selecionado" disabled><i class="bi-pencil-square"></i></button><button type="button" data-page-drawing-duplicate title="Duplicar seleção" aria-label="Duplicar seleção" disabled><i class="bi-copy"></i></button><button class="is-danger" type="button" data-page-drawing-delete title="Excluir seleção" aria-label="Excluir seleção" disabled><i class="bi-trash3"></i></button><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-undo title="Desfazer" aria-label="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i></button><button type="button" data-page-drawing-redo title="Refazer" aria-label="Refazer" disabled><i class="bi-arrow-clockwise"></i></button><button class="is-danger" type="button" data-page-drawing-clear title="Limpar toda a página" aria-label="Limpar toda a página" disabled><i class="bi-file-earmark-x"></i></button></div><div class="subject-page-drawing-stage is-paper-${esc(item.estiloFolha)}"><svg data-page-drawing-canvas viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin meet" aria-label="Folha de escrita livre"><g data-page-drawing-strokes></g><g data-page-drawing-selection></g><circle class="subject-page-drawing-eraser-cursor" data-page-drawing-eraser-cursor cx="0" cy="0" r="10" visibility="hidden"></circle></svg><div class="subject-page-drawing-hint"><i class="bi-hand-index-thumb me-1"></i>Dê dois cliques para editar texto. Imagens podem ser movidas, redimensionadas e anotadas.</div></div></section>`;
+        return `<section class="subject-page-drawing" data-page-drawing-root data-tool="pen"><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-page-drawing-image-input hidden><input type="file" accept="application/pdf,.pdf" data-page-drawing-pdf-input hidden><div class="subject-page-drawing-toolbar" role="toolbar" aria-label="Ferramentas de escrita livre"><div class="subject-page-drawing-tools"><button type="button" data-page-drawing-tool="select" aria-pressed="false" title="Selecionar e mover"><i class="bi-bounding-box-circles"></i><span>Selecionar</span></button><button class="is-active" type="button" data-page-drawing-tool="pen" aria-pressed="true" title="Caneta"><i class="bi-pen"></i><span>Caneta</span></button><button type="button" data-page-drawing-tool="highlighter" aria-pressed="false" title="Marca-texto livre"><i class="bi-highlighter"></i><span>Marca-texto</span></button><button type="button" data-page-drawing-tool="eraser" aria-pressed="false" title="Borracha"><i class="bi-eraser"></i><span>Borracha</span></button><button type="button" data-page-drawing-tool="text" aria-pressed="false" title="Caixa de texto"><i class="bi-fonts"></i><span>Texto</span></button><button type="button" data-page-drawing-add-image title="Inserir imagem privada" aria-label="Inserir imagem privada"><i class="bi-image"></i><span>Imagem</span></button><button type="button" data-page-drawing-add-pdf title="Usar PDF como fundo" aria-label="Usar PDF como fundo"><i class="bi-file-earmark-pdf"></i><span>PDF</span></button><button type="button" data-page-drawing-tool="line" aria-pressed="false" title="Linha"><i class="bi-slash-lg"></i><span>Linha</span></button><button type="button" data-page-drawing-tool="arrow" aria-pressed="false" title="Seta"><i class="bi-arrow-up-right"></i><span>Seta</span></button><button type="button" data-page-drawing-tool="rectangle" aria-pressed="false" title="Retângulo"><i class="bi-square"></i><span>Retângulo</span></button><button type="button" data-page-drawing-tool="ellipse" aria-pressed="false" title="Círculo ou elipse"><i class="bi-circle"></i><span>Círculo</span></button></div><span class="subject-notebook-editor-divider"></span><label class="subject-page-drawing-color" title="Cor"><i class="bi-palette"></i><input type="color" value="${esc(item.cor || "#3b2923")}" data-page-drawing-color aria-label="Cor da caneta, forma, texto ou seleção"></label><label class="subject-page-drawing-size" title="Espessura"><i class="bi-circle"></i><input type="range" min="2" max="28" step="1" value="4" data-page-drawing-size aria-label="Espessura da ferramenta"><output data-page-drawing-size-output>4</output></label><span class="subject-notebook-editor-spacer"></span><label class="subject-page-drawing-page-size" title="Tamanho da página"><i class="bi-aspect-ratio"></i><select data-page-drawing-page-size aria-label="Tamanho da página"><option value="standard">Padrão</option><option value="portrait">A4 vertical</option><option value="square">Quadrada</option><option value="wide">Ampla</option></select></label><div class="subject-page-drawing-zoom" role="group" aria-label="Zoom da página"><button type="button" data-page-drawing-zoom="out" title="Diminuir zoom" aria-label="Diminuir zoom"><i class="bi-dash-lg"></i></button><output data-page-drawing-zoom-output aria-live="polite">100%</output><button type="button" data-page-drawing-zoom="in" title="Aumentar zoom" aria-label="Aumentar zoom"><i class="bi-plus-lg"></i></button><button type="button" data-page-drawing-zoom="fit" title="Ajustar página à largura" aria-label="Ajustar página à largura"><i class="bi-arrows-angle-contract"></i></button></div><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-highlight-text title="Grifar ou desmarcar trecho selecionado" aria-label="Grifar ou desmarcar trecho selecionado" disabled><i class="bi-highlighter"></i></button><button type="button" data-page-drawing-edit-text title="Editar texto selecionado" aria-label="Editar texto selecionado" disabled><i class="bi-pencil-square"></i></button><button type="button" data-page-drawing-duplicate title="Duplicar seleção" aria-label="Duplicar seleção" disabled><i class="bi-copy"></i></button><button class="is-danger" type="button" data-page-drawing-delete title="Excluir seleção" aria-label="Excluir seleção" disabled><i class="bi-trash3"></i></button><span class="subject-notebook-editor-divider"></span><button type="button" data-page-drawing-undo title="Desfazer" aria-label="Desfazer" disabled><i class="bi-arrow-counterclockwise"></i></button><button type="button" data-page-drawing-redo title="Refazer" aria-label="Refazer" disabled><i class="bi-arrow-clockwise"></i></button><button class="is-danger" type="button" data-page-drawing-clear title="Limpar toda a página" aria-label="Limpar toda a página" disabled><i class="bi-file-earmark-x"></i></button></div><div class="subject-page-drawing-stage is-paper-${esc(item.estiloFolha)}"><svg data-page-drawing-canvas viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin meet" aria-label="Folha de escrita livre"><g data-page-drawing-background></g><g data-page-drawing-strokes></g><g data-page-drawing-selection></g><circle class="subject-page-drawing-eraser-cursor" data-page-drawing-eraser-cursor cx="0" cy="0" r="10" visibility="hidden"></circle></svg><div class="subject-page-drawing-hint"><i class="bi-hand-index-thumb me-1"></i>Dê dois cliques para editar texto. Imagens e PDFs podem receber anotações.</div></div></section>`;
     }
 
     function htmlTextoComGrifos(texto, marcas) {
@@ -459,6 +728,7 @@ export function criarCadernosMaterias(repositorio) {
     function renderizarWorkspace() {
         editorDesenho?.destruir();
         editorDesenho = null;
+        document.getElementById("modalMateria")?.classList.remove("subject-notebook-pdf-mode");
         if (lixeiraAberta) { renderizarLixeira(); return; }
         const item = selecionado();
         if (!item) {
@@ -471,24 +741,44 @@ export function criarCadernosMaterias(repositorio) {
         }
         if (item.tipo === "page") {
             const caderno = itemPorId(item.paiId);
-            const paginas = filhosDe(caderno?.id).filter(valor => valor.tipo === "page");
+            const fundoPdf = item.desenho?.background?.type === "pdf" ? item.desenho.background : null;
+            const paginaPdf = Boolean(fundoPdf);
+            if (paginaPdf) {
+                document.getElementById("modalMateria")?.classList.add("subject-notebook-pdf-mode");
+                if (!primeiroPdfAberto) {
+                    primeiroPdfAberto = true;
+                    paginasRecolhidas = true;
+                }
+            }
+            const paginas = filhosDe(caderno?.id).filter(valor => valor.tipo === "page" && (!paginaPdf || valor.desenho?.background?.storagePath === fundoPdf.storagePath));
             const indice = paginas.findIndex(valor => valor.id === item.id);
             const anterior = paginas[indice - 1];
             const proxima = paginas[indice + 1];
             const opcoesPapel = Object.entries(PAPEIS).map(([valor, rotulo]) => `<option value="${valor}" ${item.estiloFolha === valor ? "selected" : ""}>${rotulo}</option>`).join("");
-            const modo = modoPaginaPorId.get(item.id) || "text";
+            const modoPadrao = item.desenho?.background?.type === "pdf" ? "drawing" : "text";
+            const modo = modoPaginaPorId.get(item.id) || modoPadrao;
             const materialAberto = leitorMaterial?.paginaId === item.id
                 ? (materiaisPorPagina.get(item.id) || []).find(material => String(material.id) === String(leitorMaterial.materialId) && material.anexado)
                 : null;
-            const alternador = `<div class="subject-notebook-page-mode" role="group" aria-label="Modo da página"><button type="button" class="${modo === "text" ? "is-active" : ""}" data-notebook-page-mode="text" aria-pressed="${modo === "text"}"><i class="bi-text-paragraph"></i>Texto</button><button type="button" class="${modo === "drawing" ? "is-active" : ""}" data-notebook-page-mode="drawing" aria-pressed="${modo === "drawing"}"><i class="bi-pen"></i>Escrita livre</button></div>`;
-            const topbar = `<div class="subject-notebook-editor-topbar"><button class="subject-notebook-tool" type="button" data-notebook-back title="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}" aria-label="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}"><i class="bi-arrow-left"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" data-notebook-pages-toggle aria-pressed="${!paginasRecolhidas}" title="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}" aria-label="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}"><i class="bi-layout-sidebar-inset"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" ${anterior ? `data-notebook-select="${anterior.id}"` : "disabled"} title="Página anterior" aria-label="Página anterior"><i class="bi-chevron-left"></i></button><span class="subject-notebook-page-position">${indice + 1} / ${paginas.length}</span><button class="subject-notebook-tool" type="button" ${proxima ? `data-notebook-select="${proxima.id}"` : "disabled"} title="Próxima página" aria-label="Próxima página"><i class="bi-chevron-right"></i></button><label class="subject-notebook-paper-picker" title="Estilo da folha"><i class="bi-grid-3x3"></i><select id="subjectNotebookPagePaper" aria-label="Estilo da folha">${opcoesPapel}</select></label><span class="subject-notebook-editor-spacer"></span><button class="subject-notebook-tool is-primary" type="button" data-notebook-create="page" title="Nova página" aria-label="Nova página"><i class="bi-file-earmark-plus"></i></button>${botoesAcoes(item)}</div>`;
+            const alternador = paginaPdf ? "" : `<div class="subject-notebook-page-mode" role="group" aria-label="Modo da página"><button type="button" class="${modo === "text" ? "is-active" : ""}" data-notebook-page-mode="text" aria-pressed="${modo === "text"}"><i class="bi-text-paragraph"></i>Texto</button><button type="button" class="${modo === "drawing" ? "is-active" : ""}" data-notebook-page-mode="drawing" aria-pressed="${modo === "drawing"}"><i class="bi-pen"></i>Escrita livre</button></div>`;
+            const retorno = paginaPdf ? "Voltar ao caderno" : `Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}`;
+            const nomeOriginalPdf = fundoPdf?.name || item.titulo;
+            const nomeExibidoPdf = nomePdfLegivel(nomeOriginalPdf);
+            const opcoesPaginasPdf = paginas.map((pagina, paginaIndice) => `<option value="${pagina.id}" ${pagina.id === item.id ? "selected" : ""}>${paginaIndice + 1}</option>`).join("");
+            const topbarPdf = `<div class="subject-notebook-editor-topbar is-pdf"><button class="subject-notebook-tool subject-notebook-pdf-back" type="button" data-notebook-back aria-label="${retorno}"><i class="bi-arrow-left"></i><span>Voltar</span></button><div class="subject-notebook-pdf-identity" data-tooltip="${esc(nomeOriginalPdf)}" tabindex="0"><i class="bi-file-earmark-pdf"></i><div><small>DOCUMENTO PDF</small><strong>${esc(nomeExibidoPdf)}</strong></div></div><div class="subject-notebook-pdf-scroll-mode" aria-label="${leituraContinuaPdf ? "Rolagem contínua ativada" : "Edição da página ativada"}"><i class="bi-${leituraContinuaPdf ? "mouse" : "pencil-square"}"></i><span>${leituraContinuaPdf ? "Rolagem contínua" : "Editando página"}</span></div><div class="subject-notebook-pdf-navigation" role="group" aria-label="Escolher página"><button class="subject-notebook-tool" type="button" ${anterior ? (leituraContinuaPdf ? 'data-notebook-pdf-jump="-1"' : `data-notebook-select="${anterior.id}"`) : "disabled"} data-tooltip="Página anterior" aria-label="Página anterior"><i class="bi-chevron-left"></i></button><label><span class="visually-hidden">Ir para página</span><select data-notebook-pdf-page-select aria-label="Ir para página">${opcoesPaginasPdf}</select><small>de ${paginas.length}</small></label><button class="subject-notebook-tool" type="button" ${proxima ? (leituraContinuaPdf ? 'data-notebook-pdf-jump="1"' : `data-notebook-select="${proxima.id}"`) : "disabled"} data-tooltip="Próxima página" aria-label="Próxima página"><i class="bi-chevron-right"></i></button></div><button class="subject-notebook-tool subject-notebook-pdf-view-toggle" type="button" data-notebook-pdf-view-toggle data-tooltip="${leituraContinuaPdf ? "Anotar a página atual" : "Voltar à leitura contínua"}" aria-label="${leituraContinuaPdf ? "Anotar a página atual" : "Voltar à leitura contínua"}"><i class="bi-${leituraContinuaPdf ? "pencil-square" : "view-stacked"}"></i></button><button class="subject-notebook-tool subject-notebook-pdf-pages-toggle" type="button" data-notebook-pages-toggle aria-pressed="${!paginasRecolhidas}" data-tooltip="${paginasRecolhidas ? "Mostrar miniaturas" : "Recolher miniaturas"}" aria-label="${paginasRecolhidas ? "Mostrar miniaturas" : "Recolher miniaturas"}"><i class="bi-layout-sidebar-inset"></i></button><span class="subject-notebook-save-status" id="subjectNotebookPageStatus" role="status" aria-live="polite"></span></div>`;
+            const topbarPadrao = `<div class="subject-notebook-editor-topbar"><button class="subject-notebook-tool" type="button" data-notebook-back title="${retorno}" aria-label="${retorno}"><i class="bi-arrow-left"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" data-notebook-pages-toggle aria-pressed="${!paginasRecolhidas}" title="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}" aria-label="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}"><i class="bi-layout-sidebar-inset"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" ${anterior ? `data-notebook-select="${anterior.id}"` : "disabled"} title="Página anterior" aria-label="Página anterior"><i class="bi-chevron-left"></i></button><span class="subject-notebook-page-position">${indice + 1} / ${paginas.length}</span><button class="subject-notebook-tool" type="button" ${proxima ? `data-notebook-select="${proxima.id}"` : "disabled"} title="Próxima página" aria-label="Próxima página"><i class="bi-chevron-right"></i></button><label class="subject-notebook-paper-picker" title="Estilo da folha"><i class="bi-grid-3x3"></i><select id="subjectNotebookPagePaper" aria-label="Estilo da folha">${opcoesPapel}</select></label><span class="subject-notebook-editor-spacer"></span><button class="subject-notebook-tool is-primary" type="button" data-notebook-create="page" title="Nova página" aria-label="Nova página"><i class="bi-file-earmark-plus"></i></button>${botoesAcoes(item)}</div>`;
+            const topbar = paginaPdf ? topbarPdf : topbarPadrao;
             const grifosTexto = item.desenho?.textHighlights || [];
             const paletaGrifo = CORES_GRIFO.map((cor, indice) => `<button class="subject-notebook-highlight-swatch" type="button" data-notebook-text-highlight-color="${cor}" style="--swatch:${cor}" aria-label="Grifar em ${["amarelo", "verde", "azul", "rosa", "laranja"][indice]}"></button>`).join("");
             const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><div class="subject-notebook-page-content" id="subjectNotebookPageContent" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Comece a escrever suas anotações…" data-last-text="${esc(item.conteudo)}">${htmlTextoComGrifos(item.conteudo, grifosTexto)}</div><div class="subject-notebook-text-selection-menu" data-notebook-text-selection-menu role="toolbar" aria-label="Ações para o texto selecionado" hidden><div class="subject-notebook-selection-actions"><button type="button" data-notebook-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i></button><button type="button" data-notebook-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i></button><button type="button" data-notebook-study-action="review" title="Planejar revisão" aria-label="Planejar revisão deste trecho"><i class="bi-arrow-repeat"></i></button></div><span class="subject-notebook-selection-divider" aria-hidden="true"></span><span>Grifar</span>${paletaGrifo}<button class="subject-notebook-highlight-remove" type="button" data-notebook-text-highlight-remove title="Remover grifo" aria-label="Remover grifo"><i class="bi-eraser"></i></button></div></div>`;
-            const conteudo = materialAberto ? htmlLeitorMaterial(materialAberto) : modo === "drawing" ? htmlEditorDesenho(item) : editorTexto;
-            dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item)}<section class="subject-notebook-page-stage">${topbar}<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>${conteudo}${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="subject-notebook-save-status ms-auto" id="subjectNotebookPageStatus" role="status" aria-live="polite"></span></div></section></div>`;
+            const conteudo = paginaPdf && leituraContinuaPdf ? htmlLeituraContinuaPdf(paginas, item) : materialAberto ? htmlLeitorMaterial(materialAberto) : modo === "drawing" ? htmlEditorDesenho(item) : editorTexto;
+            const contextoPagina = paginaPdf ? "" : `<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>`;
+            const rodapePagina = paginaPdf ? "" : `${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="subject-notebook-save-status ms-auto" id="subjectNotebookPageStatus" role="status" aria-live="polite"></span></div>`;
+            dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginaPdf ? "is-pdf-workspace" : ""} ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item, paginaPdf ? fundoPdf.storagePath : "")}<section class="subject-notebook-page-stage">${topbar}${contextoPagina}${conteudo}${rodapePagina}</section></div>`;
+            if (paginaPdf) prepararMiniaturasPdf(fundoPdf.storagePath);
+            if (paginaPdf && leituraContinuaPdf) queueMicrotask(() => prepararLeituraContinuaPdf(fundoPdf.storagePath, paginas, item));
             const espacadorTopbar = dom.workspace.querySelector(".subject-notebook-editor-spacer");
-            if (espacadorTopbar) {
+            if (espacadorTopbar && !paginaPdf) {
                 const botaoFoco = document.createElement("button");
                 botaoFoco.className = "subject-notebook-tool is-focus";
                 botaoFoco.type = "button";
@@ -501,7 +791,7 @@ export function criarCadernosMaterias(repositorio) {
             }
             const rascunhoAtual = lerRascunho(item.id);
             atualizarStatusSalvamento(item.rascunhoRecuperado || rascunhoAtual ? "recovered" : "saved", item.rascunhoRecuperado || rascunhoAtual ? "Rascunho recuperado" : "Salvo na nuvem");
-            if (!materialAberto && modo === "drawing") queueMicrotask(() => {
+            if (!materialAberto && modo === "drawing" && !(paginaPdf && leituraContinuaPdf)) queueMicrotask(() => {
                 const raiz = dom.workspace.querySelector("[data-page-drawing-root]");
                 if (raiz && selecionadoId === item.id) editorDesenho = criarDesenhoPagina(
                     raiz,
@@ -511,9 +801,13 @@ export function criarCadernosMaterias(repositorio) {
                     {
                         enviarImagem: arquivo => repositorio.enviarImagem(materiaId, item.id, arquivo),
                         resolverImagem: caminho => repositorio.criarUrlImagem(caminho),
+                        enviarPdf: arquivo => repositorio.enviarPdf(materiaId, item.id, arquivo),
+                        resolverPdf: caminho => repositorio.criarUrlPdf(caminho),
+                        aoImportarPdf: pdf => criarPaginasDoPdf(item, pdf),
                         aoErro: mensagem => exibirToast(mensagem)
                     }
                 );
+                if (paginaPdf) ativarNavegacaoPorRolagem(paginas, indice);
             });
             queueMicrotask(() => carregarMateriaisPagina(item.id));
             return;
@@ -984,6 +1278,63 @@ export function criarCadernosMaterias(repositorio) {
         }, 700);
     }
 
+    async function criarPaginasDoPdf(paginaOrigem, pdf) {
+        const total = Math.max(1, Number(pdf?.totalPages) || 1);
+        if (!paginaOrigem || paginaOrigem.tipo !== "page" || total <= 1) return;
+        const nomeBase = String(pdf.name || "Documento PDF").replace(/\.pdf$/i, "").trim() || "Documento PDF";
+        const existentes = new Set(itens
+            .filter(item => item.tipo === "page" && item.desenho?.background?.storagePath === pdf.storagePath)
+            .map(item => Number(item.desenho?.background?.page) || 1));
+        const paginasParaCriar = Array.from({ length: total - 1 }, (_, indice) => indice + 2)
+            .filter(numero => !existentes.has(numero));
+        if (!paginasParaCriar.length) return;
+        informar(`Criando ${paginasParaCriar.length} páginas do PDF…`);
+        const posicaoInicial = filhosDe(paginaOrigem.paiId).filter(item => item.tipo === "page").length;
+        try {
+            for (let indice = 0; indice < paginasParaCriar.length; indice += 100) {
+                const lote = paginasParaCriar.slice(indice, indice + 100);
+                const dadosLote = lote.map((numero, deslocamento) => ({
+                    id: uuid(),
+                    tipo: "page",
+                    titulo: `${nomeBase} · Página ${numero}`,
+                    paiId: paginaOrigem.paiId,
+                    topicoId: paginaOrigem.topicoId,
+                    cor: paginaOrigem.cor,
+                    estiloCapa: paginaOrigem.estiloCapa,
+                    estiloFolha: paginaOrigem.estiloFolha,
+                    posicao: posicaoInicial + indice + deslocamento,
+                    conteudo: "",
+                    desenho: {
+                        strokes: Array.isArray(pdf.annotations?.[numero]) ? pdf.annotations[numero] : [],
+                        pageSize: pdf.pageSize || "portrait",
+                        background: {
+                            type: "pdf",
+                            storagePath: pdf.storagePath,
+                            name: pdf.name,
+                            page: numero,
+                            totalPages: total,
+                            fixedPage: true,
+                            annotations: { [numero]: Array.isArray(pdf.annotations?.[numero]) ? pdf.annotations[numero] : [] }
+                        }
+                    }
+                }));
+                const criadas = typeof repositorio.criarLote === "function"
+                    ? await repositorio.criarLote(materiaId, dadosLote)
+                    : await Promise.all(dadosLote.map(dados => repositorio.criar(materiaId, dados)));
+                itens.push(...criadas);
+                renderizarArvore();
+            }
+            informar("");
+            exibirToast(`PDF importado em ${total} páginas do caderno.`, { tipo: "success", titulo: "Documento completo" });
+            window.setTimeout(() => {
+                if (selecionadoId === paginaOrigem.id) renderizarWorkspace();
+            }, 0);
+        } catch (erro) {
+            informar(erro.message || "Não foi possível criar todas as páginas do PDF.", true);
+            exibirToast("Algumas páginas não foram criadas. Importe novamente para completar o documento.");
+        }
+    }
+
     async function alterarPapelPagina(estiloFolha) {
         if (!Object.hasOwn(PAPEIS, estiloFolha) || !await salvarPendente()) return;
         const pagina = selecionado();
@@ -1076,7 +1427,7 @@ export function criarCadernosMaterias(repositorio) {
         }
         const pagina = selecionado();
         const caderno = pagina?.tipo === "page" ? itemPorId(pagina.paiId) : null;
-        selecionadoId = caderno?.paiId || "";
+        selecionadoId = pagina?.desenho?.background?.type === "pdf" ? caderno?.id || "" : caderno?.paiId || "";
         informar("");
         renderizar();
     }
@@ -1117,6 +1468,12 @@ export function criarCadernosMaterias(repositorio) {
         organizando = false;
         lixeiraAberta = false;
         paginasRecolhidas = false;
+        primeiroPdfAberto = false;
+        posicionarPdfNoFim = false;
+        leituraContinuaPdf = true;
+        paginaContinuaInicial = "";
+        observadorMiniaturasPdf?.disconnect();
+        observadorMiniaturasPdf = null;
         modoFocoCaderno = false;
         document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode");
         ultimaPaginaMateriaId = "";
@@ -1262,7 +1619,7 @@ export function criarCadernosMaterias(repositorio) {
         limparDestinoArraste();
     });
     dom.app.addEventListener("click", async evento => {
-        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-focus],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step],[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove],[data-notebook-study-action]");
+        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-focus],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step],[data-notebook-pdf-view-toggle],[data-notebook-pdf-annotate],[data-notebook-pdf-jump],[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove],[data-notebook-study-action]");
         if (!alvo) return;
         if (alvo.hasAttribute("data-notebook-home")) await selecionar("");
         if (alvo.dataset.notebookSelect) await selecionar(alvo.dataset.notebookSelect);
@@ -1280,6 +1637,26 @@ export function criarCadernosMaterias(repositorio) {
         }
         if (alvo.hasAttribute("data-notebook-pages-toggle")) {
             alternarPainelPaginas(alvo);
+        }
+        if (alvo.dataset.notebookPdfAnnotate) {
+            selecionadoId = alvo.dataset.notebookPdfAnnotate;
+            leituraContinuaPdf = false;
+            registrarPaginaAtual(selecionado());
+            renderizarWorkspace();
+        }
+        if (alvo.hasAttribute("data-notebook-pdf-view-toggle")) {
+            if (!await salvarPendente()) return;
+            leituraContinuaPdf = !leituraContinuaPdf;
+            if (leituraContinuaPdf) paginaContinuaInicial = selecionadoId;
+            renderizarWorkspace();
+        }
+        if (alvo.dataset.notebookPdfJump) {
+            const paginaAtual = itemPorId(selecionadoId);
+            const caminhoPdf = paginaAtual?.desenho?.background?.storagePath;
+            const paginasPdf = filhosDe(paginaAtual?.paiId).filter(item => item.tipo === "page" && item.desenho?.background?.storagePath === caminhoPdf);
+            const indiceAtual = paginasPdf.findIndex(item => item.id === selecionadoId);
+            const destino = paginasPdf[indiceAtual + Number(alvo.dataset.notebookPdfJump)];
+            if (destino) rolarParaPaginaPdf(destino.id);
         }
         if (alvo.hasAttribute("data-notebook-focus")) alternarModoFocoCaderno();
         if (alvo.dataset.notebookPageMode) {
@@ -1324,6 +1701,12 @@ export function criarCadernosMaterias(repositorio) {
             if (pagina?.tipo === "page") await abrirMateriaisPagina(pagina.id);
             else document.querySelector('[data-bs-target="#ws-links"]')?.click();
         }
+    });
+    dom.app.addEventListener("change", async evento => {
+        const seletor = evento.target.closest("[data-notebook-pdf-page-select]");
+        if (!seletor?.value || seletor.value === selecionadoId) return;
+        if (leituraContinuaPdf && rolarParaPaginaPdf(seletor.value)) return;
+        await selecionar(seletor.value);
     });
     dom.app.addEventListener("input", evento => {
         if (evento.target.id === "subjectNotebookPageContent" && !("value" in evento.target)) {
