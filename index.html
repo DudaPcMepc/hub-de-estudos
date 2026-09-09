@@ -1353,9 +1353,13 @@
     .subject-notebook-page-content { width: 100%; min-height: 360px; padding: 0; color: #4c3d37; background: transparent; border: 0; resize: vertical; outline: 0; line-height: 2rem; white-space: pre-wrap; overflow-wrap: anywhere; }
     .subject-notebook-page-content:empty::before { color: #9b8c85; content: attr(data-placeholder); pointer-events: none; }
     .subject-notebook-page-editor { position: relative; }
-    .subject-notebook-text-selection-menu { position: absolute; z-index: 12; display: flex; align-items: center; gap: .3rem; min-height: 2.2rem; padding: .35rem .45rem; color: #67564e; background: rgba(255,253,249,.98); border: 1px solid rgba(59,41,35,.12); border-radius: .7rem; box-shadow: 0 .5rem 1.4rem rgba(59,41,35,.16); transform: translateX(-50%); }
+    .subject-notebook-text-selection-menu { position: absolute; z-index: 12; max-width: calc(100% - 1rem); display: flex; align-items: center; gap: .3rem; min-height: 2.2rem; padding: .35rem .45rem; overflow-x: auto; color: #67564e; background: rgba(255,253,249,.98); border: 1px solid rgba(59,41,35,.12); border-radius: .7rem; box-shadow: 0 .5rem 1.4rem rgba(59,41,35,.16); transform: translateX(-50%); scrollbar-width: none; }
     .subject-notebook-text-selection-menu[hidden] { display: none; }
     .subject-notebook-text-selection-menu > span { padding: 0 .18rem; font-size: .62rem; font-weight: 750; }
+    .subject-notebook-selection-actions { display: flex; align-items: center; gap: .14rem; }
+    .subject-notebook-selection-actions button { width: 1.85rem; height: 1.85rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; color: #67564e; background: transparent; border: 0; border-radius: .45rem; }
+    .subject-notebook-selection-actions button:hover, .subject-notebook-selection-actions button:focus-visible { color: var(--pimentel-vermelho-escuro); background: rgba(184,50,42,.09); outline: 0; }
+    .subject-notebook-selection-divider { width: 1px; align-self: stretch; margin: .05rem .12rem; padding: 0 !important; background: rgba(59,41,35,.12); }
     .subject-notebook-highlight-swatch { width: 1.2rem; height: 1.2rem; padding: 0; background: var(--swatch); border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px rgba(59,41,35,.12); }
     .subject-notebook-highlight-swatch:hover { box-shadow: 0 0 0 2px #66544c; transform: scale(1.08); }
     .subject-notebook-highlight-remove { width: 1.7rem; height: 1.7rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; color: #7f6b62; background: #f3efeb; border: 0; border-radius: .45rem; }
@@ -8170,6 +8174,58 @@ document.getElementById("btnNotaViraCard").addEventListener("click", async () =>
     const frente = prompt("Pergunta do flashcard:", document.getElementById("notaTitulo").value);
     if (!frente) return;
     await criarFlashcardSincronizado(frente, selecionado);
+});
+
+function topicoEditalParaAcaoDoCaderno(detalhes) {
+    const topicos = obterTopicosEditalDaMateria(detalhes.subjectId);
+    const tituloOrigem = textoBuscaFlashcard(detalhes.topicTitle || "");
+    return topicos.find(topico => String(topico.id) === String(detalhes.topicId || ""))
+        || (tituloOrigem ? topicos.find(topico => textoBuscaFlashcard(topico.titulo) === tituloOrigem) : null)
+        || null;
+}
+
+document.addEventListener("subject-notebook-study-action", async evento => {
+    const detalhes = evento.detail || {};
+    const trecho = String(detalhes.text || "").trim();
+    if (!trecho || String(detalhes.subjectId || "") !== String(materiaAbertaId || "")) return;
+    const topicoEdital = topicoEditalParaAcaoDoCaderno(detalhes);
+    const origem = [detalhes.pageTitle, detalhes.topicTitle].filter(Boolean).join(" · ");
+    if (detalhes.action === "flashcard") {
+        bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#ws-cards"]')).show();
+        limparEdicaoCard();
+        document.getElementById("cardFrente").value = `O que devo lembrar sobre ${detalhes.pageTitle || "este trecho"}?`;
+        document.getElementById("cardVerso").value = trecho;
+        popularTopicosEditalFlashcards(detalhes.subjectId);
+        document.getElementById("cardTopicoEdital").value = topicoEdital?.id || "";
+        document.querySelector(".flashcard-workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.setTimeout(() => document.getElementById("cardFrente")?.focus({ preventScroll: true }), 220);
+        return;
+    }
+    if (detalhes.action === "summary") {
+        const titulo = `Resumo — ${detalhes.pageTitle || detalhes.subjectName || "Estudo"}`;
+        const conteudo = `${trecho}\n\n> Fonte: ${origem || detalhes.subjectName || "Caderno da matéria"}`;
+        if (!await criarNota(titulo, conteudo)) return;
+        const painel = document.querySelector(".legacy-notes-panel");
+        if (painel) painel.open = true;
+        painel?.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.setTimeout(() => document.getElementById("notaConteudo")?.focus({ preventScroll: true }), 220);
+        return;
+    }
+    if (detalhes.action === "review") {
+        if (!await fecharMateria()) return;
+        ativarAbaPrincipal("#p-cronograma");
+        window.setTimeout(() => {
+            limparEdicaoTarefa();
+            document.getElementById("tarefaMateria").value = detalhes.subjectId;
+            popularTopicosEditalCronograma(topicoEdital?.id || "");
+            document.getElementById("tarefaTopico").value = `${detalhes.pageTitle || "Revisão"}: ${trecho.slice(0, 180)}${trecho.length > 180 ? "…" : ""}`;
+            document.getElementById("tarefaTopico").dataset.preenchidoPeloEdital = "false";
+            document.getElementById("tarefaData").value = hojeISO();
+            document.getElementById("tarefaPeriodo").value = periodoEstudoAtual();
+            document.getElementById("formTarefa")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            window.setTimeout(() => document.getElementById("tarefaMinutos")?.focus({ preventScroll: true }), 220);
+        }, 180);
+    }
 });
 
 // ---------- Flashcards ----------

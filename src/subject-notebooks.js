@@ -86,6 +86,7 @@ export function criarCadernosMaterias(repositorio) {
     let paginasRecolhidas = false;
     let modoDialogo = "full";
     let corGrifoTexto = CORES_GRIFO[0];
+    let selecaoTextoAtual = null;
     let ultimaPaginaMateriaId = "";
     let arraste = null;
     let desfazerMovimento = null;
@@ -462,7 +463,7 @@ export function criarCadernosMaterias(repositorio) {
             const topbar = `<div class="subject-notebook-editor-topbar"><button class="subject-notebook-tool" type="button" data-notebook-back title="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}" aria-label="Voltar para ${caderno?.paiId ? "a pasta" : "os cadernos"}"><i class="bi-arrow-left"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" data-notebook-pages-toggle aria-pressed="${!paginasRecolhidas}" title="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}" aria-label="${paginasRecolhidas ? "Mostrar páginas" : "Recolher páginas"}"><i class="bi-layout-sidebar-inset"></i></button><span class="subject-notebook-editor-divider"></span><button class="subject-notebook-tool" type="button" ${anterior ? `data-notebook-select="${anterior.id}"` : "disabled"} title="Página anterior" aria-label="Página anterior"><i class="bi-chevron-left"></i></button><span class="subject-notebook-page-position">${indice + 1} / ${paginas.length}</span><button class="subject-notebook-tool" type="button" ${proxima ? `data-notebook-select="${proxima.id}"` : "disabled"} title="Próxima página" aria-label="Próxima página"><i class="bi-chevron-right"></i></button><label class="subject-notebook-paper-picker" title="Estilo da folha"><i class="bi-grid-3x3"></i><select id="subjectNotebookPagePaper" aria-label="Estilo da folha">${opcoesPapel}</select></label><span class="subject-notebook-editor-spacer"></span><button class="subject-notebook-tool is-primary" type="button" data-notebook-create="page" title="Nova página" aria-label="Nova página"><i class="bi-file-earmark-plus"></i></button>${botoesAcoes(item)}</div>`;
             const grifosTexto = item.desenho?.textHighlights || [];
             const paletaGrifo = CORES_GRIFO.map((cor, indice) => `<button class="subject-notebook-highlight-swatch" type="button" data-notebook-text-highlight-color="${cor}" style="--swatch:${cor}" aria-label="Grifar em ${["amarelo", "verde", "azul", "rosa", "laranja"][indice]}"></button>`).join("");
-            const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><div class="subject-notebook-page-content" id="subjectNotebookPageContent" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Comece a escrever suas anotações…" data-last-text="${esc(item.conteudo)}">${htmlTextoComGrifos(item.conteudo, grifosTexto)}</div><div class="subject-notebook-text-selection-menu" data-notebook-text-selection-menu role="toolbar" aria-label="Cores do grifo" hidden><span>Grifar</span>${paletaGrifo}<button class="subject-notebook-highlight-remove" type="button" data-notebook-text-highlight-remove title="Remover grifo" aria-label="Remover grifo"><i class="bi-eraser"></i></button></div></div>`;
+            const editorTexto = `<div class="subject-notebook-page-editor is-paper-${esc(item.estiloFolha)}"><input class="subject-notebook-page-title" id="subjectNotebookPageTitle" maxlength="240" value="${esc(item.titulo)}" aria-label="Título da página"><div class="subject-notebook-page-content" id="subjectNotebookPageContent" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Comece a escrever suas anotações…" data-last-text="${esc(item.conteudo)}">${htmlTextoComGrifos(item.conteudo, grifosTexto)}</div><div class="subject-notebook-text-selection-menu" data-notebook-text-selection-menu role="toolbar" aria-label="Ações para o texto selecionado" hidden><div class="subject-notebook-selection-actions"><button type="button" data-notebook-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i></button><button type="button" data-notebook-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i></button><button type="button" data-notebook-study-action="review" title="Planejar revisão" aria-label="Planejar revisão deste trecho"><i class="bi-arrow-repeat"></i></button></div><span class="subject-notebook-selection-divider" aria-hidden="true"></span><span>Grifar</span>${paletaGrifo}<button class="subject-notebook-highlight-remove" type="button" data-notebook-text-highlight-remove title="Remover grifo" aria-label="Remover grifo"><i class="bi-eraser"></i></button></div></div>`;
             const conteudo = materialAberto ? htmlLeitorMaterial(materialAberto) : modo === "drawing" ? htmlEditorDesenho(item) : editorTexto;
             dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item)}<section class="subject-notebook-page-stage">${topbar}<div class="subject-notebook-page-context">${caminhoDoItem(item)}${materialAberto ? "" : alternador}</div>${conteudo}${materialAberto ? "" : htmlMateriaisPagina(item.id)}<div class="subject-notebook-shortcuts"><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="cards"><i class="bi-card-heading me-1"></i>Criar flashcard</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="maps"><i class="bi-diagram-3 me-1"></i>Mapa mental</button><button class="btn btn-sm btn-light" type="button" data-notebook-shortcut="materials"><i class="bi-paperclip me-1"></i>Anexar material</button><span class="subject-notebook-save-status ms-auto" id="subjectNotebookPageStatus" role="status" aria-live="polite"></span></div></section></div>`;
             const rascunhoAtual = lerRascunho(item.id);
@@ -819,11 +820,36 @@ export function criarCadernosMaterias(repositorio) {
             if (menu) menu.hidden = true;
             return;
         }
-        const caixaSelecao = selecao.getRangeAt(0).getBoundingClientRect();
+        const intervalo = selecao.getRangeAt(0);
+        const texto = intervalo.toString().trim();
+        if (!texto) { menu.hidden = true; return; }
+        const pagina = selecionado();
+        const topico = topicos.find(item => String(item.id) === String(pagina?.topicoId));
+        selecaoTextoAtual = { texto: texto.slice(0, 10000), paginaId: pagina?.id || "", paginaTitulo: pagina?.titulo || "Página sem título", topicoId: pagina?.topicoId || null, topicoTitulo: topico?.titulo || "" };
+        const caixaSelecao = intervalo.getBoundingClientRect();
         const caixaEditor = editor.closest(".subject-notebook-page-editor").getBoundingClientRect();
         menu.hidden = false;
-        menu.style.left = `${Math.max(112, Math.min(caixaEditor.width - 112, caixaSelecao.left - caixaEditor.left + caixaSelecao.width / 2))}px`;
+        const meiaLarguraMenu = Math.min(caixaEditor.width / 2, Math.max(112, menu.offsetWidth / 2 + 8));
+        menu.style.left = `${Math.max(meiaLarguraMenu, Math.min(caixaEditor.width - meiaLarguraMenu, caixaSelecao.left - caixaEditor.left + caixaSelecao.width / 2))}px`;
         menu.style.top = `${Math.max(54, caixaSelecao.top - caixaEditor.top - 45)}px`;
+    }
+
+    function acionarEstudoComSelecao(acao) {
+        if (!selecaoTextoAtual?.texto || !["flashcard", "summary", "review"].includes(acao)) {
+            informar("Selecione primeiro o trecho que deseja usar.", true);
+            return;
+        }
+        dom.workspace.querySelector("[data-notebook-text-selection-menu]").hidden = true;
+        document.dispatchEvent(new CustomEvent("subject-notebook-study-action", { detail: {
+            action: acao,
+            text: selecaoTextoAtual.texto,
+            subjectId: materiaId,
+            subjectName: materiaNome,
+            topicId: selecaoTextoAtual.topicoId,
+            topicTitle: selecaoTextoAtual.topicoTitulo,
+            pageId: selecaoTextoAtual.paginaId,
+            pageTitle: selecaoTextoAtual.paginaTitulo
+        } }));
     }
 
     async function alternarGrifoTextoPagina(corEscolhida = null, remover = false) {
@@ -1181,7 +1207,7 @@ export function criarCadernosMaterias(repositorio) {
         limparDestinoArraste();
     });
     dom.app.addEventListener("click", async evento => {
-        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step],[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove]");
+        const alvo = evento.target.closest("[data-notebook-select],[data-notebook-create],[data-notebook-edit],[data-notebook-rename],[data-notebook-move],[data-notebook-delete],[data-notebook-duplicate],[data-notebook-page-options],[data-notebook-shortcut],[data-notebook-toggle],[data-notebook-home],[data-notebook-pages-toggle],[data-notebook-page-mode],[data-notebook-back],[data-notebook-organize-finish],[data-notebook-trash-close],[data-notebook-trash-restore],[data-notebook-trash-delete],[data-notebook-trash-empty],[data-notebook-material-manage],[data-notebook-material-toggle],[data-notebook-material-remove],[data-notebook-material-open],[data-notebook-pdf-close],[data-notebook-pdf-step],[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove],[data-notebook-study-action]");
         if (!alvo) return;
         if (alvo.hasAttribute("data-notebook-home")) await selecionar("");
         if (alvo.dataset.notebookSelect) await selecionar(alvo.dataset.notebookSelect);
@@ -1216,6 +1242,7 @@ export function criarCadernosMaterias(repositorio) {
             await alternarGrifoTextoPagina(corGrifoTexto, false);
         }
         if (alvo.hasAttribute("data-notebook-text-highlight-remove")) await alternarGrifoTextoPagina(null, true);
+        if (alvo.dataset.notebookStudyAction) acionarEstudoComSelecao(alvo.dataset.notebookStudyAction);
         if (alvo.hasAttribute("data-notebook-organize-finish")) await alternarOrganizacao(false);
         if (alvo.hasAttribute("data-notebook-trash-close")) { lixeiraAberta = false; renderizar(); }
         if (alvo.dataset.notebookTrashRestore) await restaurarItem(alvo.dataset.notebookTrashRestore);
@@ -1256,7 +1283,7 @@ export function criarCadernosMaterias(repositorio) {
         if (["subjectNotebookPageTitle", "subjectNotebookPageContent"].includes(evento.target.id)) agendarSalvamento();
     });
     dom.app.addEventListener("pointerdown", evento => {
-        if (evento.target.closest("[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove]")) evento.preventDefault();
+        if (evento.target.closest("[data-notebook-text-highlight-color],[data-notebook-text-highlight-remove],[data-notebook-study-action]")) evento.preventDefault();
     });
     document.addEventListener("selectionchange", () => queueMicrotask(atualizarMenuGrifoTexto));
     dom.app.addEventListener("submit", async evento => {
