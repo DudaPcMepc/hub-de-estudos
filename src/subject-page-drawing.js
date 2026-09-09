@@ -1,6 +1,12 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XHTML_NS = "http://www.w3.org/1999/xhtml";
 const LIMITE_HISTORICO = 50;
+const TAMANHOS_PAGINA = Object.freeze({
+    standard: { largura: 1200, altura: 800 },
+    portrait: { largura: 1200, altura: 1697 },
+    square: { largura: 1200, altura: 1200 },
+    wide: { largura: 1600, altura: 900 }
+});
 const copiar = valor => JSON.parse(JSON.stringify(valor));
 const limitar = (valor, minimo, maximo) => Math.min(maximo, Math.max(minimo, valor));
 const svgEl = (nome, atributos = {}) => {
@@ -55,7 +61,7 @@ function pontosDaForma(tipo, inicio, fim) {
     return [inicio, fim];
 }
 
-export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
+export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTexto = () => {}) {
     const svg = container.querySelector("[data-page-drawing-canvas]");
     const camada = container.querySelector("[data-page-drawing-strokes]");
     const camadaSelecao = container.querySelector("[data-page-drawing-selection]");
@@ -64,6 +70,25 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     const cor = container.querySelector("[data-page-drawing-color]");
     const tamanho = container.querySelector("[data-page-drawing-size]");
     const tamanhoSaida = container.querySelector("[data-page-drawing-size-output]");
+    const seletorPagina = container.querySelector("[data-page-drawing-page-size]");
+    const botoesZoom = [...container.querySelectorAll("[data-page-drawing-zoom]")];
+    const zoomSaida = container.querySelector("[data-page-drawing-zoom-output]");
+    const controlesVisualizacao = document.createElement("div");
+    controlesVisualizacao.className = "subject-page-drawing-viewport-controls";
+    controlesVisualizacao.setAttribute("aria-label", "Tamanho e zoom da página");
+    const controleTamanhoPagina = seletorPagina?.closest(".subject-page-drawing-page-size");
+    const controleZoomPagina = zoomSaida?.closest(".subject-page-drawing-zoom");
+    if (controleTamanhoPagina) controlesVisualizacao.append(controleTamanhoPagina);
+    if (controleZoomPagina) controlesVisualizacao.append(controleZoomPagina);
+    container.append(controlesVisualizacao);
+    const menuEstudoTexto = document.createElement("div");
+    menuEstudoTexto.className = "subject-page-drawing-text-action-menu";
+    menuEstudoTexto.dataset.pageDrawingTextActionMenu = "";
+    menuEstudoTexto.hidden = true;
+    menuEstudoTexto.setAttribute("role", "toolbar");
+    menuEstudoTexto.setAttribute("aria-label", "Ações para o texto selecionado");
+    menuEstudoTexto.innerHTML = `<button type="button" data-page-drawing-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i><span>Flashcard</span></button><button type="button" data-page-drawing-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i><span>Resumo</span></button><button type="button" data-page-drawing-study-action="review" title="Planejar revisão" aria-label="Planejar revisão deste trecho"><i class="bi-arrow-repeat"></i><span>Revisão</span></button>`;
+    document.body.append(menuEstudoTexto);
     const formatacaoTexto = document.createElement("div");
     formatacaoTexto.className = "subject-page-drawing-text-format";
     formatacaoTexto.dataset.pageDrawingTextFormat = "";
@@ -90,6 +115,28 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     let textoEmEdicaoId = null;
     let textoAntesEdicao = null;
     let selecaoTexto = null;
+    let selecaoEstudoPendente = null;
+    let tamanhoPagina = TAMANHOS_PAGINA[dadosIniciais?.pageSize] ? dadosIniciais.pageSize : "standard";
+    let zoomPagina = 100;
+
+    function aplicarVisualizacaoPagina() {
+        const dimensoes = TAMANHOS_PAGINA[tamanhoPagina];
+        svg.setAttribute("viewBox", `0 0 ${dimensoes.largura} ${dimensoes.altura}`);
+        svg.style.setProperty("--drawing-page-ratio", `${dimensoes.largura} / ${dimensoes.altura}`);
+        svg.style.setProperty("--drawing-page-zoom", String(zoomPagina / 100));
+        if (seletorPagina) seletorPagina.value = tamanhoPagina;
+        if (zoomSaida) zoomSaida.textContent = `${zoomPagina}%`;
+        botoesZoom.forEach(botao => {
+            if (botao.dataset.pageDrawingZoom === "out") botao.disabled = zoomPagina <= 50;
+            if (botao.dataset.pageDrawingZoom === "in") botao.disabled = zoomPagina >= 200;
+        });
+    }
+
+    function alterarZoom(direcao) {
+        if (direcao === "fit") zoomPagina = 100;
+        else zoomPagina = limitar(zoomPagina + (direcao === "in" ? 25 : -25), 50, 200);
+        aplicarVisualizacaoPagina();
+    }
 
     function pontoDoEvento(evento) {
         const ponto = svg.createSVGPoint();
@@ -121,6 +168,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         }
         editarTextoBotao.disabled = unicoSelecionado?.tool !== "text";
         grifarTextoBotao.disabled = !textoEmEdicaoId || !selecaoTexto || selecaoTexto.inicio === selecaoTexto.fim;
+        if (grifarTextoBotao.disabled) menuEstudoTexto.hidden = true;
         duplicarBotao.disabled = !selecionados.size;
         excluirBotao.disabled = !selecionados.size;
         desfazerBotao.disabled = !historico.length;
@@ -147,14 +195,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
                         ["nw", x1, y1], ["n", xm, y1], ["ne", x2, y1], ["e", x2, ym],
                         ["se", x2, y2], ["s", xm, y2], ["sw", x1, y2], ["w", x1, ym]
                     ].forEach(([direcao, cx, cy]) => elementos.push(svgEl("circle", {
-                        cx, cy, r: 6, class: `subject-page-drawing-resize-handle is-${direcao}`,
+                        cx, cy, r: 4.5, class: `subject-page-drawing-resize-handle is-${direcao}`,
                         "data-page-drawing-resize": direcao
                     })));
                     const editar = svgEl("g", { class: "subject-page-drawing-edit-handle", "data-page-drawing-edit-handle": textoSelecionado.id, transform: `translate(${limites.esquerda - margem} ${limites.base + margem - 28})` });
                     editar.append(svgEl("rect", { width: 31, height: 27, rx: 7 }), svgEl("text", { x: 15.5, y: 18, "text-anchor": "middle", "aria-hidden": "true" }));
                     editar.lastElementChild.textContent = "✎";
                     elementos.push(editar);
-                } else elementos.push(svgEl("circle", { cx: limites.direita + margem, cy: limites.base + margem, r: 8, class: "subject-page-drawing-resize-handle is-se", "data-page-drawing-resize": "se" }));
+                } else elementos.push(svgEl("circle", { cx: limites.direita + margem, cy: limites.base + margem, r: 6, class: "subject-page-drawing-resize-handle is-se", "data-page-drawing-resize": "se" }));
             }
         }
         if (gesto?.tipo === "text-box") {
@@ -224,12 +272,14 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
                 if (novo !== anterior) traco.highlights = ajustarGrifosAposEdicao(anterior, novo, traco.highlights);
                 traco.text = novo;
                 selecaoTexto = null;
+                selecaoEstudoPendente = null;
+                menuEstudoTexto.hidden = true;
                 ajustarCaixaTextoAoConteudo(traco, conteudo, elemento);
                 atualizarBotoes();
             });
             conteudo.addEventListener("keyup", () => guardarSelecaoTexto(conteudo));
             conteudo.addEventListener("pointerup", () => guardarSelecaoTexto(conteudo));
-            conteudo.addEventListener("blur", () => finalizarEdicaoTexto(false), { once: true });
+            conteudo.addEventListener("blur", () => { menuEstudoTexto.hidden = true; finalizarEdicaoTexto(false); }, { once: true });
             conteudo.addEventListener("keydown", evento => {
                 if (evento.key === "Escape") { evento.preventDefault(); finalizarEdicaoTexto(true); }
                 if (evento.key === "Enter" && (evento.ctrlKey || evento.metaKey)) { evento.preventDefault(); conteudo.blur(); }
@@ -271,7 +321,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     }
 
     function notificar() {
-        aoAlterar({ strokes: copiar(tracos) });
+        aoAlterar({ strokes: copiar(tracos), pageSize: tamanhoPagina });
         atualizarBotoes();
     }
 
@@ -297,6 +347,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         const selecao = window.getSelection();
         if (!selecao?.rangeCount || selecao.isCollapsed || !editor.contains(selecao.anchorNode) || !editor.contains(selecao.focusNode)) {
             selecaoTexto = null;
+            menuEstudoTexto.hidden = true;
             atualizarBotoes();
             return;
         }
@@ -307,8 +358,36 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         const ateFim = document.createRange();
         ateFim.selectNodeContents(editor);
         ateFim.setEnd(intervalo.endContainer, intervalo.endOffset);
-        selecaoTexto = { inicio: antes.toString().length, fim: ateFim.toString().length };
+        const inicio = antes.toString().length;
+        const fim = ateFim.toString().length;
+        const texto = intervalo.toString().trim();
+        selecaoTexto = { inicio, fim, texto };
+        selecaoEstudoPendente = { strokeId: editor.dataset.strokeId || textoEmEdicaoId, inicio, fim, texto };
         atualizarBotoes();
+        if (!texto) return;
+        const caixaSelecao = intervalo.getBoundingClientRect();
+        menuEstudoTexto.hidden = false;
+        const meiaLargura = Math.max(110, menuEstudoTexto.offsetWidth / 2 + 8);
+        menuEstudoTexto.style.left = `${limitar(caixaSelecao.left + caixaSelecao.width / 2, meiaLargura, window.innerWidth - meiaLargura)}px`;
+        menuEstudoTexto.style.top = `${Math.max(8, caixaSelecao.top - menuEstudoTexto.offsetHeight - 10)}px`;
+    }
+
+    function aoMudarSelecaoTexto() {
+        if (!textoEmEdicaoId || !container.isConnected) return;
+        const editor = camada.querySelector(`.subject-page-drawing-text-content[data-stroke-id="${CSS.escape(textoEmEdicaoId)}"]`);
+        if (editor?.isContentEditable) guardarSelecaoTexto(editor);
+    }
+
+    function acionarEstudoComTexto(acao) {
+        const pendente = selecaoEstudoPendente;
+        if (!pendente || !["flashcard", "summary", "review"].includes(acao)) return;
+        const inicio = Math.min(pendente.inicio, pendente.fim);
+        const fim = Math.max(pendente.inicio, pendente.fim);
+        const texto = String(pendente.texto || "").trim();
+        if (!texto) return;
+        menuEstudoTexto.hidden = true;
+        selecaoEstudoPendente = null;
+        aoAcaoTexto(acao, texto, { strokeId: pendente.strokeId, inicio, fim });
     }
 
     function alternarGrifoTexto() {
@@ -384,6 +463,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         textoEmEdicaoId = traco.id;
         textoAntesEdicao = traco.text || "";
         selecaoTexto = null;
+        selecaoEstudoPendente = null;
         selecionarFerramenta("select");
     }
 
@@ -621,6 +701,13 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     ferramentas.forEach(botao => botao.addEventListener("click", () => selecionarFerramenta(botao.dataset.pageDrawingTool)));
     grifarTextoBotao.addEventListener("pointerdown", evento => evento.preventDefault());
     grifarTextoBotao.addEventListener("click", alternarGrifoTexto);
+    menuEstudoTexto.addEventListener("pointerdown", evento => {
+        evento.preventDefault();
+        evento.stopPropagation();
+        const botao = evento.target.closest("[data-page-drawing-study-action]");
+        if (botao) acionarEstudoComTexto(botao.dataset.pageDrawingStudyAction);
+    });
+    document.addEventListener("selectionchange", aoMudarSelecaoTexto);
     editarTextoBotao.addEventListener("click", () => iniciarEdicaoTexto(tracosSelecionados()[0]));
     cor.addEventListener("input", () => {
         if (ferramenta !== "select" || !selecionados.size) return;
@@ -629,6 +716,12 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
         renderizar(); notificar();
     });
     tamanho.addEventListener("input", () => { tamanhoSaida.textContent = tamanho.value; if (ferramenta === "eraser") cursor.setAttribute("r", String(Math.max(8, Number(tamanho.value)))); });
+    seletorPagina?.addEventListener("change", () => {
+        tamanhoPagina = TAMANHOS_PAGINA[seletorPagina.value] ? seletorPagina.value : "standard";
+        aplicarVisualizacaoPagina();
+        notificar();
+    });
+    botoesZoom.forEach(botao => botao.addEventListener("click", () => alterarZoom(botao.dataset.pageDrawingZoom)));
     formatacaoTexto.addEventListener("pointerdown", evento => evento.preventDefault());
     tamanhoFonte.addEventListener("change", () => aplicarFormatoTexto("fontSize", limitar(Number(tamanhoFonte.value) || 26, 12, 120)));
     estilosTexto.forEach(botao => botao.addEventListener("click", () => {
@@ -673,6 +766,13 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar) {
     svg.addEventListener("pointerleave", () => { if (!gesto && ferramenta === "eraser") cursor.setAttribute("visibility", "hidden"); });
     svg.addEventListener("pointerenter", () => { if (ferramenta === "eraser") cursor.setAttribute("visibility", "visible"); });
 
+    aplicarVisualizacaoPagina();
     selecionarFerramenta("pen");
-    return Object.freeze({ destruir: () => { gesto = null; textoEmEdicaoId = null; } });
+    return Object.freeze({ destruir: () => {
+        gesto = null;
+        textoEmEdicaoId = null;
+        document.removeEventListener("selectionchange", aoMudarSelecaoTexto);
+        controlesVisualizacao.remove();
+        menuEstudoTexto.remove();
+    } });
 }
