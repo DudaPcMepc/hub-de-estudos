@@ -2435,6 +2435,16 @@ test("a escrita livre oferece caixas de texto editáveis e persistentes", () => 
     assert.match(html, /word-break: break-word/);
     assert.match(html, /subject-page-drawing-text-content[^}]+min-height: 0/);
     assert.match(html, /subject-page-drawing-text-box-preview/);
+    assert.match(drawing, /pageDrawingTextFormat/);
+    assert.match(drawing, /data-page-drawing-font-size/);
+    assert.match(drawing, /data-page-drawing-text-style=\"bold\"/);
+    assert.match(drawing, /data-page-drawing-text-align=\"center\"/);
+    assert.match(drawing, /data-page-drawing-text-list=\"bullet\"/);
+    assert.match(drawing, /function aplicarFormatoTexto/);
+    assert.match(drawing, /function alternarListaTexto/);
+    assert.match(drawing, /--drawing-text-weight/);
+    assert.match(drawing, /--drawing-text-align/);
+    assert.match(html, /subject-page-drawing-text-format/);
     assert.match(frontend, /data-page-drawing-highlight-text/);
     assert.match(drawing, /function alternarGrifoTexto/);
     assert.match(drawing, /highlights/);
