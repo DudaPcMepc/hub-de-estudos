@@ -2485,3 +2485,21 @@ test("o editor de texto do caderno permite grifar trechos selecionados", () => {
     assert.match(frontend, /selectionchange/);
     assert.match(frontend, /function atualizarMenuGrifoTexto/);
 });
+
+test("trechos do caderno alimentam flashcards, resumos e revisões com contexto", () => {
+    const frontend = readProjectFile("src/subject-notebooks.js");
+    const html = readProjectFile("index.html");
+
+    assert.match(frontend, /data-notebook-study-action="flashcard"/);
+    assert.match(frontend, /data-notebook-study-action="summary"/);
+    assert.match(frontend, /data-notebook-study-action="review"/);
+    assert.match(frontend, /new CustomEvent\("subject-notebook-study-action"/);
+    assert.match(frontend, /subjectId: materiaId/);
+    assert.match(frontend, /topicTitle: selecaoTextoAtual\.topicoTitulo/);
+    assert.match(html, /document\.addEventListener\("subject-notebook-study-action"/);
+    assert.match(html, /cardVerso"\)\.value = trecho/);
+    assert.match(html, /await criarNota\(titulo, conteudo\)/);
+    assert.match(html, /ativarAbaPrincipal\("#p-cronograma"\)/);
+    assert.match(html, /function topicoEditalParaAcaoDoCaderno/);
+    assert.match(html, /\.subject-notebook-selection-actions/);
+});
