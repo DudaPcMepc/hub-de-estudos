@@ -2183,8 +2183,8 @@ test("os cadernos das matérias formam uma árvore privada de pastas, cadernos e
     assert.match(html, /id="subjectNotebookSearch"/);
     assert.match(html, /id="btnOrganizarCadernoMateria"/);
     assert.match(html, /id="btnOrganizarCadernoMateria"[\s\S]*?title="Organizar itens"/);
-    assert.match(html, />Pasta na raiz</);
-    assert.match(html, />Caderno na raiz</);
+    assert.match(html, />Novo item na raiz</);
+    assert.match(html, /class="subject-notebook-root-create"/);
     assert.match(html, /id="subjectNotebookToast"[\s\S]*?role="alert"/);
     assert.match(html, /\.subject-workspace-metric\.is-priority-high/);
     assert.match(html, /\.subject-workspace-sidebar \.ws-nav \.nav-link\.active[\s\S]*?rgba\(184, 50, 42, \.1\)/);
@@ -2207,6 +2207,13 @@ test("os cadernos das matérias formam uma árvore privada de pastas, cadernos e
     assert.match(frontend, /subject-notebook-child-open/);
     assert.match(frontend, /subject-notebook-detail-title-row/);
     assert.match(frontend, /subject-notebook-context-actions/);
+    assert.match(frontend, /subject-notebook-notebook-board/);
+    assert.match(html, /\.subject-notebook-notebook-board[\s\S]*?grid-template-columns/);
+    assert.match(frontend, /subject-notebook-create-card/);
+    assert.match(frontend, />Criar página</);
+    assert.match(html, /\.subject-notebook-notebook-board > \.subject-notebook-child-grid \{ display: contents/);
+    assert.match(html, /\.subject-notebook-content-panel/);
+    assert.match(html, /\.subject-notebook-child-open[\s\S]*?border-radius: 999px/);
     assert.match(frontend, /subject-notebook-empty is-contained/);
     assert.match(frontend, /class="subject-notebook-child-card"/);
     assert.match(frontend, /subject-notebook-child-menu">\$\{botoesAcoes\(filho\)\}/);
@@ -2287,7 +2294,7 @@ test("a lixeira dos cadernos preserva e restaura a hierarquia privada", () => {
     assert.match(frontend, /Item restaurado/);
 });
 
-test("o caderno retoma com segurança a última página aberta em cada matéria", () => {
+test("o caderno memoriza a última página sem pular a visão geral da matéria", () => {
     const migration = readProjectFile("supabase/migrations/202609080003_subject_notebook_reading_position.sql");
     const repository = readProjectFile("src/cloud-core-repository.js");
     const auth = readProjectFile("src/auth.js");
@@ -2309,6 +2316,9 @@ test("o caderno retoma com segurança a última página aberta em cada matéria"
     assert.match(frontend, /repositorio\.salvarPosicao\(materiaAoSalvar, pagina\.id\)/);
     assert.match(frontend, /repositorio\.carregarPosicao\(id\)/);
     assert.match(frontend, /ultimaPaginaPorCaderno\.set\(ultimaPagina\.paiId, ultimaPagina\.id\)/);
+    assert.match(frontend, /async function abrirInicioCaderno\(\)/);
+    assert.match(frontend, /data-bs-target="#ws-notas"[\s\S]*?abrirInicioCaderno/);
+    assert.match(frontend, /ultimaPaginaPorCaderno\.set\(ultimaPagina\.paiId, ultimaPagina\.id\);[\s\S]*?selecionadoId = "";/);
 });
 
 test("materiais da matéria podem ser vinculados privadamente a uma página do caderno", () => {
@@ -2429,7 +2439,17 @@ test("o caderno usa páginas de PDF privado como fundo anotável", () => {
     assert.match(frontend, /subject-notebook-pdf-mode/);
     assert.match(frontend, /Voltar ao caderno/);
     assert.match(frontend, /Folhas do PDF/);
+    assert.match(frontend, /function htmlLeituraContinuaPdf/);
+    assert.match(frontend, /function htmlCamadaAnotacoesPdf/);
+    assert.match(frontend, /data-pdf-annotation-image/);
+    assert.match(frontend, /anotações visíveis/);
+    assert.match(frontend, /Concluir e voltar à leitura contínua/);
+    assert.match(frontend, /Anote livremente\. Quando terminar, use “Voltar à leitura” no topo\./);
+    assert.doesNotMatch(frontend, /addEventListener\("wheel"/);
     assert.match(html, /\.subject-notebook-open\.is-pdf-workspace/);
+    assert.match(html, /\.subject-notebook-pdf-view-toggle\.is-return/);
+    assert.match(html, /\.subject-notebook-pdf-annotation-layer/);
+    assert.match(html, /\.subject-notebook-pdf-static-text/);
     assert.match(html, /\.subject-notebook-open\.is-pdf-workspace \{ position: fixed/);
     assert.match(drawing, /zoomPagina = fundoPdf \? 75 : 100/);
     assert.match(drawing, /preserveAspectRatio: "xMidYMid meet"/);
