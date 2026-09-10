@@ -1659,6 +1659,86 @@
     .legacy-notes-panel { max-width: 1180px; margin-inline: auto; padding: .85rem 1rem; background: rgba(244, 239, 233, .5); border-radius: .9rem; }
     .legacy-notes-panel > summary { color: #66544c; cursor: pointer; font-size: .75rem; font-weight: 700; }
     .legacy-notes-panel > summary small { margin-left: .35rem; color: #8a7770; font-weight: 500; }
+    .subject-summary-shell { min-height: calc(100dvh - 230px); display: grid; gap: 1rem; }
+    .subject-summary-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem; color: #4d3932; background: linear-gradient(135deg, rgba(255,253,249,.98), rgba(244,232,224,.86)); border: 1px solid rgba(59,41,35,.09); border-radius: 1rem; }
+    .subject-summary-header small { display: block; margin-bottom: .22rem; color: var(--pimentel-vermelho-escuro); font-size: .62rem; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+    .subject-summary-header h3 { margin: 0; font-size: clamp(1.05rem, 2vw, 1.35rem); font-weight: 800; }
+    .subject-summary-header p { margin: .28rem 0 0; color: #75635b; font-size: .72rem; }
+    .subject-summary-focus { min-height: 38px; display: inline-flex; align-items: center; gap: .42rem; padding: .45rem .72rem; color: #684d43; background: rgba(255,255,255,.8); border: 1px solid rgba(91,67,58,.15); border-radius: .65rem; font-size: .7rem; font-weight: 750; white-space: nowrap; }
+    .subject-summary-focus:hover, .subject-summary-focus[aria-pressed="true"] { color: #fff; background: #765149; border-color: #765149; }
+    .subject-summary-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
+    .subject-summary-metric { position: relative; min-width: 0; padding: .75rem .8rem .75rem 2.55rem; background: rgba(255,253,249,.9); border: 1px solid rgba(59,41,35,.085); border-radius: .8rem; }
+    .subject-summary-metric > i { position: absolute; left: .78rem; top: 50%; width: 1.3rem; height: 1.3rem; display: grid; place-items: center; color: #9c584d; background: rgba(184,50,42,.09); border-radius: .42rem; transform: translateY(-50%); }
+    .subject-summary-metric span, .subject-summary-metric small { display: block; }
+    .subject-summary-metric span { color: #7a6860; font-size: .62rem; font-weight: 750; }
+    .subject-summary-metric strong { display: block; margin: .18rem 0 .08rem; color: #49362f; font-size: 1.05rem; }
+    .subject-summary-metric small { color: #8b7971; font-size: .58rem; }
+    .subject-summary-notes { width: 100%; max-width: none; margin: 0; padding: .8rem; background: rgba(255,253,249,.76); border: 1px solid rgba(59,41,35,.08); border-radius: 1rem; }
+    .subject-summary-notes > summary { display: none; }
+    .subject-summary-notes .subject-notes-grid { min-height: clamp(560px, 67dvh, 860px); display: grid; grid-template-columns: minmax(220px, 285px) minmax(0, 1fr); gap: .8rem !important; margin: 0 !important; }
+    .subject-summary-notes .subject-notes-grid > div { width: 100%; min-width: 0; padding: 0; }
+    .subject-summary-notes .subject-notes-grid > div:first-child { padding: .7rem; background: #f4efe9; border-radius: .78rem; }
+    .subject-summary-notes .subject-notes-grid > div:last-child { padding: .85rem; background: #fffefb; border: 1px solid rgba(59,41,35,.08); border-radius: .78rem; }
+    .subject-summary-notes.is-list-collapsed .subject-notes-grid { grid-template-columns: minmax(0, 1fr); }
+    .subject-summary-notes.is-list-collapsed .subject-notes-grid > div:first-child { display: none; }
+    .subject-summary-list-toggle { width: 2rem; height: 2rem; display: grid; flex: 0 0 auto; place-items: center; color: #715d55; background: #fffdf9; border: 1px solid rgba(59,41,35,.11); border-radius: .55rem; }
+    .subject-summary-editor-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: .42rem; margin-bottom: .45rem; }
+    .subject-summary-editor-heading .form-control { min-width: 0; border-color: transparent; border-bottom-color: rgba(59,41,35,.12); border-radius: .45rem; box-shadow: none; }
+    .subject-summary-editor-heading button { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; padding: 0; border-radius: .55rem; }
+    .subject-summary-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .15rem; margin-bottom: .35rem; padding: .25rem .3rem; background: #f7f3ee; border: 0; border-radius: .62rem; }
+    .subject-summary-toolbar button { width: 2rem; height: 2rem; display: grid; place-items: center; padding: 0; color: #695750; background: transparent; border: 0; border-radius: .48rem; }
+    .subject-summary-toolbar button:hover { color: #8d3f37; background: rgba(184,50,42,.08); }
+    .subject-summary-toolbar button.is-applied { color: #fff; background: #765149; }
+    .subject-summary-toolbar button.is-active { color: #fff; background: #765149; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+    .subject-summary-toolbar-group { display: inline-flex; align-items: center; gap: .08rem; }
+    .subject-summary-toolbar-divider { width: 1px; height: 1.35rem; margin: 0 .18rem; background: rgba(91,67,58,.14); }
+    .subject-summary-style-select { height: 2rem; display: inline-flex; align-items: center; }
+    .subject-summary-style-select select { width: 7.4rem; height: 2rem; padding: 0 1.65rem 0 .55rem; color: #5f4c44; background-color: rgba(255,255,255,.68); border: 1px solid rgba(91,67,58,.1); border-radius: .48rem; font-size: .68rem; font-weight: 700; outline: 0; }
+    .subject-summary-style-select select:focus { border-color: rgba(118,81,73,.4); box-shadow: 0 0 0 .15rem rgba(118,81,73,.08); }
+    .subject-summary-highlight-control { position: relative; display: inline-flex; align-items: center; padding-right: 1.1rem; }
+    .subject-summary-highlight-control > button { position: relative; }
+    .subject-summary-highlight-current { position: absolute; right: .38rem; bottom: .2rem; left: .38rem; height: .18rem; background: var(--summary-highlight-color, #ffe58a); border: 1px solid rgba(59,41,35,.08); border-radius: 999px; }
+    .subject-summary-highlight-control details { position: absolute; z-index: 20; right: 0; }
+    .subject-summary-highlight-control summary { width: 1.15rem; height: 2rem; display: grid; place-items: center; color: #76645c; border-radius: .35rem; cursor: pointer; list-style: none; }
+    .subject-summary-highlight-control summary::-webkit-details-marker { display: none; }
+    .subject-summary-highlight-control summary:hover { color: #8d3f37; background: rgba(184,50,42,.08); }
+    .subject-summary-highlight-control summary i { font-size: .52rem; }
+    .subject-summary-highlight-palette { position: absolute; z-index: 30; top: calc(100% + .35rem); right: 0; width: 178px; display: grid; grid-template-columns: repeat(5, 1fr); gap: .42rem; padding: .65rem; background: #fffdf9; border: 1px solid rgba(59,41,35,.12); border-radius: .72rem; box-shadow: 0 .75rem 1.7rem rgba(59,41,35,.18); }
+    .subject-summary-highlight-palette button { width: 1.65rem; height: 1.65rem; background: var(--highlight-color); border: 1px solid rgba(59,41,35,.13); border-radius: 50%; }
+    .subject-summary-highlight-palette button:hover { transform: scale(1.08); box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(118,81,73,.18); }
+    .subject-summary-highlight-palette button.is-selected { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #765149; }
+    .subject-summary-highlight-palette .subject-summary-highlight-none { width: 100%; height: 1.8rem; grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: .38rem; color: #6d5a52; background: #f6f1ec; border: 0; border-radius: .48rem; font-size: .64rem; font-weight: 750; }
+    .subject-summary-toolbar .subject-summary-toolbar-spacer { flex: 1; }
+    .subject-summary-source { min-height: 30px; display: flex; align-items: center; margin: 0 0 .45rem; }
+    .subject-summary-source[hidden] { display: none; }
+    .subject-summary-source button { max-width: 100%; display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .55rem; color: #70574e; background: #f4eee8; border: 1px solid rgba(91,67,58,.1); border-radius: 999px; font-size: .65rem; }
+    .subject-summary-source button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .subject-summary-source button:not(:disabled):hover { color: #8f3e36; border-color: rgba(184,50,42,.25); }
+    .subject-summary-source button:disabled { cursor: default; opacity: .72; }
+    .subject-summary-note-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .55rem; align-items: end; margin-top: .55rem; padding-top: .55rem; border-top: 1px solid rgba(59,41,35,.07); }
+    .subject-summary-tags span { display: block; margin-bottom: .2rem; color: #7c6a62; font-size: .58rem; font-weight: 750; text-transform: uppercase; }
+    .subject-summary-tags input { min-height: 32px; font-size: .7rem; }
+    .subject-summary-note-status { min-width: 180px; text-align: right; }
+    .nota-item .subject-summary-list-title { display: block; max-width: 100%; overflow: hidden; color: #4f3d36; font-size: .72rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+    .nota-item .subject-summary-list-excerpt { display: -webkit-box; margin-top: .25rem; overflow: hidden; color: #76645c; font-size: .7rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .subject-summary-notes .lista-notas { max-height: calc(67dvh - 70px); }
+    .subject-summary-notes .editor-nota, .subject-summary-notes .preview-nota { min-height: clamp(480px, 59dvh, 760px); font-size: .88rem; line-height: 1.75; }
+    #ws-resumo.is-focus .subject-summary-overview, #ws-resumo.is-focus .subject-summary-notes .subject-notes-grid > div:first-child { display: none; }
+    #ws-resumo.is-focus .subject-summary-shell { min-height: 0; display: grid; gap: .45rem; }
+    #ws-resumo.is-focus .subject-summary-header { position: sticky; z-index: 5; top: 0; align-items: center; justify-content: flex-end; padding: .3rem; background: rgba(250,247,242,.94); border-color: transparent; border-radius: .75rem; backdrop-filter: blur(8px); }
+    #ws-resumo.is-focus .subject-summary-header > div { display: none; }
+    #ws-resumo.is-focus .subject-summary-focus { min-height: 34px; }
+    #ws-resumo.is-focus #subjectSummaryNotesMount { display: block; min-width: 0; }
+    #ws-resumo.is-focus .subject-summary-notes { display: block !important; width: 100%; padding: 0; border: 0; background: transparent; }
+    #ws-resumo.is-focus .subject-summary-notes .subject-notes-grid { min-height: calc(100dvh - 215px); display: grid; grid-template-columns: minmax(0, 1fr); }
+    #ws-resumo.is-focus .subject-summary-notes .subject-notes-grid > div:last-child { display: block !important; width: 100% !important; min-height: calc(100dvh - 215px); }
+    #ws-resumo.is-focus #editorNotaVazio { min-height: calc(100dvh - 280px); display: grid; place-items: center; }
+    .subject-summary-empty { position: relative; min-height: 280px; align-content: center; justify-items: center; gap: .65rem; padding: 2rem; text-align: center; }
+    .subject-summary-empty > .subject-summary-list-toggle { position: absolute; top: .65rem; left: .65rem; }
+    .subject-summary-empty i { color: #b07a6c; font-size: 1.55rem; }
+    .subject-summary-empty p { max-width: 360px; margin: 0; color: #77665e; font-size: .78rem; }
+    .subject-summary-empty > button:not(.subject-summary-list-toggle) { display: inline-flex; align-items: center; gap: .4rem; padding: .52rem .8rem; color: #fff; background: #765149; border: 0; border-radius: .65rem; font-size: .72rem; font-weight: 750; }
+    #ws-resumo.is-focus .subject-summary-notes .editor-nota, #ws-resumo.is-focus .subject-summary-notes .preview-nota { min-height: calc(100dvh - 315px); }
     .subject-notebook-dialog { width: min(520px, calc(100vw - 2rem)); padding: 0; color: #3b2923; background: #fffdf9; border: 0; border-radius: 1rem; box-shadow: 0 1.2rem 3rem rgba(30, 20, 16, .24); }
     .subject-notebook-dialog::backdrop { background: rgba(35, 27, 23, .45); backdrop-filter: blur(2px); }
     .subject-notebook-dialog form { padding: 1.1rem; }
@@ -1697,6 +1777,17 @@
     .nota-item { cursor: pointer; }
     .nota-item.ativa { background-color: #e7f1ff; border-color: #9ec5fe; }
     .editor-nota { min-height: calc(100dvh - 300px); max-height: none; resize: vertical; line-height: 1.7; padding: 1rem; }
+    .subject-summary-rich-editor { overflow-y: auto; white-space: normal; outline: 0; }
+    .subject-summary-rich-editor:empty::before { color: #978780; content: attr(data-placeholder); pointer-events: none; }
+    .subject-summary-rich-editor:focus { border-color: rgba(118,81,73,.42); box-shadow: 0 0 0 .2rem rgba(118,81,73,.09); }
+    .subject-summary-rich-editor p { margin: 0 0 .55rem; }
+    .subject-summary-rich-editor h2 { margin: .85rem 0 .45rem; color: #49362f; font-size: 1.25rem; font-weight: 750; }
+    .subject-summary-rich-editor h3 { margin: .7rem 0 .4rem; color: #59463e; font-size: 1.05rem; font-weight: 750; }
+    .subject-summary-rich-editor ul { margin: .25rem 0 .65rem; padding-left: 1.35rem; }
+    .subject-summary-rich-editor ol { margin: .25rem 0 .65rem; padding-left: 1.55rem; }
+    .subject-summary-rich-editor blockquote { margin: .55rem 0; padding: .35rem .7rem; color: #75635b; background: #faf7f3; border-left: 3px solid #b5766f; }
+    .subject-summary-rich-editor mark { padding: .03rem .16rem; background: #ffe58a; border-radius: .18rem; }
+    .subject-summary-rich-editor code { padding: .05rem .28rem; color: #8d3f37; background: #f2eeea; border-radius: .25rem; }
     .preview-nota { min-height: calc(100dvh - 300px); max-height: none; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: .375rem; padding: 1.25rem; line-height: 1.75; }
     .preview-nota p { margin-bottom: .5rem; }
     .preview-nota ul { margin-bottom: .5rem; padding-left: 1.2rem; }
@@ -1824,6 +1915,14 @@
         .subject-notebook-style-fields { grid-template-columns: 1fr 1fr; }
         .lista-notas { max-height: 240px; }
         .editor-nota, .preview-nota { min-height: 52dvh; }
+        .subject-summary-header { align-items: stretch; flex-direction: column; }
+        .subject-summary-focus { justify-content: center; }
+        .subject-summary-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .subject-summary-notes .subject-notes-grid { min-height: 0; grid-template-columns: 1fr; }
+        .subject-summary-notes .lista-notas { max-height: 220px; }
+        .subject-summary-notes .editor-nota, .subject-summary-notes .preview-nota { min-height: 58dvh; }
+        .subject-summary-note-footer { grid-template-columns: 1fr; }
+        .subject-summary-note-status { text-align: left; }
     }
     .library-prototype-notice {
         display: flex;
@@ -3278,34 +3377,60 @@
                             <div class="d-flex gap-2 mb-2">
                                 <input type="text" class="form-control form-control-sm" id="buscaNotas" placeholder="Buscar nota...">
                                 <button class="btn btn-sm btn-success flex-shrink-0" id="btnNovaNota"><i class="bi-plus-lg"></i></button>
+                                <button class="subject-summary-list-toggle" id="btnRecolherListaResumos" type="button" title="Recolher lista" aria-label="Recolher lista de resumos" aria-pressed="false"><i class="bi-chevron-left"></i></button>
                             </div>
                             <div id="listaNotas" class="list-group lista-notas"></div>
                         </div>
                         <div class="col-lg-8">
-                            <div id="editorNotaVazio" class="text-center text-muted fst-italic py-5">Selecione uma nota à esquerda ou crie uma nova.</div>
+                            <div id="editorNotaVazio" class="subject-summary-empty"><button class="subject-summary-list-toggle" id="btnMostrarListaResumosVazio" type="button" title="Mostrar lista" aria-label="Mostrar lista de resumos" hidden><i class="bi-layout-sidebar-inset"></i></button><i class="bi-journal-plus"></i><p>Selecione um resumo na lista ou comece um novo para organizar esta matéria.</p><button id="btnNovaNotaVazio" type="button"><i class="bi-plus-lg"></i>Criar primeiro resumo</button></div>
                             <div id="editorNota" class="d-none">
-                                <div class="d-flex gap-2 mb-2">
+                                <div class="subject-summary-editor-heading">
                                     <input type="text" class="form-control fw-semibold" id="notaTitulo" placeholder="Título da nota">
+                                    <button class="subject-summary-list-toggle" id="btnMostrarListaResumos" type="button" title="Mostrar lista" aria-label="Mostrar lista de resumos" hidden><i class="bi-layout-sidebar-inset"></i></button>
                                     <button class="btn btn-outline-warning flex-shrink-0" id="btnFixarNota" title="Fixar no topo"><i class="bi-pin-angle"></i></button>
                                     <button class="btn btn-outline-danger flex-shrink-0" id="btnExcluirNota" title="Excluir nota"><i class="bi-trash"></i></button>
                                 </div>
-                                <input type="text" class="form-control form-control-sm mb-2" id="notaTags" placeholder="Tags separadas por vírgula (ex: art. 5º, jurisprudência)">
-                                <div class="btn-group btn-group-sm mb-2 flex-wrap">
-                                    <button class="btn btn-outline-secondary" data-fmt="**" title="Negrito"><i class="bi-type-bold"></i></button>
-                                    <button class="btn btn-outline-secondary" data-fmt="*" title="Itálico"><i class="bi-type-italic"></i></button>
-                                    <button class="btn btn-outline-secondary" data-fmt="==" title="Destacar"><i class="bi-highlighter"></i></button>
-                                    <button class="btn btn-outline-secondary" data-fmt="`" title="Código"><i class="bi-code"></i></button>
-                                    <button class="btn btn-outline-secondary" data-linha="## " title="Título"><i class="bi-type-h2"></i></button>
-                                    <button class="btn btn-outline-secondary" data-linha="- " title="Lista"><i class="bi-list-ul"></i></button>
-                                    <button class="btn btn-outline-secondary" data-linha="> " title="Citação"><i class="bi-quote"></i></button>
-                                    <button class="btn btn-outline-primary" id="btnPreviewNota" title="Alternar visualização"><i class="bi-eye"></i></button>
-                                    <button class="btn btn-outline-success" id="btnNotaViraCard" title="Transformar seleção em flashcard"><i class="bi-card-heading"></i></button>
+                                <div class="subject-summary-source" id="notaFonteChip" hidden></div>
+                                <input type="hidden" id="notaFonteOriginal">
+                                <div class="subject-summary-toolbar" role="toolbar" aria-label="Formatação do resumo">
+                                    <div class="subject-summary-toolbar-group" aria-label="Histórico">
+                                        <button type="button" data-rich-command="undo" title="Desfazer" aria-label="Desfazer"><i class="bi-arrow-counterclockwise"></i></button>
+                                        <button type="button" data-rich-command="redo" title="Refazer" aria-label="Refazer"><i class="bi-arrow-clockwise"></i></button>
+                                    </div>
+                                    <label class="subject-summary-style-select" title="Estilo do texto"><span class="visually-hidden">Estilo do texto</span><select id="notaEstiloTexto" aria-label="Estilo do texto"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select></label>
+                                    <span class="subject-summary-toolbar-divider" aria-hidden="true"></span>
+                                    <button type="button" data-rich-command="bold" title="Negrito" aria-label="Negrito" aria-pressed="false"><i class="bi-type-bold"></i></button>
+                                    <button type="button" data-rich-command="italic" title="Itálico" aria-label="Itálico" aria-pressed="false"><i class="bi-type-italic"></i></button>
+                                    <button type="button" data-rich-command="underline" title="Sublinhado" aria-label="Sublinhado" aria-pressed="false"><i class="bi-type-underline"></i></button>
+                                    <button type="button" data-rich-command="strike" title="Tachado" aria-label="Tachado" aria-pressed="false"><i class="bi-type-strikethrough"></i></button>
+                                    <div class="subject-summary-highlight-control">
+                                        <button type="button" data-rich-command="highlight" id="btnDestaqueResumo" title="Aplicar destaque" aria-label="Aplicar destaque" aria-pressed="false"><i class="bi-highlighter"></i><span class="subject-summary-highlight-current" aria-hidden="true"></span></button>
+                                        <details id="menuCoresDestaqueResumo">
+                                            <summary title="Escolher cor do destaque" aria-label="Escolher cor do destaque"><i class="bi-chevron-down"></i></summary>
+                                            <div class="subject-summary-highlight-palette" role="group" aria-label="Cores do marca-texto">
+                                                <button type="button" data-highlight-color="#ffe58a" aria-label="Destaque amarelo" title="Amarelo" style="--highlight-color:#ffe58a"></button>
+                                                <button type="button" data-highlight-color="#b7efc5" aria-label="Destaque verde" title="Verde" style="--highlight-color:#b7efc5"></button>
+                                                <button type="button" data-highlight-color="#bde0fe" aria-label="Destaque azul" title="Azul" style="--highlight-color:#bde0fe"></button>
+                                                <button type="button" data-highlight-color="#ffc8dd" aria-label="Destaque rosa" title="Rosa" style="--highlight-color:#ffc8dd"></button>
+                                                <button type="button" data-highlight-color="#d8c4f1" aria-label="Destaque lilás" title="Lilás" style="--highlight-color:#d8c4f1"></button>
+                                                <button type="button" class="subject-summary-highlight-none" data-highlight-remove aria-label="Remover destaque" title="Sem cor"><i class="bi-slash-circle"></i><span>Sem cor</span></button>
+                                            </div>
+                                        </details>
+                                    </div>
+                                    <button type="button" data-rich-command="code" title="Código" aria-label="Código" aria-pressed="false"><i class="bi-code"></i></button>
+                                    <button type="button" data-rich-command="list" title="Lista" aria-label="Lista" aria-pressed="false"><i class="bi-list-ul"></i></button>
+                                    <button type="button" data-rich-command="ordered-list" title="Lista numerada" aria-label="Lista numerada" aria-pressed="false"><i class="bi-list-ol"></i></button>
+                                    <button type="button" data-rich-command="quote" title="Citação — clique novamente para sair" aria-label="Ativar ou desativar citação" aria-pressed="false"><i class="bi-quote"></i></button>
+                                    <button type="button" data-rich-command="clear" title="Limpar formatação" aria-label="Limpar formatação"><i class="bi-eraser"></i></button>
+                                    <span class="subject-summary-toolbar-spacer"></span>
+                                    <button type="button" id="btnPreviewNota" title="Alternar visualização"><i class="bi-eye"></i></button>
+                                    <button type="button" id="btnNotaViraCard" title="Transformar seleção em flashcard"><i class="bi-card-heading"></i></button>
                                 </div>
-                                <textarea class="form-control editor-nota" id="notaConteudo" placeholder="Escreva livremente. Aceita **negrito**, *itálico*, ==destaque==, `código`, # títulos, - listas e > citações."></textarea>
+                                <div class="form-control editor-nota subject-summary-rich-editor" id="notaConteudo" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Escreva livremente e use os botões acima para formatar."></div>
                                 <div id="previewNota" class="preview-nota d-none"></div>
-                                <div class="d-flex justify-content-between align-items-center mt-1">
-                                    <span class="form-text" id="statusSalvamento">Salva sozinho enquanto você digita.</span>
-                                    <span class="form-text" id="infoNota"></span>
+                                <div class="subject-summary-note-footer">
+                                    <label class="subject-summary-tags"><span>Organização</span><input type="text" class="form-control form-control-sm" id="notaTags" placeholder="Adicionar tags: art. 5º, jurisprudência..."></label>
+                                    <div class="subject-summary-note-status"><span class="form-text d-block" id="statusSalvamento">Salva sozinho enquanto você digita.</span><span class="form-text d-block" id="infoNota"></span></div>
                                 </div>
                             </div>
                         </div>
@@ -3729,7 +3854,14 @@
                 </div>
 
                 <div class="tab-pane fade" id="ws-resumo">
-                    <div id="painelResumo"></div>
+                    <section class="subject-summary-shell" aria-labelledby="subjectSummaryTitle">
+                        <header class="subject-summary-header">
+                            <div><small>CONSOLIDAÇÃO DO ESTUDO</small><h3 id="subjectSummaryTitle">Resumos da matéria</h3><p>Escreva, revise e transforme trechos das leituras em conhecimento organizado.</p></div>
+                            <button class="subject-summary-focus" id="btnFocoResumo" type="button" aria-pressed="false"><i class="bi-arrows-fullscreen"></i><span>Modo foco</span></button>
+                        </header>
+                        <div id="painelResumo"></div>
+                        <div id="subjectSummaryNotesMount"></div>
+                    </section>
                 </div>
 
             </div>
@@ -4600,19 +4732,39 @@ async function excluirMateriaComRelacionados(id) {
 }
 
 // ---------- Mini-markdown ----------
+function corCssParaHexResumo(cor) {
+    const valor = String(cor || "").trim().toLowerCase();
+    if (/^#[0-9a-f]{6}$/.test(valor)) return valor;
+    if (/^#[0-9a-f]{3}$/.test(valor)) return "#" + valor.slice(1).split("").map(parte => parte + parte).join("");
+    const rgb = valor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    return rgb ? "#" + rgb.slice(1, 4).map(parte => Math.max(0, Math.min(255, Number(parte))).toString(16).padStart(2, "0")).join("") : "";
+}
+
 function renderizarMarkdown(txt) {
     const linhas = esc(txt || "").split(/\r?\n/);
     const inline = s => s
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
         .replace(/(^|[^*])\*([^*]+?)\*/g, "$1<em>$2</em>")
+        .replace(/\+\+(.+?)\+\+/g, "<u>$1</u>")
+        .replace(/~~(.+?)~~/g, "<s>$1</s>")
+        .replace(/\[marca=(#[0-9a-fA-F]{6})\](.+?)\[\/marca\]/g, '<span style="background-color:$1">$2</span>')
         .replace(/==(.+?)==/g, "<mark>$1</mark>")
         .replace(/`(.+?)`/g, "<code>$1</code>");
-    let html = "", emLista = false, m;
+    let html = "", tipoLista = "", m;
     linhas.forEach(linha => {
         const t = linha.trim();
-        const item = t.match(/^[-*]\s+(.*)$/);
-        if (item) { if (!emLista) { html += "<ul>"; emLista = true; } html += "<li>" + inline(item[1]) + "</li>"; return; }
-        if (emLista) { html += "</ul>"; emLista = false; }
+        const itemComum = t.match(/^[-*]\s+(.*)$/);
+        const itemNumerado = t.match(/^\d+\.\s+(.*)$/);
+        const novoTipo = itemComum ? "ul" : itemNumerado ? "ol" : "";
+        const item = itemComum || itemNumerado;
+        if (item) {
+            if (tipoLista && tipoLista !== novoTipo) html += `</${tipoLista}>`;
+            if (tipoLista !== novoTipo) html += `<${novoTipo}>`;
+            tipoLista = novoTipo;
+            html += "<li>" + inline(item[1]) + "</li>";
+            return;
+        }
+        if (tipoLista) { html += `</${tipoLista}>`; tipoLista = ""; }
         if (!t) return;
         if ((m = t.match(/^###\s+(.*)/))) html += '<h6 class="fw-bold mt-3">' + inline(m[1]) + "</h6>";
         else if ((m = t.match(/^##\s+(.*)/))) html += '<h5 class="fw-bold mt-3">' + inline(m[1]) + "</h5>";
@@ -4621,8 +4773,67 @@ function renderizarMarkdown(txt) {
         else if (/^-{3,}$/.test(t)) html += "<hr>";
         else html += "<p>" + inline(t) + "</p>";
     });
-    if (emLista) html += "</ul>";
+    if (tipoLista) html += `</${tipoLista}>`;
     return html || '<p class="text-muted fst-italic">Nada escrito ainda.</p>';
+}
+
+function definirConteudoEditorResumo(markdown = "") {
+    const editor = document.getElementById("notaConteudo");
+    if (!editor) return;
+    if (!markdown.trim()) {
+        editor.innerHTML = "";
+        return;
+    }
+    const molde = document.createElement("template");
+    molde.innerHTML = renderizarMarkdown(markdown);
+    molde.content.querySelectorAll("mark").forEach(marca => {
+        const destaque = document.createElement("span");
+        destaque.style.backgroundColor = "#ffe58a";
+        destaque.append(...marca.childNodes);
+        marca.replaceWith(destaque);
+    });
+    const textos = document.createTreeWalker(molde.content, NodeFilter.SHOW_TEXT);
+    let texto;
+    while ((texto = textos.nextNode())) {
+        if (texto.parentElement?.closest("code")) continue;
+        texto.textContent = texto.textContent.replace(/\*\*|==|\+\+|~~|(?<!\*)\*(?!\*)|`/g, "");
+        if (texto.parentElement?.closest("strong, em, mark")) texto.textContent = texto.textContent.replace(/^=+|=+$/g, "");
+    }
+    editor.replaceChildren(molde.content.cloneNode(true));
+}
+
+function editorResumoParaMarkdown(editor = document.getElementById("notaConteudo")) {
+    if (!editor) return "";
+    const converter = no => {
+        if (no.nodeType === Node.TEXT_NODE) return no.textContent || "";
+        if (no.nodeType !== Node.ELEMENT_NODE) return "";
+        const tag = no.tagName.toLowerCase();
+        const interior = Array.from(no.childNodes).map(converter).join("");
+        if (tag === "br") return "\n";
+        if (tag === "strong" || tag === "b") return `**${interior}**`;
+        if (tag === "em" || tag === "i") return `*${interior}*`;
+        if (tag === "u") return `++${interior}++`;
+        if (tag === "s" || tag === "strike" || tag === "del") return `~~${interior}~~`;
+        if (tag === "mark") return `==${interior}==`;
+        if (tag === "span" && no.style?.backgroundColor) {
+            if (fundoNeutroResumo(no)) return interior;
+            const cor = corCssParaHexResumo(no.style.backgroundColor);
+            return cor && cor !== "#ffe58a" ? `[marca=${cor}]${interior}[/marca]` : `==${interior}==`;
+        }
+        if (tag === "code") return `\`${interior}\``;
+        if (tag === "h3") return `### ${interior.trim()}\n\n`;
+        if (/^h[1-6]$/.test(tag)) return `## ${interior.trim()}\n\n`;
+        if (tag === "blockquote") return interior.split("\n").filter(Boolean).map(linha => `> ${linha}`).join("\n") + "\n\n";
+        if (tag === "li") {
+            const numerada = no.parentElement?.tagName === "OL";
+            const indice = numerada ? Array.from(no.parentElement.children).indexOf(no) + 1 : 0;
+            return `${numerada ? `${indice}.` : "-"} ${interior.trim()}\n`;
+        }
+        if (tag === "ul" || tag === "ol") return interior + "\n";
+        if (tag === "p" || tag === "div") return interior + "\n\n";
+        return interior;
+    };
+    return Array.from(editor.childNodes).map(converter).join("").replace(/\n{3,}/g, "\n\n").trimEnd();
 }
 
 // ---------- Grade de matérias ----------
@@ -5093,6 +5304,8 @@ document.getElementById("formMateria").addEventListener("submit", async (e) => {
 let materiaAbertaId = null;
 const conteudoEditorialPorCatalogo = new Map();
 let notaSelecionadaId = null;
+let ultimaSelecaoRicaNota = null;
+let corDestaqueResumoAtual = "#ffe58a";
 let filtroStatusTopico = "todos";
 let buscaNotasTexto = "";
 let timerAutoSave = null;
@@ -6196,7 +6409,7 @@ function abrirFerramentaDoMaterial(acao, material) {
             const conteudo = document.getElementById("notaConteudo");
             if (!titulo || !conteudo) return;
             titulo.value = material.titulo;
-            conteudo.value = `Fonte de estudo: ${material.titulo}\n\n${material.descricao || material.conteudo || ""}`;
+            definirConteudoEditorResumo(`Fonte de estudo: ${material.titulo}\n\n${material.descricao || material.conteudo || ""}`);
             titulo.dispatchEvent(new Event("input", { bubbles: true }));
             conteudo.dispatchEvent(new Event("input", { bubbles: true }));
             conteudo.focus();
@@ -8098,7 +8311,7 @@ function renderizarTopicos(m) {
         const t = materiaPorId(materiaAbertaId).topicos.find(x => String(x.id) === b.dataset.id);
         if (!t) return;
         if (await criarNota(t.titulo, "## " + t.titulo + "\n\n")) {
-            document.querySelector('[data-bs-target="#ws-notas"]').click();
+            document.querySelector('[data-bs-target="#ws-resumo"]').click();
         }
     }));
 }
@@ -8166,6 +8379,65 @@ document.getElementById("btnAddTopicosLote").addEventListener("click", async () 
 });
 
 // ---------- Notas ----------
+const PREFIXO_FONTE_RESUMO = "__hub_source:";
+
+function textoResumoLegivel(valor) {
+    const original = String(valor || "").trim();
+    let texto = original.replace(/^Resumo\s*[—–-]\s*/i, "");
+    try { texto = decodeURIComponent(texto.replace(/\+/g, " ")); } catch { texto = texto.replace(/\+/g, " "); }
+    const pagina = texto.match(/(?:p[aá]gina|p[aá]g\.?)[\s_-]*(\d+)/i)?.[1] || "";
+    texto = texto
+        .replace(/(?:p[aá]gina|p[aá]g\.?)[\s_-]*\d+/ig, " ")
+        .replace(/\.pdf\b/ig, " ")
+        .replace(/\bAPOSTILA\s+DIGITAL\b/ig, "Apostila")
+        .replace(/\bGM\s+NATAL\b/ig, " ")
+        .replace(/[_.]+/g, " ")
+        .replace(/\s*[-–—]+\s*/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const siglas = new Set(["PDF", "CPP", "CTB", "GCM", "CF", "ADCT", "ECA"]);
+    texto = texto.replace(/\b[\p{Lu}À-Þ]{3,}\b/gu, palavra => siglas.has(palavra) ? palavra : palavra[0] + palavra.slice(1).toLocaleLowerCase("pt-BR"));
+    texto = texto.replace(/\(*\bParte\s+(Geral|Especial)\b\)*/i, (_, parte) => `(Parte ${parte})`);
+    texto = texto.replace(/[\s·•,;:-]+$/g, "").trim();
+    const titulo = texto || "Resumo de estudo";
+    return pagina ? `${titulo} • Pág. ${pagina}` : titulo;
+}
+
+function separarFonteResumo(conteudo) {
+    const texto = String(conteudo || "");
+    const correspondencia = texto.match(/(?:\r?\n){0,2}>\s*Fonte:\s*([^\r\n]+)\s*$/i);
+    if (!correspondencia) return { conteudo: texto, fonte: "" };
+    return { conteudo: texto.slice(0, correspondencia.index).trimEnd(), fonte: correspondencia[1].trim() };
+}
+
+function tagsVisiveisResumo(nota) {
+    return (nota?.tags || []).filter(tag => !String(tag).startsWith(PREFIXO_FONTE_RESUMO));
+}
+
+function destinoFonteResumo(nota) {
+    const tag = (nota?.tags || []).find(valor => String(valor).startsWith(PREFIXO_FONTE_RESUMO));
+    const partes = String(tag || "").slice(PREFIXO_FONTE_RESUMO.length).split(":");
+    if (partes.length < 2) {
+        const pageId = window.HUB_SUBJECT_NOTEBOOKS_UI?.encontrarPaginaPorTitulo(nota?.titulo);
+        return pageId && materiaAbertaId ? { subjectId: materiaAbertaId, pageId, pageTitle: nota?.titulo } : null;
+    }
+    return { subjectId: decodeURIComponent(partes[0]), pageId: decodeURIComponent(partes.slice(1).join(":")), pageTitle: nota.titulo };
+}
+
+async function abrirFonteResumo(nota, materia, origem) {
+    let destino = destinoFonteResumo(nota);
+    const abaCaderno = document.querySelector('[data-bs-target="#ws-notas"]');
+    if (!destino) {
+        if (abaCaderno) bootstrap.Tab.getOrCreateInstance(abaCaderno).show();
+        await window.HUB_SUBJECT_NOTEBOOKS_UI?.abrirInicio();
+        const pageId = window.HUB_SUBJECT_NOTEBOOKS_UI?.encontrarPaginaPorTitulo(nota?.titulo);
+        if (pageId) destino = { subjectId: materia.id, pageId, pageTitle: nota.titulo };
+        else return;
+    }
+    retornoLeituraCaderno = { ...destino, subjectName: materia.nome, text: origem.conteudo };
+    await voltarParaLeituraDoCaderno();
+}
+
 function notasFiltradas(m) {
     const q = buscaNotasTexto.trim().toLowerCase();
     const lista = q
@@ -8182,13 +8454,13 @@ function renderizarListaNotas(m) {
         return;
     }
     container.innerHTML = lista.map(n => `
-        <button type="button" class="list-group-item list-group-item-action nota-item ${String(n.id) === String(notaSelecionadaId) ? "ativa" : ""}" data-id="${n.id}">
+        <button type="button" class="list-group-item list-group-item-action nota-item ${String(n.id) === String(notaSelecionadaId) ? "ativa" : ""}" data-id="${n.id}" title="${esc(n.titulo || "Sem título")}">
             <div class="d-flex justify-content-between align-items-start">
-                <span class="fw-semibold small text-truncate">${n.fixada ? '<i class="bi-pin-angle-fill text-warning me-1"></i>' : ""}${esc(n.titulo || "Sem título")}</span>
+                <span class="subject-summary-list-title">${n.fixada ? '<i class="bi-pin-angle-fill text-warning me-1"></i>' : ""}${esc(textoResumoLegivel(n.titulo || "Sem título"))}</span>
                 <span class="text-muted" style="font-size:.68rem;">${dataBR(n.atualizadaEm)}</span>
             </div>
-            <div class="text-muted text-truncate" style="font-size:.72rem;">${esc((n.conteudo || "").replace(/\s+/g, " ").slice(0, 70))}</div>
-            ${(n.tags || []).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${n.tags.map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
+            <span class="subject-summary-list-excerpt">${esc(separarFonteResumo(n.conteudo).conteudo.replace(/[#*=`>_-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) || "Resumo ainda sem conteúdo")}</span>
+            ${tagsVisiveisResumo(n).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${tagsVisiveisResumo(n).map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
         </button>`).join("");
     container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", async () => {
         if (String(notaSelecionadaId) === b.dataset.id || !await salvarNotaPendente()) return;
@@ -8206,19 +8478,29 @@ function renderizarEditorNota(m) {
     if (!nota) { editor.classList.add("d-none"); vazio.classList.remove("d-none"); return; }
     editor.classList.remove("d-none");
     vazio.classList.add("d-none");
-    document.getElementById("notaTitulo").value = nota.titulo || "";
-    document.getElementById("notaTags").value = (nota.tags || []).join(", ");
-    document.getElementById("notaConteudo").value = nota.conteudo || "";
+    carregarCorDestaqueResumo();
+    const titulo = document.getElementById("notaTitulo");
+    const origem = separarFonteResumo(nota.conteudo);
+    titulo.value = textoResumoLegivel(nota.titulo || "");
+    titulo.title = nota.titulo || "";
+    document.getElementById("notaTags").value = tagsVisiveisResumo(nota).join(", ");
+    definirConteudoEditorResumo(origem.conteudo);
+    ultimaSelecaoRicaNota = null;
+    document.getElementById("notaFonteOriginal").value = origem.fonte;
+    const chip = document.getElementById("notaFonteChip");
+    chip.hidden = !origem.fonte;
+    chip.innerHTML = origem.fonte ? `<button type="button" title="${esc(origem.fonte)}"><i class="bi-file-earmark-text"></i><span>Origem: ${esc(textoResumoLegivel(origem.fonte))}</span><i class="bi-box-arrow-up-right"></i></button>` : "";
+    chip.querySelector("button")?.addEventListener("click", () => void abrirFonteResumo(nota, m, origem));
     document.getElementById("btnFixarNota").className = "btn flex-shrink-0 " + (nota.fixada ? "btn-warning" : "btn-outline-warning");
     document.getElementById("infoNota").textContent = `Criada em ${dataBR(nota.criadaEm)} · ${(nota.conteudo || "").length} caracteres`;
     const preview = document.getElementById("previewNota");
-    if (!preview.classList.contains("d-none")) preview.innerHTML = renderizarMarkdown(nota.conteudo);
+    if (!preview.classList.contains("d-none")) preview.innerHTML = renderizarMarkdown(origem.conteudo);
 }
 
-async function criarNota(titulo, conteudo) {
+async function criarNota(titulo, conteudo, tags = []) {
     if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return false;
     const nota = {
-        id: novoId(), titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [], fixada: false,
+        id: novoId(), titulo: titulo || "Nova nota", conteudo: conteudo || "", tags: [...tags], fixada: false,
         criadaEm: hojeISO(), atualizadaEm: hojeISO()
     };
     operacaoNotaEmAndamento = true;
@@ -8248,12 +8530,16 @@ async function criarNota(titulo, conteudo) {
 
 function capturarNotaParaSalvar() {
     if (!materiaAbertaId || !notaSelecionadaId) return null;
+    const notaAtual = materiaPorId(materiaAbertaId)?.notas.find(nota => String(nota.id) === String(notaSelecionadaId));
+    const fonte = document.getElementById("notaFonteOriginal").value.trim();
+    const corpo = editorResumoParaMarkdown();
+    const tagsSistema = (notaAtual?.tags || []).filter(tag => String(tag).startsWith(PREFIXO_FONTE_RESUMO));
     return {
         materiaId: materiaAbertaId,
         notaId: notaSelecionadaId,
         titulo: document.getElementById("notaTitulo").value,
-        conteudo: document.getElementById("notaConteudo").value,
-        tags: document.getElementById("notaTags").value.split(",").map(s => s.trim()).filter(Boolean)
+        conteudo: fonte ? `${corpo}\n\n> Fonte: ${fonte}` : corpo,
+        tags: [...document.getElementById("notaTags").value.split(",").map(s => s.trim()).filter(Boolean), ...tagsSistema]
     };
 }
 
@@ -8308,7 +8594,7 @@ async function salvarNotaPendente() {
                     renderizarListaNotas(materiaAtual);
                     const notaAtual = materiaAtual.notas.find(nota => String(nota.id) === String(pendente.notaId));
                     if (notaAtual) {
-                        document.getElementById("infoNota").textContent = `Criada em ${dataBR(notaAtual.criadaEm)} · ${document.getElementById("notaConteudo").value.length} caracteres`;
+                        document.getElementById("infoNota").textContent = `Criada em ${dataBR(notaAtual.criadaEm)} · ${editorResumoParaMarkdown().length} caracteres`;
                     }
                 }
             }
@@ -8339,6 +8625,22 @@ function agendarSalvamento() {
 ["notaTitulo", "notaConteudo", "notaTags"].forEach(id => document.getElementById(id).addEventListener("input", agendarSalvamento));
 
 document.getElementById("btnNovaNota").addEventListener("click", async () => criarNota("Nova nota", ""));
+document.getElementById("btnNovaNotaVazio")?.addEventListener("click", async () => criarNota("Novo resumo", ""));
+function alternarListaResumos(recolher) {
+    const painel = document.querySelector(".subject-summary-notes");
+    const botaoRecolher = document.getElementById("btnRecolherListaResumos");
+    const botaoMostrar = document.getElementById("btnMostrarListaResumos");
+    const botaoMostrarVazio = document.getElementById("btnMostrarListaResumosVazio");
+    if (!painel) return;
+    painel.classList.toggle("is-list-collapsed", recolher);
+    botaoRecolher?.setAttribute("aria-pressed", String(recolher));
+    if (botaoMostrar) botaoMostrar.hidden = !recolher;
+    if (botaoMostrarVazio) botaoMostrarVazio.hidden = !recolher;
+    if (!recolher) document.getElementById("buscaNotas")?.focus({ preventScroll: true });
+}
+document.getElementById("btnRecolherListaResumos")?.addEventListener("click", () => alternarListaResumos(true));
+document.getElementById("btnMostrarListaResumos")?.addEventListener("click", () => alternarListaResumos(false));
+document.getElementById("btnMostrarListaResumosVazio")?.addEventListener("click", () => alternarListaResumos(false));
 document.getElementById("buscaNotas").addEventListener("input", e => { buscaNotasTexto = e.target.value; renderizarListaNotas(materiaPorId(materiaAbertaId)); });
 document.getElementById("btnFixarNota").addEventListener("click", async () => {
     if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return;
@@ -8401,38 +8703,249 @@ document.getElementById("btnExcluirNota").addEventListener("click", async () => 
         operacaoNotaEmAndamento = false;
     }
 });
-document.getElementById("btnPreviewNota").addEventListener("click", () => {
+function definirPreviewNota(ativo) {
     const area = document.getElementById("notaConteudo");
     const preview = document.getElementById("previewNota");
-    const mostrandoPreview = preview.classList.contains("d-none");
-    preview.classList.toggle("d-none", !mostrandoPreview);
-    area.classList.toggle("d-none", mostrandoPreview);
-    if (mostrandoPreview) preview.innerHTML = renderizarMarkdown(area.value);
+    const botao = document.getElementById("btnPreviewNota");
+    preview.classList.toggle("d-none", !ativo);
+    area.classList.toggle("d-none", ativo);
+    botao.setAttribute("aria-pressed", String(ativo));
+    botao.title = ativo ? "Voltar à edição" : "Visualizar texto formatado";
+    botao.innerHTML = `<i class="bi-${ativo ? "pencil" : "eye"}"></i>`;
+    if (ativo) preview.innerHTML = renderizarMarkdown(editorResumoParaMarkdown(area));
+}
+
+function garantirEdicaoNotaVisivel() {
+    if (!document.getElementById("previewNota").classList.contains("d-none")) definirPreviewNota(false);
+}
+
+document.getElementById("btnPreviewNota").addEventListener("click", () => {
+    definirPreviewNota(document.getElementById("previewNota").classList.contains("d-none"));
 });
 
-function aplicarFormato(prefixo, sufixo) {
-    const area = document.getElementById("notaConteudo");
-    const ini = area.selectionStart, fim = area.selectionEnd;
-    const selecionado = area.value.slice(ini, fim) || "texto";
-    area.value = area.value.slice(0, ini) + prefixo + selecionado + sufixo + area.value.slice(fim);
-    area.focus();
-    area.setSelectionRange(ini + prefixo.length, ini + prefixo.length + selecionado.length);
-    agendarSalvamento();
+const areaNota = document.getElementById("notaConteudo");
+
+function memorizarSelecaoNota() {
+    const selecao = window.getSelection();
+    if (!selecao?.rangeCount) return;
+    const intervalo = selecao.getRangeAt(0);
+    if (areaNota.contains(intervalo.commonAncestorContainer)) ultimaSelecaoRicaNota = intervalo.cloneRange();
 }
-function aplicarFormatoLinha(marca) {
-    const area = document.getElementById("notaConteudo");
-    const ini = area.value.lastIndexOf("\n", Math.max(0, area.selectionStart - 1)) + 1;
-    area.value = area.value.slice(0, ini) + marca + area.value.slice(ini);
-    area.focus();
-    agendarSalvamento();
+
+["keyup", "pointerup", "input"].forEach(tipo => areaNota.addEventListener(tipo, memorizarSelecaoNota));
+document.addEventListener("selectionchange", () => {
+    memorizarSelecaoNota();
+    atualizarEstadoToolbarResumo();
+});
+document.querySelector(".subject-summary-toolbar")?.addEventListener("mousedown", evento => {
+    if (evento.target.closest("button")) evento.preventDefault();
+});
+
+function restaurarSelecaoNota() {
+    areaNota.focus({ preventScroll: true });
+    if (!ultimaSelecaoRicaNota) return false;
+    const selecao = window.getSelection();
+    selecao.removeAllRanges();
+    selecao.addRange(ultimaSelecaoRicaNota);
+    return true;
 }
-document.querySelectorAll("[data-fmt]").forEach(b => b.addEventListener("click", () => aplicarFormato(b.dataset.fmt, b.dataset.fmt)));
-document.querySelectorAll("[data-linha]").forEach(b => b.addEventListener("click", () => aplicarFormatoLinha(b.dataset.linha)));
+
+function confirmarBotaoFormatacao(botao) {
+    botao?.classList.add("is-applied");
+    window.setTimeout(() => botao?.classList.remove("is-applied"), 320);
+}
+
+function chaveCorDestaqueResumo() {
+    return `hub:summary-highlight:${USUARIO_ATUAL_ID || "local"}`;
+}
+
+function carregarCorDestaqueResumo() {
+    const salva = localStorage.getItem(chaveCorDestaqueResumo());
+    corDestaqueResumoAtual = /^#[0-9a-f]{6}$/i.test(salva || "") ? salva.toLowerCase() : "#ffe58a";
+    atualizarPaletaDestaqueResumo();
+}
+
+function atualizarPaletaDestaqueResumo() {
+    document.getElementById("btnDestaqueResumo")?.style.setProperty("--summary-highlight-color", corDestaqueResumoAtual);
+    document.querySelectorAll("[data-highlight-color]").forEach(botao => botao.classList.toggle("is-selected", botao.dataset.highlightColor === corDestaqueResumoAtual));
+}
+
+function escolherCorDestaqueResumo(cor) {
+    if (!/^#[0-9a-f]{6}$/i.test(cor || "")) return;
+    corDestaqueResumoAtual = cor.toLowerCase();
+    localStorage.setItem(chaveCorDestaqueResumo(), corDestaqueResumoAtual);
+    atualizarPaletaDestaqueResumo();
+}
+
+function corFundoElementoResumo(elemento) {
+    return elemento?.style?.backgroundColor?.replace(/\s+/g, "").toLowerCase() || "";
+}
+
+function fundoNeutroResumo(elemento) {
+    const cor = corFundoElementoResumo(elemento);
+    const fundoEditor = window.getComputedStyle?.(areaNota)?.backgroundColor?.replace(/\s+/g, "").toLowerCase() || "";
+    return ["transparent", "#fff", "#ffffff", "rgb(255,255,255)", "rgba(0,0,0,0)", fundoEditor].filter(Boolean).includes(cor);
+}
+
+function envoltorioDestaqueResumo(elemento) {
+    return elemento?.tagName === "MARK" || (elemento?.tagName === "SPAN" && Boolean(corFundoElementoResumo(elemento)) && !fundoNeutroResumo(elemento));
+}
+
+function removerFundosNeutrosResumo() {
+    areaNota.querySelectorAll("span[style*='background']").forEach(neutro => {
+        if (!fundoNeutroResumo(neutro)) return;
+        const paiDestacado = envoltorioDestaqueResumo(neutro.parentElement) ? neutro.parentElement : null;
+        if (paiDestacado) {
+            const fragmento = document.createDocumentFragment();
+            const antes = paiDestacado.cloneNode(false);
+            const depois = paiDestacado.cloneNode(false);
+            while (paiDestacado.firstChild && paiDestacado.firstChild !== neutro) antes.append(paiDestacado.firstChild);
+            while (neutro.nextSibling) depois.append(neutro.nextSibling);
+            if (antes.childNodes.length) fragmento.append(antes);
+            fragmento.append(...neutro.childNodes);
+            if (depois.childNodes.length) fragmento.append(depois);
+            paiDestacado.replaceWith(fragmento);
+        } else {
+            neutro.replaceWith(...neutro.childNodes);
+        }
+    });
+}
+
+function elementoComDestaqueResumo(no) {
+    let atual = no?.nodeType === Node.TEXT_NODE ? no.parentElement : no;
+    while (atual && atual !== areaNota) {
+        if (atual.tagName === "MARK") return atual;
+        if (atual.tagName === "SPAN" && atual.style?.backgroundColor) {
+            if (!fundoNeutroResumo(atual)) return atual;
+        }
+        atual = atual.parentElement;
+    }
+    return null;
+}
+
+function destaquesSelecionadosResumo(selecao) {
+    if (!selecao?.rangeCount) return [];
+    const intervalo = selecao.getRangeAt(0);
+    const destaques = Array.from(areaNota.querySelectorAll("mark, span[style*='background']"))
+        .filter(elemento => envoltorioDestaqueResumo(elemento) && intervalo.intersectsNode(elemento));
+    [elementoComDestaqueResumo(selecao.anchorNode), elementoComDestaqueResumo(selecao.focusNode)]
+        .filter(Boolean)
+        .forEach(elemento => { if (!destaques.includes(elemento)) destaques.push(elemento); });
+    return destaques;
+}
+
+function removerDestaqueSelecaoResumo(selecao) {
+    const destaques = destaquesSelecionadosResumo(selecao);
+    if (!destaques.length) return false;
+    destaques.forEach(destaque => destaque.replaceWith(...destaque.childNodes));
+    return true;
+}
+
+function executarComandoResumo(comando, botao) {
+    garantirEdicaoNotaVisivel();
+    restaurarSelecaoNota();
+    const selecao = window.getSelection();
+    if (!selecao?.rangeCount) return;
+    if (comando === "undo") document.execCommand("undo", false);
+    else if (comando === "redo") document.execCommand("redo", false);
+    else if (comando === "bold") document.execCommand("bold", false);
+    else if (comando === "italic") document.execCommand("italic", false);
+    else if (comando === "underline") document.execCommand("underline", false);
+    else if (comando === "strike") document.execCommand("strikeThrough", false);
+    else if (comando === "highlight") {
+        const estaDestacado = destaquesSelecionadosResumo(selecao).length > 0;
+        if (estaDestacado) removerDestaqueSelecaoResumo(selecao);
+        else document.execCommand("hiliteColor", false, corDestaqueResumoAtual);
+    }
+    else if (comando === "list") document.execCommand("insertUnorderedList", false);
+    else if (comando === "ordered-list") document.execCommand("insertOrderedList", false);
+    else if (comando === "quote") {
+        const noAtual = selecao.anchorNode?.nodeType === Node.TEXT_NODE ? selecao.anchorNode.parentElement : selecao.anchorNode;
+        document.execCommand("formatBlock", false, noAtual?.closest?.("blockquote") ? "p" : "blockquote");
+    }
+    else if (comando === "code") {
+        const texto = selecao.toString();
+        if (texto) document.execCommand("insertHTML", false, `<code>${esc(texto)}</code>`);
+    }
+    else if (comando === "clear") {
+        document.execCommand("removeFormat", false);
+        document.execCommand("formatBlock", false, "p");
+    }
+    memorizarSelecaoNota();
+    agendarSalvamento();
+    confirmarBotaoFormatacao(botao);
+    atualizarEstadoToolbarResumo();
+}
+
+function atualizarEstadoToolbarResumo() {
+    const selecao = window.getSelection();
+    const dentro = selecao?.rangeCount && areaNota.contains(selecao.anchorNode);
+    document.querySelectorAll("[data-rich-command]").forEach(botao => {
+        const comando = botao.dataset.richCommand;
+        let ativo = false;
+        if (dentro && comando === "bold") ativo = document.queryCommandState("bold");
+        else if (dentro && comando === "italic") ativo = document.queryCommandState("italic");
+        else if (dentro && comando === "underline") ativo = document.queryCommandState("underline");
+        else if (dentro && comando === "strike") ativo = document.queryCommandState("strikeThrough");
+        else if (dentro && comando === "list") ativo = document.queryCommandState("insertUnorderedList");
+        else if (dentro && comando === "ordered-list") ativo = document.queryCommandState("insertOrderedList");
+        else if (dentro) {
+            const no = selecao.anchorNode?.nodeType === Node.TEXT_NODE ? selecao.anchorNode.parentElement : selecao.anchorNode;
+            const seletor = ({ code: "code", quote: "blockquote" })[comando];
+            ativo = comando === "highlight" ? Boolean(elementoComDestaqueResumo(no)) : Boolean(seletor && no?.closest?.(seletor));
+        }
+        botao.classList.toggle("is-active", ativo);
+        botao.setAttribute("aria-pressed", String(ativo));
+        if (comando === "highlight") {
+            botao.title = ativo ? "Remover destaque" : "Destacar";
+            botao.setAttribute("aria-label", ativo ? "Remover destaque" : "Destacar");
+        }
+    });
+    const estilo = document.getElementById("notaEstiloTexto");
+    if (estilo && dentro) {
+        const no = selecao.anchorNode?.nodeType === Node.TEXT_NODE ? selecao.anchorNode.parentElement : selecao.anchorNode;
+        estilo.value = no?.closest?.("h2") ? "h2" : no?.closest?.("h3") ? "h3" : "p";
+    }
+}
+document.querySelectorAll("[data-rich-command]").forEach(b => b.addEventListener("click", evento => { evento.preventDefault(); executarComandoResumo(b.dataset.richCommand, b); }));
+document.querySelector("#menuCoresDestaqueResumo > summary")?.addEventListener("pointerdown", memorizarSelecaoNota);
+document.querySelectorAll("[data-highlight-color]").forEach(botao => botao.addEventListener("click", evento => {
+    evento.preventDefault();
+    garantirEdicaoNotaVisivel();
+    escolherCorDestaqueResumo(botao.dataset.highlightColor);
+    restaurarSelecaoNota();
+    document.execCommand("hiliteColor", false, corDestaqueResumoAtual);
+    memorizarSelecaoNota();
+    agendarSalvamento();
+    atualizarEstadoToolbarResumo();
+    document.getElementById("menuCoresDestaqueResumo").open = false;
+}));
+document.querySelector("[data-highlight-remove]")?.addEventListener("click", evento => {
+    evento.preventDefault();
+    garantirEdicaoNotaVisivel();
+    restaurarSelecaoNota();
+    const selecao = window.getSelection();
+    if (selecao?.rangeCount) removerDestaqueSelecaoResumo(selecao);
+    memorizarSelecaoNota();
+    agendarSalvamento();
+    atualizarEstadoToolbarResumo();
+    document.getElementById("menuCoresDestaqueResumo").open = false;
+});
+const seletorEstiloResumo = document.getElementById("notaEstiloTexto");
+seletorEstiloResumo?.addEventListener("pointerdown", memorizarSelecaoNota);
+seletorEstiloResumo?.addEventListener("change", () => {
+    garantirEdicaoNotaVisivel();
+    restaurarSelecaoNota();
+    document.execCommand("formatBlock", false, seletorEstiloResumo.value);
+    memorizarSelecaoNota();
+    agendarSalvamento();
+    atualizarEstadoToolbarResumo();
+});
 
 document.getElementById("btnNotaViraCard").addEventListener("click", async () => {
     if (!await salvarNotaPendente()) return;
-    const area = document.getElementById("notaConteudo");
-    const selecionado = area.value.slice(area.selectionStart, area.selectionEnd).trim();
+    restaurarSelecaoNota();
+    const selecionado = window.getSelection()?.toString().trim() || "";
     if (!selecionado) { alert("Selecione no texto o trecho que vira a resposta do flashcard."); return; }
     const frente = prompt("Pergunta do flashcard:", document.getElementById("notaTitulo").value);
     if (!frente) return;
@@ -8515,12 +9028,14 @@ document.addEventListener("subject-notebook-study-action", async evento => {
         return;
     }
     if (detalhes.action === "summary") {
-        const titulo = `Resumo — ${detalhes.pageTitle || detalhes.subjectName || "Estudo"}`;
+        const titulo = textoResumoLegivel(detalhes.pageTitle || detalhes.subjectName || "Estudo");
         const conteudo = `${trecho}\n\n> Fonte: ${origem || detalhes.subjectName || "Caderno da matéria"}`;
-        if (!await criarNota(titulo, conteudo)) return;
-        await window.HUB_SUBJECT_NOTEBOOKS_UI?.abrirInicio();
-        const painel = document.querySelector(".legacy-notes-panel");
-        if (painel) painel.open = true;
+        const tagFonte = detalhes.subjectId && detalhes.pageId
+            ? `${PREFIXO_FONTE_RESUMO}${encodeURIComponent(detalhes.subjectId)}:${encodeURIComponent(detalhes.pageId)}`
+            : "";
+        if (!await criarNota(titulo, conteudo, tagFonte ? [tagFonte] : [])) return;
+        bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#ws-resumo"]')).show();
+        const painel = document.querySelector(".subject-summary-notes");
         mostrarRetornoLeituraCaderno(painel, detalhes);
         painel?.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => document.getElementById("notaConteudo")?.focus({ preventScroll: true }), 220);
@@ -8976,36 +9491,54 @@ document.getElementById("formLink").addEventListener("submit", async e => {
 document.getElementById("btnCancelarEdicaoLink").addEventListener("click", limparEdicaoLink);
 
 // ---------- Resumo da matéria ----------
+function prepararCentralResumos() {
+    const painelNotas = document.querySelector(".legacy-notes-panel");
+    const destino = document.getElementById("subjectSummaryNotesMount");
+    if (!painelNotas || !destino || painelNotas.parentElement === destino) return;
+    painelNotas.open = true;
+    painelNotas.classList.remove("mt-3");
+    painelNotas.classList.add("subject-summary-notes");
+    destino.append(painelNotas);
+}
+
+function alternarFocoResumo() {
+    const aba = document.getElementById("ws-resumo");
+    const botao = document.getElementById("btnFocoResumo");
+    const painelNotas = document.querySelector(".subject-summary-notes");
+    if (!aba || !botao || !painelNotas) return;
+    painelNotas.open = true;
+    const ativo = !aba.classList.contains("is-focus");
+    aba.classList.toggle("is-focus", ativo);
+    botao.setAttribute("aria-pressed", String(ativo));
+    botao.innerHTML = `<i class="bi-${ativo ? "fullscreen-exit" : "arrows-fullscreen"}"></i><span>${ativo ? "Sair do foco" : "Modo foco"}</span>`;
+    window.requestAnimationFrame(() => {
+        const editor = document.getElementById("editorNota");
+        const alvo = editor && !editor.classList.contains("d-none")
+            ? document.getElementById("notaConteudo")
+            : document.getElementById("btnNovaNota");
+        alvo?.focus({ preventScroll: true });
+    });
+}
+
 function renderizarResumoMateria(m) {
     const tarefas = obterTarefas().filter(t => String(t.materiaId) === String(m.id));
     const pendentes = tarefas.filter(t => t.status === "pendente").length;
     const concluidas = tarefas.length - pendentes;
     const erros = obterErros().filter(e => String(e.materiaId) === String(m.id));
     const porCaixa = [1, 2, 3, 4, 5].map(c => m.cards.filter(x => x.caixa === c).length);
-    const bloco = (rotulo, valor, cor) => `
-        <div class="col-6 col-md-3">
-            <div class="p-3 border rounded bg-light h-100 text-center">
-                <div class="fs-4 fw-bold text-${cor}">${valor}</div>
-                <div class="small text-muted">${rotulo}</div>
-            </div>
-        </div>`;
+    const bloco = (icone, rotulo, valor, ajuda) => `<article class="subject-summary-metric"><i class="bi-${icone}"></i><span>${rotulo}</span><strong>${valor}</strong><small>${ajuda}</small></article>`;
     document.getElementById("painelResumo").innerHTML = `
-        <div class="row g-3 mb-4">
-            ${bloco("Progresso", progressoMateria(m) + "%", "primary")}
-            ${bloco("Tópicos dominados", m.topicos.filter(t => t.status === "dominado").length + "/" + m.topicos.length, "success")}
-            ${bloco("Sessões concluídas", concluidas + "/" + tarefas.length, "info")}
-            ${bloco("Erros registrados", erros.length, "danger")}
+        <div class="subject-summary-overview">
+            ${bloco("graph-up-arrow", "Progresso", progressoMateria(m) + "%", "domínio da matéria")}
+            ${bloco("check2-circle", "Tópicos dominados", m.topicos.filter(t => t.status === "dominado").length + "/" + m.topicos.length, "conteúdo consolidado")}
+            ${bloco("calendar-check", "Sessões concluídas", concluidas + "/" + tarefas.length, `${pendentes} pendente${pendentes === 1 ? "" : "s"}`)}
+            ${bloco("arrow-repeat", "Revisões ativas", porCaixa.reduce((total, quantidade) => total + quantidade, 0) + erros.length, `${erros.length} erro${erros.length === 1 ? "" : "s"} registrado${erros.length === 1 ? "" : "s"}`)}
         </div>
-        <h6 class="fw-bold"><i class="bi-stack me-1"></i>Flashcards por caixa</h6>
-        <div class="d-flex gap-2 flex-wrap mb-4">
-            ${porCaixa.map((q, i) => `<span class="badge bg-light text-dark border py-2 px-3">Caixa ${i + 1}: <strong>${q}</strong> <span class="text-muted">(revisa a cada ${INTERVALO_CAIXA[i + 1]}d)</span></span>`).join("")}
-        </div>
-        <h6 class="fw-bold"><i class="bi-hourglass-split me-1"></i>Sessões pendentes (${pendentes})</h6>
-        ${pendentes ? `<ul class="small">${tarefas.filter(t => t.status === "pendente").map(t => `<li>${esc(t.topico)} <span class="text-muted">— ${dataBR(t.data)}</span></li>`).join("")}</ul>` : '<p class="text-muted small fst-italic">Nenhuma sessão pendente no cronograma.</p>'}
-        <h6 class="fw-bold mt-3"><i class="bi-journal-x me-1"></i>Últimos erros</h6>
-        ${erros.length ? `<ul class="small">${erros.slice(-5).reverse().map(e => `<li><strong>${esc(e.tema)}</strong>${e.obs ? " — " + esc(e.obs) : ""} <span class="text-muted">(${esc(e.data || "")})</span></li>`).join("")}</ul>` : '<p class="text-muted small fst-italic">Nenhum erro registrado nesta matéria.</p>'}
     `;
 }
+
+prepararCentralResumos();
+document.getElementById("btnFocoResumo")?.addEventListener("click", alternarFocoResumo);
 
 // ---------- Exportar matéria em Markdown ----------
 document.getElementById("btnExportarMateria").addEventListener("click", () => {
@@ -9016,7 +9549,7 @@ document.getElementById("btnExportarMateria").addEventListener("click", () => {
     linhas.push("## Tópicos", "");
     m.topicos.forEach(t => linhas.push(`- [${STATUS_TOPICO[t.status].rotulo}] ${t.titulo}`));
     linhas.push("", "## Notas", "");
-    m.notas.forEach(n => linhas.push("### " + (n.titulo || "Sem título"), (n.tags || []).length ? "_Tags: " + n.tags.join(", ") + "_" : "", "", n.conteudo || "", ""));
+    m.notas.forEach(n => linhas.push("### " + textoResumoLegivel(n.titulo || "Sem título"), tagsVisiveisResumo(n).length ? "_Tags: " + tagsVisiveisResumo(n).join(", ") + "_" : "", "", n.conteudo || "", ""));
     linhas.push("## Flashcards", "");
     m.cards.forEach(c => linhas.push(`- **${c.frente}** → ${c.verso} _(caixa ${c.caixa})_`));
     linhas.push("", "## Materiais", "");
@@ -12409,10 +12942,12 @@ window.encerrarHub = () => {
         graficoPizzaInstancia = null;
     }
     document.querySelectorAll(".modal.show").forEach(modal => bootstrap.Modal.getInstance(modal)?.hide());
-    ["notaTitulo", "notaConteudo", "notaTags"].forEach(id => {
+    ["notaTitulo", "notaTags"].forEach(id => {
         const campo = document.getElementById(id);
         if (campo) campo.value = "";
     });
+    const conteudoNota = document.getElementById("notaConteudo");
+    if (conteudoNota) conteudoNota.innerHTML = "";
     ["previewNota", "areaQuestoes", "areaResultado"].forEach(id => {
         const area = document.getElementById(id);
         if (area) area.textContent = "";
