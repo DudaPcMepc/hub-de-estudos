@@ -871,6 +871,20 @@
         font-weight: 700;
         white-space: nowrap;
     }
+    .quiz-contingency-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: .7rem;
+        color: #58483f;
+        background: #fff8e7;
+        border-color: rgba(153, 111, 28, .24);
+        border-radius: .8rem;
+    }
+    .quiz-contingency-notice > i { margin-top: .12rem; color: #8a651c; font-size: 1rem; }
+    .quiz-contingency-copy { min-width: 0; flex: 1; }
+    .quiz-contingency-copy strong { display: block; margin-bottom: .15rem; color: #513f35; }
+    .quiz-contingency-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .65rem; }
+    .quiz-contingency-actions .btn { border-radius: 999px; }
     .performance-card { border: 1px solid rgba(59, 41, 35, .1) !important; }
     .performance-empty {
         min-height: 250px;
@@ -11218,6 +11232,65 @@ function encontrarTopicoDoSimulado(materiaId, tema) {
     return obterTopicosEditalDaMateria(materiaId).find(topico => textoBuscaFlashcard(topico.titulo).trim().replace(/\s+/g, " ") === procurado) || null;
 }
 
+function normalizarChaveQuestaoSimulado(valor) {
+    return textoBuscaFlashcard(String(valor || "")).trim().replace(/\s+/g, " ");
+}
+
+function obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, quantidade) {
+    const temaNormalizado = normalizarChaveQuestaoSimulado(tema);
+    const limite = Math.max(1, Math.min(20, Number(quantidade) || 5));
+    const agora = Date.now();
+    const candidatas = tentativasSimulado
+        .filter(tentativa => String(tentativa.materiaId) === String(materiaId))
+        .flatMap(tentativa => (tentativa.respostas || []).map(resposta => ({ tentativa, resposta })))
+        .map(({ tentativa, resposta }) => {
+            try {
+                const [questao] = validarQuestoesIA([{
+                    pergunta: resposta.pergunta,
+                    opcoes: resposta.opcoes,
+                    resposta_correta_index: resposta.respostaCorretaIndex,
+                    explicacao: resposta.explicacao,
+                    dificuldade: tentativa.dificuldade
+                }]);
+                const temaDaTentativa = normalizarChaveQuestaoSimulado(tentativa.tema);
+                const pergunta = normalizarChaveQuestaoSimulado(resposta.pergunta);
+                const correspondeAoTema = Boolean(temaNormalizado && ((temaDaTentativa && (temaDaTentativa.includes(temaNormalizado) || temaNormalizado.includes(temaDaTentativa))) || pergunta.includes(temaNormalizado)));
+                if (temaNormalizado && !correspondeAoTema) return null;
+                const idadeEmDias = Math.max(0, (agora - new Date(tentativa.iniciadoEm).getTime()) / 86400000);
+                const pontuacao = (correspondeAoTema ? 120 : 0)
+                    + (tentativa.dificuldade === dificuldade ? 30 : 0)
+                    + (resposta.respostaEscolhidaIndex != null && !resposta.correta ? 45 : 0)
+                    + Math.max(0, 20 - idadeEmDias / 7);
+                return { questao, pontuacao, iniciadoEm: tentativa.iniciadoEm };
+            } catch {
+                return null;
+            }
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.pontuacao - a.pontuacao || new Date(b.iniciadoEm) - new Date(a.iniciadoEm));
+
+    const vistas = new Set();
+    return candidatas.reduce((selecionadas, candidata) => {
+        const chave = normalizarChaveQuestaoSimulado(candidata.questao.pergunta);
+        if (!chave || vistas.has(chave) || selecionadas.length >= limite) return selecionadas;
+        vistas.add(chave);
+        selecionadas.push(candidata.questao);
+        return selecionadas;
+    }, []);
+}
+
+function exibirContingenciaSimulado(mensagem, comAcoes = false) {
+    const aviso = document.getElementById("erroIA");
+    aviso.classList.remove("d-none", "alert-danger");
+    aviso.classList.add("quiz-contingency-notice");
+    aviso.innerHTML = `<i class="bi-info-circle-fill" aria-hidden="true"></i><div class="quiz-contingency-copy"><strong>Modo de continuidade</strong><span>${esc(mensagem)}</span>${comAcoes ? '<div class="quiz-contingency-actions"><button type="button" class="btn btn-sm btn-primary" id="btnTentarSimuladoNovamente"><i class="bi-arrow-clockwise me-1"></i>Tentar novamente</button><button type="button" class="btn btn-sm btn-outline-secondary" id="btnRevisarErrosSimulado"><i class="bi-journal-x me-1"></i>Revisar erros</button></div>' : ""}</div>`;
+    document.getElementById("btnTentarSimuladoNovamente")?.addEventListener("click", () => document.getElementById("formGerarSimulado").requestSubmit());
+    document.getElementById("btnRevisarErrosSimulado")?.addEventListener("click", () => {
+        const aba = document.querySelector('[data-bs-target="#p-erros"]');
+        if (aba) bootstrap.Tab.getOrCreateInstance(aba).show();
+    });
+}
+
 function sincronizarTentativasSimulado(remotas) {
     tentativasSimulado = Array.isArray(remotas) ? remotas : [];
     renderizarHistoricoSimulados();
@@ -11283,6 +11356,8 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     const loading = document.getElementById("loadingIA");
     const erroDiv = document.getElementById("erroIA");
     erroDiv.classList.add("d-none");
+    erroDiv.classList.remove("quiz-contingency-notice");
+    erroDiv.classList.add("alert-danger");
     loading.classList.remove("d-none");
     document.getElementById("areaQuestoes").innerHTML = "";
     document.getElementById("areaResultado").classList.add("d-none");
@@ -11302,8 +11377,20 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
         }
         await iniciarTentativaSimulado(resultado.questions, materiaId, materiaNome, { tema, banca: edital.banca || "", concurso: edital.nomeConcurso || "", dificuldade });
     } catch (err) {
-        erroDiv.textContent = "Não foi possível gerar as questões: " + err.message;
-        erroDiv.classList.remove("d-none");
+        const questoesDoHistorico = obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, Number(qtd));
+        if (questoesDoHistorico.length) {
+            try {
+                const edital = obterEdital();
+                await iniciarTentativaSimulado(questoesDoHistorico, materiaId, materiaNome, { tema, banca: edital.banca || "", concurso: edital.nomeConcurso || "", dificuldade, origem: "historico" });
+                exibirContingenciaSimulado(`A IA está indisponível agora. Para não interromper seu estudo, abrimos uma revisão com ${questoesDoHistorico.length} ${questoesDoHistorico.length === 1 ? "questão válida" : "questões válidas"} do seu histórico privado.`);
+            } catch (falhaHistorico) {
+                console.error("Não foi possível iniciar o simulado com o histórico privado.", falhaHistorico);
+                exibirContingenciaSimulado("A IA está indisponível e não foi possível abrir seu histórico agora. Você pode tentar novamente ou continuar pelo Caderno de Erros.", true);
+            }
+        } else {
+            console.warn("A geração do simulado falhou e ainda não há questões privadas para contingência.", err);
+            exibirContingenciaSimulado("A IA está indisponível e você ainda não possui questões desta matéria no histórico. Tente novamente em instantes ou continue pelo Caderno de Erros.", true);
+        }
     } finally {
         loading.classList.add("d-none");
     }

@@ -728,6 +728,22 @@ test("o simulado prioriza a geração, usa aviso neutro e orienta o primeiro res
     assert.doesNotMatch(html, /Sem dados ainda\. Responda um simulado\./);
 });
 
+test("o simulado continua pelo histórico privado quando a IA está indisponível", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /function obterQuestoesContingenciaSimulado\(materiaId, tema, dificuldade, quantidade\)/);
+    assert.match(html, /String\(tentativa\.materiaId\) === String\(materiaId\)/);
+    assert.match(html, /resposta\.respostaCorretaIndex/);
+    assert.match(html, /resposta\.respostaEscolhidaIndex != null && !resposta\.correta \? 45 : 0/);
+    assert.match(html, /vistas\.has\(chave\)/);
+    assert.match(html, /origem: "historico"/);
+    assert.match(html, /questões válidas"\} do seu histórico privado/);
+    assert.match(html, /id="btnTentarSimuladoNovamente"/);
+    assert.match(html, /id="btnRevisarErrosSimulado"/);
+    assert.match(html, /quiz-contingency-notice/);
+    assert.doesNotMatch(html, /banco (estático|fixo) de questões/i);
+});
+
 test("o caderno de erros usa cadastro compacto, explicação multilinha e consulta organizada", () => {
     const html = readProjectFile("index.html");
 
