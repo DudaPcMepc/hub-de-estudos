@@ -92,6 +92,7 @@ export function criarCadernosMaterias(repositorio) {
     let paginasRecolhidas = false;
     let primeiroPdfAberto = false;
     let observadorMiniaturasPdf = null;
+    let observadorEscalaTextoPdf = null;
     let leituraContinuaPdf = true;
     let paginaContinuaInicial = "";
     let modoFocoCaderno = false;
@@ -466,16 +467,16 @@ export function criarCadernosMaterias(repositorio) {
             const numero = Number(pagina.desenho?.background?.page) || indice + 1;
             const [largura, altura] = tamanhos[pagina.desenho?.pageSize] || tamanhos.portrait;
             const anotacoes = Array.isArray(pagina.desenho?.strokes) ? pagina.desenho.strokes.length : 0;
-            return `<article class="subject-notebook-pdf-continuous-page ${pagina.id === paginaAtual.id ? "is-current" : ""}" data-pdf-continuous-page="${pagina.id}" data-pdf-page-number="${numero}" style="--pdf-page-ratio:${largura}/${altura}"><div class="subject-notebook-pdf-continuous-sheet"><canvas data-pdf-continuous-canvas="${numero}" aria-label="Página ${numero} do PDF"></canvas>${htmlCamadaAnotacoesPdf(pagina, largura, altura)}<span class="subject-notebook-pdf-continuous-loading"><i class="bi-file-earmark-pdf"></i>Carregando página ${numero}…</span></div><footer><span>Página ${numero}</span>${anotacoes ? `<small><i class="bi-pen"></i>${anotacoes} ${anotacoes === 1 ? "anotação visível" : "anotações visíveis"}</small>` : ""}<button type="button" data-notebook-pdf-annotate="${pagina.id}"><i class="bi-pencil-square"></i>Anotar esta página</button></footer></article>`;
+            return `<article class="subject-notebook-pdf-continuous-page ${pagina.id === paginaAtual.id ? "is-current" : ""}" data-pdf-continuous-page="${pagina.id}" data-pdf-page-number="${numero}" style="--pdf-page-ratio:${largura}/${altura}"><div class="subject-notebook-pdf-continuous-sheet"><canvas data-pdf-continuous-canvas="${numero}" aria-label="Página ${numero} do PDF"></canvas><div class="subject-notebook-pdf-text-layer" data-pdf-text-layer="${numero}" aria-label="Texto selecionável da página ${numero}"></div>${htmlCamadaAnotacoesPdf(pagina, largura, altura)}<span class="subject-notebook-pdf-continuous-loading"><i class="bi-file-earmark-pdf"></i>Carregando página ${numero}…</span></div><footer><span>Página ${numero}</span>${anotacoes ? `<small><i class="bi-pen"></i>${anotacoes} ${anotacoes === 1 ? "anotação visível" : "anotações visíveis"}</small>` : ""}<small data-pdf-text-status><i class="bi-text-paragraph"></i>Selecione um trecho para estudar</small><button type="button" data-notebook-pdf-annotate="${pagina.id}"><i class="bi-pencil-square"></i>Anotar esta página</button></footer></article>`;
         }).join("");
-        return `<section class="subject-notebook-pdf-continuous" data-pdf-continuous-root aria-label="Leitura contínua do PDF">${folhas}</section>`;
+        return `<section class="subject-notebook-pdf-continuous" data-pdf-continuous-root aria-label="Leitura contínua do PDF">${folhas}<div class="subject-notebook-pdf-selection-menu" data-pdf-selection-menu role="toolbar" aria-label="Usar trecho selecionado" hidden><span>Usar trecho</span><button type="button" data-pdf-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i></button><button type="button" data-pdf-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i></button><button type="button" data-pdf-study-action="review" title="Planejar revisão" aria-label="Planejar revisão do trecho"><i class="bi-arrow-repeat"></i></button></div></section>`;
     }
 
     async function desenharPaginaContinuaPdf(canvas, caminhoPdf, numeroPagina) {
         if (!canvas?.isConnected || canvas.dataset.pdfReady === "true" || canvas.dataset.pdfLoading === "true") return;
         canvas.dataset.pdfLoading = "true";
         try {
-            const documento = await documentoParaMiniaturas(caminhoPdf);
+            const [pdfjs, documento] = await Promise.all([carregarPdfJs(), documentoParaMiniaturas(caminhoPdf)]);
             const pagina = await documento.getPage(numeroPagina);
             if (!canvas.isConnected) return;
             const base = pagina.getViewport({ scale: 1 });
@@ -483,12 +484,43 @@ export function criarCadernosMaterias(repositorio) {
             const densidade = Math.min(window.devicePixelRatio || 1, 1.5);
             const escala = Math.min(2.25, (larguraCss * densidade) / Math.max(1, base.width));
             const viewport = pagina.getViewport({ scale: escala });
+            const escalaCss = larguraCss / Math.max(1, base.width);
+            const viewportCss = pagina.getViewport({ scale: escalaCss });
             canvas.width = Math.ceil(viewport.width);
             canvas.height = Math.ceil(viewport.height);
             await pagina.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
             if (canvas.isConnected) {
                 canvas.dataset.pdfReady = "true";
                 const folha = canvas.closest(".subject-notebook-pdf-continuous-page");
+                folha?.style.setProperty("--pdf-page-ratio", `${base.width}/${base.height}`);
+                const camadaTexto = folha?.querySelector("[data-pdf-text-layer]");
+                const statusTexto = folha?.querySelector("[data-pdf-text-status]");
+                if (camadaTexto) camadaTexto.dataset.pdfBaseWidth = String(base.width);
+                if (camadaTexto && camadaTexto.dataset.pdfTextReady !== "true") {
+                    try {
+                        const conteudoTexto = await pagina.getTextContent();
+                        if (canvas.isConnected && camadaTexto.isConnected) {
+                            camadaTexto.replaceChildren();
+                            camadaTexto.style.setProperty("--total-scale-factor", String(escalaCss));
+                            camadaTexto.style.width = `${viewportCss.width}px`;
+                            camadaTexto.style.height = `${viewportCss.height}px`;
+                            if (conteudoTexto.items.some(item => String(item.str || "").trim())) {
+                                await new pdfjs.TextLayer({ textContentSource: conteudoTexto, container: camadaTexto, viewport: viewportCss }).render();
+                                camadaTexto.dataset.pdfTextReady = "true";
+                                folha?.classList.remove("is-image-only");
+                                if (statusTexto) statusTexto.innerHTML = '<i class="bi-text-paragraph"></i>Selecione um trecho para estudar';
+                            } else {
+                                folha?.classList.add("is-image-only");
+                                if (statusTexto) statusTexto.innerHTML = '<i class="bi-image"></i>Página sem texto detectável';
+                            }
+                        }
+                    } catch (erroTexto) {
+                        console.warn("A página foi exibida, mas seu texto não pôde ser selecionado.", erroTexto);
+                        camadaTexto.replaceChildren();
+                        folha?.classList.add("is-image-only");
+                        if (statusTexto) statusTexto.innerHTML = '<i class="bi-image"></i>Texto não selecionável nesta página';
+                    }
+                }
                 folha?.classList.add("is-ready");
                 folha?.querySelectorAll("[data-pdf-annotation-image]").forEach(imagem => {
                     if (imagem.dataset.pdfImageLoading === "true" || imagem.getAttribute("href")) return;
@@ -515,15 +547,53 @@ export function criarCadernosMaterias(repositorio) {
             } else if (canvas?.dataset.pdfReady === "true") {
                 const timer = window.setTimeout(() => {
                     if (!canvas.isConnected) return;
+                    const folha = canvas.closest(".subject-notebook-pdf-continuous-page");
+                    const camadaTexto = folha?.querySelector("[data-pdf-text-layer]");
                     canvas.width = 1;
                     canvas.height = 1;
                     delete canvas.dataset.pdfReady;
-                    entrada.target.classList.remove("is-ready");
-                }, 1200);
+                    folha?.classList.remove("is-ready");
+                }, 6000);
                 canvas.dataset.pdfUnloadTimer = String(timer);
             }
-        }), { root: raiz, rootMargin: "1400px 0px" });
+        }), { root: raiz, rootMargin: "1600px 0px" });
         folhas.forEach(folha => renderizador.observe(folha));
+
+        observadorEscalaTextoPdf?.disconnect();
+        observadorEscalaTextoPdf = new ResizeObserver(entradas => entradas.forEach(entrada => {
+            const camadaTexto = entrada.target.querySelector("[data-pdf-text-layer]");
+            const larguraBase = Number(camadaTexto?.dataset.pdfBaseWidth) || 0;
+            if (!camadaTexto || !larguraBase) return;
+            camadaTexto.style.setProperty("--total-scale-factor", String(entrada.contentRect.width / larguraBase));
+        }));
+        folhas.forEach(folha => {
+            const pagina = folha.querySelector(".subject-notebook-pdf-continuous-sheet");
+            if (pagina) observadorEscalaTextoPdf.observe(pagina);
+        });
+
+        const menuSelecao = raiz.querySelector("[data-pdf-selection-menu]");
+        const fecharMenuSelecao = () => { if (menuSelecao) menuSelecao.hidden = true; };
+        const atualizarMenuSelecao = () => {
+            const selecao = window.getSelection();
+            if (!menuSelecao || !selecao?.rangeCount || selecao.isCollapsed) return fecharMenuSelecao();
+            const intervalo = selecao.getRangeAt(0);
+            const camadaTexto = intervalo.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+                ? intervalo.commonAncestorContainer.closest?.("[data-pdf-text-layer]")
+                : intervalo.commonAncestorContainer.parentElement?.closest("[data-pdf-text-layer]");
+            const folha = camadaTexto?.closest("[data-pdf-continuous-page]");
+            const pagina = itemPorId(folha?.dataset.pdfContinuousPage);
+            const texto = intervalo.toString().trim();
+            if (!pagina || !texto || !raiz.contains(camadaTexto)) return fecharMenuSelecao();
+            selecaoTextoAtual = contextoDeTrecho(texto, pagina);
+            const caixa = intervalo.getBoundingClientRect();
+            menuSelecao.hidden = false;
+            menuSelecao.style.left = `${Math.max(145, Math.min(window.innerWidth - 145, caixa.left + caixa.width / 2))}px`;
+            menuSelecao.style.top = `${Math.max(70, caixa.top - 8)}px`;
+        };
+        raiz.addEventListener("pointerup", () => requestAnimationFrame(atualizarMenuSelecao));
+        raiz.addEventListener("keyup", () => requestAnimationFrame(atualizarMenuSelecao));
+        menuSelecao?.addEventListener("pointerdown", evento => evento.preventDefault());
+        menuSelecao?.querySelectorAll("[data-pdf-study-action]").forEach(botao => botao.addEventListener("click", () => acionarEstudoComSelecao(botao.dataset.pdfStudyAction)));
 
         let quadro = 0;
         const atualizarPaginaVisivel = () => {
@@ -543,6 +613,7 @@ export function criarCadernosMaterias(repositorio) {
             if (seletor) seletor.value = id;
         };
         raiz.addEventListener("scroll", () => {
+            fecharMenuSelecao();
             if (!quadro) quadro = requestAnimationFrame(atualizarPaginaVisivel);
         }, { passive: true });
         const destinoId = paginaContinuaInicial || paginaAtual.id;
@@ -1484,6 +1555,24 @@ export function criarCadernosMaterias(repositorio) {
         return true;
     }
 
+    async function retomarLeitura(paginaId) {
+        if (!await salvarPendente()) return false;
+        const pagina = itemPorId(paginaId);
+        if (!pagina || pagina.tipo !== "page") {
+            informar("A página de origem não está mais disponível.", true);
+            return false;
+        }
+        leitorMaterial = null;
+        lixeiraAberta = false;
+        selecionadoId = pagina.id;
+        registrarPaginaAtual(pagina);
+        leituraContinuaPdf = pagina.desenho?.background?.type === "pdf";
+        paginaContinuaInicial = leituraContinuaPdf ? pagina.id : "";
+        informar("");
+        renderizar();
+        return true;
+    }
+
     async function alternarOrganizacao(forcar) {
         if (!await salvarPendente()) return;
         organizando = typeof forcar === "boolean" ? forcar : !organizando;
@@ -1525,6 +1614,8 @@ export function criarCadernosMaterias(repositorio) {
         paginaContinuaInicial = "";
         observadorMiniaturasPdf?.disconnect();
         observadorMiniaturasPdf = null;
+        observadorEscalaTextoPdf?.disconnect();
+        observadorEscalaTextoPdf = null;
         modoFocoCaderno = false;
         document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode");
         ultimaPaginaMateriaId = "";
@@ -1807,5 +1898,5 @@ export function criarCadernosMaterias(repositorio) {
     window.addEventListener("offline", indicarModoOffline);
     window.addEventListener("online", tentarSalvarAoReconectar);
 
-    return Object.freeze({ definirMateria, abrirInicio: abrirInicioCaderno, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); editorDesenho?.destruir(); pararRolagemArraste(); document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode"); carregamento += 1; window.removeEventListener("beforeunload", protegerSaida); window.removeEventListener("offline", indicarModoOffline); window.removeEventListener("online", tentarSalvarAoReconectar); } });
+    return Object.freeze({ definirMateria, abrirInicio: abrirInicioCaderno, retomarLeitura, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); observadorMiniaturasPdf?.disconnect(); observadorEscalaTextoPdf?.disconnect(); editorDesenho?.destruir(); pararRolagemArraste(); document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode"); carregamento += 1; window.removeEventListener("beforeunload", protegerSaida); window.removeEventListener("offline", indicarModoOffline); window.removeEventListener("online", tentarSalvarAoReconectar); } });
 }

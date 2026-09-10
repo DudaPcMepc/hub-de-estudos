@@ -2473,6 +2473,26 @@ test("o caderno usa páginas de PDF privado como fundo anotável", () => {
     assert.match(html, /\.subject-page-drawing-pdf-background/);
 });
 
+test("o leitor contínuo transforma texto real do PDF em ações de estudo com fonte", () => {
+    const html = readProjectFile("index.html");
+    const notebooks = readProjectFile("src/subject-notebooks.js");
+
+    assert.match(html, /\.subject-notebook-pdf-text-layer/);
+    assert.match(html, /--text-scale-factor: calc\(var\(--total-scale-factor, 1\) \* var\(--min-font-size\)\)/);
+    assert.match(html, /\.subject-notebook-pdf-selection-menu/);
+    assert.match(notebooks, /new pdfjs\.TextLayer\(\{ textContentSource: conteudoTexto, container: camadaTexto, viewport: viewportCss \}\)\.render\(\)/);
+    assert.match(notebooks, /data-pdf-text-status/);
+    assert.match(notebooks, /Página sem texto detectável/);
+    assert.match(notebooks, /data-pdf-study-action="flashcard"/);
+    assert.match(notebooks, /data-pdf-study-action="summary"/);
+    assert.match(notebooks, /data-pdf-study-action="review"/);
+    assert.match(notebooks, /selecaoTextoAtual = contextoDeTrecho\(texto, pagina\)/);
+    assert.match(notebooks, /observadorEscalaTextoPdf = new ResizeObserver/);
+    assert.match(notebooks, /entrada\.contentRect\.width \/ larguraBase/);
+    assert.match(notebooks, /}, 6000\)/);
+    assert.match(notebooks, /acionarEstudoComSelecao\(botao\.dataset\.pdfStudyAction\)/);
+});
+
 test("o caderno protege alterações locais até a confirmação do salvamento", () => {
     const frontend = readProjectFile("src/subject-notebooks.js");
     const html = readProjectFile("index.html");
@@ -2611,6 +2631,13 @@ test("trechos do caderno alimentam flashcards, resumos e revisões com contexto"
     assert.match(html, /ativarAbaPrincipal\("#p-cronograma"\)/);
     assert.match(html, /function topicoEditalParaAcaoDoCaderno/);
     assert.match(html, /\.subject-notebook-selection-actions/);
+    assert.match(frontend, /async function retomarLeitura\(paginaId\)/);
+    assert.match(frontend, /paginaContinuaInicial = leituraContinuaPdf \? pagina\.id : ""/);
+    assert.match(html, /function mostrarRetornoLeituraCaderno/);
+    assert.match(html, /data-return-to-notebook-reading/);
+    assert.match(html, /HUB_SUBJECT_NOTEBOOKS_UI\?\.retomarLeitura\(destino\.pageId\)/);
+    assert.match(html, /Trecho enviado da leitura/);
+    assert.match(html, /\.study-source-return/);
 });
 
 test("caixas de texto da escrita livre oferecem as mesmas ações de estudo", () => {

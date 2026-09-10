@@ -1398,6 +1398,18 @@
     .subject-notebook-pdf-continuous-page.is-current .subject-notebook-pdf-continuous-sheet { border-color: rgba(184,50,42,.42); box-shadow: 0 0 0 2px rgba(184,50,42,.1), 0 .55rem 1.45rem rgba(44,34,30,.16); }
     .subject-notebook-pdf-continuous-sheet canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; opacity: 0; transition: opacity .16s ease; }
     .subject-notebook-pdf-continuous-page.is-ready canvas { opacity: 1; }
+    .subject-notebook-pdf-text-layer { --min-font-size: 1; --text-scale-factor: calc(var(--total-scale-factor, 1) * var(--min-font-size)); --min-font-size-inv: calc(1 / var(--min-font-size)); position: absolute; z-index: 2; inset: 0; overflow: clip; color: transparent; line-height: 1; text-align: initial; text-size-adjust: none; transform-origin: 0 0; forced-color-adjust: none; }
+    .subject-notebook-pdf-text-layer :is(span, br) { position: absolute; color: transparent; white-space: pre; cursor: text; transform-origin: 0 0; }
+    .subject-notebook-pdf-text-layer > :not(.markedContent), .subject-notebook-pdf-text-layer .markedContent span:not(.markedContent) { --font-height: 0; --scale-x: 1; --rotate: 0deg; z-index: 1; font-size: calc(var(--text-scale-factor, 1) * var(--font-height)); transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv, 1)); }
+    .subject-notebook-pdf-text-layer .markedContent { display: contents; }
+    .subject-notebook-pdf-text-layer ::selection { color: transparent; background: rgba(57, 117, 190, .3); }
+    .subject-notebook-pdf-text-layer .endOfContent { position: absolute; inset: 100% 0 0; z-index: 0; display: block; cursor: default; user-select: none; }
+    .subject-notebook-pdf-continuous-page.is-image-only [data-pdf-text-status] { color: #856d48; }
+    .subject-notebook-pdf-selection-menu { position: fixed; z-index: 1085; display: flex; align-items: center; gap: .18rem; padding: .3rem; color: #fffaf6; background: #342824; border: 1px solid rgba(255,255,255,.12); border-radius: .7rem; box-shadow: 0 .6rem 1.35rem rgba(42,31,27,.24); transform: translate(-50%, -100%); }
+    .subject-notebook-pdf-selection-menu[hidden] { display: none; }
+    .subject-notebook-pdf-selection-menu > span { padding: 0 .25rem; color: #eadbd3; font-size: .6rem; font-weight: 750; white-space: nowrap; }
+    .subject-notebook-pdf-selection-menu button { width: 2rem; height: 2rem; display: inline-grid; place-items: center; padding: 0; color: #fffaf6; background: transparent; border: 0; border-radius: .48rem; }
+    .subject-notebook-pdf-selection-menu button:hover, .subject-notebook-pdf-selection-menu button:focus-visible { background: rgba(255,255,255,.13); outline: 0; }
     .subject-notebook-pdf-annotation-layer { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; opacity: 0; pointer-events: none; transition: opacity .16s ease; }
     .subject-notebook-pdf-continuous-page.is-ready .subject-notebook-pdf-annotation-layer { opacity: 1; }
     .subject-notebook-pdf-static-text { box-sizing: border-box; width: 100%; min-height: 100%; padding: .2rem .28rem; overflow: hidden; color: var(--annotation-color, #3b2923); font: var(--annotation-style, normal) var(--annotation-weight, 600) var(--annotation-size, 26px)/1.25 Inter, system-ui, sans-serif; text-align: var(--annotation-align, left); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
@@ -1676,6 +1688,13 @@
     .topico-item.st-revisar { border-left-color: var(--bs-warning); }
     .topico-item.st-dominado { border-left-color: var(--bs-success); background-color: #f6fff9; }
     .flashcard-workbench { padding: 1rem; background: linear-gradient(145deg, rgba(255, 253, 249, .98), rgba(247, 237, 229, .78)); border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; }
+    .study-source-return { display: flex; align-items: center; gap: .75rem; margin: 0 0 1rem; padding: .72rem .85rem; color: #4d3a33; background: #fff9f2; border: 1px solid rgba(142, 45, 37, .18); border-radius: .85rem; box-shadow: 0 .25rem .75rem rgba(59, 41, 35, .06); }
+    .study-source-return button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: .4rem; min-height: 38px; padding: .45rem .72rem; color: #792b25; background: #fff; border: 1px solid rgba(142, 45, 37, .28); border-radius: 999px; font-size: .78rem; font-weight: 750; }
+    .study-source-return button:hover { color: #fff; background: #8e2d25; border-color: #8e2d25; }
+    .study-source-return-copy { min-width: 0; display: grid; gap: .08rem; }
+    .study-source-return-copy strong { font-size: .76rem; }
+    .study-source-return-copy span { overflow: hidden; color: #725f57; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+    .study-source-return-copy small { overflow: hidden; color: #8a7770; font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
     .flashcard-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
     .flashcard-editor-field { min-width: 0; }
     .flashcard-editor .form-label { color: var(--pimentel-cafe); font-size: .72rem; font-weight: 700; }
@@ -1770,6 +1789,7 @@
         .subject-notebook-pdf-continuous { padding: .45rem; border-radius: .55rem; }
         .subject-notebook-pdf-continuous-page { margin-bottom: .8rem; }
         .subject-notebook-pdf-continuous-page footer { padding-inline: .1rem; }
+        .subject-notebook-pdf-selection-menu { inset: auto .7rem .7rem; width: auto; justify-content: center; transform: none; }
         .subject-notebook-page-mode { width: 100%; }
         .subject-notebook-page-mode button { flex: 1; }
         .subject-page-drawing-toolbar button span { display: none; }
@@ -2376,6 +2396,9 @@
         .calendar-task-meta, .calendar-task-note { font-size: .68rem; }
     }
     @media (max-width: 575.98px) {
+        .study-source-return { align-items: flex-start; padding: .65rem; }
+        .study-source-return button span { display: none; }
+        .study-source-return button { width: 38px; justify-content: center; padding-inline: 0; }
         .flashcard-workbench { padding: .8rem; }
         .flashcard-editor { grid-template-columns: 1fr; }
         .flashcard-editor-actions { grid-column: auto; display: grid; grid-template-columns: 1fr; }
@@ -8381,12 +8404,60 @@ function topicoEditalParaAcaoDoCaderno(detalhes) {
         || null;
 }
 
+let retornoLeituraCaderno = null;
+
+function descricaoOrigemLeitura(detalhes) {
+    return [detalhes.pageTitle, detalhes.topicTitle].filter(Boolean).join(" · ")
+        || detalhes.subjectName
+        || "Caderno da matéria";
+}
+
+function mostrarRetornoLeituraCaderno(container, detalhes) {
+    if (!container) return;
+    retornoLeituraCaderno = { ...detalhes };
+    document.querySelectorAll(".study-source-return").forEach(elemento => elemento.remove());
+    const barra = document.createElement("aside");
+    barra.className = "study-source-return";
+    barra.setAttribute("aria-label", "Origem do trecho selecionado");
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.dataset.returnToNotebookReading = "";
+    botao.setAttribute("aria-label", "Voltar à leitura do documento");
+    botao.innerHTML = '<i class="bi-arrow-left" aria-hidden="true"></i><span>Voltar à leitura</span>';
+    const copia = document.createElement("div");
+    copia.className = "study-source-return-copy";
+    const titulo = document.createElement("strong");
+    titulo.textContent = "Trecho enviado da leitura";
+    const origem = document.createElement("span");
+    origem.textContent = descricaoOrigemLeitura(detalhes);
+    const previa = document.createElement("small");
+    previa.textContent = String(detalhes.text || "").replace(/\s+/g, " ").trim();
+    copia.append(titulo, origem, previa);
+    barra.append(botao, copia);
+    const summary = container.matches("details") ? container.querySelector(":scope > summary") : null;
+    if (summary) summary.after(barra);
+    else container.prepend(barra);
+}
+
+async function voltarParaLeituraDoCaderno() {
+    const destino = retornoLeituraCaderno;
+    if (!destino?.subjectId || !destino?.pageId) return;
+    if (String(materiaAbertaId || "") !== String(destino.subjectId)) await abrirMateria(destino.subjectId);
+    const abaCaderno = document.querySelector('[data-bs-target="#ws-notas"]');
+    if (abaCaderno) bootstrap.Tab.getOrCreateInstance(abaCaderno).show();
+    await window.HUB_SUBJECT_NOTEBOOKS_UI?.retomarLeitura(destino.pageId);
+}
+
+document.addEventListener("click", evento => {
+    if (evento.target.closest("[data-return-to-notebook-reading]")) void voltarParaLeituraDoCaderno();
+});
+
 document.addEventListener("subject-notebook-study-action", async evento => {
     const detalhes = evento.detail || {};
     const trecho = String(detalhes.text || "").trim();
     if (!trecho || String(detalhes.subjectId || "") !== String(materiaAbertaId || "")) return;
     const topicoEdital = topicoEditalParaAcaoDoCaderno(detalhes);
-    const origem = [detalhes.pageTitle, detalhes.topicTitle].filter(Boolean).join(" · ");
+    const origem = descricaoOrigemLeitura(detalhes);
     if (detalhes.action === "flashcard") {
         bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#ws-cards"]')).show();
         limparEdicaoCard();
@@ -8394,7 +8465,9 @@ document.addEventListener("subject-notebook-study-action", async evento => {
         document.getElementById("cardVerso").value = trecho;
         popularTopicosEditalFlashcards(detalhes.subjectId);
         document.getElementById("cardTopicoEdital").value = topicoEdital?.id || "";
-        document.querySelector(".flashcard-workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const painelFlashcard = document.querySelector(".flashcard-workbench");
+        mostrarRetornoLeituraCaderno(painelFlashcard, detalhes);
+        painelFlashcard?.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => document.getElementById("cardFrente")?.focus({ preventScroll: true }), 220);
         return;
     }
@@ -8402,8 +8475,10 @@ document.addEventListener("subject-notebook-study-action", async evento => {
         const titulo = `Resumo — ${detalhes.pageTitle || detalhes.subjectName || "Estudo"}`;
         const conteudo = `${trecho}\n\n> Fonte: ${origem || detalhes.subjectName || "Caderno da matéria"}`;
         if (!await criarNota(titulo, conteudo)) return;
+        await window.HUB_SUBJECT_NOTEBOOKS_UI?.abrirInicio();
         const painel = document.querySelector(".legacy-notes-panel");
         if (painel) painel.open = true;
+        mostrarRetornoLeituraCaderno(painel, detalhes);
         painel?.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => document.getElementById("notaConteudo")?.focus({ preventScroll: true }), 220);
         return;
@@ -8415,11 +8490,13 @@ document.addEventListener("subject-notebook-study-action", async evento => {
             limparEdicaoTarefa();
             document.getElementById("tarefaMateria").value = detalhes.subjectId;
             popularTopicosEditalCronograma(topicoEdital?.id || "");
-            document.getElementById("tarefaTopico").value = `${detalhes.pageTitle || "Revisão"}: ${trecho.slice(0, 180)}${trecho.length > 180 ? "…" : ""}`;
+            document.getElementById("tarefaTopico").value = `${detalhes.pageTitle || "Revisão"}: ${trecho}`.slice(0, 2000);
             document.getElementById("tarefaTopico").dataset.preenchidoPeloEdital = "false";
             document.getElementById("tarefaData").value = hojeISO();
             document.getElementById("tarefaPeriodo").value = periodoEstudoAtual();
-            document.getElementById("formTarefa")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            const painelRevisao = document.getElementById("formTarefa")?.closest(".study-session-card");
+            mostrarRetornoLeituraCaderno(painelRevisao?.querySelector(".card-body"), detalhes);
+            painelRevisao?.scrollIntoView({ behavior: "smooth", block: "start" });
             window.setTimeout(() => document.getElementById("tarefaMinutos")?.focus({ preventScroll: true }), 220);
         }, 180);
     }
