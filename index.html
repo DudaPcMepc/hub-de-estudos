@@ -1629,16 +1629,25 @@
     .subject-notebook-pdf-controls label { display: flex; align-items: center; gap: .35rem; margin: 0; font-size: .6rem; }
     .subject-notebook-pdf-controls input { width: 4.6rem; height: 2rem; padding: .25rem .4rem; color: #3b2923; background: #fffdf9; border: 0; border-radius: .45rem; font-size: .67rem; }
     .subject-notebook-pdf-controls .subject-notebook-pdf-save { margin-left: .35rem; color: #3b2923; background: #f4ddd3; }
-    .subject-notebook-pdf-frame { position: relative; min-height: min(68vh, 760px); background: #e7e2de; }
-    .subject-notebook-pdf-frame iframe { position: relative; z-index: 1; width: 100%; height: min(68vh, 760px); min-height: 540px; display: block; background: #fff; border: 0; }
-    .subject-notebook-pdf-fallback { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: .45rem; color: #776a65; font-size: .67rem; }
+    .subject-notebook-pdf-frame { position: relative; min-height: min(68vh, 760px); display: grid; place-items: start center; overflow: auto; padding: 1rem; background: #d8d3cf; scroll-behavior: smooth; }
+    .subject-notebook-external-pdf-page { position: relative; width: min(900px, 100%); min-height: 540px; overflow: hidden; background: #fff; border: 1px solid rgba(59,41,35,.12); border-radius: .25rem; box-shadow: 0 .5rem 1.35rem rgba(44,34,30,.16); }
+    .subject-notebook-external-pdf-page canvas { width: 100%; height: auto; display: block; opacity: 0; transition: opacity .18s ease; }
+    .subject-notebook-external-pdf-page.is-ready canvas { opacity: 1; }
+    .subject-notebook-external-pdf-page .subject-notebook-pdf-text-layer { z-index: 2; }
+    .subject-notebook-external-pdf-loading { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .45rem; color: #806f67; font-size: .7rem; }
+    .subject-notebook-external-pdf-loading i { color: #a43b34; font-size: 1.5rem; }
+    .subject-notebook-external-pdf-page.is-ready .subject-notebook-external-pdf-loading { display: none; }
+    .subject-notebook-pdf-fallback { position: absolute; z-index: 3; inset: 1rem; display: grid; place-items: center; align-content: center; gap: .65rem; padding: 1.2rem; color: #67564e; background: #fffdf9; border: 1px dashed rgba(59,41,35,.18); border-radius: .75rem; font-size: .7rem; text-align: center; }
+    .subject-notebook-pdf-fallback[hidden] { display: none; }
+    .subject-notebook-pdf-fallback a { display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .7rem; color: #fff; background: #765149; border-radius: .55rem; font-weight: 750; text-decoration: none; }
     .subject-notebook-pdf-fallback i { font-size: 2rem; }
     @media (max-width: 767.98px) {
         .subject-notebook-pdf-reader > header { gap: .45rem; }
         .subject-notebook-pdf-progress-label { display: none; }
         .subject-notebook-pdf-controls { justify-content: flex-start; flex-wrap: wrap; }
         .subject-notebook-pdf-controls .subject-notebook-pdf-save { flex: 1 1 100%; margin-left: 0; }
-        .subject-notebook-pdf-frame, .subject-notebook-pdf-frame iframe { min-height: 62vh; height: 62vh; }
+        .subject-notebook-pdf-frame { min-height: 62vh; height: 62vh; padding: .45rem; }
+        .subject-notebook-external-pdf-page { min-height: 420px; }
     }
     .subject-notebook-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59, 41, 35, .08); }
     .subject-notebook-save-status { min-height: 1.75rem; display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .55rem; color: #76665e; background: rgba(117,101,93,.07); border-radius: 999px; font-size: .66rem; font-weight: 700; white-space: nowrap; }

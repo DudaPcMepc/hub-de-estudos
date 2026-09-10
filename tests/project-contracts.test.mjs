@@ -2555,10 +2555,18 @@ test("materiais PDF anexados abrem no leitor interno com progresso privado", () 
     assert.match(frontend, /data-notebook-material-open/);
     assert.match(frontend, /data-notebook-pdf-progress/);
     assert.match(frontend, /data-notebook-pdf-step/);
-    assert.match(frontend, /sandbox="allow-downloads allow-same-origin"/);
+    assert.match(frontend, /function documentoMaterialExterno\(item\)/);
+    assert.match(frontend, /function prepararLeitorMaterial\(item, paginaCaderno\)/);
+    assert.match(frontend, /data-external-pdf-canvas/);
+    assert.match(frontend, /data-external-pdf-text-layer/);
+    assert.match(frontend, /data-external-pdf-study-action="flashcard"/);
+    assert.match(frontend, /data-external-pdf-study-action="quiz"/);
+    assert.match(frontend, /pdfjs\.TextLayer/);
+    assert.match(frontend, /Este endereço não permitiu a leitura integrada/);
     assert.match(html, /\.subject-notebook-pdf-reader/);
     assert.match(html, /\.subject-notebook-pdf-controls/);
     assert.match(html, /\.subject-notebook-pdf-frame/);
+    assert.match(html, /\.subject-notebook-external-pdf-page/);
 });
 
 test("a escrita livre oferece formas editáveis com a mesma seleção dos traços", () => {
@@ -2694,7 +2702,7 @@ test("caixas de texto da escrita livre oferecem as mesmas ações de estudo", ()
     assert.match(frontend, /classList\.toggle\("is-pages-collapsed", paginasRecolhidas\)/);
     assert.match(frontend, /dataset\.notebookFocus/);
     assert.match(frontend, /subject-notebook-page-rail-add/);
-    assert.match(frontend, /function contextoDeTrecho\(texto, pagina\)/);
+    assert.match(frontend, /function contextoDeTrecho\(texto, pagina, tituloOrigem = ""\)/);
     assert.match(frontend, /if \(menuSelecaoTexto\) menuSelecaoTexto\.hidden = true/);
     assert.match(html, /\.subject-page-drawing-text-action-menu/);
     assert.match(html, /\.subject-page-drawing-viewport-controls/);

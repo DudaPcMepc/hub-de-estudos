@@ -111,6 +111,7 @@ export function criarCadernosMaterias(repositorio) {
     const materiaisCarregando = new Set();
     const documentosMiniaturaPdf = new Map();
     const miniaturasPdf = new Map();
+    const documentosMateriaisExternos = new Map();
 
     const chaveRascunho = paginaId => `${PREFIXO_RASCUNHO}:${materiaId}:${paginaId}`;
     const assinaturaRascunho = dados => JSON.stringify({ titulo: dados?.titulo || "", conteudo: dados?.conteudo || "", desenho: dados?.desenho || { strokes: [] } });
@@ -726,7 +727,89 @@ export function criarCadernosMaterias(repositorio) {
         const pagina = Math.max(1, Number(item.paginaAtual) || 1);
         const total = Math.max(0, Number(item.totalPaginas) || 0);
         const percentual = total ? Math.min(100, Math.round((pagina / total) * 100)) : 0;
-        return `<section class="subject-notebook-pdf-reader" data-notebook-pdf-reader data-material-id="${esc(item.id)}"><header><button type="button" data-notebook-pdf-close aria-label="Voltar para a página" title="Voltar para a página"><i class="bi-arrow-left"></i></button><div><small>LEITOR DO CADERNO</small><strong>${esc(item.titulo)}</strong></div><span class="subject-notebook-pdf-progress-label">${total ? `${percentual}% lido` : `Página ${pagina}`}</span><a href="${esc(urlMaterialSegura(item.url))}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a></header><form class="subject-notebook-pdf-controls" data-notebook-pdf-progress><button type="button" data-notebook-pdf-step="-1" ${pagina <= 1 ? "disabled" : ""} aria-label="Página anterior"><i class="bi-chevron-left"></i></button><label>Página<input type="number" min="1" max="${total || 100000}" value="${pagina}" data-notebook-pdf-current required></label><span>de</span><label><span class="visually-hidden">Total de páginas</span><input type="number" min="1" max="100000" value="${total || ""}" data-notebook-pdf-total placeholder="total"></label><button type="button" data-notebook-pdf-step="1" ${total && pagina >= total ? "disabled" : ""} aria-label="Próxima página"><i class="bi-chevron-right"></i></button><button class="subject-notebook-pdf-save" type="submit"><i class="bi-bookmark-check"></i>Salvar progresso</button></form><div class="subject-notebook-pdf-frame"><iframe src="${esc(urlPaginaPdf(item))}" title="${esc(item.titulo)}" referrerpolicy="no-referrer" sandbox="allow-downloads allow-same-origin"></iframe><div class="subject-notebook-pdf-fallback"><i class="bi-file-earmark-pdf"></i><span>Se o documento não aparecer, use “abrir em nova aba”.</span></div></div></section>`;
+        const url = urlMaterialSegura(item.url);
+        return `<section class="subject-notebook-pdf-reader" data-notebook-pdf-reader data-material-id="${esc(item.id)}"><header><button type="button" data-notebook-pdf-close aria-label="Voltar para a página" title="Voltar para a página"><i class="bi-arrow-left"></i></button><div><small>MATERIAL DE ESTUDO</small><strong>${esc(item.titulo)}</strong></div><span class="subject-notebook-pdf-progress-label">${total ? `${percentual}% lido` : `Página ${pagina}`}</span><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir PDF em nova aba" title="Abrir em nova aba"><i class="bi-box-arrow-up-right"></i></a></header><form class="subject-notebook-pdf-controls" data-notebook-pdf-progress><button type="button" data-notebook-pdf-step="-1" ${pagina <= 1 ? "disabled" : ""} aria-label="Página anterior"><i class="bi-chevron-left"></i></button><label>Página<input type="number" min="1" max="${total || 100000}" value="${pagina}" data-notebook-pdf-current required></label><span>de</span><label><span class="visually-hidden">Total de páginas</span><input type="number" min="1" max="100000" value="${total || ""}" data-notebook-pdf-total placeholder="total"></label><button type="button" data-notebook-pdf-step="1" ${total && pagina >= total ? "disabled" : ""} aria-label="Próxima página"><i class="bi-chevron-right"></i></button><button class="subject-notebook-pdf-save" type="submit"><i class="bi-bookmark-check"></i>Salvar progresso</button></form><div class="subject-notebook-pdf-frame"><article class="subject-notebook-external-pdf-page" data-external-pdf-page><canvas data-external-pdf-canvas aria-label="Página ${pagina} de ${esc(item.titulo)}"></canvas><div class="subject-notebook-pdf-text-layer" data-external-pdf-text-layer aria-label="Texto selecionável desta página"></div><span class="subject-notebook-external-pdf-loading"><i class="bi-file-earmark-pdf"></i>Preparando página e texto…</span></article><div class="subject-notebook-pdf-selection-menu" data-external-pdf-selection-menu role="toolbar" aria-label="Usar trecho selecionado" hidden><span>Usar trecho</span><button type="button" data-external-pdf-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i></button><button type="button" data-external-pdf-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i></button><button type="button" data-external-pdf-study-action="review" title="Planejar revisão" aria-label="Planejar revisão do trecho"><i class="bi-arrow-repeat"></i></button><button type="button" data-external-pdf-study-action="quiz" title="Gerar questões" aria-label="Gerar questões com o trecho"><i class="bi-patch-question"></i></button></div><div class="subject-notebook-pdf-fallback" data-external-pdf-fallback hidden><i class="bi-shield-exclamation fs-4"></i><strong>Este endereço não permitiu a leitura integrada.</strong><span>Você ainda pode abrir o PDF em outra aba ou enviá-lo diretamente para uma página do caderno.</span><a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><i class="bi-box-arrow-up-right"></i>Abrir documento</a></div></div></section>`;
+    }
+
+    async function documentoMaterialExterno(item) {
+        const url = urlMaterialSegura(item?.url);
+        if (!url) throw new Error("Endereço do material inválido.");
+        if (!documentosMateriaisExternos.has(url)) {
+            documentosMateriaisExternos.set(url, carregarPdfJs().then(pdfjs => pdfjs.getDocument({ url }).promise).catch(erro => {
+                documentosMateriaisExternos.delete(url);
+                throw erro;
+            }));
+        }
+        return documentosMateriaisExternos.get(url);
+    }
+
+    async function prepararLeitorMaterial(item, paginaCaderno) {
+        const raiz = dom.workspace.querySelector("[data-notebook-pdf-reader]");
+        const folha = raiz?.querySelector("[data-external-pdf-page]");
+        const canvas = folha?.querySelector("[data-external-pdf-canvas]");
+        const camadaTexto = folha?.querySelector("[data-external-pdf-text-layer]");
+        const fallback = raiz?.querySelector("[data-external-pdf-fallback]");
+        if (!raiz || !folha || !canvas || !camadaTexto) return;
+        try {
+            const [pdfjs, documento] = await Promise.all([carregarPdfJs(), documentoMaterialExterno(item)]);
+            if (!raiz.isConnected) return;
+            const numero = Math.max(1, Math.min(documento.numPages, Number(item.paginaAtual) || 1));
+            const pagina = await documento.getPage(numero);
+            if (!raiz.isConnected) return;
+            const base = pagina.getViewport({ scale: 1 });
+            const larguraCss = Math.max(320, folha.clientWidth || 820);
+            const densidade = Math.min(window.devicePixelRatio || 1, 1.5);
+            const escala = Math.min(2.25, (larguraCss * densidade) / Math.max(1, base.width));
+            const escalaCss = larguraCss / Math.max(1, base.width);
+            const viewport = pagina.getViewport({ scale: escala });
+            const viewportCss = pagina.getViewport({ scale: escalaCss });
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            await pagina.render({ canvasContext: canvas.getContext("2d", { alpha: false }), viewport }).promise;
+            camadaTexto.replaceChildren();
+            camadaTexto.style.setProperty("--total-scale-factor", String(escalaCss));
+            camadaTexto.style.width = `${viewportCss.width}px`;
+            camadaTexto.style.height = `${viewportCss.height}px`;
+            const conteudoTexto = await pagina.getTextContent();
+            if (conteudoTexto.items.some(valor => String(valor.str || "").trim())) {
+                await new pdfjs.TextLayer({ textContentSource: conteudoTexto, container: camadaTexto, viewport: viewportCss }).render();
+            }
+            folha.classList.add("is-ready");
+            const totalCampo = raiz.querySelector("[data-notebook-pdf-total]");
+            const atualCampo = raiz.querySelector("[data-notebook-pdf-current]");
+            if (totalCampo) totalCampo.value = String(documento.numPages);
+            if (atualCampo) atualCampo.max = String(documento.numPages);
+            raiz.querySelector('[data-notebook-pdf-step="1"]')?.toggleAttribute("disabled", numero >= documento.numPages);
+            if (Number(item.totalPaginas) !== documento.numPages) {
+                const salvo = await repositorio.salvarProgressoMaterial(materiaId, paginaCaderno.id, item.id, { paginaAtual: numero, totalPaginas: documento.numPages });
+                const materiais = materiaisPorPagina.get(paginaCaderno.id) || [];
+                materiaisPorPagina.set(paginaCaderno.id, materiais.map(valor => String(valor.id) === String(item.id) ? { ...valor, ...salvo } : valor));
+            }
+            const menu = raiz.querySelector("[data-external-pdf-selection-menu]");
+            const atualizarSelecao = () => {
+                const selecao = window.getSelection();
+                if (!menu || !selecao?.rangeCount || selecao.isCollapsed || !camadaTexto.contains(selecao.anchorNode) || !camadaTexto.contains(selecao.focusNode)) {
+                    if (menu) menu.hidden = true;
+                    return;
+                }
+                const intervalo = selecao.getRangeAt(0);
+                const texto = intervalo.toString().trim();
+                if (!texto) { menu.hidden = true; return; }
+                selecaoTextoAtual = contextoDeTrecho(texto, paginaCaderno, `${item.titulo} · página ${numero}`);
+                const caixa = intervalo.getBoundingClientRect();
+                menu.hidden = false;
+                menu.style.left = `${Math.max(145, Math.min(window.innerWidth - 145, caixa.left + caixa.width / 2))}px`;
+                menu.style.top = `${Math.max(70, caixa.top - 8)}px`;
+            };
+            raiz.addEventListener("pointerup", () => requestAnimationFrame(atualizarSelecao));
+            raiz.addEventListener("keyup", () => requestAnimationFrame(atualizarSelecao));
+            menu?.addEventListener("pointerdown", evento => evento.preventDefault());
+            menu?.querySelectorAll("[data-external-pdf-study-action]").forEach(botao => botao.addEventListener("click", () => acionarEstudoComSelecao(botao.dataset.externalPdfStudyAction)));
+        } catch (erro) {
+            console.warn("Não foi possível preparar o leitor integrado do material externo.", erro);
+            folha.hidden = true;
+            if (fallback) fallback.hidden = false;
+        }
     }
 
     function htmlMateriaisPagina(paginaId) {
@@ -884,6 +967,7 @@ export function criarCadernosMaterias(repositorio) {
             dom.workspace.innerHTML = `<div class="subject-notebook-open ${paginaPdf ? "is-pdf-workspace" : ""} ${paginasRecolhidas ? "is-pages-collapsed" : ""}">${miniaturasPaginas(caderno, item, paginaPdf ? fundoPdf.storagePath : "")}<section class="subject-notebook-page-stage">${topbar}${contextoPagina}${conteudo}${rodapePagina}</section></div>`;
             if (paginaPdf) prepararMiniaturasPdf(fundoPdf.storagePath);
             if (paginaPdf && leituraContinuaPdf) queueMicrotask(() => prepararLeituraContinuaPdf(fundoPdf.storagePath, paginas, item));
+            if (materialAberto) queueMicrotask(() => prepararLeitorMaterial(materialAberto, item));
             const espacadorTopbar = dom.workspace.querySelector(".subject-notebook-editor-spacer");
             if (espacadorTopbar && !paginaPdf) {
                 const botaoFoco = document.createElement("button");
@@ -1278,9 +1362,9 @@ export function criarCadernosMaterias(repositorio) {
         menu.style.top = `${Math.max(54, caixaSelecao.top - caixaEditor.top - 45)}px`;
     }
 
-    function contextoDeTrecho(texto, pagina) {
+    function contextoDeTrecho(texto, pagina, tituloOrigem = "") {
         const topico = topicos.find(item => String(item.id) === String(pagina?.topicoId));
-        return { texto: String(texto || "").trim().slice(0, 10000), paginaId: pagina?.id || "", paginaTitulo: pagina?.titulo || "Página sem título", topicoId: pagina?.topicoId || null, topicoTitulo: topico?.titulo || "" };
+        return { texto: String(texto || "").trim().slice(0, 10000), paginaId: pagina?.id || "", paginaTitulo: tituloOrigem || pagina?.titulo || "Página sem título", topicoId: pagina?.topicoId || null, topicoTitulo: topico?.titulo || "" };
     }
 
     function acionarEstudoComTrecho(acao, texto, pagina = selecionado()) {
