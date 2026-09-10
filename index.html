@@ -836,6 +836,9 @@
     .simulation-generator-form .form-select { background: #fffdf9; border-color: rgba(59, 41, 35, .22); }
     .simulation-generator-form .form-control:focus,
     .simulation-generator-form .form-select:focus { border-color: rgba(184, 50, 42, .58); box-shadow: 0 0 0 .2rem rgba(184, 50, 42, .11); }
+    .simulation-reference { grid-column: 1 / -1; }
+    .simulation-reference textarea { min-height: 92px; resize: vertical; }
+    .simulation-reference small { display: block; margin-top: .3rem; color: #78675f; }
     .ai-callout {
         display: flex;
         align-items: center;
@@ -2874,7 +2877,7 @@
                         </div>
                         <div class="simulation-field">
                             <label class="form-label small">Tema (opcional)</label>
-                            <input type="text" class="form-control" id="simTema" placeholder="Ex: Prisão em flagrante">
+                            <input type="text" class="form-control" id="simTema" maxlength="240" placeholder="Ex: Prisão em flagrante">
                         </div>
                         <div class="simulation-field">
                             <label class="form-label small">Dificuldade</label>
@@ -2890,6 +2893,11 @@
                         </div>
                         <div class="simulation-actions">
                             <button type="submit" class="btn btn-primary w-100"><i class="bi-stars me-1"></i>Gerar</button>
+                        </div>
+                        <div class="simulation-field simulation-reference">
+                            <label class="form-label small" for="simTrechoReferencia">Trecho-base <span class="text-muted fw-normal">(opcional)</span></label>
+                            <textarea class="form-control" id="simTrechoReferencia" maxlength="6000" rows="3" placeholder="Cole um trecho para gerar questões diretamente sobre esse conteúdo."></textarea>
+                            <small>Quando você vem de uma leitura, o trecho selecionado aparece aqui automaticamente.</small>
                         </div>
                     </form>
                     <div class="ai-callout" role="status">
@@ -8483,6 +8491,23 @@ document.addEventListener("subject-notebook-study-action", async evento => {
         window.setTimeout(() => document.getElementById("notaConteudo")?.focus({ preventScroll: true }), 220);
         return;
     }
+    if (detalhes.action === "quiz") {
+        if (!await fecharMateria()) return;
+        ativarAbaPrincipal("#p-simulados");
+        window.setTimeout(() => {
+            const materia = document.getElementById("simMateria");
+            const tema = document.getElementById("simTema");
+            const referencia = document.getElementById("simTrechoReferencia");
+            materia.value = detalhes.subjectId;
+            tema.value = `${detalhes.topicTitle || detalhes.pageTitle || "Trecho selecionado"}: ${trecho}`.slice(0, 240);
+            referencia.value = trecho.slice(0, 6000);
+            const painelSimulado = document.getElementById("formGerarSimulado")?.closest(".simulation-generator-card");
+            mostrarRetornoLeituraCaderno(painelSimulado?.querySelector(".card-body"), detalhes);
+            painelSimulado?.scrollIntoView({ behavior: "smooth", block: "start" });
+            window.setTimeout(() => document.querySelector('#formGerarSimulado button[type="submit"]')?.focus({ preventScroll: true }), 220);
+        }, 180);
+        return;
+    }
     if (detalhes.action === "review") {
         if (!await fecharMateria()) return;
         ativarAbaPrincipal("#p-cronograma");
@@ -11427,6 +11452,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     if (!materiaId) { alert("Cadastre uma matéria primeiro."); return; }
     const materiaNome = nomeDaMateria(materiaId);
     const tema = document.getElementById("simTema").value.trim();
+    const trechoReferencia = document.getElementById("simTrechoReferencia").value.trim();
     const dificuldade = document.getElementById("simDificuldade").value;
     const qtd = document.getElementById("simQtd").value;
 
@@ -11444,6 +11470,7 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
         const resultado = await exigirNuvemIA().gerarSimulado({
             subjectName: materiaNome,
             topic: tema,
+            referenceText: trechoReferencia,
             difficulty: dificuldade,
             quantity: Number(qtd),
             examName: edital.nomeConcurso || "",

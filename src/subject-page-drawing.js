@@ -99,7 +99,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
     menuEstudoTexto.hidden = true;
     menuEstudoTexto.setAttribute("role", "toolbar");
     menuEstudoTexto.setAttribute("aria-label", "Ações para o texto selecionado");
-    menuEstudoTexto.innerHTML = `<button type="button" data-page-drawing-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i><span>Flashcard</span></button><button type="button" data-page-drawing-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i><span>Resumo</span></button><button type="button" data-page-drawing-study-action="review" title="Planejar revisão" aria-label="Planejar revisão deste trecho"><i class="bi-arrow-repeat"></i><span>Revisão</span></button>`;
+    menuEstudoTexto.innerHTML = `<button type="button" data-page-drawing-study-action="flashcard" title="Criar flashcard" aria-label="Criar flashcard com o trecho"><i class="bi-card-heading"></i><span>Flashcard</span></button><button type="button" data-page-drawing-study-action="summary" title="Criar resumo" aria-label="Criar resumo com o trecho"><i class="bi-journal-text"></i><span>Resumo</span></button><button type="button" data-page-drawing-study-action="review" title="Planejar revisão" aria-label="Planejar revisão deste trecho"><i class="bi-arrow-repeat"></i><span>Revisão</span></button><button type="button" data-page-drawing-study-action="quiz" title="Gerar questões" aria-label="Gerar questões com o trecho"><i class="bi-patch-question"></i><span>Questões</span></button>`;
     document.body.append(menuEstudoTexto);
     const formatacaoTexto = document.createElement("div");
     formatacaoTexto.className = "subject-page-drawing-text-format";
@@ -669,7 +669,7 @@ export function criarDesenhoPagina(container, dadosIniciais, aoAlterar, aoAcaoTe
 
     function acionarEstudoComTexto(acao) {
         const pendente = selecaoEstudoPendente;
-        if (!pendente || !["flashcard", "summary", "review"].includes(acao)) return;
+        if (!pendente || !["flashcard", "summary", "review", "quiz"].includes(acao)) return;
         const inicio = Math.min(pendente.inicio, pendente.fim);
         const fim = Math.max(pendente.inicio, pendente.fim);
         const texto = String(pendente.texto || "").trim();
