@@ -824,7 +824,7 @@
     }
     .simulation-generator-form {
         display: grid;
-        grid-template-columns: minmax(190px, 1.15fr) minmax(230px, 1.45fr) minmax(140px, .85fr) minmax(120px, .7fr) minmax(120px, .65fr);
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
         gap: .75rem;
         align-items: end;
     }
@@ -839,6 +839,13 @@
     .simulation-reference { grid-column: 1 / -1; }
     .simulation-reference textarea { min-height: 92px; resize: vertical; }
     .simulation-reference small { display: block; margin-top: .3rem; color: #78675f; }
+    .simulation-actions { display: flex; gap: .55rem; }
+    .simulation-filter-summary { display: flex; align-items: center; gap: .55rem; min-height: 42px; margin-top: .8rem; padding: .55rem .7rem; background: rgba(91, 67, 58, .045); border: 1px solid rgba(59, 41, 35, .09); border-radius: .72rem; }
+    .simulation-filter-summary > i { color: var(--pimentel-vermelho); }
+    .simulation-filter-chips { flex: 1; display: flex; flex-wrap: wrap; gap: .35rem; }
+    .simulation-filter-chip { padding: .25rem .5rem; color: #5f4c44; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .12); border-radius: 999px; font-size: .68rem; font-weight: 700; }
+    .simulation-filter-summary button { flex: 0 0 auto; border: 0; color: #735f57; background: transparent; font-size: .72rem; font-weight: 700; }
+    .simulation-filter-summary button:hover { color: var(--pimentel-vermelho); }
     .ai-callout {
         display: flex;
         align-items: center;
@@ -2876,8 +2883,16 @@
                             <select class="form-select" id="simMateria" required></select>
                         </div>
                         <div class="simulation-field">
+                            <label class="form-label small" for="simTopicoEdital">Tópico do Edital</label>
+                            <select class="form-select" id="simTopicoEdital"><option value="">Todos os tópicos</option></select>
+                        </div>
+                        <div class="simulation-field">
                             <label class="form-label small">Tema (opcional)</label>
                             <input type="text" class="form-control" id="simTema" maxlength="240" placeholder="Ex: Prisão em flagrante">
+                        </div>
+                        <div class="simulation-field">
+                            <label class="form-label small" for="simBanca">Banca <span class="text-muted fw-normal">(opcional)</span></label>
+                            <input type="text" class="form-control" id="simBanca" maxlength="120" placeholder="Ex: FGV, Cebraspe">
                         </div>
                         <div class="simulation-field">
                             <label class="form-label small">Dificuldade</label>
@@ -2891,6 +2906,14 @@
                                 <option value="3">3</option><option value="5" selected>5</option><option value="10">10</option>
                             </select>
                         </div>
+                        <div class="simulation-field">
+                            <label class="form-label small" for="simOrigem">Origem das questões</label>
+                            <select class="form-select" id="simOrigem"><option value="ia" selected>Gerar com IA</option><option value="historico">Meu histórico</option><option value="erros">Caderno de Erros + IA</option></select>
+                        </div>
+                        <div class="simulation-field">
+                            <label class="form-label small" for="simPerfilQuestoes">Histórico de respostas</label>
+                            <select class="form-select" id="simPerfilQuestoes" disabled><option value="todas" selected>Todas</option><option value="erradas">Somente erradas</option><option value="nao_respondidas">Não respondidas</option></select>
+                        </div>
                         <div class="simulation-actions">
                             <button type="submit" class="btn btn-primary w-100"><i class="bi-stars me-1"></i>Gerar</button>
                         </div>
@@ -2900,6 +2923,7 @@
                             <small>Quando você vem de uma leitura, o trecho selecionado aparece aqui automaticamente.</small>
                         </div>
                     </form>
+                    <div class="simulation-filter-summary" id="resumoFiltrosSimulado" aria-live="polite"><i class="bi-funnel-fill" aria-hidden="true"></i><div class="simulation-filter-chips"></div><button type="button" id="btnLimparFiltrosSimulado"><i class="bi-x-circle me-1"></i>Limpar filtros</button></div>
                     <div class="ai-callout" role="status">
                         <span class="ai-callout-icon"><i class="bi-shield-lock-fill" aria-hidden="true"></i></span>
                         <div class="ai-callout-copy"><strong>IA protegida pelo servidor</strong>Só os dados necessários são enviados; a chave do Google Gemini nunca aparece no navegador.</div>
@@ -4970,6 +4994,8 @@ function popularSelects() {
     popularTopicosErro();
     popularFiltroTopicosErro();
     popularTopicosEditalCronograma();
+    popularTopicosSimulado();
+    atualizarFiltrosSimulado();
 }
 
 document.getElementById("buscaMaterias").addEventListener("input", e => { filtroMaterias = e.target.value; modoOrganizarMaterias = false; renderizarMaterias(); });
@@ -8499,8 +8525,11 @@ document.addEventListener("subject-notebook-study-action", async evento => {
             const tema = document.getElementById("simTema");
             const referencia = document.getElementById("simTrechoReferencia");
             materia.value = detalhes.subjectId;
+            popularTopicosSimulado(topicoEdital?.id || "");
             tema.value = `${detalhes.topicTitle || detalhes.pageTitle || "Trecho selecionado"}: ${trecho}`.slice(0, 240);
             referencia.value = trecho.slice(0, 6000);
+            document.getElementById("simOrigem").value = "ia";
+            atualizarFiltrosSimulado();
             const painelSimulado = document.getElementById("formGerarSimulado")?.closest(".simulation-generator-card");
             mostrarRetornoLeituraCaderno(painelSimulado?.querySelector(".card-body"), detalhes);
             painelSimulado?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -11309,6 +11338,53 @@ function exigirNuvemSimulados() {
     return window.HUB_CLOUD_QUIZZES;
 }
 
+function popularTopicosSimulado(preferido = "") {
+    const materiaId = document.getElementById("simMateria")?.value || "";
+    const select = document.getElementById("simTopicoEdital");
+    if (!select) return;
+    const anterior = preferido || select.value;
+    const topicos = obterTopicosEditalDaMateria(materiaId);
+    const titulos = new Map(topicos.map(topico => [String(topico.id), topico.titulo]));
+    select.innerHTML = '<option value="">Todos os tópicos</option>' + topicos.map(topico => {
+        const pai = topico.paiId ? titulos.get(String(topico.paiId)) : "";
+        return `<option value="${esc(topico.id)}">${esc(pai ? `${pai} → ${topico.titulo}` : topico.titulo)}</option>`;
+    }).join("");
+    select.value = [...select.options].some(opcao => opcao.value === String(anterior)) ? String(anterior) : "";
+    select.disabled = topicos.length === 0;
+}
+
+function atualizarFiltrosSimulado() {
+    const origem = document.getElementById("simOrigem")?.value || "ia";
+    const perfil = document.getElementById("simPerfilQuestoes");
+    const referencia = document.getElementById("simTrechoReferencia");
+    if (perfil) perfil.disabled = origem !== "historico";
+    if (referencia) referencia.disabled = origem === "historico";
+    const edital = obterEdital();
+    const banca = document.getElementById("simBanca");
+    if (banca && !banca.value.trim() && edital.banca) banca.value = edital.banca;
+    renderizarResumoFiltrosSimulado();
+}
+
+function renderizarResumoFiltrosSimulado() {
+    const painel = document.getElementById("resumoFiltrosSimulado");
+    if (!painel) return;
+    const rotulo = id => document.getElementById(id)?.selectedOptions?.[0]?.textContent?.trim() || "";
+    const valores = [rotulo("simMateria"), rotulo("simTopicoEdital"), rotulo("simDificuldade"), `${rotulo("simQtd")} questões`, rotulo("simOrigem")];
+    const banca = document.getElementById("simBanca")?.value.trim();
+    if (banca) valores.splice(2, 0, banca);
+    if (document.getElementById("simOrigem")?.value === "historico") valores.push(rotulo("simPerfilQuestoes"));
+    painel.querySelector(".simulation-filter-chips").innerHTML = valores.filter(Boolean).map(valor => `<span class="simulation-filter-chip">${esc(valor)}</span>`).join("");
+}
+
+function referenciaDosErrosSimulado(materiaId, topicoEditalId, limite = 10) {
+    return obterErros()
+        .filter(erro => String(erro.materiaId) === String(materiaId) && (!topicoEditalId || String(erro.topicoEditalId || "") === String(topicoEditalId)))
+        .slice(0, Math.max(1, limite))
+        .map((erro, indice) => `${indice + 1}. ${erro.enunciado || erro.tema}\nResposta correta: ${erro.respostaCorreta || "não informada"}\nExplicação: ${erro.explicacao || erro.obs || "não informada"}`)
+        .join("\n\n")
+        .slice(0, 6000);
+}
+
 function validarQuestoesIA(questoes) {
     if (!Array.isArray(questoes) || questoes.length === 0 || questoes.length > 20) {
         throw new Error("A IA retornou uma quantidade inválida de questões.");
@@ -11338,13 +11414,17 @@ function normalizarChaveQuestaoSimulado(valor) {
     return textoBuscaFlashcard(String(valor || "")).trim().replace(/\s+/g, " ");
 }
 
-function obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, quantidade) {
+function obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, quantidade, filtros = {}) {
     const temaNormalizado = normalizarChaveQuestaoSimulado(tema);
     const limite = Math.max(1, Math.min(20, Number(quantidade) || 5));
     const agora = Date.now();
     const candidatas = tentativasSimulado
-        .filter(tentativa => String(tentativa.materiaId) === String(materiaId))
+        .filter(tentativa => String(tentativa.materiaId) === String(materiaId)
+            && (!filtros.topicoEditalId || String(tentativa.topicoEditalId || "") === String(filtros.topicoEditalId))
+            && (!filtros.estrito || tentativa.dificuldade === dificuldade))
         .flatMap(tentativa => (tentativa.respostas || []).map(resposta => ({ tentativa, resposta })))
+        .filter(({ resposta }) => filtros.perfil !== "erradas" || (resposta.respostaEscolhidaIndex != null && !resposta.correta))
+        .filter(({ resposta }) => filtros.perfil !== "nao_respondidas" || resposta.respostaEscolhidaIndex == null)
         .map(({ tentativa, resposta }) => {
             try {
                 const [questao] = validarQuestoesIA([{
@@ -11446,6 +11526,19 @@ document.getElementById("btnIrGeradorSimulado").addEventListener("click", () => 
     document.getElementById("simMateria").focus();
 });
 
+document.getElementById("simMateria").addEventListener("change", () => { popularTopicosSimulado(); atualizarFiltrosSimulado(); });
+document.getElementById("simOrigem").addEventListener("change", atualizarFiltrosSimulado);
+document.getElementById("formGerarSimulado").addEventListener("input", renderizarResumoFiltrosSimulado);
+document.getElementById("formGerarSimulado").addEventListener("change", renderizarResumoFiltrosSimulado);
+document.getElementById("btnLimparFiltrosSimulado").addEventListener("click", () => {
+    document.getElementById("formGerarSimulado").reset();
+    document.querySelector(".simulation-generator-card .study-source-return")?.remove();
+    retornoLeituraCaderno = null;
+    popularTopicosSimulado();
+    atualizarFiltrosSimulado();
+    document.getElementById("simMateria").focus();
+});
+
 document.getElementById("formGerarSimulado").addEventListener("submit", async (e) => {
     e.preventDefault();
     const materiaId = document.getElementById("simMateria").value;
@@ -11453,6 +11546,10 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
     const materiaNome = nomeDaMateria(materiaId);
     const tema = document.getElementById("simTema").value.trim();
     const trechoReferencia = document.getElementById("simTrechoReferencia").value.trim();
+    const topicoEditalId = document.getElementById("simTopicoEdital").value || null;
+    const origemQuestoes = document.getElementById("simOrigem").value;
+    const perfilQuestoes = document.getElementById("simPerfilQuestoes").value;
+    const banca = document.getElementById("simBanca").value.trim();
     const dificuldade = document.getElementById("simDificuldade").value;
     const qtd = document.getElementById("simQtd").value;
 
@@ -11467,25 +11564,45 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
 
     try {
         const edital = obterEdital();
+        if (origemQuestoes === "historico") {
+            const questoesHistorico = obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, Number(qtd), { topicoEditalId, perfil: perfilQuestoes, estrito: true });
+            if (!questoesHistorico.length) {
+                exibirContingenciaSimulado("Nenhuma questão do seu histórico corresponde a todos os filtros escolhidos. Amplie os filtros ou gere novas questões com IA.", true);
+                return;
+            }
+            await iniciarTentativaSimulado(questoesHistorico, materiaId, materiaNome, { tema, banca, concurso: edital.nomeConcurso || "", dificuldade, topicoEditalId, origem: "historico" });
+            return;
+        }
+        const referenciaErros = origemQuestoes === "erros" ? referenciaDosErrosSimulado(materiaId, topicoEditalId, Number(qtd) * 2) : "";
+        if (origemQuestoes === "erros" && !referenciaErros) {
+            exibirContingenciaSimulado("Não há registros no Caderno de Erros que correspondam à matéria e ao tópico escolhidos.", true);
+            return;
+        }
+        const referenciaFinal = [trechoReferencia, referenciaErros].filter(Boolean).join("\n\n--- Caderno de Erros ---\n").slice(0, 6000);
         const resultado = await exigirNuvemIA().gerarSimulado({
             subjectName: materiaNome,
             topic: tema,
-            referenceText: trechoReferencia,
+            referenceText: referenciaFinal,
             difficulty: dificuldade,
             quantity: Number(qtd),
             examName: edital.nomeConcurso || "",
-            boardName: edital.banca || ""
+            boardName: banca
         });
         if (resultado.quota) {
             document.getElementById("statusCotaIA").textContent = `${resultado.quota.remaining}/${resultado.quota.limit} questões disponíveis hoje`;
         }
-        await iniciarTentativaSimulado(resultado.questions, materiaId, materiaNome, { tema, banca: edital.banca || "", concurso: edital.nomeConcurso || "", dificuldade });
+        await iniciarTentativaSimulado(resultado.questions, materiaId, materiaNome, { tema, banca, concurso: edital.nomeConcurso || "", dificuldade, topicoEditalId, origem: origemQuestoes });
     } catch (err) {
-        const questoesDoHistorico = obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, Number(qtd));
+        if (origemQuestoes === "historico") {
+            console.error("Não foi possível iniciar o simulado pelo histórico privado.", err);
+            exibirContingenciaSimulado("Não foi possível abrir as questões do seu histórico agora. Tente novamente ou escolha outra origem.", false);
+            return;
+        }
+        const questoesDoHistorico = obterQuestoesContingenciaSimulado(materiaId, tema, dificuldade, Number(qtd), { topicoEditalId });
         if (questoesDoHistorico.length) {
             try {
                 const edital = obterEdital();
-                await iniciarTentativaSimulado(questoesDoHistorico, materiaId, materiaNome, { tema, banca: edital.banca || "", concurso: edital.nomeConcurso || "", dificuldade, origem: "historico" });
+                await iniciarTentativaSimulado(questoesDoHistorico, materiaId, materiaNome, { tema, banca, concurso: edital.nomeConcurso || "", dificuldade, topicoEditalId, origem: "historico" });
                 exibirContingenciaSimulado(`A IA está indisponível agora. Para não interromper seu estudo, abrimos uma revisão com ${questoesDoHistorico.length} ${questoesDoHistorico.length === 1 ? "questão válida" : "questões válidas"} do seu histórico privado.`);
             } catch (falhaHistorico) {
                 console.error("Não foi possível iniciar o simulado com o histórico privado.", falhaHistorico);
@@ -11502,7 +11619,8 @@ document.getElementById("formGerarSimulado").addEventListener("submit", async (e
 
 async function iniciarTentativaSimulado(questoes, materiaId, materiaNome, contexto = {}) {
     const validadas = validarQuestoesIA(questoes);
-    const topico = encontrarTopicoDoSimulado(materiaId, contexto.tema || "");
+    const topico = obterTopicosEditalDaMateria(materiaId).find(item => String(item.id) === String(contexto.topicoEditalId || ""))
+        || encontrarTopicoDoSimulado(materiaId, contexto.tema || "");
     const criada = await exigirNuvemSimulados().criar({
         materiaId,
         topicoEditalId: topico?.id || null,
