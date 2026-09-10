@@ -1982,5 +1982,20 @@ export function criarCadernosMaterias(repositorio) {
     window.addEventListener("offline", indicarModoOffline);
     window.addEventListener("online", tentarSalvarAoReconectar);
 
-    return Object.freeze({ definirMateria, abrirInicio: abrirInicioCaderno, retomarLeitura, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); observadorMiniaturasPdf?.disconnect(); observadorEscalaTextoPdf?.disconnect(); editorDesenho?.destruir(); pararRolagemArraste(); document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode"); carregamento += 1; window.removeEventListener("beforeunload", protegerSaida); window.removeEventListener("offline", indicarModoOffline); window.removeEventListener("online", tentarSalvarAoReconectar); } });
+    function encontrarPaginaPorTitulo(referencia) {
+        const normalizar = valor => {
+            let texto = String(valor || "").replace(/^Resumo\s*[—–-]\s*/i, "");
+            try { texto = decodeURIComponent(texto.replace(/\+/g, " ")); } catch { texto = texto.replace(/\+/g, " "); }
+            return texto.toLocaleLowerCase("pt-BR").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+        };
+        const procurado = normalizar(referencia);
+        if (!procurado) return "";
+        const pagina = itens.find(item => {
+            const titulo = normalizar(item.titulo);
+            return item.tipo === "page" && titulo && (titulo === procurado || procurado.includes(titulo));
+        });
+        return pagina?.id || "";
+    }
+
+    return Object.freeze({ definirMateria, abrirInicio: abrirInicioCaderno, retomarLeitura, encontrarPaginaPorTitulo, salvarPendente, encerrar: () => { clearTimeout(timerSalvamento); clearTimeout(timerSalvamentoDesenho); observadorMiniaturasPdf?.disconnect(); observadorEscalaTextoPdf?.disconnect(); editorDesenho?.destruir(); pararRolagemArraste(); document.getElementById("modalMateria")?.classList.remove("subject-notebook-focus-mode"); carregamento += 1; window.removeEventListener("beforeunload", protegerSaida); window.removeEventListener("offline", indicarModoOffline); window.removeEventListener("online", tentarSalvarAoReconectar); } });
 }
