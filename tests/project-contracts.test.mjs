@@ -731,7 +731,7 @@ test("o simulado prioriza a geração, usa aviso neutro e orienta o primeiro res
 test("o simulado continua pelo histórico privado quando a IA está indisponível", () => {
     const html = readProjectFile("index.html");
 
-    assert.match(html, /function obterQuestoesContingenciaSimulado\(materiaId, tema, dificuldade, quantidade\)/);
+    assert.match(html, /function obterQuestoesContingenciaSimulado\(materiaId, tema, dificuldade, quantidade, filtros = \{\}\)/);
     assert.match(html, /String\(tentativa\.materiaId\) === String\(materiaId\)/);
     assert.match(html, /resposta\.respostaCorretaIndex/);
     assert.match(html, /resposta\.respostaEscolhidaIndex != null && !resposta\.correta \? 45 : 0/);
@@ -742,6 +742,28 @@ test("o simulado continua pelo histórico privado quando a IA está indisponíve
     assert.match(html, /id="btnRevisarErrosSimulado"/);
     assert.match(html, /quiz-contingency-notice/);
     assert.doesNotMatch(html, /banco (estático|fixo) de questões/i);
+});
+
+test("o gerador de simulados oferece filtros próprios e fontes privadas", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="simTopicoEdital"/);
+    assert.match(html, /id="simBanca"/);
+    assert.match(html, /id="simOrigem"/);
+    assert.match(html, /value="historico">Meu histórico/);
+    assert.match(html, /value="erros">Caderno de Erros \+ IA/);
+    assert.match(html, /id="simPerfilQuestoes"/);
+    assert.match(html, /value="erradas">Somente erradas/);
+    assert.match(html, /value="nao_respondidas">Não respondidas/);
+    assert.match(html, /id="resumoFiltrosSimulado"/);
+    assert.match(html, /id="btnLimparFiltrosSimulado"/);
+    assert.match(html, /function popularTopicosSimulado/);
+    assert.match(html, /function referenciaDosErrosSimulado/);
+    assert.match(html, /filtros\.topicoEditalId/);
+    assert.match(html, /filtros\.perfil !== "erradas"/);
+    assert.match(html, /origemQuestoes === "historico"/);
+    assert.match(html, /origemQuestoes === "erros"/);
+    assert.match(html, /topicoEditalId, origem: origemQuestoes/);
 });
 
 test("o caderno de erros usa cadastro compacto, explicação multilinha e consulta organizada", () => {
@@ -2643,7 +2665,7 @@ test("trechos do caderno alimentam flashcards, resumos e revisões com contexto"
     assert.match(html, /Trecho enviado da leitura/);
     assert.match(html, /\.study-source-return/);
     assert.match(html, /id="simTrechoReferencia"/);
-    assert.match(html, /referenceText: trechoReferencia/);
+    assert.match(html, /referenceText: referenciaFinal/);
     assert.match(html, /detalhes\.action === "quiz"/);
     assert.match(html, /ativarAbaPrincipal\("#p-simulados"\)/);
 });
