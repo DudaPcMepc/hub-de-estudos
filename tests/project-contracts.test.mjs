@@ -337,6 +337,21 @@ test("a Central de Revisões reúne tópicos, flashcards e reforços do Caderno 
     assert.match(html, /btnComecarRevisaoHoje[^\n]*ativarAbaPrincipal\("#p-revisoes"\)/);
 });
 
+test("os resumos entram no ciclo espaçado e na fila diária de revisões", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /const INTERVALOS_REVISAO_RESUMO = \[1, 3, 7, 15, 30, 60\]/);
+    assert.match(html, /function estadoRevisaoResumo\(nota\)/);
+    assert.match(html, /function resumosParaRevisao\(apenasVencidos = true\)/);
+    assert.match(html, /data-review-filter="resumos"/);
+    assert.match(html, /id="notaRevisaoResumo"/);
+    assert.match(html, /function marcarResumoComoRevisado\(\)/);
+    assert.match(html, /exigirNuvemNotas\(\)\.atualizar\(nota\.id, \{ tags: novasTags \}\)/);
+    assert.match(html, /tipo: "resumo"/);
+    assert.match(html, /abrirResumoCentralRevisoes\(item\)/);
+    assert.match(html, /resumosPendentes\.length/);
+});
+
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");

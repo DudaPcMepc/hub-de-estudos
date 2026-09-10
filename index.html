@@ -431,9 +431,11 @@
     .review-queue-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; align-items: center; padding: .75rem; background: #faf5ef; border-left: 4px solid #9d7f72; border-radius: .75rem; }
     .review-queue-item.is-topic { border-left-color: #b8731b; }
     .review-queue-item.is-card { border-left-color: #3d7f5c; }
+    .review-queue-item.is-summary { border-left-color: #6f5aa8; }
     .review-queue-icon { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; color: #fff; background: #83665b; border-radius: .65rem; }
     .review-queue-item.is-topic .review-queue-icon { background: #b8731b; }
     .review-queue-item.is-card .review-queue-icon { background: #3d7f5c; }
+    .review-queue-item.is-summary .review-queue-icon { background: #6f5aa8; }
     .review-queue-copy { min-width: 0; }
     .review-queue-copy strong, .review-queue-copy span { display: block; }
     .review-queue-copy strong { overflow: hidden; color: #49352e; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
@@ -1682,9 +1684,19 @@
     .subject-summary-notes.is-list-collapsed .subject-notes-grid { grid-template-columns: minmax(0, 1fr); }
     .subject-summary-notes.is-list-collapsed .subject-notes-grid > div:first-child { display: none; }
     .subject-summary-list-toggle { width: 2rem; height: 2rem; display: grid; flex: 0 0 auto; place-items: center; color: #715d55; background: #fffdf9; border: 1px solid rgba(59,41,35,.11); border-radius: .55rem; }
-    .subject-summary-editor-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: .42rem; margin-bottom: .45rem; }
+    .subject-summary-editor-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; gap: .42rem; margin-bottom: .45rem; }
     .subject-summary-editor-heading .form-control { min-width: 0; border-color: transparent; border-bottom-color: rgba(59,41,35,.12); border-radius: .45rem; box-shadow: none; }
     .subject-summary-editor-heading button { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; padding: 0; border-radius: .55rem; }
+    .subject-summary-review { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .55rem; margin-bottom: .5rem; padding: .55rem .65rem; color: #5d4a43; background: linear-gradient(115deg, rgba(111,90,168,.09), rgba(255,253,249,.9)); border: 1px solid rgba(111,90,168,.16); border-radius: .72rem; }
+    .subject-summary-review-copy { min-width: 0; display: flex; align-items: center; gap: .5rem; }
+    .subject-summary-review-copy > i { width: 1.8rem; height: 1.8rem; display: grid; flex: 0 0 auto; place-items: center; color: #6f5aa8; background: rgba(111,90,168,.12); border-radius: .55rem; }
+    .subject-summary-review-copy strong, .subject-summary-review-copy span { display: block; }
+    .subject-summary-review-copy strong { font-size: .7rem; }
+    .subject-summary-review-copy span { margin-top: .08rem; color: #796860; font-size: .62rem; }
+    .subject-summary-review button { min-height: 2rem; display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .7rem; color: #fff; background: #6f5aa8; border: 0; border-radius: 999px; font-size: .65rem; font-weight: 750; }
+    .subject-summary-review button:hover { background: #5b478f; }
+    .subject-summary-review button:disabled { opacity: .58; }
+    .subject-summary-list-review { display: inline-flex; align-items: center; gap: .2rem; margin-top: .38rem; padding: .15rem .36rem; color: #65528f; background: rgba(111,90,168,.09); border-radius: 999px; font-size: .56rem; font-weight: 750; }
     .subject-summary-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .15rem; margin-bottom: .35rem; padding: .25rem .3rem; background: #f7f3ee; border: 0; border-radius: .62rem; }
     .subject-summary-toolbar button { width: 2rem; height: 2rem; display: grid; place-items: center; padding: 0; color: #695750; background: transparent; border: 0; border-radius: .48rem; }
     .subject-summary-toolbar button:hover { color: #8d3f37; background: rgba(184,50,42,.08); }
@@ -2775,7 +2787,7 @@
             <section class="review-hub-metrics" id="metricasCentralRevisoes" aria-label="Resumo das revisões"></section>
             <div class="review-hub-layout">
                 <section class="review-hub-panel" aria-labelledby="tituloFilaCentralRevisoes">
-                    <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button><button type="button" class="review-hub-filter" data-review-filter="erros">Erros</button></div></header>
+                    <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="resumos">Resumos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button><button type="button" class="review-hub-filter" data-review-filter="erros">Erros</button></div></header>
                     <div class="review-queue" id="filaCentralRevisoes" aria-live="polite"></div>
                 </section>
                 <aside class="review-hub-side">
@@ -3392,6 +3404,7 @@
                                 </div>
                                 <div class="subject-summary-source" id="notaFonteChip" hidden></div>
                                 <input type="hidden" id="notaFonteOriginal">
+                                <div class="subject-summary-review" id="notaRevisaoResumo"></div>
                                 <div class="subject-summary-toolbar" role="toolbar" aria-label="Formatação do resumo">
                                     <div class="subject-summary-toolbar-group" aria-label="Histórico">
                                         <button type="button" data-rich-command="undo" title="Desfazer" aria-label="Desfazer"><i class="bi-arrow-counterclockwise"></i></button>
@@ -4385,7 +4398,8 @@ function renderizarHoje() {
         .sort((a, b) => a.proximaRevisao.localeCompare(b.proximaRevisao));
     const flashcardsPendentes = materiasNormalizadas().reduce((total, materia) => total + cardsVencidos(materia).length, 0);
     const errosPendentes = obterErros().filter(erro => erro.estadoRevisao !== "mastered" && erro.proximaRevisao <= hoje);
-    const totalRevisoes = revisoesTarefas.length + flashcardsPendentes + errosPendentes.length;
+    const resumosPendentes = resumosParaRevisao();
+    const totalRevisoes = revisoesTarefas.length + resumosPendentes.length + flashcardsPendentes + errosPendentes.length;
     const atrasadas = tarefas.filter(tarefa => tarefa.status === "pendente" && tarefa.data && tarefa.data < hoje)
         .sort((a, b) => a.data.localeCompare(b.data));
     const semEstimativa = tarefasHoje.filter(tarefa => !Number(tarefa.minutosPlanejados)).length;
@@ -4394,7 +4408,7 @@ function renderizarHoje() {
         <article class="today-metric"><span class="today-metric-label">Tempo planejado</span><strong class="today-metric-value">${formatarDuracao(minutosPlanejados)}</strong><small class="today-metric-helper">${tarefasHoje.length} ${tarefasHoje.length === 1 ? "sessão" : "sessões"}${semEstimativa ? ` · ${semEstimativa} sem estimativa` : ""}</small></article>
         <article class="today-metric"><span class="today-metric-label">Tempo estudado</span><strong class="today-metric-value">${formatarDuracao(minutosEstudados)}</strong><small class="today-metric-helper">${registrosHoje.length} ${registrosHoje.length === 1 ? "registro real" : "registros reais"}</small></article>
         <article class="today-metric"><span class="today-metric-label">Progresso do dia</span><strong class="today-metric-value">${concluidasHoje} de ${tarefasHoje.length}</strong><div class="today-progress" role="progressbar" aria-label="Progresso das sessões de hoje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cumprimento}"><span style="width:${cumprimento}%"></span></div></article>
-        <article class="today-metric"><span class="today-metric-label">Revisões pendentes</span><strong class="today-metric-value">${totalRevisoes}</strong><small class="today-metric-helper">${revisoesTarefas.filter(tarefa => tarefa.proximaRevisao < hoje).length} tópicos atrasados · ${flashcardsPendentes} cards · ${errosPendentes.length} erros</small></article>`;
+        <article class="today-metric"><span class="today-metric-label">Revisões pendentes</span><strong class="today-metric-value">${totalRevisoes}</strong><small class="today-metric-helper">${revisoesTarefas.filter(tarefa => tarefa.proximaRevisao < hoje).length} tópicos · ${resumosPendentes.length} resumos · ${flashcardsPendentes} cards · ${errosPendentes.length} erros</small></article>`;
 
     const periodos = ["morning", "afternoon", "evening"];
     const htmlTarefa = tarefa => {
@@ -4435,7 +4449,7 @@ function renderizarHoje() {
     }).join("") : '<div class="today-empty"><i class="bi-calendar2-heart" aria-hidden="true"></i><strong>Seu dia ainda está livre.</strong><span>Adicione uma sessão ou use a prioridade do edital para começar.</span><button type="button" class="btn btn-sm today-empty-action" id="btnPrimeiraSessaoHoje"><i class="bi-plus-lg me-1"></i>Planejar sessão</button></div>';
 
     const revisoes = document.getElementById("revisoesCentralHoje");
-    revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${errosPendentes.length ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-journal-x"></i></span><div class="today-side-copy"><strong>${errosPendentes.length} erro${errosPendentes.length === 1 ? "" : "s"}</strong><span>Reforço ativo no Caderno de Erros.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
+    revisoes.innerHTML = `<div class="today-side-heading"><h2 class="fw-bold">Revisar hoje</h2><span class="today-count is-warning">${totalRevisoes} pendente${totalRevisoes === 1 ? "" : "s"}</span></div>${revisoesTarefas.slice(0, 2).map(tarefa => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-arrow-repeat"></i></span><div class="today-side-copy"><strong>${esc(tarefa.topico)}</strong><span>${esc(nomeDaMateria(tarefa.materiaId))} · ${tarefa.proximaRevisao < hoje ? `atrasada desde ${dataBR(tarefa.proximaRevisao)}` : "programada para hoje"}</span></div></div>`).join("")}${resumosPendentes.slice(0, 1).map(item => `<div class="today-side-item"><span class="today-side-icon"><i class="bi-journal-text"></i></span><div class="today-side-copy"><strong>${esc(textoResumoLegivel(item.nota.titulo || "Resumo sem título"))}</strong><span>${esc(item.materia.nome)} · ${item.estado.revisoes ? "revisão pendente" : "primeira revisão"}</span></div></div>`).join("")}${flashcardsPendentes ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-card-heading"></i></span><div class="today-side-copy"><strong>${flashcardsPendentes} flashcard${flashcardsPendentes === 1 ? "" : "s"}</strong><span>Revisão rápida disponível nas suas matérias.</span></div></div>` : ""}${errosPendentes.length ? `<div class="today-side-item"><span class="today-side-icon"><i class="bi-journal-x"></i></span><div class="today-side-copy"><strong>${errosPendentes.length} erro${errosPendentes.length === 1 ? "" : "s"}</strong><span>Reforço ativo no Caderno de Erros.</span></div></div>` : ""}${totalRevisoes ? '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill today-side-action" id="btnComecarRevisaoHoje">Começar revisão</button>' : '<div class="today-side-item"><span class="today-side-icon"><i class="bi-check2"></i></span><div class="today-side-copy"><strong>Revisões em dia</strong><span>Nenhuma revisão está vencida agora.</span></div></div>'}`;
 
     const painelAtrasos = document.getElementById("atrasosCentralHoje");
     painelAtrasos.classList.toggle("d-none", atrasadas.length === 0);
@@ -4536,13 +4550,24 @@ function itensDaCentralRevisoes() {
         const dificuldade = Number(card.erros || 0) * 4 + Math.max(0, 5 - Number(card.caixa || 1)) * 2;
         return { tipo: "card", id: card.id, materiaId: materia.id, materiaNome: materia.nome, titulo: card.frente, data: card.proxima || hoje, atraso, pontos: 45 + atraso * 6 + dificuldade + Math.round((prioridade?.pontuacao || 0) * .5), nivel: `Caixa ${Number(card.caixa || 1)}`, detalhe: topicoEditalDoFlashcard(materia.id, card.topicoEditalId)?.titulo || "Flashcard sem tópico" };
     }));
+    const resumos = resumosParaRevisao().map(item => ({
+        tipo: "resumo",
+        id: item.nota.id,
+        materiaId: item.materia.id,
+        titulo: textoResumoLegivel(item.nota.titulo || "Resumo sem título"),
+        data: item.data,
+        atraso: item.atraso,
+        pontos: 60 + item.atraso * 6 + (item.estado.revisoes ? 0 : 18),
+        nivel: item.estado.revisoes ? `${item.estado.revisoes} ${item.estado.revisoes === 1 ? "revisão" : "revisões"}` : "Primeira revisão",
+        detalhe: "Resumo da matéria"
+    }));
     const erros = obterErros().filter(erro => erro.estadoRevisao !== "mastered" && erro.proximaRevisao <= hoje).map(erro => {
         const prioridade = prioridades.get(String(erro.topicoEditalId || ""));
         const atraso = diasDeAtrasoRevisao(erro.proximaRevisao);
         const reincidencia = Math.min(30, Number(erro.revisoes || 0) * 3);
         return { tipo: "erro", id: erro.id, materiaId: erro.materiaId, titulo: erro.tema, data: erro.proximaRevisao, atraso, pontos: 80 + atraso * 8 + reincidencia + Math.round((prioridade?.pontuacao || 0) * .7), nivel: erro.revisoes ? `${erro.revisoes} revisão${erro.revisoes === 1 ? "" : "ões"}` : "Primeiro reforço", detalhe: topicoDoErro(erro)?.titulo || "Caderno de Erros" };
     });
-    return [...topicos, ...cards, ...erros].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
+    return [...topicos, ...resumos, ...cards, ...erros].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
 }
 
 function iniciarFilaFlashcardsCentral(itens) {
@@ -4552,9 +4577,23 @@ function iniciarFilaFlashcardsCentral(itens) {
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalRevisao")).show();
 }
 
+async function abrirResumoCentralRevisoes(item) {
+    if (!item) return;
+    await abrirMateria(item.materiaId);
+    if (String(materiaAbertaId || "") !== String(item.materiaId)) return;
+    notaSelecionadaId = item.id;
+    const materia = materiaPorId(item.materiaId);
+    if (!materia?.notas.some(nota => String(nota.id) === String(item.id))) return;
+    renderizarListaNotas(materia);
+    renderizarEditorNota(materia);
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#ws-resumo"]')).show();
+    window.setTimeout(() => document.getElementById("notaRevisaoResumo")?.scrollIntoView({ behavior: "smooth", block: "center" }), 180);
+}
+
 function abrirItemCentralRevisoes(item) {
     if (!item) return;
     if (item.tipo === "topico") abrirConclusaoEstudo(item.id);
+    else if (item.tipo === "resumo") void abrirResumoCentralRevisoes(item);
     else if (item.tipo === "card") iniciarFilaFlashcardsCentral([item]);
     else abrirRevisaoErro(item.id);
 }
@@ -4572,14 +4611,16 @@ function renderizarCentralRevisoes() {
     if (!raiz || !USUARIO_ATUAL_ID) return;
     const fila = itensDaCentralRevisoes();
     const topicos = fila.filter(item => item.tipo === "topico");
+    const resumos = fila.filter(item => item.tipo === "resumo");
     const cards = fila.filter(item => item.tipo === "card");
     const errosVencidos = fila.filter(item => item.tipo === "erro");
     const atrasados = fila.filter(item => item.atraso > 0).length;
-    const estimativa = topicos.reduce((total, item) => total + (Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20), 0) + cards.length * 2 + errosVencidos.length * 3;
+    const estimativa = topicos.reduce((total, item) => total + (Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20), 0) + resumos.length * 5 + cards.length * 2 + errosVencidos.length * 3;
     const erros = [...obterErros()].sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")));
     document.getElementById("metricasCentralRevisoes").innerHTML = [
         ["bi-inboxes", fila.length, "revisões na fila"],
         ["bi-journal-check", topicos.length, "tópicos programados"],
+        ["bi-journal-text", resumos.length, "resumos pendentes"],
         ["bi-card-heading", cards.length, "flashcards vencidos"],
         ["bi-journal-x", errosVencidos.length, "erros para reforçar"],
         ["bi-clock", formatarDuracao(estimativa), "tempo estimado"]
@@ -4592,15 +4633,17 @@ function renderizarCentralRevisoes() {
         botao.classList.toggle("is-active", ativo);
         botao.setAttribute("aria-pressed", String(ativo));
     });
-    const tipoDoFiltro = { topicos: "topico", cards: "card", erros: "erro" }[filtroCentralRevisoes];
+    const tipoDoFiltro = { topicos: "topico", resumos: "resumo", cards: "card", erros: "erro" }[filtroCentralRevisoes];
     const filtrada = fila.filter(item => filtroCentralRevisoes === "todos" || item.tipo === tipoDoFiltro);
     document.getElementById("filaCentralRevisoes").innerHTML = filtrada.length ? filtrada.map((item, indice) => {
         const topico = item.tipo === "topico";
+        const resumo = item.tipo === "resumo";
         const erro = item.tipo === "erro";
         const atraso = item.atraso ? `${item.atraso} ${item.atraso === 1 ? "dia atrasado" : "dias atrasado"}` : "vence hoje";
-        const icone = topico ? "journal-check" : erro ? "journal-x" : "card-heading";
-        const rotulo = topico ? "Registrar revisão" : erro ? "Revisar erro" : "Revisar card";
-        return `<article class="review-queue-item is-${topico ? "topic" : "card"}"><span class="review-queue-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : erro ? "Erro" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : "play-fill"} me-1"></i>${rotulo}</button></article>`;
+        const icone = topico ? "journal-check" : resumo ? "journal-text" : erro ? "journal-x" : "card-heading";
+        const rotulo = topico ? "Registrar revisão" : resumo ? "Abrir resumo" : erro ? "Revisar erro" : "Revisar card";
+        const classe = topico ? "topic" : resumo ? "summary" : "card";
+        return `<article class="review-queue-item is-${classe}"><span class="review-queue-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : resumo ? "Resumo" : erro ? "Erro" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : resumo ? "book" : "play-fill"} me-1"></i>${rotulo}</button></article>`;
     }).join("") : `<div class="review-hub-empty"><i class="bi-check2-circle" aria-hidden="true"></i><strong class="d-block">${fila.length ? "Nenhum item neste filtro" : "Tudo em dia por aqui"}</strong><small>${fila.length ? "Escolha outro tipo de revisão." : "A próxima revisão aparecerá automaticamente na data certa."}</small></div>`;
     document.querySelectorAll(".review-queue-action").forEach(botao => botao.addEventListener("click", () => abrirItemCentralRevisoes(fila.find(item => item.tipo === botao.dataset.reviewKind && String(item.id) === String(botao.dataset.reviewId)))));
     document.getElementById("contadorErrosCentralRevisoes").textContent = erros.length;
@@ -8380,6 +8423,42 @@ document.getElementById("btnAddTopicosLote").addEventListener("click", async () 
 
 // ---------- Notas ----------
 const PREFIXO_FONTE_RESUMO = "__hub_source:";
+const PREFIXO_REVISAO_RESUMO = "__hub_summary_review:";
+const INTERVALOS_REVISAO_RESUMO = [1, 3, 7, 15, 30, 60];
+
+function estadoRevisaoResumo(nota) {
+    const tag = (nota?.tags || []).find(valor => String(valor).startsWith(PREFIXO_REVISAO_RESUMO));
+    const partes = String(tag || "").slice(PREFIXO_REVISAO_RESUMO.length).split(":");
+    const revisoes = Math.max(0, Number(partes[0]) || 0);
+    return {
+        revisoes,
+        ultimaRevisaoEm: /^\d{4}-\d{2}-\d{2}$/.test(partes[1] || "") ? partes[1] : "",
+        proximaRevisao: /^\d{4}-\d{2}-\d{2}$/.test(partes[2] || "") ? partes[2] : ""
+    };
+}
+
+function tagRevisaoResumo(estado) {
+    return `${PREFIXO_REVISAO_RESUMO}${estado.revisoes}:${estado.ultimaRevisaoEm}:${estado.proximaRevisao}`;
+}
+
+function tagsSistemaResumo(nota) {
+    return (nota?.tags || []).filter(tag => {
+        const valor = String(tag);
+        return valor.startsWith(PREFIXO_FONTE_RESUMO) || valor.startsWith(PREFIXO_REVISAO_RESUMO);
+    });
+}
+
+function resumosParaRevisao(apenasVencidos = true) {
+    const hoje = hojeISO();
+    return materiasNormalizadas().flatMap(materia => (materia.notas || []).map(nota => {
+        const corpo = separarFonteResumo(nota.conteudo).conteudo.replace(/<[^>]+>/g, " ").trim();
+        if (!corpo) return null;
+        const estado = estadoRevisaoResumo(nota);
+        const data = estado.proximaRevisao || nota.criadaEm || nota.atualizadaEm || hoje;
+        return { materia, nota, estado, data, atraso: diasDeAtrasoRevisao(data) };
+    }).filter(Boolean)).filter(item => !apenasVencidos || item.data <= hoje)
+        .sort((a, b) => b.atraso - a.atraso || a.data.localeCompare(b.data) || String(b.nota.atualizadaEm || "").localeCompare(String(a.nota.atualizadaEm || "")));
+}
 
 function textoResumoLegivel(valor) {
     const original = String(valor || "").trim();
@@ -8411,7 +8490,7 @@ function separarFonteResumo(conteudo) {
 }
 
 function tagsVisiveisResumo(nota) {
-    return (nota?.tags || []).filter(tag => !String(tag).startsWith(PREFIXO_FONTE_RESUMO));
+    return (nota?.tags || []).filter(tag => !String(tag).startsWith(PREFIXO_FONTE_RESUMO) && !String(tag).startsWith(PREFIXO_REVISAO_RESUMO));
 }
 
 function destinoFonteResumo(nota) {
@@ -8453,15 +8532,21 @@ function renderizarListaNotas(m) {
         container.innerHTML = `<div class="list-group-item text-muted small fst-italic">Nenhuma nota${buscaNotasTexto ? " encontrada" : " ainda"}.</div>`;
         return;
     }
-    container.innerHTML = lista.map(n => `
+    container.innerHTML = lista.map(n => {
+        const revisao = estadoRevisaoResumo(n);
+        const dataRevisao = revisao.proximaRevisao || n.criadaEm || n.atualizadaEm || hojeISO();
+        const revisaoVencida = dataRevisao <= hojeISO();
+        return `
         <button type="button" class="list-group-item list-group-item-action nota-item ${String(n.id) === String(notaSelecionadaId) ? "ativa" : ""}" data-id="${n.id}" title="${esc(n.titulo || "Sem título")}">
             <div class="d-flex justify-content-between align-items-start">
                 <span class="subject-summary-list-title">${n.fixada ? '<i class="bi-pin-angle-fill text-warning me-1"></i>' : ""}${esc(textoResumoLegivel(n.titulo || "Sem título"))}</span>
                 <span class="text-muted" style="font-size:.68rem;">${dataBR(n.atualizadaEm)}</span>
             </div>
             <span class="subject-summary-list-excerpt">${esc(separarFonteResumo(n.conteudo).conteudo.replace(/[#*=`>_-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) || "Resumo ainda sem conteúdo")}</span>
+            <span class="subject-summary-list-review"><i class="bi-${revisaoVencida ? "alarm" : "calendar-check"}"></i>${revisaoVencida ? (revisao.revisoes ? "Revisão pendente" : "Revisar pela primeira vez") : `Próxima ${dataBR(dataRevisao)}`}</span>
             ${tagsVisiveisResumo(n).length ? `<div class="mt-1 d-flex flex-wrap gap-1">${tagsVisiveisResumo(n).map(tg => `<span class="badge bg-secondary-subtle text-secondary-emphasis border tag-nota">${esc(tg)}</span>`).join("")}</div>` : ""}
-        </button>`).join("");
+        </button>`;
+    }).join("");
     container.querySelectorAll(".nota-item").forEach(b => b.addEventListener("click", async () => {
         if (String(notaSelecionadaId) === b.dataset.id || !await salvarNotaPendente()) return;
         notaSelecionadaId = b.dataset.id;
@@ -8469,6 +8554,61 @@ function renderizarListaNotas(m) {
         renderizarListaNotas(mm);
         renderizarEditorNota(mm);
     }));
+}
+
+function renderizarRevisaoResumo(nota) {
+    const container = document.getElementById("notaRevisaoResumo");
+    if (!container) return;
+    const estado = estadoRevisaoResumo(nota);
+    const dataBase = estado.proximaRevisao || nota.criadaEm || nota.atualizadaEm || hojeISO();
+    const vencida = dataBase <= hojeISO();
+    const descricao = estado.revisoes
+        ? `Revisado ${estado.revisoes} ${estado.revisoes === 1 ? "vez" : "vezes"} · próxima revisão ${vencida ? "pendente desde" : "em"} ${dataBR(dataBase)}`
+        : "Ainda não revisado. A primeira conclusão inicia o ciclo espaçado.";
+    container.innerHTML = `<div class="subject-summary-review-copy"><i class="bi-${vencida ? "arrow-repeat" : "calendar-check"}" aria-hidden="true"></i><div><strong>${vencida ? "Revisão disponível" : "Ciclo de revisão ativo"}</strong><span>${esc(descricao)}</span></div></div><button type="button" id="btnConcluirRevisaoResumo"><i class="bi-check2-circle"></i>${estado.revisoes ? "Registrar nova revisão" : "Marcar como revisado"}</button>`;
+    container.querySelector("#btnConcluirRevisaoResumo")?.addEventListener("click", marcarResumoComoRevisado);
+}
+
+async function marcarResumoComoRevisado() {
+    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return;
+    const materia = materiaPorId(materiaAbertaId);
+    const nota = materia?.notas.find(item => String(item.id) === String(notaSelecionadaId));
+    const botao = document.getElementById("btnConcluirRevisaoResumo");
+    if (!nota || !botao) return;
+    const tagsAnteriores = [...(nota.tags || [])];
+    const estadoAnterior = estadoRevisaoResumo(nota);
+    const revisoes = estadoAnterior.revisoes + 1;
+    const intervalo = INTERVALOS_REVISAO_RESUMO[Math.min(revisoes - 1, INTERVALOS_REVISAO_RESUMO.length - 1)];
+    const novoEstado = { revisoes, ultimaRevisaoEm: hojeISO(), proximaRevisao: somarDias(hojeISO(), intervalo) };
+    const novasTags = [...tagsAnteriores.filter(tag => !String(tag).startsWith(PREFIXO_REVISAO_RESUMO)), tagRevisaoResumo(novoEstado)];
+    operacaoNotaEmAndamento = true;
+    botao.disabled = true;
+    botao.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Registrando…';
+    try {
+        const registroRemoto = await exigirNuvemNotas().atualizar(nota.id, { tags: novasTags });
+        try {
+            atualizarMateria(materia.id, atual => {
+                const resumo = atual.notas.find(item => String(item.id) === String(nota.id));
+                if (resumo) {
+                    resumo.tags = novasTags;
+                    resumo.atualizadaEm = registroRemoto.atualizadaEm || resumo.atualizadaEm;
+                }
+            });
+        } catch (erroLocal) {
+            await exigirNuvemNotas().atualizar(nota.id, { tags: tagsAnteriores });
+            throw erroLocal;
+        }
+        renderizarWorkspace();
+        renderizarMaterias();
+        renderizarHoje();
+        renderizarCentralRevisoes();
+    } catch (erro) {
+        console.error("Falha ao registrar a revisão do resumo", erro);
+        alert("A revisão não foi registrada porque não foi possível confirmar a operação na nuvem.");
+        renderizarRevisaoResumo(nota);
+    } finally {
+        operacaoNotaEmAndamento = false;
+    }
 }
 
 function renderizarEditorNota(m) {
@@ -8491,6 +8631,7 @@ function renderizarEditorNota(m) {
     chip.hidden = !origem.fonte;
     chip.innerHTML = origem.fonte ? `<button type="button" title="${esc(origem.fonte)}"><i class="bi-file-earmark-text"></i><span>Origem: ${esc(textoResumoLegivel(origem.fonte))}</span><i class="bi-box-arrow-up-right"></i></button>` : "";
     chip.querySelector("button")?.addEventListener("click", () => void abrirFonteResumo(nota, m, origem));
+    renderizarRevisaoResumo(nota);
     document.getElementById("btnFixarNota").className = "btn flex-shrink-0 " + (nota.fixada ? "btn-warning" : "btn-outline-warning");
     document.getElementById("infoNota").textContent = `Criada em ${dataBR(nota.criadaEm)} · ${(nota.conteudo || "").length} caracteres`;
     const preview = document.getElementById("previewNota");
@@ -8533,7 +8674,7 @@ function capturarNotaParaSalvar() {
     const notaAtual = materiaPorId(materiaAbertaId)?.notas.find(nota => String(nota.id) === String(notaSelecionadaId));
     const fonte = document.getElementById("notaFonteOriginal").value.trim();
     const corpo = editorResumoParaMarkdown();
-    const tagsSistema = (notaAtual?.tags || []).filter(tag => String(tag).startsWith(PREFIXO_FONTE_RESUMO));
+    const tagsSistema = tagsSistemaResumo(notaAtual);
     return {
         materiaId: materiaAbertaId,
         notaId: notaSelecionadaId,
