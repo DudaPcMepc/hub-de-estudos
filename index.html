@@ -12445,10 +12445,16 @@ let quizAtual = [];
 let tentativasSimulado = [];
 let tentativaAtualId = null;
 let tentativaDetalheId = null;
+let nuvemFiltrosSimuladoDisponivel = true;
 
 function exigirNuvemSimulados() {
     if (!window.HUB_CLOUD_QUIZZES) throw new Error("O histórico seguro de simulados ainda não está disponível.");
     return window.HUB_CLOUD_QUIZZES;
+}
+
+function exigirNuvemFiltrosSimulado() {
+    if (!window.HUB_CLOUD_QUIZ_FILTERS) throw new Error("A sincronização dos filtros ainda não está disponível.");
+    return window.HUB_CLOUD_QUIZ_FILTERS;
 }
 
 function popularTopicosSimulado(preferido = "") {
@@ -12562,7 +12568,22 @@ function aplicarFiltroSimuladoSalvo(id) {
     if (usaAvancados) bootstrap.Collapse.getOrCreateInstance(document.getElementById("filtrosAvancadosSimulado"), { toggle: false }).show();
 }
 
-function salvarFiltroAtualSimulado() {
+function informarEstadoFiltrosSimulado(mensagem, icone = "bi-cloud-check") {
+    const painel = document.getElementById("contadorQuestoesCompativeis");
+    if (painel) painel.innerHTML = `<i class="${esc(icone)}"></i>${esc(mensagem)}`;
+}
+
+async function persistirFiltrosSimuladoSalvos(filtros) {
+    if (!nuvemFiltrosSimuladoDisponivel) {
+        salvar(LS.filtrosSimuladoSalvos, filtros);
+        return filtros;
+    }
+    const sincronizados = await exigirNuvemFiltrosSimulado().substituir(filtros);
+    salvar(LS.filtrosSimuladoSalvos, sincronizados);
+    return sincronizados;
+}
+
+async function salvarFiltroAtualSimulado() {
     const config = capturarFiltroAtualSimulado();
     if (!config.materiaId) {
         document.getElementById("simMateria")?.focus();
@@ -12573,8 +12594,19 @@ function salvarFiltroAtualSimulado() {
     const existente = atuais.find(filtro => assinatura(filtro) === assinatura(config));
     const salvo = existente ? { ...existente, ...config, nome: nomeFiltroSimulado(config) } : { id: novoId(), nome: nomeFiltroSimulado(config), ...config };
     const filtros = [salvo, ...atuais.filter(filtro => filtro.id !== salvo.id)].slice(0, 12);
-    salvar(LS.filtrosSimuladoSalvos, filtros);
-    renderizarFiltrosSimuladoSalvos(salvo.id);
+    const botao = document.getElementById("btnSalvarFiltroSimulado");
+    botao.disabled = true;
+    try {
+        const sincronizados = await persistirFiltrosSimuladoSalvos(filtros);
+        const selecionado = sincronizados.find(filtro => String(filtro.id) === String(salvo.id))?.id || "";
+        renderizarFiltrosSimuladoSalvos(selecionado);
+        informarEstadoFiltrosSimulado(nuvemFiltrosSimuladoDisponivel ? "Filtro salvo e sincronizado na nuvem." : "Filtro salvo neste dispositivo; a nuvem será ativada após a atualização.");
+    } catch (erro) {
+        console.error("Falha ao sincronizar filtro de simulado", erro);
+        informarEstadoFiltrosSimulado("Não foi possível salvar o filtro na nuvem. Tente novamente.", "bi-cloud-slash");
+    } finally {
+        botao.disabled = false;
+    }
 }
 
 function atualizarContadorQuestoesCompativeis() {
@@ -12760,13 +12792,23 @@ document.getElementById("filtrosSimuladoSalvos").addEventListener("change", even
     document.getElementById("btnExcluirFiltroSimulado").classList.toggle("d-none", !id);
     if (id) aplicarFiltroSimuladoSalvo(id);
 });
-document.getElementById("btnSalvarFiltroSimulado").addEventListener("click", salvarFiltroAtualSimulado);
-document.getElementById("btnExcluirFiltroSimulado").addEventListener("click", () => {
+document.getElementById("btnSalvarFiltroSimulado").addEventListener("click", () => salvarFiltroAtualSimulado());
+document.getElementById("btnExcluirFiltroSimulado").addEventListener("click", async () => {
     const select = document.getElementById("filtrosSimuladoSalvos");
+    const botao = document.getElementById("btnExcluirFiltroSimulado");
     const filtro = obterFiltrosSimuladoSalvos().find(item => String(item.id) === String(select.value));
     if (!filtro || !confirm(`Excluir o filtro salvo “${filtro.nome || nomeFiltroSimulado(filtro)}”?`)) return;
-    salvar(LS.filtrosSimuladoSalvos, obterFiltrosSimuladoSalvos().filter(item => String(item.id) !== String(filtro.id)));
-    renderizarFiltrosSimuladoSalvos();
+    botao.disabled = true;
+    try {
+        await persistirFiltrosSimuladoSalvos(obterFiltrosSimuladoSalvos().filter(item => String(item.id) !== String(filtro.id)));
+        renderizarFiltrosSimuladoSalvos();
+        informarEstadoFiltrosSimulado(nuvemFiltrosSimuladoDisponivel ? "Filtro excluído também da nuvem." : "Filtro excluído deste dispositivo.");
+    } catch (erro) {
+        console.error("Falha ao excluir filtro de simulado", erro);
+        informarEstadoFiltrosSimulado("Não foi possível excluir o filtro da nuvem. Tente novamente.", "bi-cloud-slash");
+    } finally {
+        botao.disabled = false;
+    }
 });
 document.getElementById("btnLimparFiltrosSimulado").addEventListener("click", () => {
     document.getElementById("formGerarSimulado").reset();
@@ -13541,7 +13583,7 @@ window.obterDadosParaPreviaMigracao = () => {
         }
     };
 };
-window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }, registrosEstudoRemotos = [], tentativasSimuladoRemotas = []) => {
+window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto = [], widgetsRemotos = [], documentosJuridicosRemotos = [], colecoesVadeRemotas = [], grifosJuridicosRemotos = [], estadoLeituraJuridicaRemoto = { favoritos: [], historico: [] }, registrosEstudoRemotos = [], tentativasSimuladoRemotas = [], filtrosSimuladoSalvosRemotos = null) => {
     geracaoSessaoHub += 1;
     materiasEditalExpandidas.clear();
     editorTopicoEdital = null;
@@ -13574,6 +13616,14 @@ window.iniciarHub = async (contexto, materiasRemotas, topicosRemotos, notasRemot
     sincronizarListaDeErros(errosRemotos);
     sincronizarDesempenho(desempenhoRemoto);
     sincronizarTentativasSimulado(tentativasSimuladoRemotas);
+    nuvemFiltrosSimuladoDisponivel = Array.isArray(filtrosSimuladoSalvosRemotos);
+    if (nuvemFiltrosSimuladoDisponivel) {
+        const filtrosLocais = obterFiltrosSimuladoSalvos();
+        const filtrosSincronizados = filtrosSimuladoSalvosRemotos.length === 0 && filtrosLocais.length
+            ? await exigirNuvemFiltrosSimulado().substituir(filtrosLocais)
+            : filtrosSimuladoSalvosRemotos;
+        salvar(LS.filtrosSimuladoSalvos, filtrosSincronizados);
+    }
     limparFiltrosDeMaterias();
     window.HUB_SESSION_CONTEXT = Object.freeze({ ...contexto });
     document.getElementById("usuarioAtual").textContent = contexto.displayName || contexto.email || "Usuário";
@@ -13619,6 +13669,7 @@ window.encerrarHub = () => {
     tentativasSimulado = [];
     tentativaAtualId = null;
     tentativaDetalheId = null;
+    nuvemFiltrosSimuladoDisponivel = true;
     offsetSemana = 0;
     offsetDiaMobile = 0;
     catalogoMaterias = [];

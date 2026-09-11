@@ -866,6 +866,29 @@ test("os filtros de simulados podem ser salvos e mostram a disponibilidade antes
     assert.match(html, /VERSAO_BACKUP = 14/);
 });
 
+test("os filtros salvos de simulados sincronizam de forma privada e atômica", () => {
+    const html = readProjectFile("index.html");
+    const auth = readProjectFile("src/auth.js");
+    const repository = readProjectFile("src/cloud-core-repository.js");
+    const migration = readProjectFile("supabase/migrations/202609110001_private_quiz_filter_presets.sql");
+
+    assert.match(auth, /window\.HUB_CLOUD_QUIZ_FILTERS = Object\.freeze/);
+    assert.match(auth, /carregarFiltrosSimuladoSalvos\(\)/);
+    assert.match(repository, /export async function carregarFiltrosSimuladoSalvos\(\)/);
+    assert.match(repository, /export async function substituirFiltrosSimuladoSalvos\(filtros\)/);
+    assert.match(repository, /supabase\.rpc\("replace_quiz_filter_presets"/);
+    assert.match(html, /async function persistirFiltrosSimuladoSalvos\(filtros\)/);
+    assert.match(html, /Filtro salvo e sincronizado na nuvem/);
+    assert.match(html, /filtrosSimuladoSalvosRemotos\.length === 0 && filtrosLocais\.length/);
+    assert.match(migration, /create table public\.quiz_filter_presets/);
+    assert.match(migration, /alter table public\.quiz_filter_presets force row level security/);
+    assert.match(migration, /user_id = \(select auth\.uid\(\)\)/);
+    assert.match(migration, /jsonb_array_length\(target_presets\) > 12/);
+    assert.match(migration, /create or replace function public\.replace_quiz_filter_presets/);
+    assert.match(migration, /perform public\.replace_quiz_filter_presets/);
+    assert.match(migration, /revoke all on function public\.replace_quiz_filter_presets\(uuid, jsonb\) from public, anon/);
+});
+
 test("o caderno de erros usa cadastro compacto, explicação multilinha e consulta organizada", () => {
     const html = readProjectFile("index.html");
 
