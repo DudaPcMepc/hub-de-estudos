@@ -420,6 +420,33 @@
     .review-hub-metric strong, .review-hub-metric span { display: block; }
     .review-hub-metric strong { color: var(--pimentel-cafe); font-size: 1.05rem; line-height: 1.1; }
     .review-hub-metric span { margin-top: .15rem; color: #806d65; font-size: .65rem; }
+    .review-results { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: .75rem; margin-bottom: 1rem; }
+    .review-results-card { min-width: 0; padding: 1rem; background: linear-gradient(145deg, #fffdf9, #f8f0e9); border: 1px solid rgba(59, 41, 35, .1); border-radius: .95rem; box-shadow: 0 .25rem .8rem rgba(59, 41, 35, .04); }
+    .review-results-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; margin-bottom: .8rem; }
+    .review-results-heading h2 { margin: 0; color: var(--pimentel-cafe); font-size: .88rem; }
+    .review-results-heading p { margin: .18rem 0 0; color: #806d65; font-size: .64rem; }
+    .review-results-period { padding: .2rem .48rem; color: #6f5aa8; background: rgba(111, 90, 168, .1); border-radius: 999px; font-size: .6rem; font-weight: 750; white-space: nowrap; }
+    .review-results-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+    .review-result-stat { min-width: 0; padding: .65rem; background: rgba(255, 255, 255, .72); border: 1px solid rgba(59, 41, 35, .07); border-radius: .7rem; }
+    .review-result-stat strong, .review-result-stat span { display: block; }
+    .review-result-stat strong { color: #49352e; font-size: 1.12rem; line-height: 1; }
+    .review-result-stat span { margin-top: .25rem; color: #806d65; font-size: .61rem; line-height: 1.3; }
+    .review-retention-track { height: .48rem; display: flex; overflow: hidden; margin-top: .75rem; background: rgba(91, 67, 58, .08); border-radius: 999px; }
+    .review-retention-track span { min-width: 0; transition: width .2s ease; }
+    .review-retention-track .is-strong { background: #4f8b64; }
+    .review-retention-track .is-partial { background: #d49a32; }
+    .review-retention-track .is-weak { background: #bd5148; }
+    .review-result-insight { display: flex; align-items: flex-start; gap: .55rem; margin-top: .7rem; padding: .58rem .65rem; color: #654f46; background: rgba(111, 90, 168, .07); border-radius: .65rem; font-size: .65rem; line-height: 1.4; }
+    .review-result-insight i { color: #6f5aa8; }
+    .review-upcoming-list { display: grid; gap: .45rem; }
+    .review-upcoming-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .52rem .58rem; background: rgba(255, 255, 255, .7); border-radius: .65rem; }
+    .review-upcoming-date { width: 2.55rem; height: 2.55rem; display: grid; place-items: center; align-content: center; color: #6f5aa8; background: rgba(111, 90, 168, .1); border-radius: .62rem; font-size: .56rem; font-weight: 750; line-height: 1.05; text-align: center; text-transform: uppercase; }
+    .review-upcoming-date strong { font-size: .88rem; }
+    .review-upcoming-copy strong, .review-upcoming-copy span { display: block; }
+    .review-upcoming-copy strong { color: #503b33; font-size: .7rem; }
+    .review-upcoming-copy span { margin-top: .1rem; color: #806d65; font-size: .6rem; }
+    .review-upcoming-count { padding: .2rem .45rem; color: #5e4b43; background: rgba(91, 67, 58, .07); border-radius: 999px; font-size: .58rem; font-weight: 750; }
+    .review-results-empty { padding: .85rem; color: #806d65; background: rgba(255,255,255,.62); border: 1px dashed rgba(59,41,35,.13); border-radius: .7rem; font-size: .67rem; text-align: center; }
     .review-hub-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .7fr); gap: 1rem; align-items: start; }
     .review-hub-panel { overflow: hidden; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .1); border-radius: 1rem; box-shadow: 0 .35rem 1rem rgba(59, 41, 35, .05); }
     .review-hub-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .65rem; padding: .9rem 1rem; border-bottom: 1px solid rgba(59, 41, 35, .08); }
@@ -493,9 +520,9 @@
     .guided-review-complete i { color: #c08a22; font-size: 3rem; }
     .guided-review-complete h3 { color: #49352e; }
     @media (max-width: 575.98px) { .guided-review-rating, .guided-review-type-grid { grid-template-columns: 1fr; } .guided-review-body { min-height: 340px; } .guided-review-resume { align-items: stretch; flex-direction: column; } }
-    @media (max-width: 991.98px) { .review-hub-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 991.98px) { .review-hub-layout, .review-results { grid-template-columns: 1fr; } }
     @media (max-width: 767.98px) { .review-hub-metrics { grid-template-columns: 1fr 1fr; } .review-hub-heading { align-items: stretch; flex-direction: column; } .review-hub-heading .btn { align-self: flex-start; } }
-    @media (max-width: 575.98px) { .review-hub-metrics { gap: .45rem; } .review-hub-metric { padding: .65rem; } .review-queue-item { grid-template-columns: auto minmax(0, 1fr); } .review-queue-action { grid-column: 1 / -1; width: 100%; } .review-hub-panel-header { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 575.98px) { .review-hub-metrics { gap: .45rem; } .review-hub-metric { padding: .65rem; } .review-results-summary { grid-template-columns: 1fr; } .review-queue-item { grid-template-columns: auto minmax(0, 1fr); } .review-queue-action { grid-column: 1 / -1; width: 100%; } .review-hub-panel-header { align-items: flex-start; flex-direction: column; } }
     .today-empty { min-height: 220px; display: grid; place-items: center; align-content: center; gap: .35rem; padding: 1.5rem; color: var(--pimentel-cafe-claro); text-align: center; }
     .today-empty i { color: #4f8a67; font-size: 2rem; }
     .today-empty strong { color: var(--pimentel-cafe); }
@@ -2822,6 +2849,7 @@
                 <button type="button" class="btn rounded-pill" id="btnIniciarCentralRevisoes"><i class="bi-play-fill me-1"></i>Iniciar revisão</button>
             </header>
             <section class="review-hub-metrics" id="metricasCentralRevisoes" aria-label="Resumo das revisões"></section>
+            <section class="review-results" id="resultadosCentralRevisoes" aria-label="Desempenho e próximas revisões"></section>
             <div class="review-hub-layout">
                 <section class="review-hub-panel" aria-labelledby="tituloFilaCentralRevisoes">
                     <header class="review-hub-panel-header"><h2 id="tituloFilaCentralRevisoes"><i class="bi-list-check me-1"></i>Fila recomendada</h2><div class="review-hub-filters" role="group" aria-label="Filtrar revisões"><button type="button" class="review-hub-filter is-active" data-review-filter="todos">Tudo</button><button type="button" class="review-hub-filter" data-review-filter="topicos">Tópicos</button><button type="button" class="review-hub-filter" data-review-filter="resumos">Resumos</button><button type="button" class="review-hub-filter" data-review-filter="cards">Flashcards</button><button type="button" class="review-hub-filter" data-review-filter="erros">Erros</button></div></header>
@@ -4188,7 +4216,8 @@ const LS = {
     edital: "hub_edital",
     erros: "hub_erros",
     desempenho: "hub_desempenho",
-    sessaoRevisao: "hub_sessao_revisao"
+    sessaoRevisao: "hub_sessao_revisao",
+    historicoSessoesRevisao: "hub_historico_sessoes_revisao"
 };
 
 const CHAVE_GEMINI_LEGADA = "hub_gemini_api_key";
@@ -4657,6 +4686,58 @@ let concluidasAntesSessaoGuiadaRevisao = 0;
 let itemExternoSessaoGuiadaRevisao = null;
 let tiposSessaoGuiadaRevisao = new Set(["topico", "resumo", "card", "erro"]);
 let limiteSessaoGuiadaRevisao = 0;
+let idSessaoGuiadaRevisao = null;
+let iniciadaEmSessaoGuiadaRevisao = null;
+let resultadosSessaoGuiadaRevisao = [];
+
+function historicoSessoesRevisao() {
+    const historico = carregar(LS.historicoSessoesRevisao, []);
+    return Array.isArray(historico) ? historico.filter(sessao => sessao && Array.isArray(sessao.resultados)).slice(0, 60) : [];
+}
+
+function registrarResultadoSessaoGuiada(item, retencao = "good", status = "concluido") {
+    if (!item) return;
+    const chave = `${item.tipo}:${String(item.id)}`;
+    const resultado = {
+        chave,
+        tipo: item.tipo,
+        itemId: String(item.id),
+        materiaId: item.materiaId,
+        titulo: item.titulo,
+        retencao: ["forgot", "partial", "good", "mastered"].includes(retencao) ? retencao : "good",
+        status,
+        registradoEm: new Date().toISOString()
+    };
+    resultadosSessaoGuiadaRevisao = [...resultadosSessaoGuiadaRevisao.filter(valor => valor.chave !== chave), resultado];
+}
+
+function retencaoAtualDoItemRevisao(item) {
+    if (item.tipo === "topico") return obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.retencao || "good";
+    if (item.tipo === "erro") return obterErros().find(erro => String(erro.id) === String(item.id))?.ultimaRetencao || "good";
+    if (item.tipo === "card") {
+        const card = materiaPorId(item.materiaId)?.cards.find(valor => String(valor.id) === String(item.id));
+        return Number(card?.caixa || 1) >= 5 ? "mastered" : "good";
+    }
+    return "good";
+}
+
+function concluirHistoricoSessaoGuiada() {
+    if (!idSessaoGuiadaRevisao || !resultadosSessaoGuiadaRevisao.length) return null;
+    const historico = historicoSessoesRevisao();
+    const existente = historico.find(sessao => sessao.id === idSessaoGuiadaRevisao);
+    if (existente) return existente;
+    const concluidaEm = new Date().toISOString();
+    const sessao = {
+        id: idSessaoGuiadaRevisao,
+        iniciadaEm: iniciadaEmSessaoGuiadaRevisao || concluidaEm,
+        concluidaEm,
+        resultados: resultadosSessaoGuiadaRevisao,
+        total: totalPlanejadoSessaoGuiadaRevisao,
+        pulados: resultadosSessaoGuiadaRevisao.filter(item => item.status === "pulado").length
+    };
+    salvar(LS.historicoSessoesRevisao, [sessao, ...historico].slice(0, 60));
+    return sessao;
+}
 
 function minutosEstimadosItemRevisao(item) {
     if (item.tipo === "topico") return Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20;
@@ -4696,6 +4777,9 @@ function salvarEstadoSessaoGuiadaRevisao() {
         concluidas: concluidasAntesSessaoGuiadaRevisao + indiceSessaoGuiadaRevisao,
         total: totalPlanejadoSessaoGuiadaRevisao,
         pulados: puladosSessaoGuiadaRevisao,
+        sessaoId: idSessaoGuiadaRevisao,
+        iniciadaEm: iniciadaEmSessaoGuiadaRevisao,
+        resultados: resultadosSessaoGuiadaRevisao,
         atualizadoEm: new Date().toISOString()
     });
 }
@@ -4718,6 +4802,9 @@ function iniciarFilaSessaoGuiada(fila, opcoes = {}) {
     puladosSessaoGuiadaRevisao = Number(opcoes.pulados) || 0;
     concluidasAntesSessaoGuiadaRevisao = Number(opcoes.concluidas) || 0;
     totalPlanejadoSessaoGuiadaRevisao = Math.max(fila.length + concluidasAntesSessaoGuiadaRevisao, Number(opcoes.total) || 0);
+    idSessaoGuiadaRevisao = opcoes.sessaoId || novoId();
+    iniciadaEmSessaoGuiadaRevisao = opcoes.iniciadaEm || new Date().toISOString();
+    resultadosSessaoGuiadaRevisao = Array.isArray(opcoes.resultados) ? opcoes.resultados : [];
     itemExternoSessaoGuiadaRevisao = null;
     salvarEstadoSessaoGuiadaRevisao();
     renderizarSessaoGuiadaRevisao();
@@ -4776,10 +4863,15 @@ function renderizarSessaoGuiadaRevisao() {
     progresso.setAttribute("aria-valuenow", String(percentual));
     progresso.querySelector("span").style.width = `${percentual}%`;
     if (!item) {
+        const sessaoConcluida = concluirHistoricoSessaoGuiada();
         removerEstadoSessaoGuiadaRevisao();
         contador.textContent = total ? `${total} de ${total} etapas concluídas` : "Nenhuma pendência agora";
-        conteudo.innerHTML = `<div class="guided-review-complete"><i class="bi-trophy-fill" aria-hidden="true"></i><h3 class="h4 mb-0">Sessão concluída</h3><p class="text-muted mb-0">${total ? `${total - puladosSessaoGuiadaRevisao} revisões registradas${puladosSessaoGuiadaRevisao ? ` · ${puladosSessaoGuiadaRevisao} pulada${puladosSessaoGuiadaRevisao === 1 ? "" : "s"}` : ""}.` : "Suas revisões estão em dia."}</p><button type="button" class="btn btn-primary rounded-pill mt-2" data-bs-dismiss="modal">Finalizar sessão</button></div>`;
+        const avaliadas = sessaoConcluida?.resultados.filter(resultado => resultado.status !== "pulado") || [];
+        const positivas = avaliadas.filter(resultado => ["good", "mastered"].includes(resultado.retencao)).length;
+        const aproveitamento = avaliadas.length ? Math.round((positivas / avaliadas.length) * 100) : 0;
+        conteudo.innerHTML = `<div class="guided-review-complete"><i class="bi-trophy-fill" aria-hidden="true"></i><h3 class="h4 mb-0">Sessão concluída</h3><p class="text-muted mb-0">${total ? `${total - puladosSessaoGuiadaRevisao} revisões registradas${puladosSessaoGuiadaRevisao ? ` · ${puladosSessaoGuiadaRevisao} pulada${puladosSessaoGuiadaRevisao === 1 ? "" : "s"}` : ""}.` : "Suas revisões estão em dia."}</p>${avaliadas.length ? `<span class="badge rounded-pill text-bg-success">${aproveitamento}% de retenção positiva</span>` : ""}<button type="button" class="btn btn-primary rounded-pill mt-2" data-bs-dismiss="modal">Ver resultados</button></div>`;
         acoes.classList.add("d-none");
+        renderizarCentralRevisoes();
         return;
     }
     acoes.classList.remove("d-none");
@@ -4799,6 +4891,7 @@ function renderizarSessaoGuiadaRevisao() {
         conteudo.querySelectorAll("[data-guided-summary-retention]").forEach(itemBotao => { itemBotao.disabled = true; });
         const salvou = await registrarRevisaoResumo(item.materiaId, item.id, botao.dataset.guidedSummaryRetention, botao);
         if (salvou) {
+            registrarResultadoSessaoGuiada(item, botao.dataset.guidedSummaryRetention);
             indiceSessaoGuiadaRevisao += 1;
             salvarEstadoSessaoGuiadaRevisao();
             renderizarSessaoGuiadaRevisao();
@@ -4831,7 +4924,11 @@ function retomarSessaoGuiadaRevisao(tipo) {
     if (!aguardando || aguardando.tipo !== tipo) return;
     window.setTimeout(() => {
         const continuaPendente = itensDaCentralRevisoes().some(item => item.tipo === aguardando.tipo && String(item.id) === String(aguardando.id));
-        if (!continuaPendente) indiceSessaoGuiadaRevisao += 1;
+        if (!continuaPendente) {
+            const itemConcluido = filaSessaoGuiadaRevisao[indiceSessaoGuiadaRevisao];
+            registrarResultadoSessaoGuiada(itemConcluido, retencaoAtualDoItemRevisao(itemConcluido));
+            indiceSessaoGuiadaRevisao += 1;
+        }
         itemExternoSessaoGuiadaRevisao = null;
         salvarEstadoSessaoGuiadaRevisao();
         renderizarSessaoGuiadaRevisao();
@@ -4841,6 +4938,50 @@ function retomarSessaoGuiadaRevisao(tipo) {
 
 function iniciarProximaRevisaoCentral() {
     iniciarSessaoGuiadaRevisao();
+}
+
+function proximasDatasDeRevisao() {
+    const hoje = hojeISO();
+    const datas = [];
+    obterTarefas().forEach(item => { if (item.proximaRevisao > hoje) datas.push({ data: item.proximaRevisao, tipo: "Tópico" }); });
+    materiasNormalizadas().forEach(materia => {
+        materia.notas.forEach(nota => { const estado = estadoRevisaoResumo(nota); if (estado.proximaRevisao > hoje) datas.push({ data: estado.proximaRevisao, tipo: "Resumo" }); });
+        materia.cards.forEach(card => { if (card.proxima > hoje) datas.push({ data: card.proxima, tipo: "Flashcard" }); });
+    });
+    obterErros().forEach(item => { if (item.estadoRevisao !== "mastered" && item.proximaRevisao > hoje) datas.push({ data: item.proximaRevisao, tipo: "Erro" }); });
+    const grupos = new Map();
+    datas.sort((a, b) => a.data.localeCompare(b.data)).forEach(item => {
+        const grupo = grupos.get(item.data) || { data: item.data, total: 0, tipos: new Set() };
+        grupo.total += 1;
+        grupo.tipos.add(item.tipo);
+        grupos.set(item.data, grupo);
+    });
+    return [...grupos.values()].slice(0, 3);
+}
+
+function renderizarResultadosCentralRevisoes() {
+    const container = document.getElementById("resultadosCentralRevisoes");
+    if (!container) return;
+    const historico = historicoSessoesRevisao();
+    const ultimaSessao = historico[0] || null;
+    const limite = Date.now() - 7 * 86400000;
+    const recentes = historico.filter(sessao => new Date(sessao.concluidaEm).getTime() >= limite).flatMap(sessao => sessao.resultados).filter(item => item.status !== "pulado");
+    const positivas = recentes.filter(item => ["good", "mastered"].includes(item.retencao)).length;
+    const parciais = recentes.filter(item => item.retencao === "partial").length;
+    const reforcos = recentes.filter(item => item.retencao === "forgot").length;
+    const retencao = recentes.length ? Math.round((positivas / recentes.length) * 100) : 0;
+    const dificuldades = recentes.filter(item => ["forgot", "partial"].includes(item.retencao)).reduce((mapa, item) => mapa.set(String(item.materiaId), (mapa.get(String(item.materiaId)) || 0) + 1), new Map());
+    const materiaReforco = [...dificuldades.entries()].sort((a, b) => b[1] - a[1])[0];
+    const insight = materiaReforco ? `${nomeDaMateria(materiaReforco[0])} concentrou mais respostas de reforço. Ela ganhará prioridade nas próximas filas.` : recentes.length ? "Sua retenção está equilibrada. Continue avaliando com sinceridade para ajustar os intervalos." : "Conclua uma sessão guiada para descobrir onde concentrar seu próximo estudo.";
+    const proximas = proximasDatasDeRevisao();
+    const htmlProximas = proximas.length ? proximas.map(grupo => {
+        const data = new Date(`${grupo.data}T12:00:00`);
+        const dia = String(data.getDate()).padStart(2, "0");
+        const mes = data.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+        return `<div class="review-upcoming-item"><span class="review-upcoming-date"><strong>${dia}</strong>${esc(mes)}</span><div class="review-upcoming-copy"><strong>${grupo.data === somarDias(hojeISO(), 1) ? "Amanhã" : dataBR(grupo.data)}</strong><span>${esc([...grupo.tipos].join(" · "))}</span></div><span class="review-upcoming-count">${grupo.total} ${grupo.total === 1 ? "item" : "itens"}</span></div>`;
+    }).join("") : '<div class="review-results-empty"><i class="bi-calendar2-check me-1"></i>Nenhuma revisão futura foi agendada ainda.</div>';
+    const ultimaDescricao = ultimaSessao ? `Última sessão: ${ultimaSessao.resultados.filter(item => item.status !== "pulado").length} itens · ${new Date(ultimaSessao.concluidaEm).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}` : "Resultados consolidados das sessões guiadas.";
+    container.innerHTML = `<article class="review-results-card"><div class="review-results-heading"><div><h2><i class="bi-graph-up-arrow me-1"></i>Seu desempenho</h2><p>${esc(ultimaDescricao)}</p></div><span class="review-results-period">Últimos 7 dias</span></div>${recentes.length ? `<div class="review-results-summary"><div class="review-result-stat"><strong>${recentes.length}</strong><span>itens revisados</span></div><div class="review-result-stat"><strong>${retencao}%</strong><span>retenção positiva</span></div><div class="review-result-stat"><strong>${reforcos + parciais}</strong><span>pedem reforço</span></div></div><div class="review-retention-track" aria-label="Distribuição da retenção"><span class="is-strong" style="width:${positivas / recentes.length * 100}%"></span><span class="is-partial" style="width:${parciais / recentes.length * 100}%"></span><span class="is-weak" style="width:${reforcos / recentes.length * 100}%"></span></div>` : '<div class="review-results-empty">Os resultados aparecerão aqui após sua primeira sessão guiada.</div>'}<div class="review-result-insight"><i class="bi-lightbulb-fill" aria-hidden="true"></i><span>${esc(insight)}</span></div></article><article class="review-results-card"><div class="review-results-heading"><div><h2><i class="bi-calendar2-week me-1"></i>Próximas revisões</h2><p>O que já está programado no seu ciclo.</p></div></div><div class="review-upcoming-list">${htmlProximas}</div></article>`;
 }
 
 function renderizarCentralRevisoes() {
@@ -4862,6 +5003,7 @@ function renderizarCentralRevisoes() {
         ["bi-journal-x", errosVencidos.length, "erros para reforçar"],
         ["bi-clock", formatarDuracao(estimativa), "tempo estimado"]
     ].map(([icone, valor, rotulo]) => `<article class="review-hub-metric"><i class="${icone}" aria-hidden="true"></i><div><strong>${esc(valor)}</strong><span>${esc(rotulo)}</span></div></article>`).join("");
+    renderizarResultadosCentralRevisoes();
     const botaoIniciar = document.getElementById("btnIniciarCentralRevisoes");
     const sessaoSalva = sessaoGuiadaSalva();
     botaoIniciar.disabled = fila.length === 0;
@@ -4895,7 +5037,9 @@ function renderizarCentralRevisoes() {
 document.getElementById("btnIniciarCentralRevisoes").addEventListener("click", iniciarProximaRevisaoCentral);
 document.getElementById("btnAbrirItemSessaoGuiadaRevisao").addEventListener("click", abrirEtapaExternaSessaoGuiadaRevisao);
 document.getElementById("btnPularSessaoGuiadaRevisao").addEventListener("click", () => {
-    if (!itemAtualSessaoGuiadaRevisao()) return;
+    const item = itemAtualSessaoGuiadaRevisao();
+    if (!item) return;
+    registrarResultadoSessaoGuiada(item, "good", "pulado");
     indiceSessaoGuiadaRevisao += 1;
     puladosSessaoGuiadaRevisao += 1;
     salvarEstadoSessaoGuiadaRevisao();
@@ -12775,7 +12919,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 12;
+const VERSAO_BACKUP = 13;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -13077,13 +13221,28 @@ function validarPayloadBackup(payload) {
         const acertos = numeroBackup(valor.acertos, "Total de acertos", 0, total);
         desempenho[id] = { acertos, total };
     });
-    return { materias, tarefas, registrosEstudo, edital, erros, desempenho, simulados };
+    const historicoSessoesRevisao = versao >= 13 ? listaBackup(dados.historicoSessoesRevisao || [], "Histórico das sessões de revisão", 60).map((sessao, indice) => {
+        objetoBackup(sessao, `Sessão de revisão ${indice + 1}`);
+        const resultados = listaBackup(sessao.resultados, `Resultados da sessão ${indice + 1}`, 1000).map((resultado, posicao) => {
+            objetoBackup(resultado, `Resultado ${posicao + 1} da sessão ${indice + 1}`);
+            if (!["topico", "resumo", "card", "erro"].includes(resultado.tipo)) throw new Error(`Tipo do resultado ${posicao + 1} inválido.`);
+            if (!["forgot", "partial", "good", "mastered"].includes(resultado.retencao)) throw new Error(`Retenção do resultado ${posicao + 1} inválida.`);
+            if (!["concluido", "pulado"].includes(resultado.status)) throw new Error(`Status do resultado ${posicao + 1} inválido.`);
+            return { chave: textoBackup(resultado.chave, "Chave do resultado", 180), tipo: resultado.tipo, itemId: textoBackup(resultado.itemId, "ID do item revisado", 100), materiaId: textoBackup(String(resultado.materiaId || ""), "ID da matéria revisada", 100), titulo: textoBackup(resultado.titulo || "", "Título revisado", 2000), retencao: resultado.retencao, status: resultado.status, registradoEm: instanteBackup(resultado.registradoEm, "Data do resultado") };
+        });
+        const total = numeroBackup(sessao.total, "Total da sessão de revisão", 0, 1000, resultados.length);
+        const pulados = numeroBackup(sessao.pulados, "Itens pulados da sessão", 0, total, resultados.filter(item => item.status === "pulado").length);
+        if (![total, pulados].every(Number.isInteger)) throw new Error(`Totais da sessão de revisão ${indice + 1} inválidos.`);
+        return { id: idBackup(sessao.id, `ID da sessão de revisão ${indice + 1}`), iniciadaEm: instanteBackup(sessao.iniciadaEm, "Início da sessão de revisão"), concluidaEm: instanteBackup(sessao.concluidaEm, "Conclusão da sessão de revisão"), resultados, total, pulados };
+    }) : [];
+    garantirIdsUnicos(historicoSessoesRevisao, "Histórico das sessões de revisão");
+    return { materias, tarefas, registrosEstudo, edital, erros, desempenho, simulados, historicoSessoesRevisao };
 }
 
 function aplicarBackupValidado(dados) {
     const itens = [
         [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.registrosEstudo, dados.registrosEstudo], [LS.edital, dados.edital],
-        [LS.erros, dados.erros], [LS.desempenho, dados.desempenho]
+        [LS.erros, dados.erros], [LS.desempenho, dados.desempenho], [LS.historicoSessoesRevisao, dados.historicoSessoesRevisao]
     ];
     salvarLote(itens, { permitirRecuperacao: true });
 }
@@ -13098,7 +13257,7 @@ document.getElementById("btnExportar").addEventListener("click", () => {
             tarefas: obterTarefas().map(tarefa => ({ ...tarefa, periodo: normalizarPeriodoEstudo(tarefa.periodo) })),
             registrosEstudo: obterRegistrosEstudo().map(registro => ({ ...registro, periodo: normalizarPeriodoEstudo(registro.periodo) })),
             edital: obterEdital(),
-            erros: obterErros(), desempenho: obterDesempenho(), simulados: tentativasSimulado
+            erros: obterErros(), desempenho: obterDesempenho(), simulados: tentativasSimulado, historicoSessoesRevisao: historicoSessoesRevisao()
         }
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
