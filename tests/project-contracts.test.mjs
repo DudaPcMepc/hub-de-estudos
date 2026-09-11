@@ -389,6 +389,21 @@ test("a central registra resultados da sessão e orienta as próximas revisões"
     assert.match(html, /registrarResultadoSessaoGuiada\(item, "good", "pulado"\)/);
 });
 
+test("a retenção recente ajusta a prioridade e o intervalo das revisões", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /function perfilAdaptativoMateria\(materiaId\)/);
+    assert.match(html, /resultados\.length < 2/);
+    assert.match(html, /bonusFila: 0, multiplicadorIntervalo: 1/);
+    assert.match(html, /Math\.max\(-10, Math\.min\(35/);
+    assert.match(html, /function aplicarPerfilAdaptativo\(item, pontosBase\)/);
+    assert.match(html, /Retenção baixa: prioridade maior/);
+    assert.match(html, /function intervaloAdaptativoResumo\(materiaId, retencao, intervaloBase\)/);
+    assert.match(html, /retencao === "forgot"\) return 1/);
+    assert.match(html, /retencao === "mastered"\) return Math\.min\(90/);
+    assert.match(html, /const intervalo = intervaloAdaptativoResumo\(materiaId, retencao, intervaloBase\)/);
+});
+
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
