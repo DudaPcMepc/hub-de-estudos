@@ -2714,7 +2714,7 @@
         .exam-topic-delete,
         .exam-topic-add-child,
         .btn-metrica-edital { min-width: 44px; min-height: 44px; }
-        .exam-matrix-table { margin-inline: -.85rem; border-inline: 0; border-radius: 0; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
+        .exam-matrix-table { overflow-x: auto; overflow-y: hidden; margin-inline: -.85rem; border-inline: 0; border-radius: 0; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
         .exam-matrix-table table { min-width: 690px; }
         .exam-matrix-table thead th:first-child,
         .exam-matrix-table .exam-subject-row > td:first-child { position: sticky; z-index: 2; left: 0; background: #f7eee6; box-shadow: 1px 0 rgba(59,41,35,.1); }
@@ -2746,7 +2746,7 @@
         .subject-summary-style-select,
         .subject-summary-style-select select { height: 44px; }
         .subject-summary-highlight-control { padding-right: 44px; }
-        .subject-summary-highlight-palette { position: fixed; z-index: 1090; right: .75rem; bottom: max(.75rem, env(safe-area-inset-bottom)); width: calc(100vw - 1.5rem); grid-template-columns: repeat(5, 44px); justify-content: space-between; }
+        .subject-summary-highlight-palette { position: fixed; z-index: 1090; top: auto; right: .75rem; bottom: max(.75rem, env(safe-area-inset-bottom)); width: calc(100vw - 1.5rem); grid-template-columns: repeat(5, 44px); justify-content: space-between; }
         .subject-summary-highlight-palette button,
         .subject-summary-highlight-palette .subject-summary-highlight-none { min-height: 44px; }
         .flashcard-editor textarea,
