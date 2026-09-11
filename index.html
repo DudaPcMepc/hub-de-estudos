@@ -923,6 +923,12 @@
     .simulation-filter-chip { padding: .25rem .5rem; color: #5f4c44; background: #fffdf9; border: 1px solid rgba(59, 41, 35, .12); border-radius: 999px; font-size: .68rem; font-weight: 700; }
     .simulation-filter-summary button { flex: 0 0 auto; border: 0; color: #735f57; background: transparent; font-size: .72rem; font-weight: 700; }
     .simulation-filter-summary button:hover { color: var(--pimentel-vermelho); }
+    .simulation-filter-presets { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem; margin-top: .55rem; padding: .55rem .65rem; background: rgba(255,253,249,.72); border: 1px solid rgba(59,41,35,.08); border-radius: .72rem; }
+    .simulation-match-count { display: inline-flex; align-items: center; gap: .35rem; color: #705d54; font-size: .66rem; font-weight: 650; }
+    .simulation-match-count i { color: #6f5aa8; }
+    .simulation-preset-actions { display: flex; align-items: center; gap: .4rem; }
+    .simulation-preset-actions .form-select { width: min(260px, 45vw); min-height: 34px; background-color: #fffdf9; border-color: rgba(59,41,35,.14); font-size: .68rem; }
+    .simulation-preset-actions .btn { min-height: 34px; border-radius: .6rem; font-size: .66rem; font-weight: 700; }
     .ai-callout {
         display: flex;
         align-items: center;
@@ -2659,6 +2665,8 @@
         .simulation-generator-heading { align-items: stretch; flex-direction: column; }
         .simulation-advanced-toggle { align-self: flex-start; }
         .simulation-essential-grid, .simulation-advanced-grid { grid-template-columns: 1fr; }
+        .simulation-filter-presets, .simulation-preset-actions { align-items: stretch; flex-direction: column; }
+        .simulation-preset-actions, .simulation-preset-actions .form-select, .simulation-preset-actions .btn { width: 100%; }
         .simulation-actions { grid-column: auto; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -3097,6 +3105,7 @@
                         </div>
                     </form>
                     <div class="simulation-filter-summary" id="resumoFiltrosSimulado" aria-live="polite"><i class="bi-funnel-fill" aria-hidden="true"></i><div class="simulation-filter-chips"></div><button type="button" id="btnLimparFiltrosSimulado"><i class="bi-x-circle me-1"></i>Limpar filtros</button></div>
+                    <div class="simulation-filter-presets"><span class="simulation-match-count" id="contadorQuestoesCompativeis"><i class="bi-info-circle"></i>Escolha uma fonte para consultar as questões.</span><div class="simulation-preset-actions"><select class="form-select form-select-sm" id="filtrosSimuladoSalvos" aria-label="Aplicar filtro salvo"><option value="">Meus filtros salvos</option></select><button type="button" class="btn btn-sm btn-outline-primary" id="btnSalvarFiltroSimulado"><i class="bi-bookmark-plus me-1"></i>Salvar filtro</button><button type="button" class="btn btn-sm btn-outline-danger d-none" id="btnExcluirFiltroSimulado" aria-label="Excluir filtro selecionado" title="Excluir filtro selecionado"><i class="bi-trash"></i></button></div></div>
                     <div class="ai-callout" role="status">
                         <span class="ai-callout-icon"><i class="bi-shield-lock-fill" aria-hidden="true"></i></span>
                         <div class="ai-callout-copy"><strong>IA protegida pelo servidor</strong>Só os dados necessários são enviados; a chave do Google Gemini nunca aparece no navegador.</div>
@@ -4205,7 +4214,8 @@ const LS = {
     erros: "hub_erros",
     desempenho: "hub_desempenho",
     sessaoRevisao: "hub_sessao_revisao",
-    historicoSessoesRevisao: "hub_historico_sessoes_revisao"
+    historicoSessoesRevisao: "hub_historico_sessoes_revisao",
+    filtrosSimuladoSalvos: "hub_filtros_simulado_salvos"
 };
 
 const CHAVE_GEMINI_LEGADA = "hub_gemini_api_key";
@@ -12470,6 +12480,7 @@ function atualizarFiltrosSimulado() {
     const banca = document.getElementById("simBanca");
     if (banca && !banca.value.trim() && edital.banca) banca.value = edital.banca;
     renderizarResumoFiltrosSimulado();
+    atualizarContadorQuestoesCompativeis();
 }
 
 function renderizarResumoFiltrosSimulado() {
@@ -12484,6 +12495,108 @@ function renderizarResumoFiltrosSimulado() {
         if (document.getElementById("simEvitarAcertadas")?.checked) valores.push("Sem acertos recentes");
     }
     painel.querySelector(".simulation-filter-chips").innerHTML = valores.filter(Boolean).map(valor => `<span class="simulation-filter-chip">${esc(valor)}</span>`).join("");
+    atualizarContadorQuestoesCompativeis();
+}
+
+function obterFiltrosSimuladoSalvos() {
+    const filtros = carregar(LS.filtrosSimuladoSalvos, []);
+    return Array.isArray(filtros) ? filtros.filter(item => item && typeof item === "object" && item.id).slice(0, 12) : [];
+}
+
+function capturarFiltroAtualSimulado() {
+    return {
+        materiaId: document.getElementById("simMateria")?.value || "",
+        topicoEditalId: document.getElementById("simTopicoEdital")?.value || "",
+        tema: document.getElementById("simTema")?.value.trim() || "",
+        banca: document.getElementById("simBanca")?.value.trim() || "",
+        dificuldade: document.getElementById("simDificuldade")?.value || "Médio",
+        quantidade: document.getElementById("simQtd")?.value || "5",
+        origem: document.getElementById("simOrigem")?.value || "ia",
+        perfil: document.getElementById("simPerfilQuestoes")?.value || "todas",
+        periodoDias: document.getElementById("simPeriodoQuestoes")?.value ?? "30",
+        evitarAcertadasRecentes: Boolean(document.getElementById("simEvitarAcertadas")?.checked)
+    };
+}
+
+function nomeFiltroSimulado(config) {
+    const materia = nomeDaMateria(config.materiaId);
+    const topico = obterTopicosEditalDaMateria(config.materiaId).find(item => String(item.id) === String(config.topicoEditalId));
+    const assunto = topico?.titulo || (config.tema ? config.tema : "Todos os assuntos");
+    const nome = `${materia} · ${assunto} · ${config.dificuldade}`;
+    return nome.length > 88 ? `${nome.slice(0, 85)}…` : nome;
+}
+
+function renderizarFiltrosSimuladoSalvos(selecionado = "") {
+    const select = document.getElementById("filtrosSimuladoSalvos");
+    const excluir = document.getElementById("btnExcluirFiltroSimulado");
+    if (!select) return;
+    const filtros = obterFiltrosSimuladoSalvos();
+    select.innerHTML = '<option value="">Meus filtros salvos</option>' + filtros.map(filtro => `<option value="${esc(filtro.id)}">${esc(filtro.nome || nomeFiltroSimulado(filtro))}</option>`).join("");
+    select.value = filtros.some(filtro => String(filtro.id) === String(selecionado)) ? String(selecionado) : "";
+    excluir?.classList.toggle("d-none", !select.value);
+}
+
+function definirValorFiltroSimulado(id, valor) {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    const pretendido = String(valor ?? "");
+    if (campo.tagName === "SELECT" && ![...campo.options].some(opcao => opcao.value === pretendido)) return;
+    campo.value = pretendido;
+}
+
+function aplicarFiltroSimuladoSalvo(id) {
+    const filtro = obterFiltrosSimuladoSalvos().find(item => String(item.id) === String(id));
+    if (!filtro) return;
+    definirValorFiltroSimulado("simMateria", filtro.materiaId);
+    popularTopicosSimulado(filtro.topicoEditalId);
+    definirValorFiltroSimulado("simTema", filtro.tema);
+    definirValorFiltroSimulado("simBanca", filtro.banca);
+    definirValorFiltroSimulado("simDificuldade", filtro.dificuldade);
+    definirValorFiltroSimulado("simQtd", filtro.quantidade);
+    definirValorFiltroSimulado("simOrigem", filtro.origem);
+    definirValorFiltroSimulado("simPerfilQuestoes", filtro.perfil);
+    definirValorFiltroSimulado("simPeriodoQuestoes", filtro.periodoDias);
+    document.getElementById("simEvitarAcertadas").checked = filtro.evitarAcertadasRecentes !== false;
+    atualizarFiltrosSimulado();
+    const usaAvancados = filtro.tema || filtro.banca || filtro.dificuldade !== "Médio" || filtro.origem !== "ia";
+    if (usaAvancados) bootstrap.Collapse.getOrCreateInstance(document.getElementById("filtrosAvancadosSimulado"), { toggle: false }).show();
+}
+
+function salvarFiltroAtualSimulado() {
+    const config = capturarFiltroAtualSimulado();
+    if (!config.materiaId) {
+        document.getElementById("simMateria")?.focus();
+        return;
+    }
+    const atuais = obterFiltrosSimuladoSalvos();
+    const assinatura = filtro => JSON.stringify({ materiaId: filtro.materiaId, topicoEditalId: filtro.topicoEditalId, tema: filtro.tema, banca: filtro.banca, dificuldade: filtro.dificuldade, quantidade: filtro.quantidade, origem: filtro.origem, perfil: filtro.perfil, periodoDias: filtro.periodoDias, evitarAcertadasRecentes: filtro.evitarAcertadasRecentes });
+    const existente = atuais.find(filtro => assinatura(filtro) === assinatura(config));
+    const salvo = existente ? { ...existente, ...config, nome: nomeFiltroSimulado(config) } : { id: novoId(), nome: nomeFiltroSimulado(config), ...config };
+    const filtros = [salvo, ...atuais.filter(filtro => filtro.id !== salvo.id)].slice(0, 12);
+    salvar(LS.filtrosSimuladoSalvos, filtros);
+    renderizarFiltrosSimuladoSalvos(salvo.id);
+}
+
+function atualizarContadorQuestoesCompativeis() {
+    const painel = document.getElementById("contadorQuestoesCompativeis");
+    if (!painel) return;
+    const config = capturarFiltroAtualSimulado();
+    if (!config.materiaId) {
+        painel.innerHTML = '<i class="bi-info-circle"></i>Escolha uma matéria para consultar as questões.';
+        return;
+    }
+    if (config.origem === "ia") {
+        painel.innerHTML = '<i class="bi-stars"></i>A IA criará novas questões com estes filtros.';
+        return;
+    }
+    if (config.origem === "erros") {
+        const quantidade = obterErros().filter(erro => String(erro.materiaId) === String(config.materiaId) && (!config.topicoEditalId || String(erro.topicoEditalId || "") === String(config.topicoEditalId))).length;
+        painel.innerHTML = `<i class="bi-journal-x"></i>${quantidade ? `${quantidade} ${quantidade === 1 ? "erro pode" : "erros podem"} orientar a IA.` : "Nenhum erro corresponde a estes filtros."}`;
+        return;
+    }
+    const questoes = obterQuestoesContingenciaSimulado(config.materiaId, config.tema, config.dificuldade, 20, { topicoEditalId: config.topicoEditalId, perfil: config.perfil, periodoDias: config.periodoDias, evitarAcertadasRecentes: config.evitarAcertadasRecentes, estrito: true });
+    const quantidade = questoes.length;
+    painel.innerHTML = `<i class="bi-database-check"></i>${quantidade ? `${quantidade === 20 ? "20 ou mais" : quantidade} ${quantidade === 1 ? "questão compatível" : "questões compatíveis"} no histórico.` : "Nenhuma questão corresponde a estes filtros."}`;
 }
 
 function referenciaDosErrosSimulado(materiaId, topicoEditalId, limite = 10) {
@@ -12642,12 +12755,26 @@ document.getElementById("simMateria").addEventListener("change", () => { popular
 document.getElementById("simOrigem").addEventListener("change", atualizarFiltrosSimulado);
 document.getElementById("formGerarSimulado").addEventListener("input", renderizarResumoFiltrosSimulado);
 document.getElementById("formGerarSimulado").addEventListener("change", renderizarResumoFiltrosSimulado);
+document.getElementById("filtrosSimuladoSalvos").addEventListener("change", evento => {
+    const id = evento.target.value;
+    document.getElementById("btnExcluirFiltroSimulado").classList.toggle("d-none", !id);
+    if (id) aplicarFiltroSimuladoSalvo(id);
+});
+document.getElementById("btnSalvarFiltroSimulado").addEventListener("click", salvarFiltroAtualSimulado);
+document.getElementById("btnExcluirFiltroSimulado").addEventListener("click", () => {
+    const select = document.getElementById("filtrosSimuladoSalvos");
+    const filtro = obterFiltrosSimuladoSalvos().find(item => String(item.id) === String(select.value));
+    if (!filtro || !confirm(`Excluir o filtro salvo “${filtro.nome || nomeFiltroSimulado(filtro)}”?`)) return;
+    salvar(LS.filtrosSimuladoSalvos, obterFiltrosSimuladoSalvos().filter(item => String(item.id) !== String(filtro.id)));
+    renderizarFiltrosSimuladoSalvos();
+});
 document.getElementById("btnLimparFiltrosSimulado").addEventListener("click", () => {
     document.getElementById("formGerarSimulado").reset();
     document.querySelector(".simulation-generator-card .study-source-return")?.remove();
     retornoLeituraCaderno = null;
     popularTopicosSimulado();
     atualizarFiltrosSimulado();
+    renderizarFiltrosSimuladoSalvos();
     document.getElementById("simMateria").focus();
 });
 
@@ -12947,7 +13074,7 @@ function renderizarDesempenho() {
 // ============================================================
 // BACKUP
 // ============================================================
-const VERSAO_BACKUP = 13;
+const VERSAO_BACKUP = 14;
 const TAMANHO_MAX_BACKUP = 5 * 1024 * 1024;
 
 function objetoBackup(valor, campo) {
@@ -13264,13 +13391,24 @@ function validarPayloadBackup(payload) {
         return { id: idBackup(sessao.id, `ID da sessão de revisão ${indice + 1}`), iniciadaEm: instanteBackup(sessao.iniciadaEm, "Início da sessão de revisão"), concluidaEm: instanteBackup(sessao.concluidaEm, "Conclusão da sessão de revisão"), resultados, total, pulados };
     }) : [];
     garantirIdsUnicos(historicoSessoesRevisao, "Histórico das sessões de revisão");
-    return { materias, tarefas, registrosEstudo, edital, erros, desempenho, simulados, historicoSessoesRevisao };
+    const filtrosSimuladoSalvos = versao >= 14 ? listaBackup(dados.filtrosSimuladoSalvos || [], "Filtros salvos de simulados", 12).map((filtro, indice) => {
+        objetoBackup(filtro, `Filtro salvo ${indice + 1}`);
+        const dificuldade = ["Fácil", "Médio", "Difícil"].includes(filtro.dificuldade) ? filtro.dificuldade : "Médio";
+        const origem = ["ia", "historico", "erros"].includes(filtro.origem) ? filtro.origem : "ia";
+        const perfil = ["todas", "erradas", "nao_respondidas"].includes(filtro.perfil) ? filtro.perfil : "todas";
+        const periodoDias = ["", "7", "30", "90"].includes(String(filtro.periodoDias ?? "30")) ? String(filtro.periodoDias ?? "30") : "30";
+        const quantidade = ["3", "5", "10"].includes(String(filtro.quantidade)) ? String(filtro.quantidade) : "5";
+        return { id: idBackup(filtro.id, "ID do filtro salvo"), nome: textoBackup(filtro.nome || "", "Nome do filtro salvo", 100), materiaId: textoBackup(String(filtro.materiaId || ""), "Matéria do filtro salvo", 100), topicoEditalId: textoBackup(String(filtro.topicoEditalId || ""), "Tópico do filtro salvo", 100), tema: textoBackup(filtro.tema || "", "Tema do filtro salvo", 240), banca: textoBackup(filtro.banca || "", "Banca do filtro salvo", 120), dificuldade, quantidade, origem, perfil, periodoDias, evitarAcertadasRecentes: filtro.evitarAcertadasRecentes !== false };
+    }) : [];
+    garantirIdsUnicos(filtrosSimuladoSalvos, "Filtros salvos de simulados");
+    return { materias, tarefas, registrosEstudo, edital, erros, desempenho, simulados, historicoSessoesRevisao, filtrosSimuladoSalvos };
 }
 
 function aplicarBackupValidado(dados) {
     const itens = [
         [LS.materias, dados.materias], [LS.tarefas, dados.tarefas], [LS.registrosEstudo, dados.registrosEstudo], [LS.edital, dados.edital],
-        [LS.erros, dados.erros], [LS.desempenho, dados.desempenho], [LS.historicoSessoesRevisao, dados.historicoSessoesRevisao]
+        [LS.erros, dados.erros], [LS.desempenho, dados.desempenho], [LS.historicoSessoesRevisao, dados.historicoSessoesRevisao],
+        [LS.filtrosSimuladoSalvos, dados.filtrosSimuladoSalvos]
     ];
     salvarLote(itens, { permitirRecuperacao: true });
 }
@@ -13285,7 +13423,7 @@ document.getElementById("btnExportar").addEventListener("click", () => {
             tarefas: obterTarefas().map(tarefa => ({ ...tarefa, periodo: normalizarPeriodoEstudo(tarefa.periodo) })),
             registrosEstudo: obterRegistrosEstudo().map(registro => ({ ...registro, periodo: normalizarPeriodoEstudo(registro.periodo) })),
             edital: obterEdital(),
-            erros: obterErros(), desempenho: obterDesempenho(), simulados: tentativasSimulado, historicoSessoesRevisao: historicoSessoesRevisao()
+            erros: obterErros(), desempenho: obterDesempenho(), simulados: tentativasSimulado, historicoSessoesRevisao: historicoSessoesRevisao(), filtrosSimuladoSalvos: obterFiltrosSimuladoSalvos()
         }
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -13366,6 +13504,8 @@ function iniciar() {
     renderizarErros();
     renderizarDesempenho();
     renderizarHistoricoSimulados();
+    renderizarFiltrosSimuladoSalvos();
+    atualizarFiltrosSimulado();
     renderizarHoje();
     renderizarCentralRevisoes();
     limparBackdropsOrfaos();

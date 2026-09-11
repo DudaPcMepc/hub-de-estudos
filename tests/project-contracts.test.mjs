@@ -418,7 +418,7 @@ test("o cronograma liga o edital a um ciclo privado e configurável de revisão 
     assert.match(html, /data-metrica="atividade"/);
     assert.match(html, /Ritmo dos últimos 7 dias/);
     assert.match(html, /cardsVencidos\(materia\)/);
-    assert.match(html, /VERSAO_BACKUP = 13/);
+    assert.match(html, /VERSAO_BACKUP = 14/);
     assert.match(html, /historicoRevisoes/);
     assert.match(repository, /\.eq\("assigned_to", contexto\.userId\)/);
     assert.match(repository, /export async function registrarRevisaoTarefa/);
@@ -465,7 +465,7 @@ test("cada usuário vincula seus flashcards aos próprios tópicos do Edital", (
     assert.match(html, /id="filtroTopicoCards"/);
     assert.match(html, /function popularTopicosEditalFlashcards\(materiaId\)/);
     assert.match(html, /topicoEditalId: topicoEditalId \|\| null/);
-    assert.match(html, /VERSAO_BACKUP = 13/);
+    assert.match(html, /VERSAO_BACKUP = 14/);
     assert.match(repository, /flashcard_progress"\)\s*\.select\("flashcard_id, box, next_review, correct_count, error_count, exam_topic_id"\)/);
     assert.match(repository, /export async function atualizarTopicoFlashcard/);
     assert.match(repository, /\.eq\("user_id", contexto\.userId\)/);
@@ -492,7 +492,7 @@ test("o Caderno de Erros transforma aprendizados em flashcards do tópico corret
     assert.match(html, /class="exam-topic-learning"/);
     assert.match(html, /btn-revisar-topico-edital/);
     assert.match(html, /btn-ver-erros-topico/);
-    assert.match(html, /VERSAO_BACKUP = 13/);
+    assert.match(html, /VERSAO_BACKUP = 14/);
     assert.match(repository, /error_entries"\)\s*\.select\("id, subject_id, theme, observation, occurred_on, exam_topic_id,/);
     assert.match(repository, /exam_topic_id: erro\.topicoEditalId \? resolverId\("exam_topic", erro\.topicoEditalId\) : null/);
     assert.match(verification, /topicoEditalId: item\.exam_topic_id \? idLegado\(mapas, "exam_topic", item\.exam_topic_id\) : null/);
@@ -544,7 +544,7 @@ test("questões erradas do simulado entram completas e sem duplicação no Cader
     assert.match(html, /sincronizarListaDeErros\(erros\)/);
     assert.match(html, /Questão e explicação salvas no Caderno de Erros/);
     assert.match(html, /id="detalhesQuestaoRevisaoErro"/);
-    assert.match(html, /VERSAO_BACKUP = 13/);
+    assert.match(html, /VERSAO_BACKUP = 14/);
     assert.match(repository, /export async function registrarErroSimulado/);
     assert.match(repository, /supabase\.rpc\("record_quiz_error"/);
     assert.match(auth, /registrarSimulado: registrarErroSimulado/);
@@ -847,6 +847,23 @@ test("os filtros de simulados separam escolhas essenciais de refinamentos avanç
     assert.match(html, /filtros\.periodoDias/);
     assert.match(html, /filtros\.evitarAcertadasRecentes/);
     assert.match(html, /Sem acertos recentes/);
+});
+
+test("os filtros de simulados podem ser salvos e mostram a disponibilidade antes da geração", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /filtrosSimuladoSalvos: "hub_filtros_simulado_salvos"/);
+    assert.match(html, /id="filtrosSimuladoSalvos"/);
+    assert.match(html, /id="btnSalvarFiltroSimulado"/);
+    assert.match(html, /id="btnExcluirFiltroSimulado"/);
+    assert.match(html, /id="contadorQuestoesCompativeis"/);
+    assert.match(html, /function capturarFiltroAtualSimulado\(\)/);
+    assert.match(html, /function salvarFiltroAtualSimulado\(\)/);
+    assert.match(html, /function aplicarFiltroSimuladoSalvo\(id\)/);
+    assert.match(html, /function atualizarContadorQuestoesCompativeis\(\)/);
+    assert.match(html, /Nenhuma questão corresponde a estes filtros/);
+    assert.match(html, /filtrosSimuladoSalvos: obterFiltrosSimuladoSalvos\(\)/);
+    assert.match(html, /VERSAO_BACKUP = 14/);
 });
 
 test("o caderno de erros usa cadastro compacto, explicação multilinha e consulta organizada", () => {
