@@ -2856,7 +2856,7 @@
                     <div class="review-queue" id="filaCentralRevisoes" aria-live="polite"></div>
                 </section>
                 <aside class="review-hub-side">
-                    <section class="review-hub-side-card"><h2><i class="bi-signpost-split me-1"></i>Como a ordem é definida</h2><div class="review-hub-strategy"><span><i class="bi-clock-history"></i>Itens mais atrasados sobem na fila.</span><span><i class="bi-bullseye"></i>O peso do Edital aumenta a prioridade.</span><span><i class="bi-activity"></i>Dificuldades e erros recebem reforço.</span></div></section>
+                    <section class="review-hub-side-card"><h2><i class="bi-signpost-split me-1"></i>Como a ordem é definida</h2><div class="review-hub-strategy"><span><i class="bi-clock-history"></i>Itens mais atrasados sobem na fila.</span><span><i class="bi-bullseye"></i>O peso do Edital aumenta a prioridade.</span><span><i class="bi-activity"></i>Sua retenção recente ajusta cada matéria.</span><span><i class="bi-arrows-angle-expand"></i>Domínio consistente amplia os intervalos.</span></div></section>
                     <section class="review-hub-side-card"><div class="d-flex align-items-center justify-content-between gap-2 mb-2"><h2 class="mb-0"><i class="bi-journal-x me-1"></i>Caderno de Erros</h2><span class="badge rounded-pill text-bg-light" id="contadorErrosCentralRevisoes">0</span></div><div class="review-error-list" id="errosCentralRevisoes"></div></section>
                 </aside>
             </div>
@@ -4616,36 +4616,57 @@ function diasDeAtrasoRevisao(data) {
     return Math.max(0, Math.floor(diferenca / 86400000));
 }
 
+function perfilAdaptativoMateria(materiaId) {
+    const limite = Date.now() - 30 * 86400000;
+    const resultados = historicoSessoesRevisao()
+        .filter(sessao => new Date(sessao.concluidaEm).getTime() >= limite)
+        .flatMap(sessao => sessao.resultados)
+        .filter(item => item.status !== "pulado" && String(item.materiaId) === String(materiaId));
+    if (resultados.length < 2) return { total: resultados.length, bonusFila: 0, multiplicadorIntervalo: 1, rotulo: "" };
+    const esquecidos = resultados.filter(item => item.retencao === "forgot").length;
+    const parciais = resultados.filter(item => item.retencao === "partial").length;
+    const positivos = resultados.filter(item => ["good", "mastered"].includes(item.retencao)).length;
+    const dominados = resultados.filter(item => item.retencao === "mastered").length;
+    const indiceDificuldade = (esquecidos + parciais * .5) / resultados.length;
+    const indicePositivo = positivos / resultados.length;
+    const bonusFila = Math.max(-10, Math.min(35, Math.round(indiceDificuldade * 42 - indicePositivo * 8 - dominados * 1.5)));
+    const multiplicadorIntervalo = indiceDificuldade >= .4 ? .8 : indicePositivo >= .8 && esquecidos === 0 ? 1.25 : 1;
+    const rotulo = bonusFila >= 8 ? "Retenção baixa: prioridade maior" : bonusFila <= -5 ? "Domínio consistente" : "";
+    return { total: resultados.length, bonusFila, multiplicadorIntervalo, rotulo };
+}
+
+function aplicarPerfilAdaptativo(item, pontosBase) {
+    const perfil = perfilAdaptativoMateria(item.materiaId);
+    return { ...item, pontos: pontosBase + perfil.bonusFila, ajusteRetencao: perfil.rotulo, bonusRetencao: perfil.bonusFila };
+}
+
 function itensDaCentralRevisoes() {
     const hoje = hojeISO();
     const prioridades = new Map(prioridadesInteligentesDoEdital().map(candidato => [String(candidato.topico.id), candidato]));
     const topicos = obterTarefas().filter(tarefa => tarefa.proximaRevisao && tarefa.proximaRevisao <= hoje).map(tarefa => {
         const prioridade = prioridades.get(String(tarefa.topicoEditalId || ""));
         const atraso = diasDeAtrasoRevisao(tarefa.proximaRevisao);
-        return { tipo: "topico", id: tarefa.id, materiaId: tarefa.materiaId, titulo: tarefa.topico, data: tarefa.proximaRevisao, atraso, pontos: 70 + atraso * 7 + (prioridade?.pontuacao || 0), nivel: prioridade?.nivel || "Revisão", detalhe: tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "Sessão de estudo" };
+        const item = { tipo: "topico", id: tarefa.id, materiaId: tarefa.materiaId, titulo: tarefa.topico, data: tarefa.proximaRevisao, atraso, nivel: prioridade?.nivel || "Revisão", detalhe: tarefa.topicoEditalId ? tituloTopicoEdital(tarefa.topicoEditalId) : "Sessão de estudo" };
+        return aplicarPerfilAdaptativo(item, 70 + atraso * 7 + (prioridade?.pontuacao || 0));
     });
     const cards = materiasNormalizadas().flatMap(materia => cardsVencidos(materia).map(card => {
         const prioridade = prioridades.get(String(card.topicoEditalId || ""));
         const atraso = diasDeAtrasoRevisao(card.proxima || hoje);
         const dificuldade = Number(card.erros || 0) * 4 + Math.max(0, 5 - Number(card.caixa || 1)) * 2;
-        return { tipo: "card", id: card.id, materiaId: materia.id, materiaNome: materia.nome, titulo: card.frente, data: card.proxima || hoje, atraso, pontos: 45 + atraso * 6 + dificuldade + Math.round((prioridade?.pontuacao || 0) * .5), nivel: `Caixa ${Number(card.caixa || 1)}`, detalhe: topicoEditalDoFlashcard(materia.id, card.topicoEditalId)?.titulo || "Flashcard sem tópico" };
+        const item = { tipo: "card", id: card.id, materiaId: materia.id, materiaNome: materia.nome, titulo: card.frente, data: card.proxima || hoje, atraso, nivel: `Caixa ${Number(card.caixa || 1)}`, detalhe: topicoEditalDoFlashcard(materia.id, card.topicoEditalId)?.titulo || "Flashcard sem tópico" };
+        return aplicarPerfilAdaptativo(item, 45 + atraso * 6 + dificuldade + Math.round((prioridade?.pontuacao || 0) * .5));
     }));
-    const resumos = resumosParaRevisao().map(item => ({
-        tipo: "resumo",
-        id: item.nota.id,
-        materiaId: item.materia.id,
-        titulo: textoResumoLegivel(item.nota.titulo || "Resumo sem título"),
-        data: item.data,
-        atraso: item.atraso,
-        pontos: 60 + item.atraso * 6 + (item.estado.revisoes ? 0 : 18),
-        nivel: item.estado.revisoes ? `${item.estado.revisoes} ${item.estado.revisoes === 1 ? "revisão" : "revisões"}` : "Primeira revisão",
-        detalhe: "Resumo da matéria"
-    }));
+    const resumos = resumosParaRevisao().map(item => aplicarPerfilAdaptativo({
+        tipo: "resumo", id: item.nota.id, materiaId: item.materia.id,
+        titulo: textoResumoLegivel(item.nota.titulo || "Resumo sem título"), data: item.data, atraso: item.atraso,
+        nivel: item.estado.revisoes ? `${item.estado.revisoes} ${item.estado.revisoes === 1 ? "revisão" : "revisões"}` : "Primeira revisão", detalhe: "Resumo da matéria"
+    }, 60 + item.atraso * 6 + (item.estado.revisoes ? 0 : 18)));
     const erros = obterErros().filter(erro => erro.estadoRevisao !== "mastered" && erro.proximaRevisao <= hoje).map(erro => {
         const prioridade = prioridades.get(String(erro.topicoEditalId || ""));
         const atraso = diasDeAtrasoRevisao(erro.proximaRevisao);
         const reincidencia = Math.min(30, Number(erro.revisoes || 0) * 3);
-        return { tipo: "erro", id: erro.id, materiaId: erro.materiaId, titulo: erro.tema, data: erro.proximaRevisao, atraso, pontos: 80 + atraso * 8 + reincidencia + Math.round((prioridade?.pontuacao || 0) * .7), nivel: erro.revisoes ? `${erro.revisoes} revisão${erro.revisoes === 1 ? "" : "ões"}` : "Primeiro reforço", detalhe: topicoDoErro(erro)?.titulo || "Caderno de Erros" };
+        const item = { tipo: "erro", id: erro.id, materiaId: erro.materiaId, titulo: erro.tema, data: erro.proximaRevisao, atraso, nivel: erro.revisoes ? `${erro.revisoes} revisão${erro.revisoes === 1 ? "" : "ões"}` : "Primeiro reforço", detalhe: topicoDoErro(erro)?.titulo || "Caderno de Erros" };
+        return aplicarPerfilAdaptativo(item, 80 + atraso * 8 + reincidencia + Math.round((prioridade?.pontuacao || 0) * .7));
     });
     return [...topicos, ...resumos, ...cards, ...erros].sort((a, b) => b.pontos - a.pontos || b.atraso - a.atraso || a.data.localeCompare(b.data));
 }
@@ -5023,7 +5044,7 @@ function renderizarCentralRevisoes() {
         const icone = topico ? "journal-check" : resumo ? "journal-text" : erro ? "journal-x" : "card-heading";
         const rotulo = topico ? "Registrar revisão" : resumo ? "Abrir resumo" : erro ? "Revisar erro" : "Revisar card";
         const classe = topico ? "topic" : resumo ? "summary" : "card";
-        return `<article class="review-queue-item is-${classe}"><span class="review-queue-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : resumo ? "Resumo" : erro ? "Erro" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span></div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : resumo ? "book" : "play-fill"} me-1"></i>${rotulo}</button></article>`;
+        return `<article class="review-queue-item is-${classe}"><span class="review-queue-icon"><i class="bi-${icone}" aria-hidden="true"></i></span><div class="review-queue-copy"><strong>${esc(item.titulo)}</strong><span>${esc(nomeDaMateria(item.materiaId))} · ${esc(item.detalhe)}</span><div class="review-queue-meta"><span>${indice === 0 && filtroCentralRevisoes === "todos" ? "Próxima recomendação" : topico ? "Tópico" : resumo ? "Resumo" : erro ? "Erro" : "Flashcard"}</span><span>${esc(atraso)}</span><span>${esc(item.nivel)}</span>${item.ajusteRetencao ? `<span><i class="bi-activity me-1"></i>${esc(item.ajusteRetencao)}</span>` : ""}</div></div><button type="button" class="btn btn-sm btn-outline-primary rounded-pill review-queue-action" data-review-kind="${item.tipo}" data-review-id="${esc(item.id)}"><i class="bi-${topico ? "arrow-repeat" : resumo ? "book" : "play-fill"} me-1"></i>${rotulo}</button></article>`;
     }).join("") : `<div class="review-hub-empty"><i class="bi-check2-circle" aria-hidden="true"></i><strong class="d-block">${fila.length ? "Nenhum item neste filtro" : "Tudo em dia por aqui"}</strong><small>${fila.length ? "Escolha outro tipo de revisão." : "A próxima revisão aparecerá automaticamente na data certa."}</small></div>`;
     document.querySelectorAll(".review-queue-action").forEach(botao => botao.addEventListener("click", () => abrirItemCentralRevisoes(fila.find(item => item.tipo === botao.dataset.reviewKind && String(item.id) === String(botao.dataset.reviewId)))));
     document.getElementById("contadorErrosCentralRevisoes").textContent = erros.length;
@@ -8819,6 +8840,14 @@ const PREFIXO_FONTE_RESUMO = "__hub_source:";
 const PREFIXO_REVISAO_RESUMO = "__hub_summary_review:";
 const INTERVALOS_REVISAO_RESUMO = [1, 3, 7, 15, 30, 60];
 
+function intervaloAdaptativoResumo(materiaId, retencao, intervaloBase) {
+    const perfil = perfilAdaptativoMateria(materiaId);
+    if (retencao === "forgot") return 1;
+    if (retencao === "partial") return Math.max(1, Math.ceil(intervaloBase * .5 * Math.min(1, perfil.multiplicadorIntervalo)));
+    if (retencao === "mastered") return Math.min(90, Math.max(30, Math.round(intervaloBase * Math.max(1.25, perfil.multiplicadorIntervalo))));
+    return Math.min(90, Math.max(1, Math.round(intervaloBase * perfil.multiplicadorIntervalo)));
+}
+
 function estadoRevisaoResumo(nota) {
     const tag = (nota?.tags || []).find(valor => String(valor).startsWith(PREFIXO_REVISAO_RESUMO));
     const partes = String(tag || "").slice(PREFIXO_REVISAO_RESUMO.length).split(":");
@@ -8972,7 +9001,7 @@ async function registrarRevisaoResumo(materiaId, notaId, retencao = "good", bota
     const estadoAnterior = estadoRevisaoResumo(nota);
     const revisoes = estadoAnterior.revisoes + 1;
     const intervaloBase = INTERVALOS_REVISAO_RESUMO[Math.min(revisoes - 1, INTERVALOS_REVISAO_RESUMO.length - 1)];
-    const intervalo = retencao === "forgot" ? 1 : retencao === "partial" ? Math.max(1, Math.ceil(intervaloBase / 2)) : retencao === "mastered" ? Math.max(30, intervaloBase) : intervaloBase;
+    const intervalo = intervaloAdaptativoResumo(materiaId, retencao, intervaloBase);
     const novoEstado = { revisoes, ultimaRevisaoEm: hojeISO(), proximaRevisao: somarDias(hojeISO(), intervalo), retencao };
     const novasTags = [...tagsAnteriores.filter(tag => !String(tag).startsWith(PREFIXO_REVISAO_RESUMO)), tagRevisaoResumo(novoEstado)];
     operacaoNotaEmAndamento = true;
