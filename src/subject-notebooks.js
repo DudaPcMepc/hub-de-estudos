@@ -32,6 +32,7 @@ export function criarCadernosMaterias(repositorio) {
         trash: document.getElementById("btnLixeiraCadernoMateria"),
         trashCount: document.getElementById("subjectNotebookTrashCount"),
         treePanel: document.getElementById("subjectNotebookTreePanel"),
+        treeBackdrop: document.getElementById("subjectNotebookTreeBackdrop"),
         mobileTree: document.getElementById("btnAlternarArvoreCaderno"),
         workspace: document.getElementById("subjectNotebookWorkspace"),
         novaPasta: document.getElementById("btnNovaPastaMateria"),
@@ -1717,6 +1718,7 @@ export function criarCadernosMaterias(repositorio) {
         dom.organize.setAttribute("aria-pressed", "false");
         dom.organize.querySelector("span").textContent = "Organizar itens";
         dom.treePanel.classList.remove("is-mobile-open");
+        dom.app.classList.remove("is-mobile-tree-open");
         dom.mobileTree.setAttribute("aria-expanded", "false");
         const token = ++carregamento;
         selecionadoId = "";
@@ -1790,7 +1792,14 @@ export function criarCadernosMaterias(repositorio) {
     dom.trash.addEventListener("click", async () => { if (!lixeiraAberta) await abrirLixeira(); });
     dom.mobileTree.addEventListener("click", () => {
         const aberta = dom.treePanel.classList.toggle("is-mobile-open");
+        dom.app.classList.toggle("is-mobile-tree-open", aberta);
         dom.mobileTree.setAttribute("aria-expanded", String(aberta));
+    });
+    dom.treeBackdrop.addEventListener("click", () => {
+        dom.treePanel.classList.remove("is-mobile-open");
+        dom.app.classList.remove("is-mobile-tree-open");
+        dom.mobileTree.setAttribute("aria-expanded", "false");
+        dom.mobileTree.focus({ preventScroll: true });
     });
     dom.tree.addEventListener("pointerdown", evento => {
         const alca = evento.target.closest("[data-notebook-drag]");
@@ -1848,6 +1857,11 @@ export function criarCadernosMaterias(repositorio) {
         if (!alvo) return;
         if (alvo.hasAttribute("data-notebook-home")) await selecionar("");
         if (alvo.dataset.notebookSelect) await selecionar(alvo.dataset.notebookSelect);
+        if ((alvo.hasAttribute("data-notebook-home") || alvo.dataset.notebookSelect) && window.matchMedia("(max-width: 767.98px)").matches) {
+            dom.treePanel.classList.remove("is-mobile-open");
+            dom.app.classList.remove("is-mobile-tree-open");
+            dom.mobileTree.setAttribute("aria-expanded", "false");
+        }
         if (alvo.dataset.notebookCreate) abrirDialogo(alvo.dataset.notebookCreate);
         if (alvo.dataset.notebookEdit) { const item = itemPorId(alvo.dataset.notebookEdit); if (item) abrirDialogo(item.tipo, item); }
         if (alvo.dataset.notebookRename) { const item = itemPorId(alvo.dataset.notebookRename); if (item) abrirDialogo(item.tipo, item, "rename"); }

@@ -1319,6 +1319,7 @@
     .subject-notebook-status { min-height: 0; padding: 0 1.15rem; color: #78675f; font-size: .72rem; }
     .subject-notebook-status:not(:empty) { padding-block: .55rem; background: rgba(100, 116, 90, .07); }
     .subject-notebook-layout { min-height: 560px; display: grid; grid-template-columns: 275px minmax(0, 1fr); }
+    .subject-notebook-tree-backdrop { display: none; }
     .subject-notebook-tree-panel { padding: .9rem; background: #f4efe9; box-shadow: inset -1px 0 rgba(59, 41, 35, .07); }
     .subject-notebook-tree-title { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; padding: 0 .2rem; color: #5b433a; font-size: .7rem; font-weight: 750; }
     .subject-notebook-tree-title small { color: #8a7770; font-size: .6rem; font-weight: 600; }
@@ -1950,7 +1951,9 @@
     .flashcard-shortcuts { margin-top: .65rem; color: #806f67; font-size: .63rem; text-align: center; }
     .ws-nav .nav-link { border-radius: 2rem; font-size: .9rem; }
     @media (max-width: 767.98px) {
-        .subject-workspace-header { min-height: 68px; padding: .65rem .8rem; }
+        .subject-workspace-page { height: 100dvh; }
+        .subject-workspace-shell { height: 100dvh; }
+        .subject-workspace-header { min-height: 68px; padding: max(.65rem, env(safe-area-inset-top)) .8rem .65rem; }
         .subject-workspace-header .subject-workspace-export { display: none; }
         .subject-workspace-layout { width: 100%; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
         .subject-workspace-sidebar { width: 100%; min-width: 0; flex: 0 0 auto; padding: .65rem .75rem; overflow-x: auto; overflow-y: hidden; }
@@ -1965,9 +1968,11 @@
         .subject-notebook-root-create > summary { width: 100%; justify-content: center; }
         .subject-notebook-root-create > div { right: auto; left: 0; width: min(260px, 90vw); }
         .subject-notebook-mobile-tree { display: inline-flex; }
-        .subject-notebook-layout { min-height: 600px; grid-template-columns: 1fr; }
-        .subject-notebook-tree-panel { display: none; max-height: 300px; overflow-y: auto; }
-        .subject-notebook-tree-panel.is-mobile-open { display: block; }
+        .subject-notebook-layout { position: relative; min-height: 600px; grid-template-columns: 1fr; overflow: hidden; }
+        .subject-notebook-tree-backdrop { position: absolute; z-index: 18; inset: 0; display: block; padding: 0; background: rgba(40, 31, 27, .34); border: 0; opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+        .subject-notebook-app.is-mobile-tree-open .subject-notebook-tree-backdrop { opacity: 1; pointer-events: auto; }
+        .subject-notebook-tree-panel { position: absolute; z-index: 19; inset: 0 auto 0 0; width: min(86vw, 320px); max-height: none; display: block; overflow-y: auto; visibility: hidden; box-shadow: .75rem 0 1.8rem rgba(40, 31, 27, .2); transform: translateX(-105%); transition: transform .2s ease, visibility .2s ease; overscroll-behavior: contain; }
+        .subject-notebook-tree-panel.is-mobile-open { visibility: visible; transform: translateX(0); }
         .subject-notebook-workspace { min-height: 390px; }
         .subject-notebook-view-header { flex-direction: column; }
         .subject-notebook-content-panel { padding: .7rem; }
@@ -1989,10 +1994,10 @@
         .subject-notebook-pdf-identity { max-width: none; }
         .subject-notebook-pdf-scroll-mode { display: none; }
         .subject-notebook-editor-topbar.is-pdf .subject-notebook-save-status { display: none; }
-        .subject-notebook-pdf-continuous { padding: .45rem; border-radius: .55rem; }
+        .subject-notebook-pdf-continuous { padding: .45rem; border-radius: .55rem; -webkit-overflow-scrolling: touch; }
         .subject-notebook-pdf-continuous-page { margin-bottom: .8rem; }
         .subject-notebook-pdf-continuous-page footer { padding-inline: .1rem; }
-        .subject-notebook-pdf-selection-menu { inset: auto .7rem .7rem; width: auto; justify-content: center; transform: none; }
+        .subject-notebook-pdf-selection-menu { inset: auto .7rem max(.7rem, env(safe-area-inset-bottom)); width: auto; justify-content: center; transform: none; }
         .subject-notebook-page-mode { width: 100%; }
         .subject-notebook-page-mode button { flex: 1; }
         .subject-page-drawing-toolbar button span { display: none; }
@@ -2016,6 +2021,29 @@
         .subject-summary-notes .editor-nota, .subject-summary-notes .preview-nota { min-height: 58dvh; }
         .subject-summary-note-footer { grid-template-columns: 1fr; }
         .subject-summary-note-status { text-align: left; }
+    }
+    @media (pointer: coarse) {
+        button, [role="button"], summary, .nav-link { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        #abas.app-primary-nav .nav-link,
+        .subject-workspace-sidebar .ws-nav .nav-link,
+        .subject-notebook-header-actions .btn,
+        .subject-notebook-section-nav button,
+        .subject-notebook-organize-toggle,
+        .subject-notebook-tree-item,
+        .subject-notebook-tree-disclosure,
+        .subject-notebook-page-rail-header button,
+        .subject-notebook-page-rail-add,
+        .subject-notebook-tool,
+        .subject-notebook-pdf-selection-menu button,
+        .subject-page-drawing-toolbar button { min-height: 44px; }
+        .subject-notebook-tree-disclosure,
+        .subject-notebook-page-rail-header button,
+        .subject-notebook-tool,
+        .subject-notebook-pdf-selection-menu button,
+        .subject-page-drawing-toolbar button { min-width: 44px; }
+        .subject-notebook-editor-topbar.is-pdf [data-tooltip]::after { display: none; }
+        .subject-notebook-page-thumbnails { scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+        .subject-notebook-page-thumbnail-card { scroll-snap-align: start; }
     }
     .library-prototype-notice {
         display: flex;
@@ -2526,7 +2554,7 @@
         .app-topbar .brand-subtitle, .app-topbar .navbar-user { display: none; }
         .app-topbar .d-flex { gap: .25rem !important; }
         #abas.app-primary-nav { margin-inline: -.15rem; border-radius: .7rem; }
-        #abas.app-primary-nav .nav-link { min-height: 36px; padding: .4rem .58rem .5rem; font-size: .68rem; }
+        #abas.app-primary-nav .nav-link { min-height: 44px; padding: .48rem .62rem .55rem; font-size: .7rem; }
         .navbar-brand { max-width: 100%; }
         .brand-code-logo-nav { min-width: 58px; padding-inline: .4rem; font-size: .78rem; }
         .brand-title { font-size: .98rem; }
@@ -3434,6 +3462,7 @@
                         </header>
                         <div class="subject-notebook-status" id="subjectNotebookStatus" role="status" aria-live="polite"></div>
                         <div class="subject-notebook-layout">
+                            <button class="subject-notebook-tree-backdrop" id="subjectNotebookTreeBackdrop" type="button" aria-label="Fechar organização dos cadernos" tabindex="-1"></button>
                             <aside class="subject-notebook-tree-panel" id="subjectNotebookTreePanel" aria-label="Pastas e cadernos">
                                 <div class="subject-notebook-tree-title"><span>Minha organização <small id="subjectNotebookCount">0 itens</small></span><button class="subject-notebook-organize-toggle" id="btnOrganizarCadernoMateria" type="button" aria-pressed="false" title="Organizar itens"><i class="bi-grip-vertical"></i><span>Organizar</span></button></div>
                                 <nav class="subject-notebook-section-nav" aria-label="Seções do caderno"><button class="is-active" id="btnCadernosMateria" type="button" aria-pressed="true"><i class="bi-journals"></i><span>Cadernos</span></button><button id="btnLixeiraCadernoMateria" type="button" aria-pressed="false"><i class="bi-trash3"></i><span>Lixeira</span><small id="subjectNotebookTrashCount" hidden>0</small></button></nav>

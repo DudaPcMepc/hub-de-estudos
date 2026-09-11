@@ -297,7 +297,7 @@
         left: .45rem;
         z-index: 35;
         max-height: min(54vh, 420px);
-        padding: .7rem;
+        padding: .7rem .7rem max(.7rem, env(safe-area-inset-bottom));
         overflow-y: auto;
         background: rgba(255, 253, 249, .98);
         border: 1px solid rgba(59, 41, 35, .1);
@@ -311,4 +311,12 @@
     .mind-map-line-style { width: 2.65rem; }
     .mind-map-hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mind-map-minimap { width: 120px; height: 74px; }
+}
+
+@media (pointer: coarse) {
+    .mind-map-tool { width: 44px; min-width: 44px; height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .mind-map-text-format .mind-map-tool { width: 44px; min-width: 44px; height: 44px; }
+    .mind-map-color-control { min-height: 44px; }
+    .mind-map-line-style { min-height: 44px; }
+    .mind-map-mobile-extra { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 }

@@ -2864,3 +2864,18 @@ test("caixas de texto da escrita livre oferecem as mesmas ações de estudo", ()
     assert.match(html, /\.subject-page-drawing-viewport-controls/);
     assert.match(html, /subject-notebook-focus-mode \.subject-notebook-page-rail/);
 });
+
+test("a experiência mobile usa alvos de toque e gaveta de organização", () => {
+    const html = readProjectFile("index.html");
+    const notebooks = readProjectFile("src/subject-notebooks.js");
+    const mindMapCss = readProjectFile("src/mind-map.css");
+
+    assert.match(html, /id="subjectNotebookTreeBackdrop"/);
+    assert.match(html, /subject-notebook-app\.is-mobile-tree-open \.subject-notebook-tree-backdrop/);
+    assert.match(html, /@media \(pointer: coarse\)/);
+    assert.match(html, /subject-notebook-pdf-selection-menu button[\s\S]*min-height: 44px/);
+    assert.match(notebooks, /classList\.toggle\("is-mobile-tree-open", aberta\)/);
+    assert.match(notebooks, /treeBackdrop\.addEventListener\("click"/);
+    assert.match(mindMapCss, /@media \(pointer: coarse\)/);
+    assert.match(mindMapCss, /\.mind-map-tool \{ width: 44px; min-width: 44px; height: 44px/);
+});
