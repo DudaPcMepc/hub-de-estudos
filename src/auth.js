@@ -46,6 +46,7 @@ import {
     carregarEditalRemoto,
     carregarErrosRemotos,
     carregarDesempenhoRemoto,
+    carregarFiltrosSimuladoSalvos,
     carregarTentativasSimulado,
     carregarTopicosRemotos,
     carregarWidgetsMaterias,
@@ -126,7 +127,8 @@ import {
     salvarRevisaoArtigosColecaoVade,
     salvarUltimoArtigoColecaoVade,
     salvarDocumentosColecaoVade,
-    salvarLayoutWidgets
+    salvarLayoutWidgets,
+    substituirFiltrosSimuladoSalvos
 } from "./cloud-core-repository.js";
 
 window.HUB_CLOUD_SUBJECTS = Object.freeze({
@@ -304,6 +306,11 @@ window.HUB_CLOUD_QUIZZES = Object.freeze({
     listar: carregarTentativasSimulado,
     criar: criarTentativaSimulado,
     responder: registrarRespostaTentativaSimulado
+});
+
+window.HUB_CLOUD_QUIZ_FILTERS = Object.freeze({
+    listar: carregarFiltrosSimuladoSalvos,
+    substituir: substituirFiltrosSimuladoSalvos
 });
 
 window.HUB_CLOUD_AI = Object.freeze({
@@ -561,6 +568,12 @@ async function ativarSessao(session) {
             const errosRemotos = await carregarErrosRemotos();
             const desempenhoRemoto = await carregarDesempenhoRemoto();
             const tentativasSimuladoRemotas = await carregarTentativasSimulado();
+            let filtrosSimuladoSalvosRemotos = null;
+            try {
+                filtrosSimuladoSalvosRemotos = await carregarFiltrosSimuladoSalvos();
+            } catch (erroFiltros) {
+                console.warn("A sincronização dos filtros de simulados ainda não está disponível neste ambiente.", erroFiltros);
+            }
             const [catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto] = await Promise.all([
                 carregarCatalogoMaterias(),
                 carregarWidgetsMaterias(),
@@ -569,7 +582,7 @@ async function ativarSessao(session) {
                 carregarGrifosJuridicos(),
                 carregarEstadoLeituraJuridica()
             ]);
-            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto, registrosEstudoRemotos, tentativasSimuladoRemotas);
+            await window.iniciarHub(contexto, materiasRemotas, topicosRemotos, notasRemotas, flashcardsRemotos, linksRemotos, tarefasRemotas, editalRemoto, errosRemotos, desempenhoRemoto, catalogoRemoto, widgetsRemotos, bibliotecaJuridicaRemota, colecoesVadeRemotas, grifosJuridicosRemotos, estadoLeituraJuridicaRemoto, registrosEstudoRemotos, tentativasSimuladoRemotas, filtrosSimuladoSalvosRemotos);
             iniciarPreviaMigracao(contexto);
             await iniciarAdministracao();
             usuarioAtivoId = session.user.id;

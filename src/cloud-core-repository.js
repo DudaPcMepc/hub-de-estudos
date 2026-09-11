@@ -1633,6 +1633,58 @@ function mapearTentativaSimulado(registro) {
     };
 }
 
+function mapearFiltroSimulado(registro) {
+    return {
+        id: registro.id,
+        nome: registro.name || "Filtro de simulado",
+        materiaId: registro.subject_ref,
+        topicoEditalId: registro.exam_topic_ref || "",
+        tema: registro.topic || "",
+        banca: registro.board_name || "",
+        dificuldade: registro.difficulty || "Médio",
+        quantidade: String(registro.question_count || 5),
+        origem: registro.source || "ia",
+        perfil: registro.question_profile || "todas",
+        periodoDias: registro.history_days == null ? "" : String(registro.history_days),
+        evitarAcertadasRecentes: registro.avoid_recent_correct !== false
+    };
+}
+
+export async function carregarFiltrosSimuladoSalvos() {
+    const contexto = obterContexto();
+    const resposta = await supabase.from("quiz_filter_presets")
+        .select("id, name, subject_ref, exam_topic_ref, topic, board_name, difficulty, question_count, source, question_profile, history_days, avoid_recent_correct, position")
+        .eq("workspace_id", contexto.workspaceId)
+        .eq("user_id", contexto.userId)
+        .order("position", { ascending: true })
+        .limit(12);
+    return (verificarResposta(resposta, "Não foi possível carregar os filtros salvos de simulados.") || []).map(mapearFiltroSimulado);
+}
+
+export async function substituirFiltrosSimuladoSalvos(filtros) {
+    const contexto = exigirContexto();
+    if (!Array.isArray(filtros) || filtros.length > 12) throw erroRepositorio("A lista de filtros salvos é inválida.");
+    const normalizados = filtros.map(filtro => ({
+        id: exigirUuidNovo(filtro.id, "Filtro de simulado"),
+        nome: texto(filtro.nome, 100, "Nome do filtro"),
+        materiaId: texto(filtro.materiaId, 100, "Matéria do filtro", true),
+        topicoEditalId: texto(filtro.topicoEditalId, 100, "Tópico do filtro"),
+        tema: texto(filtro.tema, 240, "Tema do filtro"),
+        banca: texto(filtro.banca, 120, "Banca do filtro"),
+        dificuldade: ["Fácil", "Médio", "Difícil"].includes(filtro.dificuldade) ? filtro.dificuldade : "Médio",
+        quantidade: ["3", "5", "10"].includes(String(filtro.quantidade)) ? String(filtro.quantidade) : "5",
+        origem: ["ia", "historico", "erros"].includes(filtro.origem) ? filtro.origem : "ia",
+        perfil: ["todas", "erradas", "nao_respondidas"].includes(filtro.perfil) ? filtro.perfil : "todas",
+        periodoDias: ["", "7", "30", "90"].includes(String(filtro.periodoDias ?? "")) ? String(filtro.periodoDias ?? "") : "30",
+        evitarAcertadasRecentes: filtro.evitarAcertadasRecentes !== false
+    }));
+    const resposta = await supabase.rpc("replace_quiz_filter_presets", {
+        target_workspace_id: contexto.workspaceId,
+        target_presets: normalizados
+    });
+    return (verificarResposta(resposta, "Não foi possível sincronizar os filtros salvos de simulados.") || []).map(mapearFiltroSimulado);
+}
+
 export async function carregarTentativasSimulado() {
     const contexto = obterContexto();
     const resposta = await supabase.from("quiz_attempts")
