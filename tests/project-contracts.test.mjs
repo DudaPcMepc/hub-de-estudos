@@ -2879,3 +2879,16 @@ test("a experiência mobile usa alvos de toque e gaveta de organização", () =>
     assert.match(mindMapCss, /@media \(pointer: coarse\)/);
     assert.match(mindMapCss, /\.mind-map-tool \{ width: 44px; min-width: 44px; height: 44px/);
 });
+
+test("as telas de estudo restantes evitam controles pequenos no celular", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /\.calendar-period-add,[\s\S]*\.calendar-task-menu-toggle \{ width: 44px; height: 44px/);
+    assert.match(html, /\.exam-matrix-table table \{ min-width: 690px/);
+    assert.match(html, /\.exam-matrix-table \.exam-subject-row > td:first-child \{ position: sticky/);
+    assert.match(html, /\.quiz-history-item \{ grid-template-columns: 1fr/);
+    assert.match(html, /\.subject-summary-toolbar button,[\s\S]*width: 44px; min-width: 44px; height: 44px/);
+    assert.match(html, /\.subject-summary-highlight-palette \{ position: fixed/);
+    assert.match(html, /\.flashcard-editor textarea,[\s\S]*font-size: 16px/);
+    assert.match(html, /\.modal-dialog \.modal-content \{ min-height: 100dvh/);
+});
