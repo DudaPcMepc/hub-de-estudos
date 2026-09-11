@@ -833,6 +833,22 @@ test("o gerador de simulados oferece filtros próprios e fontes privadas", () =>
     assert.match(html, /topicoEditalId, origem: origemQuestoes/);
 });
 
+test("os filtros de simulados separam escolhas essenciais de refinamentos avançados", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="btnFiltrosAvancadosSimulado"/);
+    assert.match(html, /id="filtrosAvancadosSimulado"/);
+    assert.match(html, /class="simulation-essential-grid"/);
+    assert.match(html, /class="simulation-advanced-grid"/);
+    assert.match(html, /id="simPeriodoQuestoes"/);
+    assert.match(html, /id="simEvitarAcertadas"/);
+    assert.match(html, /periodo\.disabled = origem !== "historico"/);
+    assert.match(html, /evitarAcertadas\.disabled = origem !== "historico"/);
+    assert.match(html, /filtros\.periodoDias/);
+    assert.match(html, /filtros\.evitarAcertadasRecentes/);
+    assert.match(html, /Sem acertos recentes/);
+});
+
 test("o caderno de erros usa cadastro compacto, explicação multilinha e consulta organizada", () => {
     const html = readProjectFile("index.html");
 
