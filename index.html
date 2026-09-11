@@ -456,6 +456,43 @@
     .review-error-item strong, .review-error-item small { display: block; }
     .review-error-item strong { color: #503b33; font-size: .7rem; }
     .review-error-item small { margin: .12rem 0 .45rem; color: #806b62; font-size: .61rem; }
+    .guided-review-modal .modal-content { overflow: hidden; border: 0; border-radius: 1.1rem; box-shadow: 0 1.25rem 3.5rem rgba(45,28,23,.24); }
+    .guided-review-header { align-items: flex-start; color: #fff; background: linear-gradient(135deg, #4b2420, #765149); border: 0; }
+    .guided-review-header small { display: block; margin-bottom: .18rem; color: rgba(255,255,255,.7); font-size: .62rem; font-weight: 800; letter-spacing: .055em; }
+    .guided-review-header .btn-close { filter: invert(1); }
+    .guided-review-progress { height: .42rem; overflow: hidden; background: rgba(91,67,58,.1); }
+    .guided-review-progress span { display: block; height: 100%; background: linear-gradient(90deg, #6f5aa8, #9d82cf); transition: width .2s ease; }
+    .guided-review-body { min-height: 390px; padding: clamp(1rem, 3vw, 1.6rem); background: #faf7f2; }
+    .guided-review-stage { max-width: 760px; margin: 0 auto; }
+    .guided-review-meta { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+    .guided-review-kind { padding: .22rem .48rem; color: #5d4a91; background: rgba(111,90,168,.12); border-radius: 999px; font-size: .62rem; font-weight: 800; }
+    .guided-review-subject { color: #806c63; font-size: .68rem; font-weight: 700; }
+    .guided-review-card { padding: clamp(1rem, 3vw, 1.5rem); background: #fffefb; border: 1px solid rgba(59,41,35,.09); border-radius: 1rem; box-shadow: 0 .4rem 1.1rem rgba(59,41,35,.055); }
+    .guided-review-card h3 { margin: 0; color: #49352e; font-size: clamp(1.05rem, 2.4vw, 1.35rem); }
+    .guided-review-card > p { margin: .55rem 0 0; color: #756159; font-size: .75rem; line-height: 1.55; }
+    .guided-review-setup { max-width: 720px; margin: 0 auto; }
+    .guided-review-resume { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; padding: .8rem; color: #4f4039; background: rgba(111,90,168,.09); border: 1px solid rgba(111,90,168,.16); border-radius: .8rem; }
+    .guided-review-resume strong, .guided-review-resume span { display: block; }
+    .guided-review-resume span { margin-top: .15rem; color: #76645c; font-size: .65rem; }
+    .guided-review-setup h3 { color: #49352e; font-size: 1rem; }
+    .guided-review-type-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin: .65rem 0 1rem; }
+    .guided-review-type { display: flex; align-items: center; gap: .55rem; padding: .7rem; color: #59473f; background: #fffefb; border: 1px solid rgba(59,41,35,.1); border-radius: .72rem; cursor: pointer; }
+    .guided-review-type input { width: 1rem; height: 1rem; accent-color: #6f5aa8; }
+    .guided-review-type i { color: #6f5aa8; }
+    .guided-review-duration { display: flex; flex-wrap: wrap; gap: .42rem; margin: .65rem 0; }
+    .guided-review-duration button { padding: .38rem .68rem; color: #68564e; background: #fffefb; border: 1px solid rgba(59,41,35,.11); border-radius: 999px; font-size: .66rem; font-weight: 750; }
+    .guided-review-duration button.is-active { color: #fff; background: #6f5aa8; border-color: #6f5aa8; }
+    .guided-review-estimate { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .85rem; padding: .65rem .75rem; color: #6a5850; background: #f2ece6; border-radius: .7rem; font-size: .7rem; }
+    .guided-review-start { width: 100%; min-height: 44px; margin-top: .75rem; border-radius: .72rem; font-weight: 750; }
+    .guided-review-summary-copy { max-height: 43dvh; overflow-y: auto; margin-top: 1rem; padding: 1rem; color: #4f4039; background: #fff; border-left: 3px solid #6f5aa8; border-radius: .45rem; font-size: .82rem; line-height: 1.7; }
+    .guided-review-rating { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: 1rem; }
+    .guided-review-rating button { min-height: 54px; display: grid; place-items: center; gap: .12rem; padding: .45rem; border-radius: .72rem; font-size: .7rem; font-weight: 750; }
+    .guided-review-rating small { font-size: .58rem; font-weight: 600; }
+    .guided-review-footer { justify-content: space-between; background: #fffdf9; }
+    .guided-review-complete { min-height: 310px; display: grid; place-items: center; align-content: center; gap: .55rem; text-align: center; }
+    .guided-review-complete i { color: #c08a22; font-size: 3rem; }
+    .guided-review-complete h3 { color: #49352e; }
+    @media (max-width: 575.98px) { .guided-review-rating, .guided-review-type-grid { grid-template-columns: 1fr; } .guided-review-body { min-height: 340px; } .guided-review-resume { align-items: stretch; flex-direction: column; } }
     @media (max-width: 991.98px) { .review-hub-layout { grid-template-columns: 1fr; } }
     @media (max-width: 767.98px) { .review-hub-metrics { grid-template-columns: 1fr 1fr; } .review-hub-heading { align-items: stretch; flex-direction: column; } .review-hub-heading .btn { align-self: flex-start; } }
     @media (max-width: 575.98px) { .review-hub-metrics { gap: .45rem; } .review-hub-metric { padding: .65rem; } .review-queue-item { grid-template-columns: auto minmax(0, 1fr); } .review-queue-action { grid-column: 1 / -1; width: 100%; } .review-hub-panel-header { align-items: flex-start; flex-direction: column; } }
@@ -3883,6 +3920,19 @@
     </div>
 </section>
 
+<!-- ============ SESSÃO GUIADA DE REVISÃO ============ -->
+<div class="modal fade" id="modalSessaoGuiadaRevisao" tabindex="-1" aria-labelledby="tituloSessaoGuiadaRevisao" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable guided-review-modal"><div class="modal-content">
+        <div class="modal-header guided-review-header">
+            <div><small>SESSÃO GUIADA</small><h5 class="modal-title fw-bold" id="tituloSessaoGuiadaRevisao"><i class="bi-signpost-split me-2"></i>Revisão do dia</h5><p class="small mb-0 mt-1 opacity-75" id="contadorSessaoGuiadaRevisao"></p></div>
+            <button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar sessão"></button>
+        </div>
+        <div class="guided-review-progress" id="progressoSessaoGuiadaRevisao" role="progressbar" aria-label="Progresso da sessão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+        <div class="modal-body guided-review-body" id="conteudoSessaoGuiadaRevisao"></div>
+        <div class="modal-footer guided-review-footer" id="acoesSessaoGuiadaRevisao"><button type="button" class="btn btn-sm btn-link text-secondary" id="btnPularSessaoGuiadaRevisao">Pular por agora</button><button type="button" class="btn btn-primary rounded-pill" id="btnAbrirItemSessaoGuiadaRevisao"><i class="bi-play-fill me-1"></i>Iniciar esta etapa</button></div>
+    </div></div>
+</div>
+
 <!-- ============ REVISÃO DE FLASHCARDS ============ -->
 <div class="modal fade" id="modalRevisao" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
@@ -4137,7 +4187,8 @@ const LS = {
     registrosEstudo: "hub_registros_estudo",
     edital: "hub_edital",
     erros: "hub_erros",
-    desempenho: "hub_desempenho"
+    desempenho: "hub_desempenho",
+    sessaoRevisao: "hub_sessao_revisao"
 };
 
 const CHAVE_GEMINI_LEGADA = "hub_gemini_api_key";
@@ -4598,12 +4649,198 @@ function abrirItemCentralRevisoes(item) {
     else abrirRevisaoErro(item.id);
 }
 
+let filaSessaoGuiadaRevisao = [];
+let indiceSessaoGuiadaRevisao = 0;
+let puladosSessaoGuiadaRevisao = 0;
+let totalPlanejadoSessaoGuiadaRevisao = 0;
+let concluidasAntesSessaoGuiadaRevisao = 0;
+let itemExternoSessaoGuiadaRevisao = null;
+let tiposSessaoGuiadaRevisao = new Set(["topico", "resumo", "card", "erro"]);
+let limiteSessaoGuiadaRevisao = 0;
+
+function minutosEstimadosItemRevisao(item) {
+    if (item.tipo === "topico") return Number(obterTarefas().find(tarefa => String(tarefa.id) === String(item.id))?.minutosPlanejados) || 20;
+    if (item.tipo === "resumo") return 5;
+    if (item.tipo === "erro") return 3;
+    return 2;
+}
+
+function limitarFilaSessaoGuiada(fila, limiteMinutos) {
+    if (!limiteMinutos) return fila;
+    const selecionados = [];
+    let total = 0;
+    fila.forEach(item => {
+        const minutos = minutosEstimadosItemRevisao(item);
+        if (total + minutos <= limiteMinutos) {
+            selecionados.push(item);
+            total += minutos;
+        }
+    });
+    if (!selecionados.length && fila.length) selecionados.push([...fila].sort((a, b) => minutosEstimadosItemRevisao(a) - minutosEstimadosItemRevisao(b))[0]);
+    return selecionados;
+}
+
+function removerEstadoSessaoGuiadaRevisao() {
+    try { localStorage.removeItem(chaveDoUsuario(LS.sessaoRevisao)); }
+    catch (erro) { console.error("Não foi possível limpar a sessão guiada local", erro); }
+}
+
+function salvarEstadoSessaoGuiadaRevisao() {
+    const restantes = filaSessaoGuiadaRevisao.slice(indiceSessaoGuiadaRevisao);
+    if (!restantes.length) {
+        removerEstadoSessaoGuiadaRevisao();
+        return;
+    }
+    salvar(LS.sessaoRevisao, {
+        itens: restantes.map(item => ({ tipo: item.tipo, id: String(item.id) })),
+        concluidas: concluidasAntesSessaoGuiadaRevisao + indiceSessaoGuiadaRevisao,
+        total: totalPlanejadoSessaoGuiadaRevisao,
+        pulados: puladosSessaoGuiadaRevisao,
+        atualizadoEm: new Date().toISOString()
+    });
+}
+
+function sessaoGuiadaSalva() {
+    const estado = carregar(LS.sessaoRevisao, null);
+    if (!estado?.itens?.length) return null;
+    const atuais = new Map(itensDaCentralRevisoes().map(item => [`${item.tipo}:${String(item.id)}`, item]));
+    const fila = estado.itens.map(item => atuais.get(`${item.tipo}:${String(item.id)}`)).filter(Boolean);
+    if (!fila.length) {
+        removerEstadoSessaoGuiadaRevisao();
+        return null;
+    }
+    return { ...estado, fila };
+}
+
+function iniciarFilaSessaoGuiada(fila, opcoes = {}) {
+    filaSessaoGuiadaRevisao = fila;
+    indiceSessaoGuiadaRevisao = 0;
+    puladosSessaoGuiadaRevisao = Number(opcoes.pulados) || 0;
+    concluidasAntesSessaoGuiadaRevisao = Number(opcoes.concluidas) || 0;
+    totalPlanejadoSessaoGuiadaRevisao = Math.max(fila.length + concluidasAntesSessaoGuiadaRevisao, Number(opcoes.total) || 0);
+    itemExternoSessaoGuiadaRevisao = null;
+    salvarEstadoSessaoGuiadaRevisao();
+    renderizarSessaoGuiadaRevisao();
+}
+
+function renderizarPreparacaoSessaoGuiadaRevisao() {
+    const todos = itensDaCentralRevisoes();
+    const salva = sessaoGuiadaSalva();
+    const conteudo = document.getElementById("conteudoSessaoGuiadaRevisao");
+    const acoes = document.getElementById("acoesSessaoGuiadaRevisao");
+    const contador = document.getElementById("contadorSessaoGuiadaRevisao");
+    const progresso = document.getElementById("progressoSessaoGuiadaRevisao");
+    acoes.classList.add("d-none");
+    contador.textContent = `${todos.length} ${todos.length === 1 ? "pendência disponível" : "pendências disponíveis"}`;
+    progresso.setAttribute("aria-valuenow", "0");
+    progresso.querySelector("span").style.width = "0%";
+    const tipos = [
+        ["topico", "bi-journal-check", "Tópicos"],
+        ["resumo", "bi-journal-text", "Resumos"],
+        ["card", "bi-card-heading", "Flashcards"],
+        ["erro", "bi-journal-x", "Erros"]
+    ];
+    const selecionados = todos.filter(item => tiposSessaoGuiadaRevisao.has(item.tipo));
+    const filaPrevista = limitarFilaSessaoGuiada(selecionados, limiteSessaoGuiadaRevisao);
+    const minutos = filaPrevista.reduce((total, item) => total + minutosEstimadosItemRevisao(item), 0);
+    conteudo.innerHTML = `<section class="guided-review-setup">${salva ? `<div class="guided-review-resume"><div><strong><i class="bi-bookmark-check me-1"></i>Você tem uma sessão em andamento</strong><span>${salva.fila.length} ${salva.fila.length === 1 ? "etapa restante" : "etapas restantes"} · progresso preservado neste dispositivo</span></div><button type="button" class="btn btn-sm btn-primary rounded-pill" id="btnRetomarSessaoGuiada">Continuar</button></div>` : ""}<h3>O que você quer revisar?</h3><div class="guided-review-type-grid">${tipos.map(([tipo, icone, rotulo]) => { const quantidade = todos.filter(item => item.tipo === tipo).length; return `<label class="guided-review-type"><input type="checkbox" value="${tipo}" data-guided-review-type ${tiposSessaoGuiadaRevisao.has(tipo) ? "checked" : ""} ${quantidade ? "" : "disabled"}><i class="${icone}"></i><span><strong>${rotulo}</strong> <small class="text-muted">(${quantidade})</small></span></label>`; }).join("")}</div><h3>Quanto tempo você tem?</h3><div class="guided-review-duration" role="group" aria-label="Duração da revisão"><button type="button" data-guided-duration="5" class="${limiteSessaoGuiadaRevisao === 5 ? "is-active" : ""}">5 min</button><button type="button" data-guided-duration="10" class="${limiteSessaoGuiadaRevisao === 10 ? "is-active" : ""}">10 min</button><button type="button" data-guided-duration="20" class="${limiteSessaoGuiadaRevisao === 20 ? "is-active" : ""}">20 min</button><button type="button" data-guided-duration="0" class="${limiteSessaoGuiadaRevisao === 0 ? "is-active" : ""}">Fila completa</button></div><div class="guided-review-estimate"><span><i class="bi-clock me-1"></i>Estimativa</span><strong>${filaPrevista.length} ${filaPrevista.length === 1 ? "etapa" : "etapas"} · ${formatarDuracao(minutos)}</strong></div><button type="button" class="btn btn-primary guided-review-start" id="btnComecarNovaSessaoGuiada" ${filaPrevista.length ? "" : "disabled"}><i class="bi-play-fill me-1"></i>Começar revisão</button></section>`;
+    conteudo.querySelector("#btnRetomarSessaoGuiada")?.addEventListener("click", () => iniciarFilaSessaoGuiada(salva.fila, salva));
+    conteudo.querySelectorAll("[data-guided-review-type]").forEach(input => input.addEventListener("change", () => {
+        if (input.checked) tiposSessaoGuiadaRevisao.add(input.value);
+        else tiposSessaoGuiadaRevisao.delete(input.value);
+        renderizarPreparacaoSessaoGuiadaRevisao();
+    }));
+    conteudo.querySelectorAll("[data-guided-duration]").forEach(botao => botao.addEventListener("click", () => {
+        limiteSessaoGuiadaRevisao = Number(botao.dataset.guidedDuration) || 0;
+        renderizarPreparacaoSessaoGuiadaRevisao();
+    }));
+    conteudo.querySelector("#btnComecarNovaSessaoGuiada")?.addEventListener("click", () => {
+        removerEstadoSessaoGuiadaRevisao();
+        iniciarFilaSessaoGuiada(filaPrevista);
+    });
+}
+
+function itemAtualSessaoGuiadaRevisao() {
+    return filaSessaoGuiadaRevisao[indiceSessaoGuiadaRevisao] || null;
+}
+
+function renderizarSessaoGuiadaRevisao() {
+    const conteudo = document.getElementById("conteudoSessaoGuiadaRevisao");
+    const acoes = document.getElementById("acoesSessaoGuiadaRevisao");
+    const contador = document.getElementById("contadorSessaoGuiadaRevisao");
+    const progresso = document.getElementById("progressoSessaoGuiadaRevisao");
+    const total = totalPlanejadoSessaoGuiadaRevisao || filaSessaoGuiadaRevisao.length;
+    const concluidas = concluidasAntesSessaoGuiadaRevisao + indiceSessaoGuiadaRevisao;
+    const item = itemAtualSessaoGuiadaRevisao();
+    const percentual = total ? Math.round((Math.min(concluidas, total) / total) * 100) : 100;
+    progresso.setAttribute("aria-valuenow", String(percentual));
+    progresso.querySelector("span").style.width = `${percentual}%`;
+    if (!item) {
+        removerEstadoSessaoGuiadaRevisao();
+        contador.textContent = total ? `${total} de ${total} etapas concluídas` : "Nenhuma pendência agora";
+        conteudo.innerHTML = `<div class="guided-review-complete"><i class="bi-trophy-fill" aria-hidden="true"></i><h3 class="h4 mb-0">Sessão concluída</h3><p class="text-muted mb-0">${total ? `${total - puladosSessaoGuiadaRevisao} revisões registradas${puladosSessaoGuiadaRevisao ? ` · ${puladosSessaoGuiadaRevisao} pulada${puladosSessaoGuiadaRevisao === 1 ? "" : "s"}` : ""}.` : "Suas revisões estão em dia."}</p><button type="button" class="btn btn-primary rounded-pill mt-2" data-bs-dismiss="modal">Finalizar sessão</button></div>`;
+        acoes.classList.add("d-none");
+        return;
+    }
+    acoes.classList.remove("d-none");
+    contador.textContent = `Etapa ${concluidas + 1} de ${total}`;
+    const rotulos = { topico: ["Tópico", "bi-journal-check"], resumo: ["Resumo", "bi-journal-text"], card: ["Flashcard", "bi-card-heading"], erro: ["Caderno de Erros", "bi-journal-x"] };
+    const [rotulo, icone] = rotulos[item.tipo] || ["Revisão", "bi-arrow-repeat"];
+    let complemento = `<p>${esc(item.detalhe)}. Abra esta etapa, faça a revisão e avalie sua retenção. Ao concluir, você voltará automaticamente para a próxima pendência.</p>`;
+    if (item.tipo === "resumo") {
+        const nota = materiaPorId(item.materiaId)?.notas.find(valor => String(valor.id) === String(item.id));
+        const corpo = separarFonteResumo(nota?.conteudo || "").conteudo;
+        complemento = `<div class="guided-review-summary-copy">${renderizarMarkdown(corpo)}</div><p class="small fw-semibold mt-3 mb-1">Como ficou sua retenção?</p><div class="guided-review-rating"><button type="button" class="btn btn-outline-danger" data-guided-summary-retention="forgot"><span><i class="bi-arrow-repeat me-1"></i>Preciso reforçar</span><small>Revisar amanhã</small></button><button type="button" class="btn btn-outline-warning" data-guided-summary-retention="partial"><span><i class="bi-circle-half me-1"></i>Retenção parcial</span><small>Intervalo reduzido</small></button><button type="button" class="btn btn-outline-success" data-guided-summary-retention="mastered"><span><i class="bi-check2-circle me-1"></i>Dominei</span><small>Revisar em 30 dias</small></button></div>`;
+    }
+    conteudo.innerHTML = `<div class="guided-review-stage"><div class="guided-review-meta"><span class="guided-review-kind"><i class="${icone} me-1"></i>${rotulo}</span><span class="guided-review-subject">${esc(nomeDaMateria(item.materiaId))} · ${item.atraso ? `${item.atraso} ${item.atraso === 1 ? "dia atrasado" : "dias atrasado"}` : "vence hoje"}</span></div><article class="guided-review-card"><h3>${esc(item.titulo)}</h3>${complemento}</article></div>`;
+    const botaoAbrir = document.getElementById("btnAbrirItemSessaoGuiadaRevisao");
+    botaoAbrir.classList.toggle("d-none", item.tipo === "resumo");
+    conteudo.querySelectorAll("[data-guided-summary-retention]").forEach(botao => botao.addEventListener("click", async () => {
+        conteudo.querySelectorAll("[data-guided-summary-retention]").forEach(itemBotao => { itemBotao.disabled = true; });
+        const salvou = await registrarRevisaoResumo(item.materiaId, item.id, botao.dataset.guidedSummaryRetention, botao);
+        if (salvou) {
+            indiceSessaoGuiadaRevisao += 1;
+            salvarEstadoSessaoGuiadaRevisao();
+            renderizarSessaoGuiadaRevisao();
+        } else {
+            conteudo.querySelectorAll("[data-guided-summary-retention]").forEach(itemBotao => { itemBotao.disabled = false; });
+        }
+    }));
+}
+
+function iniciarSessaoGuiadaRevisao() {
+    renderizarPreparacaoSessaoGuiadaRevisao();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalSessaoGuiadaRevisao")).show();
+}
+
+function abrirEtapaExternaSessaoGuiadaRevisao() {
+    const item = itemAtualSessaoGuiadaRevisao();
+    if (!item || item.tipo === "resumo") return;
+    itemExternoSessaoGuiadaRevisao = { tipo: item.tipo, id: item.id };
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalSessaoGuiadaRevisao"));
+    document.getElementById("modalSessaoGuiadaRevisao").addEventListener("hidden.bs.modal", () => {
+        if (item.tipo === "topico") abrirConclusaoEstudo(item.id);
+        else if (item.tipo === "card") iniciarFilaFlashcardsCentral([item]);
+        else abrirRevisaoErro(item.id);
+    }, { once: true });
+    modal.hide();
+}
+
+function retomarSessaoGuiadaRevisao(tipo) {
+    const aguardando = itemExternoSessaoGuiadaRevisao;
+    if (!aguardando || aguardando.tipo !== tipo) return;
+    window.setTimeout(() => {
+        const continuaPendente = itensDaCentralRevisoes().some(item => item.tipo === aguardando.tipo && String(item.id) === String(aguardando.id));
+        if (!continuaPendente) indiceSessaoGuiadaRevisao += 1;
+        itemExternoSessaoGuiadaRevisao = null;
+        salvarEstadoSessaoGuiadaRevisao();
+        renderizarSessaoGuiadaRevisao();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalSessaoGuiadaRevisao")).show();
+    }, 180);
+}
+
 function iniciarProximaRevisaoCentral() {
-    const fila = itensDaCentralRevisoes();
-    if (!fila.length) return;
-    const primeira = fila[0];
-    if (primeira.tipo === "card") iniciarFilaFlashcardsCentral(fila.filter(item => item.tipo === "card"));
-    else abrirItemCentralRevisoes(primeira);
+    iniciarSessaoGuiadaRevisao();
 }
 
 function renderizarCentralRevisoes() {
@@ -4626,8 +4863,9 @@ function renderizarCentralRevisoes() {
         ["bi-clock", formatarDuracao(estimativa), "tempo estimado"]
     ].map(([icone, valor, rotulo]) => `<article class="review-hub-metric"><i class="${icone}" aria-hidden="true"></i><div><strong>${esc(valor)}</strong><span>${esc(rotulo)}</span></div></article>`).join("");
     const botaoIniciar = document.getElementById("btnIniciarCentralRevisoes");
+    const sessaoSalva = sessaoGuiadaSalva();
     botaoIniciar.disabled = fila.length === 0;
-    botaoIniciar.innerHTML = fila.length ? `<i class="bi-play-fill me-1"></i>Iniciar revisão (${fila.length})` : '<i class="bi-check2-circle me-1"></i>Revisões em dia';
+    botaoIniciar.innerHTML = fila.length ? (sessaoSalva ? `<i class="bi-bookmark-check me-1"></i>Continuar sessão (${sessaoSalva.fila.length})` : `<i class="bi-play-fill me-1"></i>Iniciar revisão (${fila.length})`) : '<i class="bi-check2-circle me-1"></i>Revisões em dia';
     document.querySelectorAll(".review-hub-filter").forEach(botao => {
         const ativo = botao.dataset.reviewFilter === filtroCentralRevisoes;
         botao.classList.toggle("is-active", ativo);
@@ -4655,6 +4893,17 @@ function renderizarCentralRevisoes() {
 }
 
 document.getElementById("btnIniciarCentralRevisoes").addEventListener("click", iniciarProximaRevisaoCentral);
+document.getElementById("btnAbrirItemSessaoGuiadaRevisao").addEventListener("click", abrirEtapaExternaSessaoGuiadaRevisao);
+document.getElementById("btnPularSessaoGuiadaRevisao").addEventListener("click", () => {
+    if (!itemAtualSessaoGuiadaRevisao()) return;
+    indiceSessaoGuiadaRevisao += 1;
+    puladosSessaoGuiadaRevisao += 1;
+    salvarEstadoSessaoGuiadaRevisao();
+    renderizarSessaoGuiadaRevisao();
+});
+document.getElementById("modalConcluirEstudo").addEventListener("hidden.bs.modal", () => retomarSessaoGuiadaRevisao("topico"));
+document.getElementById("modalRevisao").addEventListener("hidden.bs.modal", () => retomarSessaoGuiadaRevisao("card"));
+document.getElementById("modalRevisaoErro").addEventListener("hidden.bs.modal", () => retomarSessaoGuiadaRevisao("erro"));
 document.querySelectorAll(".review-hub-filter").forEach(botao => botao.addEventListener("click", () => { filtroCentralRevisoes = botao.dataset.reviewFilter; renderizarCentralRevisoes(); }));
 document.querySelector('[data-bs-target="#p-revisoes"]').addEventListener("shown.bs.tab", renderizarCentralRevisoes);
 
@@ -8433,12 +8682,13 @@ function estadoRevisaoResumo(nota) {
     return {
         revisoes,
         ultimaRevisaoEm: /^\d{4}-\d{2}-\d{2}$/.test(partes[1] || "") ? partes[1] : "",
-        proximaRevisao: /^\d{4}-\d{2}-\d{2}$/.test(partes[2] || "") ? partes[2] : ""
+        proximaRevisao: /^\d{4}-\d{2}-\d{2}$/.test(partes[2] || "") ? partes[2] : "",
+        retencao: ["forgot", "partial", "good", "mastered"].includes(partes[3]) ? partes[3] : ""
     };
 }
 
 function tagRevisaoResumo(estado) {
-    return `${PREFIXO_REVISAO_RESUMO}${estado.revisoes}:${estado.ultimaRevisaoEm}:${estado.proximaRevisao}`;
+    return `${PREFIXO_REVISAO_RESUMO}${estado.revisoes}:${estado.ultimaRevisaoEm}:${estado.proximaRevisao}:${estado.retencao || "good"}`;
 }
 
 function tagsSistemaResumo(nota) {
@@ -8569,21 +8819,23 @@ function renderizarRevisaoResumo(nota) {
     container.querySelector("#btnConcluirRevisaoResumo")?.addEventListener("click", marcarResumoComoRevisado);
 }
 
-async function marcarResumoComoRevisado() {
-    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return;
-    const materia = materiaPorId(materiaAbertaId);
-    const nota = materia?.notas.find(item => String(item.id) === String(notaSelecionadaId));
-    const botao = document.getElementById("btnConcluirRevisaoResumo");
-    if (!nota || !botao) return;
+async function registrarRevisaoResumo(materiaId, notaId, retencao = "good", botao = null) {
+    if (operacaoNotaEmAndamento || !await salvarNotaPendente()) return false;
+    const materia = materiaPorId(materiaId);
+    const nota = materia?.notas.find(item => String(item.id) === String(notaId));
+    if (!nota) return false;
     const tagsAnteriores = [...(nota.tags || [])];
     const estadoAnterior = estadoRevisaoResumo(nota);
     const revisoes = estadoAnterior.revisoes + 1;
-    const intervalo = INTERVALOS_REVISAO_RESUMO[Math.min(revisoes - 1, INTERVALOS_REVISAO_RESUMO.length - 1)];
-    const novoEstado = { revisoes, ultimaRevisaoEm: hojeISO(), proximaRevisao: somarDias(hojeISO(), intervalo) };
+    const intervaloBase = INTERVALOS_REVISAO_RESUMO[Math.min(revisoes - 1, INTERVALOS_REVISAO_RESUMO.length - 1)];
+    const intervalo = retencao === "forgot" ? 1 : retencao === "partial" ? Math.max(1, Math.ceil(intervaloBase / 2)) : retencao === "mastered" ? Math.max(30, intervaloBase) : intervaloBase;
+    const novoEstado = { revisoes, ultimaRevisaoEm: hojeISO(), proximaRevisao: somarDias(hojeISO(), intervalo), retencao };
     const novasTags = [...tagsAnteriores.filter(tag => !String(tag).startsWith(PREFIXO_REVISAO_RESUMO)), tagRevisaoResumo(novoEstado)];
     operacaoNotaEmAndamento = true;
-    botao.disabled = true;
-    botao.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Registrando…';
+    if (botao) {
+        botao.disabled = true;
+        botao.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Registrando…';
+    }
     try {
         const registroRemoto = await exigirNuvemNotas().atualizar(nota.id, { tags: novasTags });
         try {
@@ -8602,13 +8854,20 @@ async function marcarResumoComoRevisado() {
         renderizarMaterias();
         renderizarHoje();
         renderizarCentralRevisoes();
+        return true;
     } catch (erro) {
         console.error("Falha ao registrar a revisão do resumo", erro);
         alert("A revisão não foi registrada porque não foi possível confirmar a operação na nuvem.");
-        renderizarRevisaoResumo(nota);
+        if (String(materiaAbertaId || "") === String(materiaId) && String(notaSelecionadaId || "") === String(notaId)) renderizarRevisaoResumo(nota);
+        return false;
     } finally {
         operacaoNotaEmAndamento = false;
     }
+}
+
+async function marcarResumoComoRevisado() {
+    const botao = document.getElementById("btnConcluirRevisaoResumo");
+    await registrarRevisaoResumo(materiaAbertaId, notaSelecionadaId, "good", botao);
 }
 
 function renderizarEditorNota(m) {

@@ -352,6 +352,29 @@ test("os resumos entram no ciclo espaçado e na fila diária de revisões", () =
     assert.match(html, /resumosPendentes\.length/);
 });
 
+test("a sessão guiada percorre resumos, tópicos, cards e erros sem perder a fila", () => {
+    const html = readProjectFile("index.html");
+
+    assert.match(html, /id="modalSessaoGuiadaRevisao"/);
+    assert.match(html, /id="progressoSessaoGuiadaRevisao"/);
+    assert.match(html, /function iniciarSessaoGuiadaRevisao\(\)/);
+    assert.match(html, /function iniciarFilaSessaoGuiada\(fila, opcoes = \{\}\)/);
+    assert.match(html, /data-guided-summary-retention="forgot"/);
+    assert.match(html, /data-guided-summary-retention="partial"/);
+    assert.match(html, /data-guided-summary-retention="mastered"/);
+    assert.match(html, /function retomarSessaoGuiadaRevisao\(tipo\)/);
+    assert.match(html, /modalConcluirEstudo[^\n]*retomarSessaoGuiadaRevisao\("topico"\)/);
+    assert.match(html, /modalRevisao[^\n]*retomarSessaoGuiadaRevisao\("card"\)/);
+    assert.match(html, /modalRevisaoErro[^\n]*retomarSessaoGuiadaRevisao\("erro"\)/);
+    assert.match(html, /sessaoRevisao: "hub_sessao_revisao"/);
+    assert.match(html, /function salvarEstadoSessaoGuiadaRevisao\(\)/);
+    assert.match(html, /function renderizarPreparacaoSessaoGuiadaRevisao\(\)/);
+    assert.match(html, /data-guided-review-type/);
+    assert.match(html, /data-guided-duration="5"/);
+    assert.match(html, /data-guided-duration="10"/);
+    assert.match(html, /id="btnRetomarSessaoGuiada"/);
+});
+
 test("o cronograma liga o edital a um ciclo privado e configurável de revisão espaçada", () => {
     const html = readProjectFile("index.html");
     const repository = readProjectFile("src/cloud-core-repository.js");
